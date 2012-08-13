@@ -1,0 +1,26 @@
+<assembly>
+    <id>executable</id>
+  <formats>
+    <format>war</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <dependencySets>
+    <dependencySet>
+      <unpack>true</unpack>
+      <scope>runtime</scope>
+      <outputDirectory>/</outputDirectory>
+        <excludes>
+          <exclude>se.su.it.cxf:cxf-svc-skeleton-war</exclude>
+        </excludes>
+    </dependencySet>
+  </dependencySets>
+  <fileSets>
+    <fileSet>
+        <directory>target/cxf-svc-skeleton-war-1.0-SNAPSHOT</directory>
+        <outputDirectory />
+        <excludes>
+          <exclude>se.su.it.cxf:cxf-svc-skeleton-jar</exclude>
+        </excludes>
+    </fileSet>
+  </fileSets>
+</assembly>

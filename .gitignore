@@ -1,0 +1,17 @@
+target/
+classes/
+logs/
+out/
+web-app/META-INF/
+.settings/
+.idea/
+*.iml
+*.log
+*.ipr
+*.iws
+*.war
+web-app/img/.DS_Store
+web-app/.DS_Store
+.DS_Store
+atlassian-ide-plugin.xml
+
