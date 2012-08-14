@@ -5,7 +5,7 @@
   <artifactId>sukat-cxf-svc</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>war</packaging>
-  <name>cxf-svc-skeleton-war</name>
+  <name>sukat-cxf-svc-war</name>
   <build>
     <resources>
       <resource>
@@ -74,7 +74,7 @@
           <artifactId>maven-assembly-plugin</artifactId>
           <version>2.2-beta-3</version>
           <configuration>
-            <finalName>cxf-svc-skeleton</finalName>
+            <finalName>sukat-cxf-svc</finalName>
             <outputDirectory>.</outputDirectory>
             <descriptor>src/main/assembly/execwar.xml</descriptor>
             <archive>

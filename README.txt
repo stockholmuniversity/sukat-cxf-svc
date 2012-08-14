@@ -9,7 +9,7 @@ The war file will appear in the root directory
 
 Notes:
 To start:
-sudo java -DDEBUG -Djava.security.krb5.conf=/etc/krb5.conf -Djava.security.auth.login.config=/etc/spnego.conf -Djavax.security.auth.useSubjectCredsOnly=false -Dorg.eclipse.jetty.util.log.DEBUG=true -Dsun.security.spnego.debug=all -Djava.security.krb5.kdc=kerberos.su.se -Djava.security.krb5.realm=SU.SE -jar cxf-svc-skeleton.war
+sudo java -DDEBUG -Djava.security.krb5.conf=/etc/krb5.conf -Djava.security.auth.login.config=/etc/spnego.conf -Djavax.security.auth.useSubjectCredsOnly=false -Dorg.eclipse.jetty.util.log.DEBUG=true -Dsun.security.spnego.debug=all -Djava.security.krb5.kdc=kerberos.su.se -Djava.security.krb5.realm=SU.SE -jar sukat-cxf-svc.war
 
 /etc/krb5.conf (You need to have a valid krb5.conf in /etc)
 

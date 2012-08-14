@@ -10,16 +10,16 @@
       <scope>runtime</scope>
       <outputDirectory>/</outputDirectory>
         <excludes>
-          <exclude>se.su.it.cxf:cxf-svc-skeleton-war</exclude>
+          <exclude>se.su.it.cxf:sukat-cxf-svc-war</exclude>
         </excludes>
     </dependencySet>
   </dependencySets>
   <fileSets>
     <fileSet>
-        <directory>target/cxf-svc-skeleton-war-1.0-SNAPSHOT</directory>
+        <directory>target/sukat-cxf-svc-war-1.0-SNAPSHOT</directory>
         <outputDirectory />
         <excludes>
-          <exclude>se.su.it.cxf:cxf-svc-skeleton-jar</exclude>
+          <exclude>se.su.it.cxf:sukat-cxf-svc-jar</exclude>
         </excludes>
     </fileSet>
   </fileSets>
