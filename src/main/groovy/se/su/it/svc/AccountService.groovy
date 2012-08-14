@@ -3,35 +3,15 @@ package se.su.it.svc
 import javax.jws.WebService
 import javax.jws.WebParam
 import se.su.it.svc.annotations.*
-import se.su.it.svc.domains.*
-import se.su.it.svc.manager.ApplicationContextProvider
-import se.su.it.svc.ldap.SuPerson
-import org.springframework.core.io.Resource
+import se.su.it.commons.ExecUtils
 
 @SuCxfSvcSpocpRole(role = "sukat-user-admin")
 @WebService
 public class AccountService {
 
-  public String sayHi(@WebParam(name = "text") String text) {
-    // GROM IMPLEMENTATION
-    ApplicationContextProvider.bindTxSession()
-    Test helloObj = new Test()
-    helloObj.setName(text)
-    helloObj.setVisitdate(new Date())
-    helloObj.save()
-    ApplicationContextProvider.unbindTxSession()
-    //
-
-    //GLDAPO IMPLEMENTATION
-    SuPerson person = SuPerson.find(base: "") {
-      and {
-        eq("uid", "jqvar")
-        eq("objectclass", "superson")
-      }
-    }
-    //
-
-    return (person.displayName != null ? person.displayName:"no one") + " says HELLO to " + text
-    //return "Hello " + text
+  public String getPassword(@WebParam(name = "uid") String uid) {
+    String cmd = "/local/sukat/libexec/kdcpass.pl"
+    String[] args = [{ uid.replaceFirst("\\.", "/") }]
+    return ExecUtils.exec(cmd, args, "su-sukatsvc-service-admin");
   }
 }
