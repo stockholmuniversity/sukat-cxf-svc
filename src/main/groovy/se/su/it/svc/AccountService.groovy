@@ -19,6 +19,7 @@ public class AccountService {
     helloObj.setName(text)
     helloObj.setVisitdate(new Date())
     helloObj.save()
+    ApplicationContextProvider.unbindTxSession()
     //
 
     //GLDAPO IMPLEMENTATION
