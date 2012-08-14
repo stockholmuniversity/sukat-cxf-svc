@@ -123,11 +123,6 @@
       <artifactId>gldapo</artifactId>
       <version>0.8.5</version>
     </dependency>
-    <dependency>
-      <groupId>se.su.it.commons</groupId>
-      <artifactId>su-commons</artifactId>
-      <version>1.7</version>
-    </dependency>
   </dependencies>
 
   <!-- Change versions if necessary -->

@@ -72,9 +72,9 @@
   <bean id="gldapoManager" class="se.su.it.svc.manager.GldapoManager"></bean>
 
   <jaxws:endpoint
-	  id="accountservice"
-	  implementor="se.su.it.svc.AccountService"
-	  address="/AccountService" />
+	  id="cardinfoservice"
+	  implementor="se.su.it.svc.CardInfoService"
+	  address="/CardInfoService" />
 
   <jaxws:endpoint
 	  id="status"
