@@ -70,17 +70,11 @@
   <bean name="annotationHandlerMapping" class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
   <bean id="applicationContextProvider" class="se.su.it.svc.manager.ApplicationContextProvider"></bean>
   <bean id="gldapoManager" class="se.su.it.svc.manager.GldapoManager"></bean>
-  <!-- <bean id="helloworld" class="se.su.it.samples.cxf.HelloWorldbean>
-  <simple:server serviceClass="se.su.it.samples.cxf.HelloWorldddress="/HelloWorld">
 
-    <simple:serviceBean>
-      <ref bean="helloworld" />
-    </simple:serviceBean>
-  </simple:server> -->
   <jaxws:endpoint
-	  id="helloworld"
-	  implementor="se.su.it.svc.HelloWorld"
-	  address="/HelloWorld" />
+	  id="accountservice"
+	  implementor="se.su.it.svc.AccountService"
+	  address="/AccountService" />
 
   <jaxws:endpoint
 	  id="status"

@@ -10,7 +10,7 @@ import org.springframework.core.io.Resource
 
 @SuCxfSvcSpocpRole(role = "sukat-user-admin")
 @WebService
-public class HelloWorld {
+public class AccountService {
 
   public String sayHi(@WebParam(name = "text") String text) {
     // GROM IMPLEMENTATION
