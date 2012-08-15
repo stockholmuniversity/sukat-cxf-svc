@@ -65,9 +65,6 @@ class SuPerson implements Serializable {
       and {
         eq("uid", uid)
         eq("objectclass", "superson")
-        not {
-          eq("sukatVisibility", "hidden")
-        }
       }
     }
   }
