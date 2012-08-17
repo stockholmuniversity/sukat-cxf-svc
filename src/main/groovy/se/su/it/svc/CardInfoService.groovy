@@ -10,10 +10,10 @@ import se.su.it.svc.ldap.SuPerson
 @WebService
 public class CardInfoService {
 
-  public String getAllCards(@WebParam(name = "uid") String uid, @WebParam(name = "onlyActive") boolean onlyActive) {
+  public SuCard[] getAllCards(@WebParam(name = "uid") String uid, @WebParam(name = "onlyActive") boolean onlyActive) {
     SuPerson person = SuPerson.getPersonFromUID(uid)
     if(person) {
-      def cards = SuCard.findAll(base: person.getDn(), searchScope: "object") {
+      def cards = SuCard.findAll(base: person.getDn()) {
         if(onlyActive) {
           eq("suCardState", "urn:x-su:su-card:state:active")
         }

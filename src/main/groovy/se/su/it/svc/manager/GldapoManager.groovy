@@ -8,7 +8,7 @@ class GldapoManager {
 
     Gldapo.initialize(
       directories: [Directory1:
-      [url: "ldap://ldap-test.su.se",
+      [url: "ldap://ldap.su.se",
         base: "",
         userDn: "",
         password: "",

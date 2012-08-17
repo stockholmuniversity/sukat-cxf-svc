@@ -9,21 +9,21 @@ import javax.xml.bind.annotation.XmlAttribute
 
 @XmlAccessorType( XmlAccessType.NONE )
 @XmlRootElement
-class SuCard implements Serializable {
+class SuCard implements Serializable{
   static final long serialVersionUID = -687991492884005073L
-
   @GldapoSchemaFilter("(objectClass=suCardOwner)")
+
   @GldapoNamingAttribute
   @XmlAttribute
-  String suCardTypeURN
+  String cn
   @XmlAttribute
   String suCardUUID
+  @XmlAttribute
+  String suCardTypeURN
   @XmlAttribute
   String suCardSerial
   @XmlAttribute
   String suCardState
-  @XmlAttribute
-  String cn
 
   static constraints =
     {
