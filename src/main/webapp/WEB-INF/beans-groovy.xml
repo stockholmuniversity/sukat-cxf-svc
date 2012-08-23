@@ -26,6 +26,8 @@
        xmlns:util="http://www.springframework.org/schema/util"
        xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/a
        http://grails.org/schema/gorm http://grails.org/schema/gorm/gorm.xsd
        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
        http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd
@@ -71,14 +73,34 @@
   <bean id="applicationContextProvider" class="se.su.it.svc.manager.ApplicationContextProvider"></bean>
   <bean id="gldapoManager" class="se.su.it.svc.manager.GldapoManager"></bean>
 
+  <bean id="cardinfoserviceEndpoint" class="se.su.it.svc.CardInfoServiceImpl" />
   <jaxws:endpoint
 	  id="cardinfoservice"
-	  implementor="se.su.it.svc.CardInfoService"
+	  implementorClass="se.su.it.svc.CardInfoServiceImpl"
+    implementor="#cardinfoserviceEndpoint"
 	  address="/CardInfoService" />
 
   <jaxws:endpoint
 	  id="status"
-	  implementor="se.su.it.svc.Status"
+    implementor="se.su.it.svc.Status"
 	  address="/Status" />
+
+  <bean id="auditAspect" class="se.su.it.svc.audit.AuditAspect" />
+  <bean id="auditPointcut" class="org.springframework.aop.support.JdkRegexpMethodPointcut">
+    <property name="pattern" value=".*" />
+  </bean>
+  <bean id="auditAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
+    <property name="advice" ref="auditAspect" />
+    <property name="pointcut" ref="auditPointcut" />
+  </bean>
+  <bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+    <property name="beanNames"><value>*Endpoint</value></property>
+    <property name="interceptorNames">
+      <list>
+        <value>auditAdvisor</value>
+      </list>
+    </property>
+  </bean>
+
 </beans>
 <!-- END SNIPPET: beans -->

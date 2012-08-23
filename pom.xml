@@ -106,7 +106,12 @@
     <dependency>
       <groupId>se.su.it.svc</groupId>
       <artifactId>cxf-svc-server</artifactId>
-      <version>1.5</version>
+      <version>1.5.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+      <version>3.0.4.RELEASE</version>
     </dependency>
     <dependency>
         <groupId>org.springframework</groupId>
@@ -122,6 +127,11 @@
       <groupId>org.codehaus</groupId>
       <artifactId>gldapo</artifactId>
       <version>0.8.5</version>
+    </dependency>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.17</version>
     </dependency>
   </dependencies>
 

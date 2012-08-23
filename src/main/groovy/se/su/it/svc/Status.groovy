@@ -8,6 +8,7 @@ import se.su.it.svc.manager.ApplicationContextProvider
 import se.su.it.svc.ldap.SuPerson
 import org.springframework.core.io.Resource
 import se.su.it.svc.commons.SvcStatus
+import se.su.it.svc.commons.SvcAudit
 
 @WebService
 public class Status {
