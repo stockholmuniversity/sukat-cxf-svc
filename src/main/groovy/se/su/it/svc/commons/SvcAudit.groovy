@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlAttribute
 
 @XmlAccessorType( XmlAccessType.NONE )
 @XmlRootElement
-public class SvcAudit {
+public class SvcAudit implements Serializable{
   @XmlAttribute
   String uid
   @XmlAttribute

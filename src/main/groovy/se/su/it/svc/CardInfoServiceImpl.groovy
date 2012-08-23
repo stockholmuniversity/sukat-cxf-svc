@@ -7,7 +7,7 @@ import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.commons.SvcAudit
 
-@SuCxfSvcSpocpRole(role = "sukat-user-admin")
+
 @WebService
 public class CardInfoServiceImpl implements CardInfoService {
 
