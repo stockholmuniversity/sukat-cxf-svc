@@ -21,14 +21,14 @@ public class AuditEntity {
 
   public String toString() {
     return "Created: " + this.Created + "\r\n"
-    ae += "Ip_address: " + this.Ip_address + "\r\n"
-    ae += "Uid: " +  this.Uid + "\r\n"
-    ae += "Client: " + this.Client + "\r\n"
-    ae += "Operation: " + this.Operation + "\r\n"
-    ae += "Text_args: " + this.Text_args + "\r\n"
-    ae += "Raw_args: " + this.Raw_args + "\r\n"
-    ae += "Text_return: " + this.Text_return + "\r\n"
-    ae += "Raw_return: " + this.Raw_return + "\r\n"
-    ae += "State: " + this.State + "\r\n"
+    + "Ip_address: " + this.Ip_address + "\r\n"
+    + "Uid: " +  this.Uid + "\r\n"
+    + "Client: " + this.Client + "\r\n"
+    + "Operation: " + this.Operation + "\r\n"
+    + "Text_args: " + this.Text_args + "\r\n"
+    + "Raw_args: " + this.Raw_args + "\r\n"
+    + "Text_return: " + this.Text_return + "\r\n"
+    + "Raw_return: " + this.Raw_return + "\r\n"
+    + "State: " + this.State + "\r\n"
   }
 }
