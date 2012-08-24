@@ -86,19 +86,20 @@ public class AuditAspect implements MethodInterceptor {
       }
 
       // Create an AuditEntity based on the gathered information
-      String ae = "Created: " + new Timestamp(new Date().getTime()).toString() + "\r\n"
-      ae += "Ip_address: " + auditIp + "\r\n"
-      ae += "Uid: " +  auditUid + "\r\n"
-      ae += "Client: " + auditClient + "\r\n"
-      ae += "Operation: " + mi.getName() + "\r\n"
-      ae += "Text_args: " + objectToString(args) + "\r\n"
-      ae += "Raw_args: " + bsArgs.toByteArray().toString() + "\r\n"
-      // These will be filled in with actual values by the logAfter method
-      ae += "Text_return: " + UNKNOWN + "\r\n"
-      ae += "Raw_return: " + UNKNOWN + "\r\n"
-      ae += "State: " + STATE_INPROGRESS + "\r\n"
-      //TODO: Call RabbitMQ here to transmit the "audit before data"
+      AuditEntity ae = new AuditEntity()
+      ae.Created = new Timestamp(new Date().getTime()).toString()
+      ae.Ip_address = auditIp
+      ae.Uid = auditUid
+      ae.Client = auditClient
+      ae.Operation = mi.getName()
+      ae.Text_args = objectToString(args)
+      ae.Raw_args = bsArgs.toByteArray().toString()
+      ae.Text_return = UNKNOWN
+      ae.Raw_return = UNKNOWN
+      ae.State = STATE_INPROGRESS
 
+      //TODO: Call RabbitMQ here to transmit the "audit before data"
+      logger.info("Audit before -\r\n" + ae)
       // Return a reference to the ae for reuse in success/exception loggers
       return ae
 
@@ -111,9 +112,9 @@ public class AuditAspect implements MethodInterceptor {
   protected void logAfter(Object ref, Object ret) {
 
     try {
-      String ae = (String) ref
+      AuditEntity ae = (AuditEntity) ref
 
-      logger.info("Decorating ae " + ae + " with return value: " + ret)
+      //logger.info("Decorating ae " + ae + " with return value: " + ret)
 
       // Serialize the Return object into a ByteArray
       ByteArrayOutputStream bsRet = new ByteArrayOutputStream()
@@ -122,11 +123,12 @@ public class AuditAspect implements MethodInterceptor {
       outRet.close()
 
       // Append return value to the audit entity
-      ae += "Text_return: " + objectToString(ret) + "\r\n"
-      ae += "Raw_return: " + bsRet.toByteArray().toString() + "\r\n"
-      ae += "State: " + STATE_SUCCESS + "\r\n"
+      ae.Text_return = objectToString(ret)
+      ae.Raw_return = bsRet.toByteArray().toString()
+      ae.State = STATE_SUCCESS
 
       //TODO: Call RabbitMQ here to transmit the "audit after data"
+      logger.info("Audit after -\r\n" + ae)
 
     } catch (Exception e) {
       logger.warn("Audit logging failed, no return value will be stored", e)
@@ -136,16 +138,17 @@ public class AuditAspect implements MethodInterceptor {
   protected void logException(Object ref, Throwable t) {
 
     try {
-      String ae = (String) ref
+      AuditEntity ae = (AuditEntity) ref
 
       // TBD: Check for cast exception and nullity of ref
-      logger.info("Decorating ae " + ae + " with exception " + t.getClass().getCanonicalName())
+      //logger.info("Decorating ae " + ae + " with exception " + t.getClass().getCanonicalName())
 
       // Append return value to the audit entity
-      ae += "Text_return: " + t.toString() + "\r\n"
-      ae += "State: " + STATE_EXCEPTION + "\r\n"
+      ae.Text_return = t.toString()
+      ae.State = STATE_EXCEPTION
 
       //TODO: Call RabbitMQ here to transmit the "audit after data"
+      logger.info("Audit exception occured -\r\n" + ae)
 
     } catch (Exception e) {
       logger.warn("Audit logging of thrown exception failed", e)
