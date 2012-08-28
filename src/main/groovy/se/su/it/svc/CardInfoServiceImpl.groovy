@@ -35,11 +35,7 @@ public class CardInfoServiceImpl implements CardInfoService {
           eq("suCardState", "urn:x-su:su-card:state:active")
         }
       }
-      if(cards.size() > 0){
-        logger.debug("getAllCards - Found: ${cards.collect{card -> card.suCardUUID}.join(",")} with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
-      } else {
-        logger.debug("getAllCards - Found: 0 cards with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
-      }
+      logger.debug("getAllCards - Found: ${cards.size()} card(s) ${cards.collect{card -> card.suCardUUID}.join(",")} with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
       return cards
     }
     logger.debug("getAllCards - No cards found with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
