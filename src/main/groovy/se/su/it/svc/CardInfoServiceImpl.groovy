@@ -19,9 +19,10 @@ public class CardInfoServiceImpl implements CardInfoService {
    *
    * @param uid  the uid (user id) for the user that you want to find cards for.
    * @param onlyActive  if only active cards should be returned in the result.
-   * @param audit an audit thing
-   * @return an <code>ArrayList<SuCard></code> of SuCard objects.
+   * @param audit Audit object initilized with audit data about the client and user.
+   * @return an <code>ArrayList<SuCard></code> of SuCard objects or an empty array if no card was found.
    * @see se.su.it.svc.ldap.SuCard
+   * @see se.su.it.svc.commons.SvcAudit
    */
   public SuCard[] getAllCards(@WebParam(name = "uid") String uid, @WebParam(name = "onlyActive") boolean onlyActive, @WebParam(name = "audit") SvcAudit audit) {
     if(uid == null || onlyActive == null || audit == null)
