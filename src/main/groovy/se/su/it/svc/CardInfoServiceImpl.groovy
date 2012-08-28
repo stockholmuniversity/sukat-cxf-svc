@@ -24,17 +24,21 @@ public class CardInfoServiceImpl implements CardInfoService {
    * @see se.su.it.svc.ldap.SuCard
    */
   public SuCard[] getAllCards(@WebParam(name = "uid") String uid, @WebParam(name = "onlyActive") boolean onlyActive, @WebParam(name = "audit") SvcAudit audit) {
+    if(uid == null || onlyActive == null || audit == null)
+      throw new java.lang.IllegalArgumentException("Null values not allowed in this function")
     SuPerson person = SuPerson.getPersonFromUID(uid)
     if(person) {
       def cards = SuCard.findAll(base: person.getDn()) {
+        eq("objectClass","suCardOwner")
         if(onlyActive) {
           eq("suCardState", "urn:x-su:su-card:state:active")
         }
       }
-      logger.debug("Found: ${cards.collect{card -> card.suCardUUID}.join(",")} with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
+      logger.debug("getAllCards - Found: ${cards.collect{card -> card.suCardUUID}.join(",")} with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
       return cards
     }
-    logger.debug("No cards found with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
+    logger.debug("getAllCards - No cards found with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
+    return []
   }
 
 }
