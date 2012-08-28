@@ -6,11 +6,12 @@ import se.su.it.svc.annotations.*
 import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.commons.SvcAudit
+import org.apache.log4j.Logger
 
 
 @WebService
 public class CardInfoServiceImpl implements CardInfoService {
-
+  private static final Logger logger = Logger.getLogger(CardInfoServiceImpl.class)
 
   /**
    * Returns a list (<code>ArrayList<SuCard></code>) of SuCard objects for a specific user, specified by the parameter uid.
@@ -30,8 +31,10 @@ public class CardInfoServiceImpl implements CardInfoService {
           eq("suCardState", "urn:x-su:su-card:state:active")
         }
       }
+      logger.debug("Found: ${cards.collect{card -> card.suCardUUID}.join(",")} with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
       return cards
     }
+    logger.debug("No cards found with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
   }
 
 }

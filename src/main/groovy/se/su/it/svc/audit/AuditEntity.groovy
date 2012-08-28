@@ -20,7 +20,7 @@ public class AuditEntity {
   String State
 
   public String toString() {
-    return "Created: " + this.Created + "\r\n"
+    return ("Created: " + this.Created + "\r\n"
     + "Ip_address: " + this.Ip_address + "\r\n"
     + "Uid: " +  this.Uid + "\r\n"
     + "Client: " + this.Client + "\r\n"
@@ -29,6 +29,6 @@ public class AuditEntity {
     + "Raw_args: " + this.Raw_args + "\r\n"
     + "Text_return: " + this.Text_return + "\r\n"
     + "Raw_return: " + this.Raw_return + "\r\n"
-    + "State: " + this.State + "\r\n"
+    + "State: " + this.State + "\r\n" )
   }
 }
