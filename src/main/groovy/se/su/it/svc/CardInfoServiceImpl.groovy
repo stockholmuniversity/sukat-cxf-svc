@@ -44,5 +44,25 @@ public class CardInfoServiceImpl implements CardInfoService {
     logger.debug("getAllCards - No cards found with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
     return []
   }
+  /**
+   * Returns a SuCard object for a specific suCardUUID, specified by the parameter suCardUUID.
+   *
+   *
+   * @param suCardUUID  the card uuid for the card.
+   * @param audit Audit object initilized with audit data about the client and user.
+   * @return an SuCard object or null if no card was found.
+   * @see se.su.it.svc.ldap.SuCard
+   * @see se.su.it.svc.commons.SvcAudit
+   */
+  public SuCard getCardByUUID(@WebParam(name = "suCardUUID") String suCardUUID, @WebParam(name = "audit") SvcAudit audit) {
+    if(suCardUUID == null || audit == null)
+      throw new java.lang.IllegalArgumentException("Null values not allowed in this function")
+    def card = SuCard.find(base: "") {
+      eq("objectClass","suCardOwner")
+      eq("suCardUUID",suCardUUID)
+    }
+    logger.debug("getCardByUUID - Found: ${card?"1":"0"} card ${card?card.suCardUUID:""} with params: suCardUUID=<${suCardUUID}>")
+    return card
+  }
 
 }

@@ -8,5 +8,5 @@ import se.su.it.svc.annotations.SuCxfSvcSpocpRole
 public interface CardInfoService {
 
   public SuCard[] getAllCards(String uid, boolean onlyActive, SvcAudit audit);
-
+  public SuCard getCardByUUID(String suCardUUID, SvcAudit audit);
 }
