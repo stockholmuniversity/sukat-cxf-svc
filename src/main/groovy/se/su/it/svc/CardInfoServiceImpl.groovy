@@ -8,7 +8,10 @@ import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.commons.SvcAudit
 import org.apache.log4j.Logger
 
-
+/**
+ * Implementing class for CardInfoService CXF Web Service.
+ * This Class handles all University Card information in SUKAT.
+ */
 @WebService
 public class CardInfoServiceImpl implements CardInfoService {
   private static final Logger logger = Logger.getLogger(CardInfoServiceImpl.class)
