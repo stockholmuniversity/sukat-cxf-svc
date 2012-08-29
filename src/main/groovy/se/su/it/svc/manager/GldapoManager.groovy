@@ -5,10 +5,11 @@ import gldapo.*
 class GldapoManager {
   public GldapoManager() {
     System.out.println("Gldapo Init")
+    def props = Properties.getInstance().props
 
     Gldapo.initialize(
       directories: [Directory1:
-      [url: "ldap://ldap.su.se",
+      [url: props.ldap.server,
         base: "",
         userDn: "",
         password: "",
