@@ -2,7 +2,9 @@ package se.su.it.svc.ldap
 
 import gldapo.schema.annotation.GldapoNamingAttribute
 import gldapo.schema.annotation.GldapoSchemaFilter
-
+/**
+ * GLDAPO schema class for SU roles also used by web service.
+ */
 class SuRole implements Serializable
 {
    static final long serialVersionUID = -687991492884005038L;

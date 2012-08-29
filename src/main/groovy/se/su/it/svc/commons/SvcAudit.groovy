@@ -1,11 +1,11 @@
 package se.su.it.svc.commons
 
 /**
- * Created with IntelliJ IDEA.
- * User: jqvar
- * Date: 2012-08-21
- * Time: 08:36
- * To change this template use File | Settings | File Templates.
+ *  Audit class for all webservice requests.<br />
+ *  This object is used by the Spring AOP Aspect enabled class AuditAspect.<br />
+ * <b>uid</b> UserId of client invoker.<br />
+ * <b>ipAddress</b> ip of Application Server.<br />
+ * <b>client</b> ip of Client invoker.<br />
  */
 import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType

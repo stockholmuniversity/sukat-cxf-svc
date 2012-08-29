@@ -9,9 +9,19 @@ import se.su.it.svc.ldap.SuPerson
 import org.springframework.core.io.Resource
 import se.su.it.svc.commons.SvcStatus
 import se.su.it.svc.commons.SvcAudit
-
+/**
+ * Implementing class for Status CXF Web Service.
+ * This Class handles all Status information for this web service application.
+ */
 @WebService
 public class Status {
+  /**
+   * Returns a SvcStatus object with status information regarding the web service application and server.
+   *
+   *
+   * @return an SvcStatus object.
+   * @see se.su.it.svc.commons.SvcStatus
+   */
   public SvcStatus getStatus() {
     Resource me       = ApplicationContextProvider.getApplicationContext().getResource("WEB-INF/classes/version.properties")
     Resource server   = ApplicationContextProvider.getApplicationContext().getResource("version.properties")

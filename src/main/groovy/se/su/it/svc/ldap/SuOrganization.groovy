@@ -2,7 +2,9 @@ package se.su.it.svc.ldap
 
 import gldapo.schema.annotation.GldapoNamingAttribute
 import gldapo.schema.annotation.GldapoSchemaFilter
-
+/**
+ * GLDAPO schema class for SU organisations also used by web service.
+ */
 class SuOrganization implements Serializable {
 
   static final long serialVersionUID = -627991492884005048L;
