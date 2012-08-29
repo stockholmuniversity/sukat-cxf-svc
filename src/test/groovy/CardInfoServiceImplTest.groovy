@@ -55,4 +55,24 @@ class CardInfoServiceImplTest extends spock.lang.Specification {
     then:
     ret.size() == 0
   }
+
+  @Test
+  def "Test getCardByUUID with null suCardUUID argument"() {
+    setup:
+    def cardInfoServiceImpl = new CardInfoServiceImpl()
+    when:
+    cardInfoServiceImpl.getCardByUUID(null,new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test getCardByUUID with null SvcAudit argument"() {
+    setup:
+    def cardInfoServiceImpl = new CardInfoServiceImpl()
+    when:
+    cardInfoServiceImpl.getCardByUUID("testcarduuid",null)
+    then:
+    thrown(IllegalArgumentException)
+  }
 }
