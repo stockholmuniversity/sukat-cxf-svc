@@ -40,16 +40,16 @@
 
   <context:component-scan base-package="se.su.it.svc"/>
 
-  <bean id="proopertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-    <property name="location" value="file:/local/cxf-server/conf/config.properties" />
-  </bean>
-
-  <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
-		<property name="driverClassName" value="${database.driver}" />
-		<property name="url" value="${database.url}" />
-		<property name="username" value="${database.user}" />
-		<property name="password" value="${database.password}" />
-	</bean>
+  <!--uncomment the following if gorm and mysql support is to be enabled-->
+  <!--<bean id="proopertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">-->
+    <!--<property name="location" value="file:/local/cxf-server/conf/config.properties" />-->
+  <!--</bean>-->
+  <!--<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">-->
+		<!--<property name="driverClassName" value="${database.driver}" />-->
+		<!--<property name="url" value="${database.url}" />-->
+		<!--<property name="username" value="${database.user}" />-->
+		<!--<property name="password" value="${database.password}" />-->
+	<!--</bean>-->
 
 	<bean id="messageSource"
 	      class="org.springframework.context.support.ResourceBundleMessageSource">
@@ -59,16 +59,18 @@
 			</list>
 		</property>
 	</bean>
-	<gorm:sessionFactory xmlns:gorm="http://grails.org/schema/gorm"
-						base-package="se.su.it.svc.domains"
-						data-source-ref="dataSource"
-						message-source-ref="messageSource">
-		<property name="hibernateProperties">
-			<util:map>
-				<entry key="hibernate.hbm2ddl.auto" value="update">
-			</entry></util:map>
-		</property>
-	</gorm:sessionFactory>
+
+  <!--uncomment the following if gorm and mysql support is to be enabled-->
+	<!--<gorm:sessionFactory xmlns:gorm="http://grails.org/schema/gorm"-->
+						<!--base-package="se.su.it.svc.domains"-->
+						<!--data-source-ref="dataSource"-->
+						<!--message-source-ref="messageSource">-->
+		<!--<property name="hibernateProperties">-->
+			<!--<util:map>-->
+				<!--<entry key="hibernate.hbm2ddl.auto" value="update">-->
+			<!--</entry></util:map>-->
+		<!--</property>-->
+	<!--</gorm:sessionFactory>-->
   <context:annotation-config/>
   <context:mbean-export/>
   <tx:annotation-driven/>
