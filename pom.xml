@@ -35,28 +35,11 @@
         <plugin>
           <groupId>org.codehaus.gmaven</groupId>
           <artifactId>gmaven-plugin</artifactId>
-          <version>1.3</version>
+          <version>1.4</version>
           <configuration>
-            <providerSelection>1.7</providerSelection>
+            <providerSelection>1.8</providerSelection>
+            <sourceEncoding>UTF-8</sourceEncoding>
           </configuration>
-          <dependencies>
-            <dependency>
-              <groupId>org.codehaus.gmaven.runtime</groupId>
-              <artifactId>gmaven-runtime-1.7</artifactId>
-              <version>1.3</version>
-              <exclusions>
-                <exclusion>
-                  <groupId>org.codehaus.groovy</groupId>
-                  <artifactId>groovy-all</artifactId>
-                </exclusion>
-              </exclusions>
-            </dependency>
-            <dependency>
-              <groupId>org.codehaus.groovy</groupId>
-              <artifactId>groovy-all</artifactId>
-              <version>1.7.0</version>
-            </dependency>
-          </dependencies>
           <executions>
             <execution>
               <goals>
@@ -67,6 +50,13 @@
               </goals>
             </execution>
           </executions>
+          <dependencies>
+            <dependency>
+              <groupId>org.codehaus.groovy</groupId>
+              <artifactId>groovy-all</artifactId>
+              <version>1.8.0</version>
+            </dependency>
+          </dependencies>
         </plugin>
 
         <plugin>
@@ -85,9 +75,15 @@
           </configuration>
 
         </plugin>
+
       </plugins>
   </build>
   <dependencies>
+    <dependency>
+    <groupId>org.codehaus.groovy</groupId>
+    <artifactId>groovy-all</artifactId>
+    <version>1.8.0</version>
+    </dependency>
     <dependency>
     	<groupId>org.grails</groupId>
     	<artifactId>grails-bootstrap</artifactId>
@@ -132,6 +128,13 @@
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
       <version>1.2.17</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.spockframework</groupId>
+      <artifactId>spock-core</artifactId>
+      <version>0.6-groovy-1.8</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
