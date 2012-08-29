@@ -16,4 +16,3 @@ web-app/.DS_Store
 atlassian-ide-plugin.xml
 cxf-svc-server.keystore
 spnego.properties
-webapp/

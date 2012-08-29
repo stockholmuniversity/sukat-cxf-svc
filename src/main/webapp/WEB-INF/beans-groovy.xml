@@ -84,6 +84,13 @@
     implementor="#cardinfoserviceEndpoint"
 	  address="/CardInfoService" />
 
+  <bean id="cardadminserviceEndpoint" class="se.su.it.svc.CardAdminServiceImpl" />
+  <jaxws:endpoint
+    id="cardadminservice"
+    implementorClass="se.su.it.svc.CardAdminServiceImpl"
+    implementor="#cardadminserviceEndpoint"
+    address="/CardAdminService" />
+
   <jaxws:endpoint
 	  id="status"
     implementor="se.su.it.svc.Status"

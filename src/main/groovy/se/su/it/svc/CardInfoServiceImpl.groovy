@@ -2,7 +2,6 @@ package se.su.it.svc
 
 import javax.jws.WebService
 import javax.jws.WebParam
-import se.su.it.svc.annotations.*
 import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.commons.SvcAudit
