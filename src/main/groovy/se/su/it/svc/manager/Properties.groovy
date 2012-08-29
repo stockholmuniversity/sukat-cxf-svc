@@ -24,10 +24,18 @@ class Properties {
     loadProperties()
   }
 
+  /**
+   *
+   * @return the singleton instance containing a groovy.util.ConfigObject called props.
+   */
   static getInstance(){
     return INSTANCE
   }
 
+  /**
+   * loading the properties file from the filesystem at a predefined path.
+   * populates the public member field props with a groovy.util.ConfigObject containing the properties
+   */
   private loadProperties(){
     def props = new java.util.Properties()
     new File("/local/cxf-server/conf/config.properties").withInputStream { stream ->
