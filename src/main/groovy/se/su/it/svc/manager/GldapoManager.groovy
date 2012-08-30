@@ -26,9 +26,6 @@ class GldapoManager {
       ]
       ],
       schemas: [se.su.it.svc.ldap.SuPerson,
-        se.su.it.svc.ldap.SuOrganization,
-        se.su.it.svc.ldap.SuGroup,
-        se.su.it.svc.ldap.SuRole,
         se.su.it.svc.ldap.SuCard]
     )
   }
