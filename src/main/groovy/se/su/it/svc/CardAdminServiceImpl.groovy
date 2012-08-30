@@ -26,18 +26,16 @@ public class CardAdminServiceImpl implements CardAdminService{
    * @see se.su.it.svc.ldap.SuCard
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public boolean revokeCard(@WebParam(name = "suCardUUID") String suCardUUID, @WebParam(name = "audit") SvcAudit audit) {
+  public void revokeCard(@WebParam(name = "suCardUUID") String suCardUUID, @WebParam(name = "audit") SvcAudit audit) {
     if(suCardUUID == null || audit == null)
       throw new java.lang.IllegalArgumentException("Null values not allowed in this function")
     SuCard card =SuCardQuery.findCardBySuCardUUID(GldapoManager.LDAP_RW,suCardUUID)
     if(card != null) {
       card.suCardState="urn:x-su:su-card:state:revoked"
       SuCardQuery.saveSuCard(card)
-      //urn:x-su:su-card:state:active
-      return true
     } else {
       logger.info("revokeCard: Could not find a card with uuid<${suCardUUID}>")
+      throw new IllegalArgumentException("revokeCard: Could not find a card with uuid<${suCardUUID}>")
     }
-    return false
   }
 }
