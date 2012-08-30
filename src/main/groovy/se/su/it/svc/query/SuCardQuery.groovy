@@ -17,7 +17,7 @@ public class SuCardQuery {
    * @see se.su.it.svc.ldap.SuCard
    * @see se.su.it.svc.manager.GldapoManager
    */
-  static SuCard[] findAllCardsBySuPersonDnAndOnlyActiveOrNot(String directory,String dn, boolean onlyActiveCards) {
+  static SuCard[] findAllCardsBySuPersonDnAndOnlyActiveOrNot(String directory,org.springframework.ldap.core.DistinguishedName dn, boolean onlyActiveCards) {
     return SuCard.findAll(directory:directory,base: dn) {
       eq("objectClass","suCardOwner")
       if(onlyActiveCards) {
