@@ -6,6 +6,9 @@ import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.commons.SvcAudit
 import org.apache.log4j.Logger
+import se.su.it.svc.query.SuPersonQuery
+import se.su.it.svc.query.SuCardQuery
+import se.su.it.svc.manager.GldapoManager
 
 /**
  * Implementing class for CardInfoService CXF Web Service.
@@ -29,14 +32,9 @@ public class CardInfoServiceImpl implements CardInfoService {
   public SuCard[] getAllCards(@WebParam(name = "uid") String uid, @WebParam(name = "onlyActive") boolean onlyActive, @WebParam(name = "audit") SvcAudit audit) {
     if(uid == null || onlyActive == null || audit == null)
       throw new java.lang.IllegalArgumentException("Null values not allowed in this function")
-    SuPerson person = SuPerson.getPersonFromUID(uid)
+    SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
     if(person) {
-      def cards = SuCard.findAll(base: person.getDn()) {
-        eq("objectClass","suCardOwner")
-        if(onlyActive) {
-          eq("suCardState", "urn:x-su:su-card:state:active")
-        }
-      }
+      def cards = SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(GldapoManager.LDAP_RO,person.getDn(),onlyActive)
       logger.debug("getAllCards - Found: ${cards.size()} card(s) ${cards.collect{card -> card.suCardUUID}.join(",")} with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
       return cards
     }
@@ -56,10 +54,7 @@ public class CardInfoServiceImpl implements CardInfoService {
   public SuCard getCardByUUID(@WebParam(name = "suCardUUID") String suCardUUID, @WebParam(name = "audit") SvcAudit audit) {
     if(suCardUUID == null || audit == null)
       throw new java.lang.IllegalArgumentException("Null values not allowed in this function")
-    def card = SuCard.find(base: "") {
-      eq("objectClass","suCardOwner")
-      eq("suCardUUID",suCardUUID)
-    }
+    def card = SuCardQuery.findCardBySuCardUUID(GldapoManager.LDAP_RO,suCardUUID)
     logger.debug("getCardByUUID - Found: ${card?"1":"0"} card ${card?card.suCardUUID:""} with params: suCardUUID=<${suCardUUID}>")
     return card
   }

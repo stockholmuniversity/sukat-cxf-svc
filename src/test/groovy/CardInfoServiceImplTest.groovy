@@ -5,6 +5,8 @@ import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuCard
 import gldapo.GldapoSchemaRegistry
+import se.su.it.svc.query.SuPersonQuery
+import se.su.it.svc.query.SuCardQuery
 
 class CardInfoServiceImplTest extends spock.lang.Specification {
   @Test
@@ -33,9 +35,9 @@ class CardInfoServiceImplTest extends spock.lang.Specification {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     def person = new SuPerson()
     def suCards = [new SuCard()]
-    SuPerson.metaClass.static.getPersonFromUID = {String uid -> return person }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return person }
     person.metaClass.getDn = {""}
-    SuCard.metaClass.static.findAll = {Object arg1,Closure arg2 -> return suCards}
+    SuCardQuery.metaClass.static.findAllCardsBySuPersonDnAndOnlyActiveOrNot = {String directory,String dn, boolean onlyActiveCards -> return suCards}
     def cardInfoServiceImpl = new CardInfoServiceImpl()
     when:
     def ret = cardInfoServiceImpl.getAllCards("testuid",true,new SvcAudit())
@@ -48,7 +50,7 @@ class CardInfoServiceImplTest extends spock.lang.Specification {
   def "Test getAllCards returns empty list when person dont exists"() {
     setup:
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
-    SuPerson.metaClass.static.getPersonFromUID = {String uid -> return null }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def cardInfoServiceImpl = new CardInfoServiceImpl()
     when:
     def ret = cardInfoServiceImpl.getAllCards("testuid",true,new SvcAudit())

@@ -1,15 +1,23 @@
 package se.su.it.svc.manager
 
 import gldapo.*
+/**
+ * This class specifies the ldap integration<br />
+ * We have 2 directories that use different sukat servers.<br />
+ * LDAP_RO are the slave servers and we use them to do searches and queries.<br />
+ * LDAP_RW is the master server, we use this one for modifications of data on sukat.<br />
+ */
+public class GldapoManager {
+  public static final String LDAP_RO = "ldapreadonly"
+  public static final String LDAP_RW = "ldapreadwrite"
 
-class GldapoManager {
   public GldapoManager() {
     System.out.println("Gldapo Init")
     def props = Properties.getInstance().props
 
     Gldapo.initialize(
-      directories: [Directory1:
-      [url: props.ldap.server,
+      directories: [(this.LDAP_RO):
+      [url: props.ldap.serverro,
         base: "",
         userDn: "",
         password: "",
@@ -23,7 +31,22 @@ class GldapoManager {
           timeLimit: 120000,
           searchScope: "subtree"
         ]
-      ]
+      ],(this.LDAP_RW):
+        [url: props.ldap.serverrw,
+          base: "",
+          userDn: "",
+          password: "",
+          ignorePartialResultException: false,
+          env: [
+            "java.naming.security.authentication": "GSSAPI",
+            "javax.security.sasl.server.authentication": "true"
+          ],
+          searchControls: [
+            countLimit: 500,
+            timeLimit: 120000,
+            searchScope: "subtree"
+          ]
+        ]
       ],
       schemas: [se.su.it.svc.ldap.SuPerson,
         se.su.it.svc.ldap.SuCard]
