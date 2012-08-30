@@ -41,4 +41,8 @@ public class SuCardQuery {
       eq("suCardUUID",suCardUUID)
     }
   }
+
+  static void saveSuCard(SuCard suCard) {
+    suCard.save()
+  }
 }
