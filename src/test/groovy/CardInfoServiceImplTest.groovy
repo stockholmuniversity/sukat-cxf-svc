@@ -55,7 +55,7 @@ class CardInfoServiceImplTest extends spock.lang.Specification {
     when:
     def ret = cardInfoServiceImpl.getAllCards("testuid",true,new SvcAudit())
     then:
-    ret.size() == 0
+    thrown(IllegalArgumentException)
   }
 
   @Test

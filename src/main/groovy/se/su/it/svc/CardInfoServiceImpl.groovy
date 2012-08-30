@@ -37,6 +37,8 @@ public class CardInfoServiceImpl implements CardInfoService {
       def cards = SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(GldapoManager.LDAP_RO,person.getDn(),onlyActive)
       logger.debug("getAllCards - Found: ${cards.size()} card(s) ${cards.collect{card -> card.suCardUUID}.join(",")} with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
       return cards
+    } else {
+      throw new IllegalArgumentException("getAllCards no such uid found: "+uid)
     }
     logger.debug("getAllCards - No cards found with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
     return []
@@ -56,6 +58,9 @@ public class CardInfoServiceImpl implements CardInfoService {
       throw new java.lang.IllegalArgumentException("Null values not allowed in this function")
     def card = SuCardQuery.findCardBySuCardUUID(GldapoManager.LDAP_RO,suCardUUID)
     logger.debug("getCardByUUID - Found: ${card?"1":"0"} card ${card?card.suCardUUID:""} with params: suCardUUID=<${suCardUUID}>")
+    if(card == null) {
+      throw new IllegalArgumentException("getCardByUUID: Could not find a card with uuid<${suCardUUID}>")
+    }
     return card
   }
 
