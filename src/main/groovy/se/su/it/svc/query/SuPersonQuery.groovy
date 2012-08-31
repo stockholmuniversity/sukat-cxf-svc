@@ -26,4 +26,8 @@ public class SuPersonQuery {
     }
   }
 
+  static void saveSuPerson(SuPerson person) {
+    person.save()
+  }
+
 }
