@@ -93,6 +93,13 @@
     implementor="#cardadminserviceEndpoint"
     address="/CardAdminService" />
 
+  <bean id="entitlementserviceEndpoint" class="se.su.it.svc.EntitlementServiceImpl" />
+  <jaxws:endpoint
+    id="entitlementservice"
+    implementorClass="se.su.it.svc.EntitlementServiceImpl"
+    implementor="#entitlementserviceEndpoint"
+    address="/EntitlementService" />
+
   <jaxws:endpoint
 	  id="status"
     implementor="se.su.it.svc.Status"
