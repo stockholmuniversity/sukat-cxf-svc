@@ -22,7 +22,7 @@ public class CardAdminServiceImpl implements CardAdminService{
    *
    * @param suCardUUID  the card uuid for the card.
    * @param audit Audit object initilized with audit data about the client and user.
-   * @return true when card was found and the state was changed to revoked, otherwise false.
+   * @return void.
    * @see se.su.it.svc.ldap.SuCard
    * @see se.su.it.svc.commons.SvcAudit
    */
@@ -35,6 +35,30 @@ public class CardAdminServiceImpl implements CardAdminService{
       SuCardQuery.saveSuCard(card)
     } else {
       logger.info("revokeCard: Could not find a card with uuid<${suCardUUID}>")
+      throw new IllegalArgumentException("revokeCard: Could not find a card with uuid<${suCardUUID}>")
+    }
+  }
+
+  /**
+   * This method sets a PIN for the specified University Card
+   *
+   *
+   * @param suCardUUID  the card uuid for the card.
+   * @param pin the new pin for the card.
+   * @param audit Audit object initilized with audit data about the client and user.
+   * @return void.
+   * @see se.su.it.svc.ldap.SuCard
+   * @see se.su.it.svc.commons.SvcAudit
+   */
+  public void setCardPIN(@WebParam(name = "suCardUUID") String suCardUUID, @WebParam(name = "pin") String pin, @WebParam(name = "audit") SvcAudit audit) {
+    if(suCardUUID == null || pin == null || audit == null)
+      throw new java.lang.IllegalArgumentException("Null values not allowed in this function")
+    SuCard card =SuCardQuery.findCardBySuCardUUID(GldapoManager.LDAP_RW,suCardUUID)
+    if(card != null) {
+      card.suCardPIN = pin
+      SuCardQuery.saveSuCard(card)
+    } else {
+      logger.info("setCardPIN: Could not find a card with uuid<${suCardUUID}>")
       throw new IllegalArgumentException("revokeCard: Could not find a card with uuid<${suCardUUID}>")
     }
   }

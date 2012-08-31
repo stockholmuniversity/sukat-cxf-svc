@@ -31,7 +31,7 @@ class CardAdminServiceImplTest extends spock.lang.Specification{
   }
 
   @Test
-  def "Test revokeCard returns true and sets state to revoked"() {
+  def "Test revokeCard sets state to revoked"() {
     setup:
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     def suCard = new SuCard()
@@ -46,7 +46,7 @@ class CardAdminServiceImplTest extends spock.lang.Specification{
   }
 
   @Test
-  def "Test revokeCard returns false when no card was found"() {
+  def "Test revokeCard throws IllegalArgumentException when no card was found"() {
     setup:
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuCardQuery.metaClass.static.findCardBySuCardUUID = {String arg1, String arg2 -> return null}
@@ -54,6 +54,64 @@ class CardAdminServiceImplTest extends spock.lang.Specification{
     def cardAdminServiceImpl = new CardAdminServiceImpl()
     when:
     cardAdminServiceImpl.revokeCard("testcarduuid",new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test setCardPIN with null suCardUUID argument"() {
+    setup:
+    def cardAdminServiceImpl = new CardAdminServiceImpl()
+    when:
+    cardAdminServiceImpl.setCardPIN(null,"1234", new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test setCardPIN with null pin argument"() {
+    setup:
+    def cardAdminServiceImpl = new CardAdminServiceImpl()
+    when:
+    cardAdminServiceImpl.setCardPIN("testcarduuid",null, new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test setCardPIN with null SvcAudit argument"() {
+    setup:
+    def cardAdminServiceImpl = new CardAdminServiceImpl()
+    when:
+    cardAdminServiceImpl.setCardPIN("testcarduuid","1234",null)
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test setCardPIN sets pin"() {
+    setup:
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
+    def suCard = new SuCard()
+    SuCardQuery.metaClass.static.findCardBySuCardUUID = {String arg1, String arg2 -> return suCard}
+    SuCardQuery.metaClass.static.saveSuCard = {SuCard arg1 -> return void}
+
+    def cardAdminServiceImpl = new CardAdminServiceImpl()
+    when:
+    cardAdminServiceImpl.setCardPIN("testcarduuid","1234",new SvcAudit())
+    then:
+    suCard.suCardPIN == "1234"
+  }
+
+  @Test
+  def "Test setCardPIN returns false when no card was found"() {
+    setup:
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
+    SuCardQuery.metaClass.static.findCardBySuCardUUID = {String arg1, String arg2 -> return null}
+
+    def cardAdminServiceImpl = new CardAdminServiceImpl()
+    when:
+    cardAdminServiceImpl.setCardPIN("testcarduuid","1234", new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }

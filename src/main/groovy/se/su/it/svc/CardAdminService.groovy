@@ -6,5 +6,6 @@ import se.su.it.svc.annotations.SuCxfSvcSpocpRole
 
 @SuCxfSvcSpocpRole(role = "sukat-card-admin")
 public interface CardAdminService {
-  public void revokeCard(String suCardUUID, SvcAudit audit);
+  public void revokeCard(String suCardUUID, SvcAudit audit)
+  public void setCardPIN(String suCardUUID, String pin, SvcAudit audit)
 }
