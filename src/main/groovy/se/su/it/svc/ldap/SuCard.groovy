@@ -26,13 +26,6 @@ class SuCard implements Serializable{
   String suCardSerial
   @XmlAttribute
   String suCardState
-
-  static constraints =
-    {
-      suCardTypeURN(nullable:false)
-      suCardUUID(nullable:false)
-      suCardSerial(nullable:false)
-      suCardState(nullable:false)
-      cn(nullable:false)
-    }
+  @XmlAttribute
+  String suCardPIN
 }
