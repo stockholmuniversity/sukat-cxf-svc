@@ -9,13 +9,17 @@ import se.su.it.svc.manager.EhCacheManager
  */
 public class SuCardQuery {
 
-//  static applicationContext = ApplicationContextProvider.getApplicationContext()
-//  static EhCacheManager cacheManager = (EhCacheManager)applicationContext.getBean('ehCacheManager')
-
+  /**
+   * the CacheManager provides an instance of EhCache and some overridden methods (get/put/remove)
+   * !important: when getting an object from LDAP which is to be changed, we always need to get it from the master,
+   *             ie: using the props.ldap.serverrw (readWrite, to ensure that we are changing the up-to-date value)
+   *             and NOT fetching the object from the cache.
+   */
   def static cacheManager = EhCacheManager.getInstance()
+
   /**
    * Returns a list (<code>ArrayList<SuCard></code>) of SuCard objects for a specific DistinguishedName, specified by the parameter dn.
-   *
+   * !important: this query is cached,
    *
    * @param directory which directory to use, see GldapoManager.
    * @param dn  the DistinguishedName for the user that you want to find cards for.
