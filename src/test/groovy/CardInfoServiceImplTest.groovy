@@ -12,7 +12,6 @@ import org.springframework.context.ApplicationContext
 import net.sf.ehcache.hibernate.EhCache
 import se.su.it.svc.manager.ApplicationContextProvider
 
-@Mock([EhCacheManager, EhCache, ApplicationContext, ApplicationContextProvider])
 class CardInfoServiceImplTest extends spock.lang.Specification {
   @Test
   def "Test getAllCards with null uid argument"() {
@@ -44,13 +43,6 @@ class CardInfoServiceImplTest extends spock.lang.Specification {
     person.metaClass.getDn = {""}
     SuCardQuery.metaClass.static.findAllCardsBySuPersonDnAndOnlyActiveOrNot = {String directory,String dn, boolean onlyActiveCards -> return suCards}
     def cardInfoServiceImpl = new CardInfoServiceImpl()
-    SuCardQuery suCardQuery = new SuCardQuery()
-
-    ApplicationContext applicationContext = Mock(ApplicationContext)
-    EhCacheManager manager = Mock(EhCacheManager)
-    suCardQuery.metaClass.static.applicationContext = (ApplicationContext)applicationContext
-    suCardQuery.metaClass.static.cacheManager = (EhCacheManager)manager
-//    suCardQuery.metaClass.static.applicationContext.getBean = {String bean -> return manager}
     when:
     def ret = cardInfoServiceImpl.getAllCards("testuid",true,new SvcAudit())
     then:
