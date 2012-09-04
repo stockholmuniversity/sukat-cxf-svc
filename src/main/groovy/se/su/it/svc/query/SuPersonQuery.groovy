@@ -9,7 +9,6 @@ public class SuPersonQuery {
   /**
    * Returns a SuPerson object, specified by the parameter uid.
    *
-   * The ldap query uses read only servers (slaves).
    *
    * @param directory which directory to use, see GldapoManager.
    * @param uid  the uid (user id) for the user that you want to find.
@@ -26,6 +25,14 @@ public class SuPersonQuery {
     }
   }
 
+  /**
+   * Save a SuPerson object to ldap.
+   *
+   *
+   * @return void.
+   * @see se.su.it.svc.ldap.SuPerson
+   * @see se.su.it.svc.manager.GldapoManager
+   */
   static void saveSuPerson(SuPerson person) {
     person.save()
   }

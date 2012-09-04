@@ -42,6 +42,14 @@ public class SuCardQuery {
     }
   }
 
+  /**
+   * Save a SuCard object to ldap.
+   *
+   *
+   * @return void.
+   * @see se.su.it.svc.ldap.SuCard
+   * @see se.su.it.svc.manager.GldapoManager
+   */
   static void saveSuCard(SuCard suCard) {
     suCard.save()
   }
