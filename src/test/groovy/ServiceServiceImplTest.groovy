@@ -83,4 +83,16 @@ class ServiceServiceImplTest extends spock.lang.Specification{
     then:
     thrown(IllegalArgumentException)
   }
+
+  @Test
+  def "Test getServiceTemplates with null SvcAudit argument"() {
+    setup:
+    def serviceServiceImpl = new ServiceServiceImpl()
+
+    when:
+    serviceServiceImpl.getServiceTemplates(null)
+
+    then:
+    thrown(IllegalArgumentException)
+  }
 }

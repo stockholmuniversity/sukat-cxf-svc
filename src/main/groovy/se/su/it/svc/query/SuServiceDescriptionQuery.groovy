@@ -17,7 +17,7 @@ public class SuServiceDescriptionQuery {
    * @see se.su.it.svc.manager.GldapoManager
    */
   static SuServiceDescription[] getSuServiceDescriptions(String directory) {
-    return SuServiceDescription.find(directory:directory, base: "") {
+    return SuServiceDescription.findAll(directory:directory, base: "") {
       and {
         eq("objectclass", "suServiceDescription")
       }

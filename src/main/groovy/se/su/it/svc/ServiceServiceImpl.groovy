@@ -9,6 +9,8 @@ import se.su.it.svc.manager.GldapoManager
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuServiceQuery
+import se.su.it.svc.ldap.SuServiceDescription
+import se.su.it.svc.query.SuServiceDescriptionQuery
 
 /**
  * Implementing class for ServiceService CXF Web Service.
@@ -41,5 +43,20 @@ public class ServiceServiceImpl implements ServiceService {
     }
     logger.debug("getServices - No services found with params: uid=<${uid}>")
     return []
+  }
+
+  /**
+   * This method returns service descriptions found in sukat.
+   *
+   *
+   * @param audit Audit object initilized with audit data about the client and user.
+   * @return array of SuServiceDescription.
+   * @see se.su.it.svc.ldap.SuServiceDescription
+   * @see se.su.it.svc.commons.SvcAudit
+   */
+  public SuServiceDescription[] getServiceTemplates(@WebParam(name = "audit") SvcAudit audit) {
+    if(audit == null)
+      throw new java.lang.IllegalArgumentException("Null values not allowed in this function")
+    return SuServiceDescriptionQuery.getSuServiceDescriptions(GldapoManager.LDAP_RO)
   }
 }
