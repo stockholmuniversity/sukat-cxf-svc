@@ -1,11 +1,18 @@
 package se.su.it.svc.query
 
 import se.su.it.svc.ldap.SuCard
+import se.su.it.svc.manager.ApplicationContextProvider
+import se.su.it.svc.manager.EhCacheManager
 
 /**
  * This class is a helper class for doing GLDAPO queries on the SuCard GLDAPO schema.
  */
 public class SuCardQuery {
+
+//  static applicationContext = ApplicationContextProvider.getApplicationContext()
+//  static EhCacheManager cacheManager = (EhCacheManager)applicationContext.getBean('ehCacheManager')
+
+  def static cacheManager = EhCacheManager.getInstance()
   /**
    * Returns a list (<code>ArrayList<SuCard></code>) of SuCard objects for a specific DistinguishedName, specified by the parameter dn.
    *
@@ -17,13 +24,18 @@ public class SuCardQuery {
    * @see se.su.it.svc.ldap.SuCard
    * @see se.su.it.svc.manager.GldapoManager
    */
-  static SuCard[] findAllCardsBySuPersonDnAndOnlyActiveOrNot(String directory,org.springframework.ldap.core.DistinguishedName dn, boolean onlyActiveCards) {
-    return SuCard.findAll(directory:directory,base: dn) {
-      eq("objectClass","suCardOwner")
-      if(onlyActiveCards) {
-        eq("suCardState", "urn:x-su:su-card:state:active")
+  static SuCard[] findAllCardsBySuPersonDnAndOnlyActiveOrNot(String directory, org.springframework.ldap.core.DistinguishedName dn, boolean onlyActiveCards) {
+    def cards = (SuCard[]) cacheManager.get([key: ":getAllCardsFor:${dn}", ttl: 120, cache: cacheManager.DEFAULT_CACHE_NAME],
+      {
+        SuCard.findAll(directory: directory, base: dn) {
+          eq("objectClass", "suCardOwner")
+          if (onlyActiveCards) {
+            eq("suCardState", "urn:x-su:su-card:state:active")
+          }
+        }
       }
-    }
+    )
+    return cards
   }
 
   /**
