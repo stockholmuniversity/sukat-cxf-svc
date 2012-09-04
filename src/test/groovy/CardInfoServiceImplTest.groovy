@@ -7,6 +7,10 @@ import se.su.it.svc.ldap.SuCard
 import gldapo.GldapoSchemaRegistry
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuCardQuery
+import se.su.it.svc.manager.EhCacheManager
+import org.springframework.context.ApplicationContext
+import net.sf.ehcache.hibernate.EhCache
+import se.su.it.svc.manager.ApplicationContextProvider
 
 class CardInfoServiceImplTest extends spock.lang.Specification {
   @Test
