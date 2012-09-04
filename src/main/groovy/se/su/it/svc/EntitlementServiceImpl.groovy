@@ -17,6 +17,17 @@ import org.apache.log4j.Logger
 public class EntitlementServiceImpl implements EntitlementService {
   private static final Logger logger = Logger.getLogger(EntitlementServiceImpl.class)
 
+  /**
+   * This method adds entitlement to the specified uid.
+   *
+   *
+   * @param uid  uid of the user.
+   * @param entitlement entitlement to add
+   * @param audit Audit object initilized with audit data about the client and user.
+   * @return void.
+   * @see se.su.it.svc.ldap.SuPerson
+   * @see se.su.it.svc.commons.SvcAudit
+   */
   public void addEntitlement(@WebParam(name = "uid") String uid, @WebParam(name = "entitlement") String entitlement, @WebParam(name = "audit") SvcAudit audit) {
     if(uid == null || entitlement == null || audit == null)
       throw new java.lang.IllegalArgumentException("Null values not allowed in this function")
@@ -37,6 +48,38 @@ public class EntitlementServiceImpl implements EntitlementService {
     } else {
       logger.info("addEntitlement: Could not find uid<${uid}>")
       throw new IllegalArgumentException("addEntitlement no such uid found: "+uid)
+    }
+  }
+
+  /**
+   * This method removes entitlement from the specified uid.
+   *
+   *
+   * @param uid  uid of the user.
+   * @param entitlement entitlement to remove
+   * @param audit Audit object initilized with audit data about the client and user.
+   * @return void.
+   * @see se.su.it.svc.ldap.SuPerson
+   * @see se.su.it.svc.commons.SvcAudit
+   */
+  public void removeEntitlement(@WebParam(name = "uid") String uid, @WebParam(name = "entitlement") String entitlement, @WebParam(name = "audit") SvcAudit audit) {
+    if(uid == null || entitlement == null || audit == null)
+      throw new java.lang.IllegalArgumentException("Null values not allowed in this function")
+
+    SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+    if(person) {
+      if(person.eduPersonEntitlement != null) {
+        if(person.eduPersonEntitlement.remove(entitlement)) {
+          SuPersonQuery.saveSuPerson(person)
+        } else {
+          throw new IllegalArgumentException("removeEntitlement entitlement not found: "+entitlement)
+        }
+      } else {
+        throw new IllegalArgumentException("removeEntitlement entitlement not found: "+entitlement)
+      }
+    } else {
+      logger.info("removeEntitlement: Could not find uid<${uid}>")
+      throw new IllegalArgumentException("removeEntitlement no such uid found: "+uid)
     }
   }
 }

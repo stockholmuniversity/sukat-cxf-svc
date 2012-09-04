@@ -100,6 +100,13 @@
     implementor="#entitlementserviceEndpoint"
     address="/EntitlementService" />
 
+  <bean id="serviceserviceEndpoint" class="se.su.it.svc.ServiceServiceImpl" />
+  <jaxws:endpoint
+    id="serviceservice"
+    implementorClass="se.su.it.svc.ServiceServiceImpl"
+    implementor="#serviceserviceEndpoint"
+    address="/ServiceService" />
+
   <jaxws:endpoint
 	  id="status"
     implementor="se.su.it.svc.Status"
