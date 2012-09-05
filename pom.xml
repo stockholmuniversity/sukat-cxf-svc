@@ -17,6 +17,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
+          <version>2.5.1</version>
           <configuration>
             <source>1.5</source>
             <target>1.5</target>
@@ -144,11 +145,17 @@
       <type>pom</type>
     </dependency>
 
+    <dependency>
+      <groupId>se.su.it.commons</groupId>
+      <artifactId>su-commons</artifactId>
+      <version>1.9.2</version>
+    </dependency>
   </dependencies>
 
 
   <!-- Change versions if necessary -->
   <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <hibernate.version>3.3.1.ga</hibernate.version>
     <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
     <buildNumber>${maven.build.timestamp}</buildNumber>
@@ -164,7 +171,7 @@
       <id>su-maven</id>
       <name>SU Maven</name>
       <url>http://maven.it.su.se/it.su.se/maven</url>
-      <layout>legacy</layout>
+      <layout>default</layout>
     </repository>
   </repositories>
 </project>

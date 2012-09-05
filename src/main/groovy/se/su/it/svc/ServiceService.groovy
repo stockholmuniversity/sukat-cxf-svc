@@ -9,4 +9,5 @@ import se.su.it.svc.ldap.SuServiceDescription
 public interface ServiceService {
   public SuService[] getServices(String uid, SvcAudit audit)
   public SuServiceDescription[] getServiceTemplates(SvcAudit audit)
+  public SuService enableServiceFully(String uid, String serviceType, String qualifier, String description, SvcAudit audit)
 }

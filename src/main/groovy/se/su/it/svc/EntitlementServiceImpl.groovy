@@ -8,6 +8,7 @@ import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.manager.GldapoManager
 import se.su.it.svc.query.SuCardQuery
 import org.apache.log4j.Logger
+import se.su.it.svc.ldap.SuSubAccount
 
 /**
  * Implementing class for EntitlementService CXF Web Service.
