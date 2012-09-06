@@ -15,7 +15,7 @@ class EhCacheManager {
 
   private static final Logger logger = Logger.getLogger(EhCacheManager.class)
   def final Object NULL = "NULL"
-  def final int DEFAULT_TTL = 300
+  def final int DEFAULT_TTL = (60 * 10)
   private props = Properties.getInstance().props
 
 

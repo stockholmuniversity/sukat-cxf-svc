@@ -38,7 +38,8 @@ public class SuCardQuery {
         }
       }
     }
-    def params = [key: ":getAllCardsFor:${dn}:onlyActive:${onlyActiveCards}", ttl: 120, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
+
+    def params = [key: ":getAllCardsFor:${dn}:onlyActive:${onlyActiveCards}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
     def cards = (SuCard[]) cacheManager.get(params ,{query(directory,dn,onlyActiveCards)})
 
     return cards
@@ -54,13 +55,13 @@ public class SuCardQuery {
    * @see se.su.it.svc.manager.GldapoManager
    */
   static SuCard findCardBySuCardUUID(String directory,String suCardUUID) {
-    def query = { String qDirectory, String qSuCardUUID ->
-      SuCard.find(directory: (String)qDirectory, base: '') {
+    def query = { qDirectory, qSuCardUUID ->
+      SuCard.find(directory: qDirectory, base: '') {
         eq("objectClass", "suCardOwner")
-        eq("suCardUUID", (String)qSuCardUUID)
+        eq("suCardUUID", qSuCardUUID)
       }
     }
-    def params = [key: ":findCardBySuCardUUID:${suCardUUID}", ttl: 120, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RO)]
+    def params = [key: ":findCardBySuCardUUID:${suCardUUID}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RO)]
     def cards = (SuCard)cacheManager.get(params, {query(directory, suCardUUID)})
     return cards
 
