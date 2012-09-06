@@ -25,4 +25,12 @@ class SuService implements Serializable {
   String suServiceType
   @XmlAttribute
   String suServiceStatus
+  @XmlAttribute
+  String owner
+  @XmlAttribute
+  String suServiceStartTime
+  @XmlAttribute
+  String roleOccupant
+  @XmlAttribute
+  Set<String> objectClass
 }
