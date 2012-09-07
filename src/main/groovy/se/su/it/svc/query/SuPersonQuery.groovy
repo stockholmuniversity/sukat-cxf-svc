@@ -38,14 +38,14 @@ public class SuPersonQuery {
     }
 
     def params = [key: ":getSuPersonFromUID:${uid}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
-    def suPerson = (SuPerson) cacheManager.get(params, {query(directory, uid)})
+    def suPerson = (SuPerson) cacheManager.get(params, { query(directory, uid) })
 
     return suPerson
   }
 
   /**
    * Save a SuPerson object to ldap.
-   *
+   * and putting the changed object in the cache so that the objects returned by this svc is always up-to-date.
    *
    * @return void.
    * @see se.su.it.svc.ldap.SuPerson
@@ -53,6 +53,8 @@ public class SuPersonQuery {
    */
   static void saveSuPerson(SuPerson person) {
     person.save()
+    def params = [key: ":getSuPersonFromUID:${person.uid}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: false]
+    cacheManager.put(params, { person })
   }
 
 }
