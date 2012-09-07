@@ -14,6 +14,7 @@ import se.su.it.svc.query.SuServiceDescriptionQuery
 import se.su.it.svc.ldap.SuSubAccount
 import se.su.it.svc.query.SuSubAccountQuery
 import se.su.it.commons.Kadmin
+import javax.naming.OperationNotSupportedException
 
 /**
  * Implementing class for ServiceService CXF Web Service.
@@ -83,16 +84,52 @@ public class ServiceServiceImpl implements ServiceService {
     if(person == null)
       throw new java.lang.IllegalArgumentException("enableServiceFully no such uid found: "+uid)
 
+    String subUid = ""
     // START Try to create sub account if it do not exist
     if(qualifier && qualifier.length() > 0) {
-      String subUid = uid + "." + qualifier;
+      subUid = uid + "." + qualifier;
       def subAccounts = SuSubAccountQuery.getSuSubAccounts(GldapoManager.LDAP_RO, person.getDn())
       if(!subAccounts.find {subAcc -> subAcc.uid == subUid}) {
-        SuSubAccount subAcc = new SuSubAccount(uid: subUid, description: description)
-        SuSubAccountQuery.createSubAccount(GldapoManager.LDAP_RW, subAcc, person.getDn().toString())
+        SuSubAccount subAcc = new SuSubAccount()
+        subAcc.parent = person.getDn().toString()
+        subAcc.uid = subUid
+        subAcc.description = description
+        subAcc.objectClass = ["top", "account"]
+        if(serviceType.equalsIgnoreCase("urn:x-su:service:type:jabber")) {
+          subAcc.objectClass.add("jabberUser")
+          subAcc.jabberID = uid + "@su.se"
+        }
+        SuSubAccountQuery.createSubAccount(GldapoManager.LDAP_RW, subAcc)
         Kadmin.newInstance().resetOrCreatePrincipal(subUid.replaceFirst("\\.", "/"))
       }
     }
     // END Try to create sub account if it do not exist
+    SuService suService = SuServiceQuery.getSuServiceByType(GldapoManager.LDAP_RW, person.getDn(), serviceType)
+    if(suService == null) {
+      //create service
+      suService = new SuService()
+      suService.objectClass.add("top")
+      suService.objectClass.add("suServiceObject")
+      suService.objectClass.add("suService")
+      suService.objectClass.add("organizationalRole")
+      UUID cn = UUID.randomUUID()
+      suService.cn = cn.toString()
+      suService.suServiceType = serviceType
+      suService.owner = person.getDn().toString()
+      suService.suServiceStartTime = new Date().format("yyyyMMddHHmm'Z'","UTC")
+      suService.suServiceStatus = "enabled"
+      if(subUid.length() > 0) {
+        suService.roleOccupant = "uid=${subUid},${person.getDn().toString()}"
+      }
+      suService.parent=person.getDn().toString()
+      SuServiceQuery.createService(GldapoManager.LDAP_RW,suService)
+    } else {
+      //enable service
+      if (suService.suServiceStatus.equalsIgnoreCase("blocked") || suService.suServiceStatus.equalsIgnoreCase("locked"))
+        throw new OperationNotSupportedException("enableServiceFully Service " + suService.getDn().toString() +  " is blocked/locked");
+      suService.suServiceStatus = "enabled"
+      SuServiceQuery.saveSuService(suService)
+    }
+    return suService
   }
 }

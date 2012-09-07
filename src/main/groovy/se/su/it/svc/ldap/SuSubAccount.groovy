@@ -12,5 +12,6 @@ class SuSubAccount implements Serializable {
   @GldapoNamingAttribute
   String uid
   String description
+  String jabberID
   Set<String> objectClass
 }
