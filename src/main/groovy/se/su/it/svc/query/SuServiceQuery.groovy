@@ -35,7 +35,7 @@ public class SuServiceQuery {
       }
     }
 
-    def params = [key: ":getSuServiceDescription:", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
+    def params = [key: ":getSuServiceDescription:${dn}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
     def suServices = (SuService[]) cacheManager.get(params, {query(directory, dn)})
 
     return suServices
@@ -53,12 +53,17 @@ public class SuServiceQuery {
    * @see se.su.it.svc.manager.GldapoManager
    */
   static SuService getSuServiceByType(String directory, org.springframework.ldap.core.DistinguishedName dn, String serviceType) {
-    return SuService.find(directory:directory, base: dn) {
-      and {
-        eq("objectclass", "suServiceObject")
-        eq("suServiceType", serviceType)
+    def query = { qDirectory, qDn, qServiceType ->
+      SuService.find(directory: qDirectory, base: qDn) {
+        and {
+          eq("objectclass", "suServiceObject")
+          eq("suServiceType", qServiceType)
+        }
       }
     }
+    def params = [key: ":getSuServiceByType:${serviceType}${dn}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
+    def suService = (SuService)cacheManager.get(params, {query(directory,dn,serviceType)})
+    return suService
   }
 
   /**
