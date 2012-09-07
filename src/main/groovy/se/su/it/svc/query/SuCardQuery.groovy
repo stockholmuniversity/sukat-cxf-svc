@@ -70,6 +70,7 @@ public class SuCardQuery {
 
   /**
    * Save a SuCard object to ldap.
+   * and putting the changed object in the cache so that the objects returned by this svc is always up-to-date.
    *
    *
    * @return void.
@@ -78,5 +79,7 @@ public class SuCardQuery {
    */
   static void saveSuCard(SuCard suCard) {
     suCard.save()
+    def params = [key: ":findCardBySuCardUUID:${suCard.suCardUUID}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: false]
+    cacheManager.put(params, { suCard })
   }
 }
