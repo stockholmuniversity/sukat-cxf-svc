@@ -31,7 +31,7 @@ public class CardInfoServiceImpl implements CardInfoService {
    */
   public SuCard[] getAllCards(@WebParam(name = "uid") String uid, @WebParam(name = "onlyActive") boolean onlyActive, @WebParam(name = "audit") SvcAudit audit) {
     if(uid == null || onlyActive == null || audit == null)
-      throw new java.lang.IllegalArgumentException("Null values not allowed in this function")
+      throw new java.lang.IllegalArgumentException("getAllCards - Null argument values not allowed in this function")
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
     if(person) {
       def cards = SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(GldapoManager.LDAP_RO,person.getDn(),onlyActive)
@@ -55,7 +55,7 @@ public class CardInfoServiceImpl implements CardInfoService {
    */
   public SuCard getCardByUUID(@WebParam(name = "suCardUUID") String suCardUUID, @WebParam(name = "audit") SvcAudit audit) {
     if(suCardUUID == null || audit == null)
-      throw new java.lang.IllegalArgumentException("Null values not allowed in this function")
+      throw new java.lang.IllegalArgumentException("getCardByUUID - Null argument values not allowed in this function")
     def card = SuCardQuery.findCardBySuCardUUID(GldapoManager.LDAP_RO,suCardUUID)
     logger.debug("getCardByUUID - Found: ${card?"1":"0"} card ${card?card.suCardUUID:""} with params: suCardUUID=<${suCardUUID}>")
     if(card == null) {

@@ -31,7 +31,7 @@ public class EntitlementServiceImpl implements EntitlementService {
    */
   public void addEntitlement(@WebParam(name = "uid") String uid, @WebParam(name = "entitlement") String entitlement, @WebParam(name = "audit") SvcAudit audit) {
     if(uid == null || entitlement == null || audit == null)
-      throw new java.lang.IllegalArgumentException("Null values not allowed in this function")
+      throw new java.lang.IllegalArgumentException("addEntitlement - Null argument values not allowed in this function")
 
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
     if(person) {
@@ -65,7 +65,7 @@ public class EntitlementServiceImpl implements EntitlementService {
    */
   public void removeEntitlement(@WebParam(name = "uid") String uid, @WebParam(name = "entitlement") String entitlement, @WebParam(name = "audit") SvcAudit audit) {
     if(uid == null || entitlement == null || audit == null)
-      throw new java.lang.IllegalArgumentException("Null values not allowed in this function")
+      throw new java.lang.IllegalArgumentException("removeEntitlement - Null argument values not allowed in this function")
 
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
     if(person) {

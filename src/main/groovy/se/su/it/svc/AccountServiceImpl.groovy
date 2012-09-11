@@ -14,7 +14,8 @@ import javax.jws.WebParam
 public class AccountServiceImpl implements AccountService{
   private static final Logger logger = Logger.getLogger(AccountServiceImpl.class)
 
-  public void UpdateAffiliation(@WebParam(name = "uid") String uid, @WebParam(name = "affiliation") String affiliation, @WebParam(name = "audit") SvcAudit audit) {
-
+  public void updateAffiliation(@WebParam(name = "uid") String uid, @WebParam(name = "affiliation") String affiliation, @WebParam(name = "audit") SvcAudit audit) {
+    if(uid == null || affiliation == null || audit == null)
+      throw new java.lang.IllegalArgumentException("updateAffiliation - Null argument values not allowed in this function")
   }
 }

@@ -28,7 +28,7 @@ public class CardAdminServiceImpl implements CardAdminService{
    */
   public void revokeCard(@WebParam(name = "suCardUUID") String suCardUUID, @WebParam(name = "audit") SvcAudit audit) {
     if(suCardUUID == null || audit == null)
-      throw new java.lang.IllegalArgumentException("Null values not allowed in this function")
+      throw new java.lang.IllegalArgumentException("revokeCard - Null argument values not allowed in this function")
     SuCard card =SuCardQuery.findCardBySuCardUUID(GldapoManager.LDAP_RW,suCardUUID)
     if(card != null) {
       card.suCardState="urn:x-su:su-card:state:revoked"
@@ -52,7 +52,7 @@ public class CardAdminServiceImpl implements CardAdminService{
    */
   public void setCardPIN(@WebParam(name = "suCardUUID") String suCardUUID, @WebParam(name = "pin") String pin, @WebParam(name = "audit") SvcAudit audit) {
     if(suCardUUID == null || pin == null || audit == null)
-      throw new java.lang.IllegalArgumentException("Null values not allowed in this function")
+      throw new java.lang.IllegalArgumentException("setCardPIN - Null argument values not allowed in this function")
     SuCard card =SuCardQuery.findCardBySuCardUUID(GldapoManager.LDAP_RW,suCardUUID)
     if(card != null) {
       card.suCardPIN = pin

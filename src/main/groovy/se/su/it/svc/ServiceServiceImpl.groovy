@@ -36,7 +36,7 @@ public class ServiceServiceImpl implements ServiceService {
    */
   public SuService[] getServices(@WebParam(name = "uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
     if(uid == null || audit == null)
-      throw new java.lang.IllegalArgumentException("Null values not allowed in this function")
+      throw new java.lang.IllegalArgumentException("getServices - Null argument values not allowed in this function")
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
     if(person) {
       def services = SuServiceQuery.getSuServices(GldapoManager.LDAP_RO,person.getDn())
@@ -60,7 +60,7 @@ public class ServiceServiceImpl implements ServiceService {
    */
   public SuServiceDescription[] getServiceTemplates(@WebParam(name = "audit") SvcAudit audit) {
     if(audit == null)
-      throw new java.lang.IllegalArgumentException("Null values not allowed in this function")
+      throw new java.lang.IllegalArgumentException("getServiceTemplates - Null argument values not allowed in this function")
     return SuServiceDescriptionQuery.getSuServiceDescriptions(GldapoManager.LDAP_RO)
   }
 
@@ -79,7 +79,7 @@ public class ServiceServiceImpl implements ServiceService {
    */
   public SuService enableServiceFully(@WebParam(name = "uid") String uid, @WebParam(name = "serviceType") String serviceType, @WebParam(name = "qualifier") String qualifier, @WebParam(name = "description") String description, @WebParam(name = "audit") SvcAudit audit) {
     if(uid == null || serviceType == null || qualifier == null || description == null || audit == null)
-      throw new java.lang.IllegalArgumentException("Null values not allowed in this function")
+      throw new java.lang.IllegalArgumentException("enableServiceFully - Null argument values not allowed in this function")
 
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
     if(person == null)
@@ -152,7 +152,7 @@ public class ServiceServiceImpl implements ServiceService {
    */
   public void blockService(@WebParam(name = "uid") String uid, @WebParam(name = "serviceType") String serviceType, @WebParam(name = "audit") SvcAudit audit) {
     if(uid == null || serviceType == null || audit == null)
-      throw new java.lang.IllegalArgumentException("Null values not allowed in this function")
+      throw new java.lang.IllegalArgumentException("blockService - Null argument values not allowed in this function")
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
     if(person) {
       def service = SuServiceQuery.getSuServiceByType(GldapoManager.LDAP_RW, person.getDn(), serviceType)
@@ -186,7 +186,7 @@ public class ServiceServiceImpl implements ServiceService {
    */
   public void unblockService(@WebParam(name = "uid") String uid, @WebParam(name = "serviceType") String serviceType, @WebParam(name = "audit") SvcAudit audit) {
     if(uid == null || serviceType == null || audit == null)
-      throw new java.lang.IllegalArgumentException("Null values not allowed in this function")
+      throw new java.lang.IllegalArgumentException("unblockService - Null argument values not allowed in this function")
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
     if(person) {
       def service = SuServiceQuery.getSuServiceByType(GldapoManager.LDAP_RW, person.getDn(), serviceType)
