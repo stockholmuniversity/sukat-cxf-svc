@@ -69,6 +69,7 @@ public class ServiceServiceImpl implements ServiceService {
    *
    *
    * @param uid  uid of the user.
+   * @param serviceType the urn of the serviceType required
    * @param qualifier, a String that indicates whether to create a sub account for this service with qualifier as par of sub uid
    * @param description String with description for the sub account
    * @param audit Audit object initilized with audit data about the client and user.
@@ -130,11 +131,45 @@ public class ServiceServiceImpl implements ServiceService {
       //enable service
       logger.debug("enableServiceFully - Service=<${serviceType}> for uid=<${uid}> already exist. Trying to enable it.")
       if (suService.suServiceStatus.equalsIgnoreCase("blocked") || suService.suServiceStatus.equalsIgnoreCase("locked"))
-        throw new javax.naming.OperationNotSupportedException("enableServiceFully Service " + suService.getDn().toString() +  " is blocked/locked")
+        throw new IllegalArgumentException("enableServiceFully Service " + suService.getDn().toString() +  " is blocked/locked")
       suService.suServiceStatus = "enabled"
       SuServiceQuery.saveSuService(suService)
       logger.info("enableServiceFully - Service=<${serviceType}> for uid=<${uid}> enabled.")
     }
     return suService
+  }
+
+  /**
+   * This method blocks a service for specified serviceType and uid.
+   *
+   *
+   * @param uid  uid of the user.
+   * @param serviceType the urn of the serviceType required
+   * @param audit Audit object initilized with audit data about the client and user.
+   * @return void.
+   * @see se.su.it.svc.ldap.SuService
+   * @see se.su.it.svc.commons.SvcAudit
+   */
+  public void blockService(@WebParam(name = "uid") String uid, @WebParam(name = "serviceType") String serviceType, @WebParam(name = "audit") SvcAudit audit) {
+    if(uid == null || serviceType == null || audit == null)
+      throw new java.lang.IllegalArgumentException("Null values not allowed in this function")
+    SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
+    if(person) {
+      def service = SuServiceQuery.getSuServiceByType(GldapoManager.LDAP_RW, person.getDn(), serviceType)
+      if(service != null) {
+        if (service.suServiceStatus.equalsIgnoreCase("blocked") || service.suServiceStatus.equalsIgnoreCase("locked"))
+          throw new IllegalArgumentException("blockService - service=<${serviceType}> for uid=<${uid}> is already blocked/locked")
+        logger.debug("blockService - Trying to block service=<${serviceType}> for uid=<${uid}>")
+        service.suServiceStatus = "blocked"
+        SuServiceQuery.saveSuService(service)
+        logger.info("blockService - Blocked service=<${serviceType}> for uid=<${uid}>")
+        return
+      }
+    } else {
+      throw new IllegalArgumentException("blockService no such uid found: "+uid)
+    }
+    logger.debug("blockService - No service found with params: uid=<${uid}> serviceType=<${serviceType}>")
+    throw new IllegalArgumentException("blockService - No service found with params: uid=<${uid}> serviceType=<${serviceType}>")
+    return
   }
 }

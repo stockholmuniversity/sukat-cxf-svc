@@ -210,7 +210,7 @@ class ServiceServiceImplTest extends spock.lang.Specification{
     when:
     def ret = serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", "A description", new SvcAudit())
     then:
-    thrown(OperationNotSupportedException)
+    thrown(IllegalArgumentException)
   }
 
   @Test
@@ -231,6 +231,94 @@ class ServiceServiceImplTest extends spock.lang.Specification{
     when:
     def ret = serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", "A description", new SvcAudit())
     then:
-    thrown(OperationNotSupportedException)
+    thrown(IllegalArgumentException)
   }
+
+  @Test
+  def "Test blockService with null uid argument"() {
+    setup:
+    def serviceServiceImpl = new ServiceServiceImpl()
+
+    when:
+    serviceServiceImpl.blockService(null, "urn:x-su:service:type:jabber", new SvcAudit())
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test blockService with null serviceType argument"() {
+    setup:
+    def serviceServiceImpl = new ServiceServiceImpl()
+
+    when:
+    serviceServiceImpl.blockService("testuid", null, new SvcAudit())
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test blockService with null SvcAudit argument"() {
+    setup:
+    def serviceServiceImpl = new ServiceServiceImpl()
+
+    when:
+    serviceServiceImpl.blockService("testuid", "urn:x-su:service:type:jabber", null)
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test blockService no service found"() {
+    setup:
+    def serviceServiceImpl = new ServiceServiceImpl()
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return new SuPerson(uid: "testuid") }
+    SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
+    SuServiceQuery.metaClass.static.getSuServiceByType = {String directory, org.springframework.ldap.core.DistinguishedName dn, String serviceType -> return null}
+
+    when:
+    serviceServiceImpl.blockService("testuid", "urn:x-su:service:type:jabber", new SvcAudit())
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+
+  @Test
+  def "Test blockService already blocked"() {
+    setup:
+    def serviceServiceImpl = new ServiceServiceImpl()
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return new SuPerson(uid: "testuid") }
+    SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
+    SuServiceQuery.metaClass.static.getSuServiceByType = {String directory, org.springframework.ldap.core.DistinguishedName dn, String serviceType -> return new SuService(suServiceStatus: "locked")}
+
+    when:
+    serviceServiceImpl.blockService("testuid", "urn:x-su:service:type:jabber", new SvcAudit())
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test blockService"() {
+    setup:
+    String serviceStatus = null
+    def serviceServiceImpl = new ServiceServiceImpl()
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return new SuPerson(uid: "testuid") }
+    SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
+    SuServiceQuery.metaClass.static.getSuServiceByType = {String directory, org.springframework.ldap.core.DistinguishedName dn, String serviceType -> return new SuService(suServiceStatus: "enabled")}
+    SuServiceQuery.metaClass.static.saveSuService = {SuService suService ->
+      serviceStatus = suService.suServiceStatus
+      return void
+    }
+
+    when:
+    serviceServiceImpl.blockService("testuid", "urn:x-su:service:type:jabber", new SvcAudit())
+
+    then:
+    serviceStatus == "blocked"
+  }
+
 }
