@@ -107,6 +107,13 @@
     implementor="#serviceserviceEndpoint"
     address="/ServiceService" />
 
+  <bean id="accountserviceEndpoint" class="se.su.it.svc.AccountServiceImpl" />
+  <jaxws:endpoint
+    id="accountservice"
+    implementorClass="se.su.it.svc.AccountServiceImpl"
+    implementor="#accountserviceEndpoint"
+    address="/AccountService" />
+
   <jaxws:endpoint
 	  id="status"
     implementor="se.su.it.svc.Status"
