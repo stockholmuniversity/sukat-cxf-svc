@@ -11,4 +11,5 @@ public interface ServiceService {
   public SuServiceDescription[] getServiceTemplates(SvcAudit audit)
   public SuService enableServiceFully(String uid, String serviceType, String qualifier, String description, SvcAudit audit)
   public void blockService(String uid, String serviceType, SvcAudit audit)
+  public void unblockService(String uid, String serviceType, SvcAudit audit)
 }

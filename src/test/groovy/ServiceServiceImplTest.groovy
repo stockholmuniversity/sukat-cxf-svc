@@ -10,6 +10,8 @@ import se.su.it.svc.query.SuSubAccountQuery
 import se.su.it.svc.ldap.SuSubAccount
 import se.su.it.commons.Kadmin
 import javax.naming.OperationNotSupportedException
+import se.su.it.svc.query.SuServiceDescriptionQuery
+import se.su.it.svc.ldap.SuServiceDescription
 
 /**
  * Created with IntelliJ IDEA.
@@ -319,6 +321,104 @@ class ServiceServiceImplTest extends spock.lang.Specification{
 
     then:
     serviceStatus == "blocked"
+  }
+
+
+
+
+
+
+  @Test
+  def "Test unblockService with null uid argument"() {
+    setup:
+    def serviceServiceImpl = new ServiceServiceImpl()
+
+    when:
+    serviceServiceImpl.unblockService(null, "urn:x-su:service:type:jabber", new SvcAudit())
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test unblockService with null serviceType argument"() {
+    setup:
+    def serviceServiceImpl = new ServiceServiceImpl()
+
+    when:
+    serviceServiceImpl.unblockService("testuid", null, new SvcAudit())
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test unblockService with null SvcAudit argument"() {
+    setup:
+    def serviceServiceImpl = new ServiceServiceImpl()
+
+    when:
+    serviceServiceImpl.unblockService("testuid", "urn:x-su:service:type:jabber", null)
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test unblockService no service found"() {
+    setup:
+    def serviceServiceImpl = new ServiceServiceImpl()
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return new SuPerson(uid: "testuid") }
+    SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
+    SuServiceQuery.metaClass.static.getSuServiceByType = {String directory, org.springframework.ldap.core.DistinguishedName dn, String serviceType -> return null}
+
+    when:
+    serviceServiceImpl.unblockService("testuid", "urn:x-su:service:type:jabber", new SvcAudit())
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test unblockService without opt-in"() {
+    setup:
+    String serviceStatus = null
+    def serviceServiceImpl = new ServiceServiceImpl()
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return new SuPerson(uid: "testuid") }
+    SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
+    SuServiceQuery.metaClass.static.getSuServiceByType = {String directory, org.springframework.ldap.core.DistinguishedName dn, String serviceType -> return new SuService(suServiceStatus: "enabled")}
+    SuServiceDescriptionQuery.metaClass.static.getSuServiceDescriptions = {String directory -> [new SuServiceDescription(suServiceType: "urn:x-su:service:type:jabber")]}
+    SuServiceQuery.metaClass.static.saveSuService = {SuService suService ->
+      serviceStatus = suService.suServiceStatus
+      return void
+    }
+
+    when:
+    serviceServiceImpl.unblockService("testuid", "urn:x-su:service:type:jabber", new SvcAudit())
+
+    then:
+    serviceStatus == "enabled"
+  }
+
+  @Test
+  def "Test unblockService with opt-in"() {
+    setup:
+    String serviceStatus = null
+    def serviceServiceImpl = new ServiceServiceImpl()
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return new SuPerson(uid: "testuid") }
+    SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
+    SuServiceQuery.metaClass.static.getSuServiceByType = {String directory, org.springframework.ldap.core.DistinguishedName dn, String serviceType -> return new SuService(suServiceStatus: "enabled")}
+    SuServiceDescriptionQuery.metaClass.static.getSuServiceDescriptions = {String directory -> [new SuServiceDescription(suServiceType: "urn:x-su:service:type:jabber", suServicePolicy: "urn:x-su:service:policy:opt-in")]}
+    SuServiceQuery.metaClass.static.saveSuService = {SuService suService ->
+      serviceStatus = suService.suServiceStatus
+      return void
+    }
+
+    when:
+    serviceServiceImpl.unblockService("testuid", "urn:x-su:service:type:jabber", new SvcAudit())
+
+    then:
+    serviceStatus == "disabled"
   }
 
 }

@@ -172,4 +172,40 @@ public class ServiceServiceImpl implements ServiceService {
     throw new IllegalArgumentException("blockService - No service found with params: uid=<${uid}> serviceType=<${serviceType}>")
     return
   }
+
+  /**
+   * This method unblocks a service for specified serviceType and uid to state disabled or enabled depending on the opt-in value in the service template.
+   *
+   *
+   * @param uid  uid of the user.
+   * @param serviceType the urn of the serviceType required
+   * @param audit Audit object initilized with audit data about the client and user.
+   * @return void.
+   * @see se.su.it.svc.ldap.SuService
+   * @see se.su.it.svc.commons.SvcAudit
+   */
+  public void unblockService(@WebParam(name = "uid") String uid, @WebParam(name = "serviceType") String serviceType, @WebParam(name = "audit") SvcAudit audit) {
+    if(uid == null || serviceType == null || audit == null)
+      throw new java.lang.IllegalArgumentException("Null values not allowed in this function")
+    SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
+    if(person) {
+      def service = SuServiceQuery.getSuServiceByType(GldapoManager.LDAP_RW, person.getDn(), serviceType)
+      if(service != null) {
+        def serviceDescs=SuServiceDescriptionQuery.getSuServiceDescriptions(GldapoManager.LDAP_RO)
+        def servDesc=serviceDescs.find {serverDescription -> serverDescription.suServiceType.equalsIgnoreCase(serviceType)}
+        String status = servDesc?.suServicePolicy?.contains("opt-in") ? "disabled":"enabled"
+        logger.debug("unblockService - Trying to unblock service=<${serviceType}> for uid=<${uid}>")
+        service.suServiceStatus = status
+        SuServiceQuery.saveSuService(service)
+        logger.info("unblockService - Unblocked service=<${serviceType}> for uid=<${uid}> to service state=<${status}>")
+        return
+      }
+    } else {
+      throw new IllegalArgumentException("unblockService no such uid found: "+uid)
+    }
+    logger.debug("unblockService - No service found with params: uid=<${uid}> serviceType=<${serviceType}>")
+    throw new IllegalArgumentException("unblockService - No service found with params: uid=<${uid}> serviceType=<${serviceType}>")
+    return
+  }
 }
+
