@@ -90,6 +90,7 @@ public class ServiceServiceImpl implements ServiceService {
       subUid = uid + "." + qualifier;
       def subAccounts = SuSubAccountQuery.getSuSubAccounts(GldapoManager.LDAP_RO, person.getDn())
       if(!subAccounts.find {subAcc -> subAcc.uid == subUid}) {
+        logger.debug("enableServiceFully - Trying to create sub account uid=<${subUid}> to be used by service=<${serviceType}> for uid=<${uid}>")
         SuSubAccount subAcc = new SuSubAccount()
         subAcc.parent = person.getDn().toString()
         subAcc.uid = subUid
@@ -100,35 +101,39 @@ public class ServiceServiceImpl implements ServiceService {
           subAcc.jabberID = uid + "@su.se"
         }
         SuSubAccountQuery.createSubAccount(GldapoManager.LDAP_RW, subAcc)
-        Kadmin.newInstance().resetOrCreatePrincipal(subUid.replaceFirst("\\.", "/"))
+        def subAccountPwd = Kadmin.newInstance().resetOrCreatePrincipal(subUid.replaceFirst("\\.", "/"))
+        logger.info("enableServiceFully - Created sub account uid=<${subUid}> to be used by service=<${serviceType}> for uid=<${uid}>")
+      } else {
+        logger.info("enableServiceFully - Sub account uid=<${subUid}> to be used by service=<${serviceType}> for uid=<${uid}> already exist. Using it.")
       }
     }
     // END Try to create sub account if it do not exist
     SuService suService = SuServiceQuery.getSuServiceByType(GldapoManager.LDAP_RW, person.getDn(), serviceType)
     if(suService == null) {
+      logger.debug("enableServiceFully - Trying to create service=<${serviceType}> for uid=<${uid}>")
       //create service
       suService = new SuService()
-      suService.objectClass.add("top")
-      suService.objectClass.add("suServiceObject")
-      suService.objectClass.add("suService")
-      suService.objectClass.add("organizationalRole")
-      UUID cn = UUID.randomUUID()
-      suService.cn = cn.toString()
+      suService.objectClass = ["top", "suServiceObject", "suService", "organizationalRole"]
+      suService.cn = UUID.randomUUID().toString()
+      suService.myowner = person.getDn().toString()
       suService.suServiceType = serviceType
-      suService.owner = person.getDn().toString()
-      suService.suServiceStartTime = new Date().format("yyyyMMddHHmm'Z'","UTC")
+      suService.suServiceStartTime = new Date().format("yyyyMMddHHmm'Z'")
       suService.suServiceStatus = "enabled"
       if(subUid.length() > 0) {
         suService.roleOccupant = "uid=${subUid},${person.getDn().toString()}"
+        logger.debug("enableServiceFully - Setting roleOccupant of service=<${serviceType}> to <${suService.roleOccupant}>")
       }
       suService.parent=person.getDn().toString()
       SuServiceQuery.createService(GldapoManager.LDAP_RW,suService)
+      logger.info("enableServiceFully - Created service=<${serviceType}> for uid=<${uid}>")
     } else {
       //enable service
+      logger.debug("enableServiceFully - Service=<${serviceType}> for uid=<${uid}> already exist. Trying to enable it.")
       if (suService.suServiceStatus.equalsIgnoreCase("blocked") || suService.suServiceStatus.equalsIgnoreCase("locked"))
-        throw new OperationNotSupportedException("enableServiceFully Service " + suService.getDn().toString() +  " is blocked/locked");
+        throw new javax.naming.OperationNotSupportedException("enableServiceFully Service " + suService.getDn().toString() +  " is blocked/locked")
       suService.suServiceStatus = "enabled"
       SuServiceQuery.saveSuService(suService)
+      logger.info("enableServiceFully - Service=<${serviceType}> for uid=<${uid}> enabled.")
     }
     return suService
   }
