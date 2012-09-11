@@ -4,6 +4,9 @@ import javax.jws.WebService
 import org.apache.log4j.Logger
 import se.su.it.svc.commons.SvcAudit
 import javax.jws.WebParam
+import se.su.it.svc.manager.GldapoManager
+import se.su.it.svc.query.SuPersonQuery
+import se.su.it.svc.ldap.SuPerson
 
 /**
  * Implementing class for AccountService CXF Web Service.
@@ -28,5 +31,14 @@ public class AccountServiceImpl implements AccountService{
   public void updateAffiliation(@WebParam(name = "uid") String uid, @WebParam(name = "affiliation") String affiliation, @WebParam(name = "audit") SvcAudit audit) {
     if(uid == null || affiliation == null || audit == null)
       throw new java.lang.IllegalArgumentException("updateAffiliation - Null argument values not allowed in this function")
+    SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+    if(person) {
+      logger.debug("updateAffiliation - Replacing affiliation=<${person?.eduPersonPrimaryAffiliation}> with affiliation=<${affiliation}> for uid=<${uid}>")
+      person.eduPersonPrimaryAffiliation = affiliation
+      SuPersonQuery.saveSuPerson(person)
+      logger.info("updateAffiliation - Updated affiliation for uid=<${uid}> with affiliation=<${person.eduPersonPrimaryAffiliation}>")
+    } else {
+      throw new IllegalArgumentException("updateAffiliation no such uid found: "+uid)
+    }
   }
 }
