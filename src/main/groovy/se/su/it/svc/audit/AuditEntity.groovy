@@ -18,17 +18,21 @@ public class AuditEntity {
   String Text_return
   String Raw_return
   String State
+  List<String> MethodDetails
 
   public String toString() {
-    return ("Created: " + this.Created + "\r\n"
-    + "Ip_address: " + this.Ip_address + "\r\n"
-    + "Uid: " +  this.Uid + "\r\n"
-    + "Client: " + this.Client + "\r\n"
-    + "Operation: " + this.Operation + "\r\n"
-    + "Text_args: " + this.Text_args + "\r\n"
-    + "Raw_args: " + this.Raw_args + "\r\n"
-    + "Text_return: " + this.Text_return + "\r\n"
-    + "Raw_return: " + this.Raw_return + "\r\n"
-    + "State: " + this.State + "\r\n" )
+    String ret = "Created: " + this.Created + "\r\n"
+    ret += "Ip_address: " + this.Ip_address + "\r\n"
+    ret += "Uid: " +  this.Uid + "\r\n"
+    ret += "Client: " + this.Client + "\r\n"
+    ret += "Operation: " + this.Operation + "\r\n"
+    ret += "Text_args: " + this.Text_args + "\r\n"
+    ret += "Raw_args: " + this.Raw_args + "\r\n"
+    ret += "Text_return: " + this.Text_return + "\r\n"
+    ret += "Raw_return: " + this.Raw_return + "\r\n"
+    ret += "State: " + this.State + "\r\n"
+
+    this.MethodDetails?.each {entry -> ret += "This method will also invoke: " + entry + "\r\n"}
+    return ret
   }
 }

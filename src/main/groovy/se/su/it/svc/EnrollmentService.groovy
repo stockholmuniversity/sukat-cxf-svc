@@ -8,6 +8,6 @@ import se.su.it.svc.commons.SvcAudit
  * Date: 2012-09-06 ~ 09:38
  */
 public interface EnrollmentService {
-  public SvcUserCredential enrollUserByUid(java.lang.String uid, SvcAudit auditVO)
-  void expireUserPassword(java.lang.String uid, SvcAudit auditVO)
+  public String enrollUserByUid(java.lang.String uid, SvcAudit audit)
+  void expireUserPassword(java.lang.String uid, SvcAudit audit)
 }

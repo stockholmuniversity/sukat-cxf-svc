@@ -59,6 +59,24 @@ public class AuditAspect implements MethodInterceptor {
     try {
       logger.info("Invoked " + mi.getName() + " with " + args.length + " params")
 
+      //Generate MethodDetails from annotation on method to be able to describe
+      //functions that will be invoked by this method
+      List<String> methodDetails = []
+      mi.getAnnotations().each {annotation ->
+        if (annotation.annotationType().getName().equalsIgnoreCase("se.su.it.svc.audit.AuditAspectMethodDetails")) {
+          Method[] methods = annotation.getClass().getMethods();
+          for (int i = 0; i < methods.length; i++) {
+            Method m = methods[i]
+            if (m.getName() == "details") {
+              String details = (String) m.invoke(annotation, null)
+              def detailsArr = details.split(",")
+              detailsArr.each {entry -> methodDetails << entry.replace(" ","").toString()}
+              break
+            }
+          }
+        }
+      }
+
       // Serialize the argument Object list into a ByteArray
       ByteArrayOutputStream bsArgs = new ByteArrayOutputStream()
       ObjectOutputStream outArgs = new ObjectOutputStream(bsArgs)
@@ -97,6 +115,7 @@ public class AuditAspect implements MethodInterceptor {
       ae.Text_return = UNKNOWN
       ae.Raw_return = UNKNOWN
       ae.State = STATE_INPROGRESS
+      ae.MethodDetails = methodDetails
 
       //TODO: Call RabbitMQ here to transmit the "audit before data"
       logger.info("Audit before -\r\n" + ae)

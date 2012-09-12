@@ -9,6 +9,7 @@ import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.commons.Kadmin
 import se.su.it.commons.PasswordUtils
+import se.su.it.svc.audit.AuditAspectMethodDetails
 
 /**
  * Implementing class for AccountService CXF Web Service.
