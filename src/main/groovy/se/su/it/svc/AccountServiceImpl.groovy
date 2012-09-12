@@ -7,6 +7,8 @@ import javax.jws.WebParam
 import se.su.it.svc.manager.GldapoManager
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.ldap.SuPerson
+import se.su.it.commons.Kadmin
+import se.su.it.commons.PasswordUtils
 
 /**
  * Implementing class for AccountService CXF Web Service.
@@ -40,5 +42,31 @@ public class AccountServiceImpl implements AccountService{
     } else {
       throw new IllegalArgumentException("updateAffiliation no such uid found: "+uid)
     }
+  }
+
+  /**
+   * This method resets the password for the specified uid and returns the clear text password.
+   *
+   *
+   * @param uid  uid of the user.
+   * @param audit Audit object initilized with audit data about the client and user.
+   * @return String new password.
+   * @see se.su.it.svc.commons.SvcAudit
+   */
+  public String resetPassword(String uid, SvcAudit audit) {
+    if (uid == null || audit == null)
+      throw new java.lang.IllegalArgumentException("resetPassword - Null argument values not allowed in this function")
+    String trueUid = uid.replaceFirst("\\.", "/")
+    if (Kadmin.newInstance().principalExists(trueUid)) {
+      logger.debug("resetPassword - Trying to reset password for uid=<${uid}>")
+      String pwd = PasswordUtils.genRandomPassword(10, 10)
+      Kadmin.newInstance().setPassword(trueUid, pwd)
+      logger.info("resetPassword - Password was reset for uid=<${uid}>")
+      return pwd
+    } else {
+      logger.debug("resetPassword - No such uid found: "+uid)
+      throw new java.lang.IllegalArgumentException("resetPassword - No such uid found: "+uid)
+    }
+    return null
   }
 }

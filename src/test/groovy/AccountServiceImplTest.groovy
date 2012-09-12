@@ -4,6 +4,7 @@ import se.su.it.svc.commons.SvcAudit
 import gldapo.GldapoSchemaRegistry
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.ldap.SuPerson
+import se.su.it.commons.Kadmin
 /**
  * Created with IntelliJ IDEA.
  * User: jqvar
@@ -66,5 +67,66 @@ class AccountServiceImplTest extends spock.lang.Specification{
     accountServiceImpl.updateAffiliation("testuid", "employee", new SvcAudit())
     then:
     myaffiliation == "employee"
+  }
+
+  @Test
+  def "Test resetPassword with null uid argument"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.resetPassword(null, new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test resetPassword with null audit argument"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.resetPassword("testuid", null)
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test resetPassword uid dont exist"() {
+    setup:
+    Kadmin.metaClass.principalExists = {String uid -> return false}
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.resetPassword("testuid", new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test resetPassword password 10 chars"() {
+    setup:
+    Kadmin.metaClass.principalExists = {String uid -> return true}
+    Kadmin.metaClass.setPassword = {String uid, String pwd -> return void}
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    String pwd = accountServiceImpl.resetPassword("testuid", new SvcAudit())
+    then:
+    pwd != null
+    pwd.length() == 10
+  }
+
+  @Test
+  def "Test resetPassword correct conversion of uid"() {
+    setup:
+    String changedUid = null
+    String changedUid2 = null
+    Kadmin.metaClass.principalExists = {String uid -> changedUid = uid
+      return true}
+    Kadmin.metaClass.setPassword = {String uid, String pwd -> changedUid2 = uid
+      return void}
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    String pwd = accountServiceImpl.resetPassword("testuid.jabber", new SvcAudit())
+    then:
+    changedUid == "testuid/jabber"
+    changedUid2 == "testuid/jabber"
   }
 }
