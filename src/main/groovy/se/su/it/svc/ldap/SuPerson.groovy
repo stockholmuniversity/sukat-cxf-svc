@@ -14,5 +14,6 @@ class SuPerson implements Serializable {
   @GldapoNamingAttribute
   String uid
   String eduPersonPrimaryAffiliation
+  Set<String> objectClass
   Set<String> eduPersonEntitlement
 }

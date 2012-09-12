@@ -4,6 +4,10 @@ import se.su.it.svc.commons.SvcAudit
 import javax.jws.WebService
 import javax.jws.WebParam
 import org.apache.log4j.Logger
+import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.query.SuPersonQuery
+import se.su.it.svc.manager.GldapoManager
+import se.su.it.commons.Kadmin
 
 /**
  * Implementing class for EnrollmentService CXF Web Service.
@@ -26,7 +30,20 @@ class EnrollmentServiceImpl implements EnrollmentService{
   public String enrollUserByUid(@WebParam(name = "uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
     if(uid == null || audit == null)
       throw new java.lang.IllegalArgumentException("enrollUserByUid - Null argument values not allowed in this function")
-
+    SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+    if(person) {
+      if(!person.objectClass?.contains("posixAccount")) {
+        if(!person.eduPersonEntitlement?.contains("urn:x-su:autoenable-keeprouting")) {
+          if(person.eduPersonEntitlement == null)
+            person.eduPersonEntitlement = []
+          person.eduPersonEntitlement << "urn:x-su:autoenable-keeprouting"
+          SuPersonQuery.saveSuPerson(person)
+        }
+      }
+      return Kadmin.newInstance().resetOrCreatePrincipal(uid.replaceFirst("\\.", "/"))
+    } else {
+      throw new IllegalArgumentException("enrollUserByUid no such uid found: "+uid)
+    }
 
     return null
   }
