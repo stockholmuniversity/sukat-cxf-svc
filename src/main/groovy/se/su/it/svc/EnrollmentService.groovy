@@ -1,6 +1,5 @@
 package se.su.it.svc
 
-import se.su.it.svc.commons.SvcUserCredential
 import se.su.it.svc.commons.SvcAudit
 
 /**
