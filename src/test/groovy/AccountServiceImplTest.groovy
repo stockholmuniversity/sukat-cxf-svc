@@ -14,49 +14,49 @@ import se.su.it.commons.Kadmin
  */
 class AccountServiceImplTest extends spock.lang.Specification{
   @Test
-  def "Test updateAffiliation with null uid argument"() {
+  def "Test updatePrimaryAffiliation with null uid argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.updateAffiliation(null, "employee", new SvcAudit())
+    accountServiceImpl.updatePrimaryAffiliation(null, "employee", new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
 
   @Test
-  def "Test updateAffiliation with null affiliation argument"() {
+  def "Test updatePrimaryAffiliation with null affiliation argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.updateAffiliation("testuid", null, new SvcAudit())
+    accountServiceImpl.updatePrimaryAffiliation("testuid", null, new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
 
   @Test
-  def "Test updateAffiliation with null SvcAudit argument"() {
+  def "Test updatePrimaryAffiliation with null SvcAudit argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.updateAffiliation("testuid", "employee", null)
+    accountServiceImpl.updatePrimaryAffiliation("testuid", "employee", null)
     then:
     thrown(IllegalArgumentException)
   }
 
   @Test
-  def "Test updateAffiliation without person exist"() {
+  def "Test updatePrimaryAffiliation without person exist"() {
     setup:
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.updateAffiliation("testuid", "employee", new SvcAudit())
+    accountServiceImpl.updatePrimaryAffiliation("testuid", "employee", new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
 
   @Test
-  def "Test updateAffiliation when person exist"() {
+  def "Test updatePrimaryAffiliation when person exist"() {
     setup:
     String myaffiliation = null
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
@@ -64,7 +64,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     SuPersonQuery.metaClass.static.saveSuPerson = {SuPerson person -> myaffiliation = person.eduPersonPrimaryAffiliation}
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.updateAffiliation("testuid", "employee", new SvcAudit())
+    accountServiceImpl.updatePrimaryAffiliation("testuid", "employee", new SvcAudit())
     then:
     myaffiliation == "employee"
   }

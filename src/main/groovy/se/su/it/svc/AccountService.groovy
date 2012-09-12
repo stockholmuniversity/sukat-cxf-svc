@@ -6,7 +6,7 @@ import se.su.it.svc.audit.AuditAspectMethodDetails
 
 @SuCxfSvcSpocpRole(role = "sukat-account-admin")
 public interface AccountService {
-  public void updateAffiliation(String uid, String affiliation, SvcAudit audit)
+  public void updatePrimaryAffiliation(String uid, String affiliation, SvcAudit audit)
   @AuditAspectMethodDetails(details = "setPassword")
   public String resetPassword(String uid, SvcAudit audit)
 }

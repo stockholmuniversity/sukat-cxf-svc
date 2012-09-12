@@ -31,17 +31,17 @@ public class AccountServiceImpl implements AccountService{
    * @see se.su.it.svc.ldap.SuPerson
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public void updateAffiliation(@WebParam(name = "uid") String uid, @WebParam(name = "affiliation") String affiliation, @WebParam(name = "audit") SvcAudit audit) {
+  public void updatePrimaryAffiliation(@WebParam(name = "uid") String uid, @WebParam(name = "affiliation") String affiliation, @WebParam(name = "audit") SvcAudit audit) {
     if(uid == null || affiliation == null || audit == null)
-      throw new java.lang.IllegalArgumentException("updateAffiliation - Null argument values not allowed in this function")
+      throw new java.lang.IllegalArgumentException("updatePrimaryAffiliation - Null argument values not allowed in this function")
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
     if(person) {
-      logger.debug("updateAffiliation - Replacing affiliation=<${person?.eduPersonPrimaryAffiliation}> with affiliation=<${affiliation}> for uid=<${uid}>")
+      logger.debug("updatePrimaryAffiliation - Replacing affiliation=<${person?.eduPersonPrimaryAffiliation}> with affiliation=<${affiliation}> for uid=<${uid}>")
       person.eduPersonPrimaryAffiliation = affiliation
       SuPersonQuery.saveSuPerson(person)
-      logger.info("updateAffiliation - Updated affiliation for uid=<${uid}> with affiliation=<${person.eduPersonPrimaryAffiliation}>")
+      logger.info("updatePrimaryAffiliation - Updated affiliation for uid=<${uid}> with affiliation=<${person.eduPersonPrimaryAffiliation}>")
     } else {
-      throw new IllegalArgumentException("updateAffiliation no such uid found: "+uid)
+      throw new IllegalArgumentException("updatePrimaryAffiliation no such uid found: "+uid)
     }
   }
 
