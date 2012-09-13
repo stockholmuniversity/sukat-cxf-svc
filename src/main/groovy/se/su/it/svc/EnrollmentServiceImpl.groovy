@@ -19,37 +19,26 @@ class EnrollmentServiceImpl implements EnrollmentService{
   private static final Logger logger = Logger.getLogger(EnrollmentServiceImpl.class)
 
   /**
-   * This method enrolls user for the specified uid and returns the password.
+   * This method creates a new password and retire it for the specified uid.
    *
    *
    * @param uid  uid of the user.
    * @param audit Audit object initilized with audit data about the client and user.
-   * @return String with password.
+   * @return String with temporary password.
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public String enrollUserByUid(@WebParam(name = "uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
+  public String resetAndExpirePwd(@WebParam(name = "uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
     if(uid == null || audit == null)
-      throw new java.lang.IllegalArgumentException("enrollUserByUid - Null argument values not allowed in this function")
+      throw new java.lang.IllegalArgumentException("resetAndExpirePwd - Null argument values not allowed in this function")
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
     if(person) {
-      if(!person.objectClass?.contains("posixAccount")) {
-        if(!person.eduPersonEntitlement?.contains("urn:x-su:autoenable-keeprouting")) {
-          if(person.eduPersonEntitlement == null)
-            person.eduPersonEntitlement = []
-          person.eduPersonEntitlement << "urn:x-su:autoenable-keeprouting"
-          SuPersonQuery.saveSuPerson(person)
-        }
-      }
-      return Kadmin.newInstance().resetOrCreatePrincipal(uid.replaceFirst("\\.", "/"))
+      String pwd = Kadmin.newInstance().resetOrCreatePrincipal(uid.replaceFirst("\\.", "/"))
+      Kadmin.newInstance().setPasswordExpiry(uid.replaceFirst("\\.", "/"), new Date())
+      return pwd
     } else {
-      throw new IllegalArgumentException("enrollUserByUid no such uid found: "+uid)
+      throw new IllegalArgumentException("resetAndExpirePwd no such uid found: "+uid)
     }
 
     return null
-  }
-
-  public void expireUserPassword(@WebParam(name = "uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
-    if(uid == null || audit == null)
-      throw new java.lang.IllegalArgumentException("enrollUserByUid - Null argument values not allowed in this function")
   }
 }

@@ -10,7 +10,6 @@ import se.su.it.svc.audit.AuditAspectMethodDetails
  */
 @SuCxfSvcSpocpRole(role = "sukat-user-admin")
 public interface EnrollmentService {
-  @AuditAspectMethodDetails(details = "resetOrCreatePrincipal")
-  public String enrollUserByUid(java.lang.String uid, SvcAudit audit)
-  void expireUserPassword(java.lang.String uid, SvcAudit audit)
+  @AuditAspectMethodDetails(details = "resetOrCreatePrincipal,setPasswordExpiry")
+  public String resetAndExpirePwd(java.lang.String uid, SvcAudit audit)
 }
