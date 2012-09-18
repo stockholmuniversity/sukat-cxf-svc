@@ -61,7 +61,9 @@ class CacheEventListenerImpl implements CacheEventListener{
         } else {
           if(result.value.getAt(gldapoNamingAttribute) == element.value.getAt(gldapoNamingAttribute)) {
             //This Cache Key need to be updated with the element
-            System.out.println("Hola")
+            def newElement = new Element(result.key, element.value)
+            newElement.timeToLive = EhCacheManager.INSTANCE.DEFAULT_TTL
+            ehcache.putQuiet(newElement)
           }
         }
       }
