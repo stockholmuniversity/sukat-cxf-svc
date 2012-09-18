@@ -4,6 +4,9 @@ import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.manager.ApplicationContextProvider
 import se.su.it.svc.manager.EhCacheManager
 import se.su.it.svc.manager.GldapoManager
+import net.sf.ehcache.search.Attribute
+import se.su.it.svc.ldap.SuPerson
+import net.sf.ehcache.search.Results
 
 /**
  * This class is a helper class for doing GLDAPO queries on the SuCard GLDAPO schema.
@@ -81,5 +84,6 @@ public class SuCardQuery {
     suCard.save()
     def params = [key: ":findCardBySuCardUUID:${suCard.suCardUUID}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: false]
     cacheManager.put(params, { suCard })
+
   }
 }

@@ -5,7 +5,9 @@ import net.sf.ehcache.Ehcache
 import net.sf.ehcache.Cache
 import net.sf.ehcache.config.CacheConfiguration
 import net.sf.ehcache.Element
-import org.apache.log4j.Logger;
+import org.apache.log4j.Logger
+import net.sf.ehcache.config.Searchable
+import net.sf.ehcache.config.SearchAttribute;
 /**
  * Created by: Jack Enqvist (jaen4109)
  * Date: 2012-08-30 ~ 11:22
@@ -40,14 +42,26 @@ class EhCacheManager {
     def cacheInstance = cacheManager.getCache(cacheName)
 
     if(!cacheInstance) {
-      cacheInstance = cacheManager.addCacheIfAbsent(cacheName)
-      Cache cache = cacheManager.getCache(cacheName)
-      CacheConfiguration config = cache.getCacheConfiguration()
+      //cacheInstance = cacheManager.addCacheIfAbsent(cacheName)
+
+      //CacheConfiguration config = cacheInstance.getCacheConfiguration()
+      CacheConfiguration config = new CacheConfiguration(cacheName, 0)
       config.setTimeToIdleSeconds(props.ehcache.timetoidleseconds as Long)
       config.setTimeToLiveSeconds(props.ehcache.timetoliveseconds as Long)
       config.setMaxEntriesLocalHeap(props.ehcache.maxentrieslocalheap as Long)
       config.setMaxElementsOnDisk(props.ehcache.maxelementsondisk as int)
       config.setOverflowToDisk(props.ehcache.overflowtodisk as Boolean)
+
+
+      Searchable searchable = new Searchable(keys: false, values: false)
+      //searchable.addSearchAttribute(new SearchAttribute().name("class").expression('value.getClass().getName()'))
+      searchable.addSearchAttribute(new SearchAttribute().name("se.su.it.svc.ldap.SuCard").className(CacheSearchAttributeExtractor.class.name))
+      config.addSearchable(searchable)
+
+      cacheManager.addCache(new Cache(config))
+      cacheInstance = cacheManager.getCache(cacheName)
+
+      cacheInstance.getCacheEventNotificationService().registerListener(new CacheEventListenerImpl());
     }
 
     cacheInstance
