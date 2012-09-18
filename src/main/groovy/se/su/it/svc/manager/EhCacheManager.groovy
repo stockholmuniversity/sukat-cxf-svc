@@ -56,6 +56,10 @@ class EhCacheManager {
       Searchable searchable = new Searchable(keys: false, values: false)
       //searchable.addSearchAttribute(new SearchAttribute().name("class").expression('value.getClass().getName()'))
       searchable.addSearchAttribute(new SearchAttribute().name("se.su.it.svc.ldap.SuCard").className(CacheSearchAttributeExtractor.class.name))
+      searchable.addSearchAttribute(new SearchAttribute().name("se.su.it.svc.ldap.SuPerson").className(CacheSearchAttributeExtractor.class.name))
+      searchable.addSearchAttribute(new SearchAttribute().name("se.su.it.svc.ldap.SuService").className(CacheSearchAttributeExtractor.class.name))
+      searchable.addSearchAttribute(new SearchAttribute().name("se.su.it.svc.ldap.SuServiceDescription").className(CacheSearchAttributeExtractor.class.name))
+      searchable.addSearchAttribute(new SearchAttribute().name("se.su.it.svc.ldap.SuSubAccount").className(CacheSearchAttributeExtractor.class.name))
       config.addSearchable(searchable)
 
       cacheManager.addCache(new Cache(config))
