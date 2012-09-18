@@ -91,5 +91,7 @@ public class SuServiceQuery {
    */
   static void saveSuService(SuService suService) {
     suService.save()
+    def params = [key: ":getSuServiceByType:${suService.suServiceType}${suService.getDn()}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: false]
+    cacheManager.put(params, { suService })
   }
 }
