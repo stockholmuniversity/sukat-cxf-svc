@@ -29,6 +29,8 @@ public class SuSubAccountQuery {
   static void createSubAccount(String directory, SuSubAccount subAcc) {
     subAcc.directory = directory
     subAcc.save()
+    //refresh other cache keys
+    this.getSuSubAccounts(GldapoManager.LDAP_RW,subAcc.getParent())
   }
 
   /**

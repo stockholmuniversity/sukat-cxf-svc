@@ -79,6 +79,9 @@ public class SuServiceQuery {
   static void createService(String directory, SuService suService) {
     suService.directory = directory
     suService.save()
+    //refresh other cachkeys
+    this.getSuServices(GldapoManager.LDAP_RW,suService.getParent())
+    this.getSuServiceByType(GldapoManager.LDAP_RW,suService.getParent(),suService.suServiceType)
   }
 
   /**
