@@ -64,7 +64,7 @@ public class SuCardQuery {
         eq("suCardUUID", qSuCardUUID)
       }
     }
-    def params = [key: ":findCardBySuCardUUID:${suCardUUID}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RO)]
+    def params = [key: ":findCardBySuCardUUID:${suCardUUID}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
     def cards = (SuCard)cacheManager.get(params, {query(directory, suCardUUID)})
     return cards
 
