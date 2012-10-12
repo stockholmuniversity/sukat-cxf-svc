@@ -9,7 +9,7 @@ import se.su.it.svc.audit.AuditAspectMethodDetails
 @SuCxfSvcSpocpRole(role = "sukat-service-admin")
 public interface ServiceService {
   public SuService[] getServices(String uid, SvcAudit audit)
-  public SuServiceDescription getServiceTemplate(SvcAudit audit)
+  public SuServiceDescription getServiceTemplate(String serviceType, SvcAudit audit)
   public SuServiceDescription[] getServiceTemplates(SvcAudit audit)
   @AuditAspectMethodDetails(details = "resetOrCreatePrincipal")
   public SuService enableServiceFully(String uid, String serviceType, String qualifier, String description, SvcAudit audit)
