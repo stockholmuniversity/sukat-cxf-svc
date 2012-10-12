@@ -21,6 +21,32 @@ public class SuServiceDescriptionQuery {
    * Returns an Array of SuServiceDescription objects.
    *
    *
+   * @param serviceType String with ServiceType to fetch
+   * @param directory which directory to use, see GldapoManager.
+   * @return an <code><SuServiceDescription></code>.
+   * @see se.su.it.svc.ldap.SuServiceDescription
+   * @see se.su.it.svc.manager.GldapoManager
+   */
+  static SuServiceDescription getSuServiceDescription(String serviceType, String directory) {
+    def query = { qDirectory ->
+      SuServiceDescription.find(directory: qDirectory, base: "") {
+        and {
+          eq("objectclass", "suServiceDescription")
+          eq("suServiceType", serviceType)
+        }
+      }
+    }
+
+    def params = [key: ":getSuServiceDescription:", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
+    def suServiceDescription = (SuServiceDescription[]) cacheManager.get(params, {query(directory)})
+
+    return suServiceDescription
+  }
+
+  /**
+   * Returns an Array of SuServiceDescription objects.
+   *
+   *
    * @param directory which directory to use, see GldapoManager.
    * @return an <code>ArrayList<SuServiceDescription></code> of SuServiceDescription objects or an empty array if no service description was found.
    * @see se.su.it.svc.ldap.SuServiceDescription
@@ -35,7 +61,7 @@ public class SuServiceDescriptionQuery {
       }
     }
 
-    def params = [key: ":getSuServiceDescription:", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
+    def params = [key: ":getSuServiceDescriptions:", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
     def suServiceDescriptionList = (SuServiceDescription[]) cacheManager.get(params, {query(directory)})
 
     return suServiceDescriptionList

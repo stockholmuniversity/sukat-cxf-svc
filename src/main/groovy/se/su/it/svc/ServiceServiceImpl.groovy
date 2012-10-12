@@ -50,6 +50,22 @@ public class ServiceServiceImpl implements ServiceService {
   }
 
   /**
+   * This method returns a service description found in sukat.
+   *
+   *
+   * @param serviceType ServiceType of the serviceDescription that is wanted.
+   * @param audit Audit object initilized with audit data about the client and user.
+   * @return SuServiceDescription.
+   * @see se.su.it.svc.ldap.SuServiceDescription
+   * @see se.su.it.svc.commons.SvcAudit
+   */
+  public SuServiceDescription getServiceTemplate(@WebParam(name = "serviceType") String serviceType, @WebParam(name = "audit") SvcAudit audit) {
+    if(serviceType == null || audit == null)
+      throw new java.lang.IllegalArgumentException("getServiceTemplate - Null argument values not allowed in this function")
+    return SuServiceDescriptionQuery.getSuServiceDescription(serviceType, GldapoManager.LDAP_RO)
+  }
+
+  /**
    * This method returns service descriptions found in sukat.
    *
    *
