@@ -38,7 +38,7 @@ public class SuServiceDescriptionQuery {
     }
 
     def params = [key: ":getSuServiceDescription:", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
-    def suServiceDescription = (SuServiceDescription[]) cacheManager.get(params, {query(directory)})
+    def suServiceDescription = (SuServiceDescription) cacheManager.get(params, {query(directory)})
 
     return suServiceDescription
   }
