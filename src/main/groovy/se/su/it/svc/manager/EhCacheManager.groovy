@@ -42,9 +42,8 @@ class EhCacheManager {
     def cacheInstance = cacheManager.getCache(cacheName)
 
     if (!cacheInstance) {
+      CacheConfiguration config = new CacheConfiguration(cacheName, 0)
       try {
-
-        CacheConfiguration config = new CacheConfiguration(cacheName, 0)
         config.setOverflowToDisk(props.ehcache?.overflodwToDisk ?: false as Boolean)
         config.setTimeToLiveSeconds(props.ehcache?.timeToLiveSeconds as int);
         config.setMaxElementsInMemory(props.ehcache?.maxElementsInMemory ?: 10000 as int)
