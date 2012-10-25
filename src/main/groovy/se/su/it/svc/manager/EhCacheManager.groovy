@@ -41,16 +41,23 @@ class EhCacheManager {
 
     def cacheInstance = cacheManager.getCache(cacheName)
 
-    if(!cacheInstance) {
-      //cacheInstance = cacheManager.addCacheIfAbsent(cacheName)
+    if (!cacheInstance) {
+      try {
 
-      //CacheConfiguration config = cacheInstance.getCacheConfiguration()
-      CacheConfiguration config = new CacheConfiguration(cacheName, 0)
-      config.setTimeToIdleSeconds(props.ehcache.timetoidleseconds as Long)
-      config.setTimeToLiveSeconds(props.ehcache.timetoliveseconds as Long)
-      config.setMaxEntriesLocalHeap(props.ehcache.maxentrieslocalheap as Long)
-      config.setMaxElementsOnDisk(props.ehcache.maxelementsondisk as int)
-      config.setOverflowToDisk(props.ehcache.overflowtodisk as Boolean)
+        CacheConfiguration config = new CacheConfiguration(cacheName, 0)
+        config.setOverflowToDisk(props.ehcache?.overflodwToDisk ?: false as Boolean)
+        config.setTimeToLiveSeconds(props.ehcache?.timeToLiveSeconds as int);
+        config.setMaxElementsInMemory(props.ehcache?.maxElementsInMemory ?: 10000 as int)
+        config.setEternal(props.ehcache?.eternal as Boolean)
+        config.setTimeToIdleSeconds(props.ehcache?.timeToIdleSeconds as long)
+        config.setDiskPersistent(props.ehcache?.diskPersistent ?: false as Boolean)
+        config.setDiskExpiryThreadIntervalSeconds(props.ehcache?.diskExpiryThreadIntervalSeconds as long)
+        config.setMemoryStoreEvictionPolicy(props.ehcache?.memoryStoreEvictionPolicy as String)
+      } catch (e) {
+        logger.info("Cant load the cache config, check if config is present. cause: " + e.cause)
+        e.printStackTrace()
+      }
+
 
 
       Searchable searchable = new Searchable(keys: false, values: false)
