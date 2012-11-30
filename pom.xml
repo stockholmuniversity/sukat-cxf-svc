@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>se.su.it.cxf</groupId>
   <artifactId>sukat-cxf-svc</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.0.1</version>
   <packaging>war</packaging>
   <name>sukat-cxf-svc-war</name>
   <build>
