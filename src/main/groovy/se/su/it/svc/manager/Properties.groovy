@@ -52,7 +52,8 @@ class Properties {
     props.put("ldap.serverro", "ldap://ldap-test.su.se")
     props.put("ldap.serverrw", "ldap://sukat-test-ldaprw02.it.su.se")
     //Ssl
-    props.put("ssl.port", 443)
+    props.put("http.port", 443)
+    props.put("ssl.enabled", true);
     props.put("ssl.keystore", "cxf-svc-server.keystore")
     props.put("ssl.password", "changeit")
     //Spnego
