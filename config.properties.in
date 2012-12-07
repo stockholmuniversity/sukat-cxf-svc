@@ -1,0 +1,29 @@
+#database settings
+database.url        = jdbc:mysql://localhost/gormtest
+database.driver     = com.mysql.jdbc.Driver
+database.user       = gormtest
+database.password   = gormtest
+
+#ldap settings
+ldap.serverro           = ldap://ldap-test.su.se
+ldap.serverrw           = ldap://sukat-test-ldaprw02.it.su.se
+
+# Jetty settings
+http.port               = 443  
+ssl.enabled             = true
+ssl.keystore            = cxf-svc-server.keystore
+ssl.password            = changeit
+
+# Jetty spnego settings
+spnego.properties       = spnego.properties
+spnego.realm            = SU.SE
+
+# EhCache settings
+ehcache.maxElementsInMemory             = 10000
+ehcache.eternal                         = false
+ehcache.timeToIdleSeconds               = 120
+ehcache.timeToLiveSeconds               = 600
+ehcache.overflowToDisk                  = false
+ehcache.diskPersistent                  = false
+ehcache.diskExpiryThreadIntervalSeconds = 120
+ehcache.memoryStoreEvictionPolicy       = "LRU"
