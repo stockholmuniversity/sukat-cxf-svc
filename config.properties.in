@@ -15,6 +15,7 @@ ssl.keystore            = cxf-svc-server.keystore
 ssl.password            = changeit
 
 # Jetty spnego settings
+spnego.conf             = /etc/spnego.conf
 spnego.properties       = spnego.properties
 spnego.realm            = SU.SE
 
