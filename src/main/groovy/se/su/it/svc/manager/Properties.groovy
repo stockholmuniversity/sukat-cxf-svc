@@ -67,6 +67,7 @@ class Properties {
       props.put("ssl.keystore", "cxf-svc-server.keystore")
       props.put("ssl.password", "changeit")
       //Spnego
+      props.put("spnego.conf","/etc/spnego.conf");
       props.put("spnego.properties", "spnego.properties")
       props.put("spnego.realm", "SU.SE")
       //Ehcache
