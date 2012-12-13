@@ -124,6 +124,13 @@
     implementor="#enrollmentserviceEndpoint"
     address="/EnrollmentService" />
 
+  <bean id="webserviceadminEndpoint" class="se.su.it.svc.WebServiceAdminImpl" />
+  <jaxws:endpoint
+    id="webserviceadmin"
+    implementorClass="se.su.it.svc.WebServiceAdminImpl"
+    implementor="#webserviceadminEndpoint"
+    address="/WebServiceAdmin" />
+
   <jaxws:endpoint
 	  id="status"
     implementor="se.su.it.svc.Status"
