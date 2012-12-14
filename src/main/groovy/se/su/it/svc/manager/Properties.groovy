@@ -70,6 +70,7 @@ class Properties {
       props.put("spnego.conf","/etc/spnego.conf");
       props.put("spnego.properties", "spnego.properties")
       props.put("spnego.realm", "SU.SE")
+      props.put("spnego.kdc", "kerberos.su.se")
       //Ehcache
       props.put("ehcache.maxElementsInMemory", 10000)
       props.put("ehcache.eternal", false)
