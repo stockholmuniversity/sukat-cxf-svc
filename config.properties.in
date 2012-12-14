@@ -18,6 +18,7 @@ ssl.password            = changeit
 spnego.conf             = /etc/spnego.conf
 spnego.properties       = spnego.properties
 spnego.realm            = SU.SE
+spnego.kdc              = kerberos.su.se
 
 # EhCache settings
 ehcache.maxElementsInMemory             = 10000
