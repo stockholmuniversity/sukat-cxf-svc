@@ -9,7 +9,10 @@ The war file will appear in the root directory
 
 Notes:
 To start:
-sudo java -DDEBUG -Djava.security.krb5.conf=/etc/krb5.conf -Dconfig.properties=/local/cxf-server/conf/config.properties -Djavax.security.auth.useSubjectCredsOnly=false -Dorg.eclipse.jetty.util.log.DEBUG=true -Dsun.security.spnego.debug=all -Djava.security.krb5.kdc=kerberos.su.se -Djava.security.krb5.realm=SU.SE -jar sukat-cxf-svc.war
+sudo java -Dconfig.properties=/local/cxf-server/conf/config.properties -Dlog.file=/local/cxf-server/logs/sukat-svc-application.log -jar sukat-cxf-svc-executable.war
+
+To start with DEBUGGING:
+sudo java -DDEBUG -Dconfig.properties=/local/cxf-server/conf/config.properties -Dlog.file=/local/cxf-server/logs/sukat-svc-application.log -Dorg.eclipse.jetty.util.log.DEBUG=true -Dsun.security.spnego.debug=all -jar sukat-cxf-svc-executable.war
 
 /etc/krb5.conf (You need to have a valid krb5.conf in /etc)
 
