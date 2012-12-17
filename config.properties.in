@@ -9,7 +9,9 @@ ldap.serverro           = ldap://ldap-test.su.se
 ldap.serverrw           = ldap://sukat-test-ldaprw02.it.su.se
 
 # Jetty settings
-http.port               = 443  
+http.port               = 443
+# bind.address (Specify to bind to specific ip. Not mandatory)
+bind.address            = 127.0.0.1
 ssl.enabled             = true
 ssl.keystore            = cxf-svc-server.keystore
 ssl.password            = changeit
