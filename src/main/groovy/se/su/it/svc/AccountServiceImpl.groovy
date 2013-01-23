@@ -54,7 +54,7 @@ public class AccountServiceImpl implements AccountService{
    * @return String new password.
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public String resetPassword(String uid, SvcAudit audit) {
+  public String resetPassword(@WebParam(name = "uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
     if (uid == null || audit == null)
       throw new java.lang.IllegalArgumentException("resetPassword - Null argument values not allowed in this function")
     String trueUid = uid.replaceFirst("\\.", "/")
