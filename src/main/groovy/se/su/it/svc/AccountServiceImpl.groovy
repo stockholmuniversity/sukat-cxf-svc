@@ -70,4 +70,20 @@ public class AccountServiceImpl implements AccountService{
     }
     return null
   }
+
+  public void updateSuPerson(@WebParam(name = "person") SuPerson person, @WebParam(name = "audit") SvcAudit audit){
+    if (person == null || audit == null)
+      throw new java.lang.IllegalArgumentException("updateSuPerson - Null argument values not allowed in this function")
+    if (person.uid == null)
+      throw new java.lang.IllegalArgumentException("updateSuPerson - Person uid cant be null")
+    SuPerson originalPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, person.uid)
+    if(person) {
+      originalPerson.applySuPersonDifference(person)
+      logger.debug("updateSuPerson - Trying to update SuPerson uid<${originalPerson.uid}>")
+      SuPersonQuery.saveSuPerson(originalPerson)
+      logger.info("updateSuPerson - Updated SuPerson uid<${originalPerson.uid}>")
+    } else {
+      throw new IllegalArgumentException("updateSuPerson - No such uid found: "+person.uid)
+    }
+  }
 }
