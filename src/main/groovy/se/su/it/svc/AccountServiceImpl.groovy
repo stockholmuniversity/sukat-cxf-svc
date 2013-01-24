@@ -87,7 +87,7 @@ public class AccountServiceImpl implements AccountService{
     if (person.uid == null)
       throw new java.lang.IllegalArgumentException("updateSuPerson - Person uid cant be null")
     SuPerson originalPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, person.uid)
-    if(person) {
+    if(originalPerson) {
       originalPerson.applySuPersonDifference(person)
       logger.debug("updateSuPerson - Trying to update SuPerson uid<${originalPerson.uid}>")
       SuPersonQuery.saveSuPerson(originalPerson)
