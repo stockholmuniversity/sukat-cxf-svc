@@ -5,6 +5,7 @@ import gldapo.GldapoSchemaRegistry
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.commons.Kadmin
+import se.su.it.svc.commons.SvcSuPersonVO
 /**
  * Created with IntelliJ IDEA.
  * User: jqvar
@@ -131,11 +132,21 @@ class AccountServiceImplTest extends spock.lang.Specification{
   }
 
   @Test
-  def "Test updateSuPerson with null person argument"() {
+  def "Test updateSuPerson with null uid argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.updateSuPerson(null, new SvcAudit())
+    accountServiceImpl.updateSuPerson(null,new SvcSuPersonVO(), new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test updateSuPerson with null personVO argument"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.updateSuPerson("testuid",null, new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
@@ -145,7 +156,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.updateSuPerson(new SuPerson(), null)
+    accountServiceImpl.updateSuPerson("testuid",new SvcSuPersonVO(), null)
     then:
     thrown(IllegalArgumentException)
   }
@@ -153,13 +164,11 @@ class AccountServiceImplTest extends spock.lang.Specification{
   @Test
   def "Test updateSuPerson without person exist"() {
     setup:
-    SuPerson suPerson = new SuPerson()
-    suPerson.uid = "test"
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.updateSuPerson(suPerson, new SvcAudit())
+    accountServiceImpl.updateSuPerson("testuid", new SvcSuPersonVO(), new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
@@ -167,8 +176,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
   @Test
   def "Test updateSuPerson when person exist"() {
     setup:
-    SuPerson suPerson = new SuPerson()
-    suPerson.uid = "test"
+    SvcSuPersonVO suPerson = new SvcSuPersonVO()
     suPerson.title = "knallhatt"
     suPerson.eduPersonAffiliation = ["other"]
     String title = null
@@ -178,7 +186,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     SuPersonQuery.metaClass.static.saveSuPerson = {SuPerson person -> title = person.title;listEntry0=person.eduPersonAffiliation.iterator().next()}
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.updateSuPerson(suPerson, new SvcAudit())
+    accountServiceImpl.updateSuPerson("testuid",suPerson, new SvcAudit())
     then:
     title == "knallhatt"
     listEntry0 == "other"

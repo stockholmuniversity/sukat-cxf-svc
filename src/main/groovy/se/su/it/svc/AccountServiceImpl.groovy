@@ -10,6 +10,7 @@ import se.su.it.svc.ldap.SuPerson
 import se.su.it.commons.Kadmin
 import se.su.it.commons.PasswordUtils
 import se.su.it.svc.audit.AuditAspectMethodDetails
+import se.su.it.svc.commons.SvcSuPersonVO
 
 /**
  * Implementing class for AccountService CXF Web Service.
@@ -74,26 +75,25 @@ public class AccountServiceImpl implements AccountService{
   /**
    * This method updates the attributes for the specified SuPerson.uid.
    *
-   *
-   * @param person pre-populated SuPerson object, the attributes that differ in this object to the original will be updated in ldap.
+   * @param uid  uid of the user.
+   * @param person pre-populated SvcSuPersonVO object, the attributes that differ in this object to the original will be updated in ldap.
    * @param audit Audit object initilized with audit data about the client and user.
    * @return void.
    * @see se.su.it.svc.ldap.SuPerson
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public void updateSuPerson(@WebParam(name = "person") SuPerson person, @WebParam(name = "audit") SvcAudit audit){
-    if (person == null || audit == null)
+  public void updateSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "person") SvcSuPersonVO person, @WebParam(name = "audit") SvcAudit audit){
+    if (uid == null || person == null || audit == null)
       throw new java.lang.IllegalArgumentException("updateSuPerson - Null argument values not allowed in this function")
-    if (person.uid == null)
-      throw new java.lang.IllegalArgumentException("updateSuPerson - Person uid cant be null")
-    SuPerson originalPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, person.uid)
+
+    SuPerson originalPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
     if(originalPerson) {
       originalPerson.applySuPersonDifference(person)
       logger.debug("updateSuPerson - Trying to update SuPerson uid<${originalPerson.uid}>")
       SuPersonQuery.saveSuPerson(originalPerson)
       logger.info("updateSuPerson - Updated SuPerson uid<${originalPerson.uid}>")
     } else {
-      throw new IllegalArgumentException("updateSuPerson - No such uid found: "+person.uid)
+      throw new IllegalArgumentException("updateSuPerson - No such uid found: "+uid)
     }
   }
 }
