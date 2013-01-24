@@ -71,6 +71,16 @@ public class AccountServiceImpl implements AccountService{
     return null
   }
 
+  /**
+   * This method updates the attributes for the specified SuPerson.uid.
+   *
+   *
+   * @param person pre-populated SuPerson object, the attributes that differ in this object to the original will be updated in ldap.
+   * @param audit Audit object initilized with audit data about the client and user.
+   * @return void.
+   * @see se.su.it.svc.ldap.SuPerson
+   * @see se.su.it.svc.commons.SvcAudit
+   */
   public void updateSuPerson(@WebParam(name = "person") SuPerson person, @WebParam(name = "audit") SvcAudit audit){
     if (person == null || audit == null)
       throw new java.lang.IllegalArgumentException("updateSuPerson - Null argument values not allowed in this function")
