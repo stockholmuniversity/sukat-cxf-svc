@@ -29,10 +29,10 @@ class SuPerson implements Serializable {
   String mobile
   Set<String> sukatPULAttributes //Adress (hem),Fax (hem),Hemsida (privat/hem),Mail (privat/hem),Mobil,Mobil (privat/hem),Stad (hem),Telefon (privat/hem)
   String labeledURI //hemsida
-  String mail
+  Set<String> mail
   Set<String> mailLocalAddress
-  Date sukatLOAFromDate //Tjänstledighet börjar
-  Date sukatLOAToDate   //Tjänstledighet slutar
+  String sukatLOAFromDate //Tjänstledighet börjar
+  String sukatLOAToDate   //Tjänstledighet slutar
   Set<String> eduPersonOrgUnitDN
   String eduPersonPrimaryOrgUnitDN
   String registeredAddress
@@ -61,7 +61,7 @@ class SuPerson implements Serializable {
     if(this.mobile != person.mobile) this.mobile = person.mobile
     if(!isEqualSets(this.sukatPULAttributes, person.sukatPULAttributes)) this.sukatPULAttributes = person.sukatPULAttributes
     if(this.labeledURI != person.labeledURI) this.labeledURI = person.labeledURI
-    if(this.mail != person.mail) this.mail = person.mail
+    if(!isEqualSets(this.mail, person.mail)) this.mail = person.mail
     if(!isEqualSets(this.mailLocalAddress, person.mailLocalAddress)) this.mailLocalAddress = person.mailLocalAddress
     if(this.sukatLOAFromDate != person.sukatLOAFromDate) this.sukatLOAFromDate = person.sukatLOAFromDate
     if(this.sukatLOAToDate != person.sukatLOAToDate) this.sukatLOAToDate = person.sukatLOAToDate

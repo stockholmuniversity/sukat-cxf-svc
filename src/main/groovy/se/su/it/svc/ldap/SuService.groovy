@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlRootElement
 import org.springframework.ldap.core.DistinguishedName
 import gldapo.schema.annotation.GldapoSynonymFor
+import javax.xml.bind.annotation.XmlElement
 
 /**
  * GLDAPO schema class for SU Service also used by web service.
@@ -35,6 +36,6 @@ class SuService implements Serializable {
   String suServiceStartTime
   @XmlAttribute
   String roleOccupant
-  @XmlAttribute
+  @XmlElement(name="objectClass")
   Set<String> objectClass
 }

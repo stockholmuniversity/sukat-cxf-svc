@@ -4,15 +4,17 @@ import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType
 import javax.xml.bind.annotation.XmlAttribute
 import javax.xml.bind.annotation.XmlRootElement
+import javax.xml.bind.annotation.XmlElementWrapper
+import javax.xml.bind.annotation.XmlElement
 
 @XmlAccessorType( XmlAccessType.NONE )
 @XmlRootElement
 public class SvcSuPersonVO {
   @XmlAttribute
   String eduPersonPrimaryAffiliation
-  @XmlAttribute
+  @XmlElement(name="eduPersonAffiliation")
   Set<String> eduPersonAffiliation
-  @XmlAttribute
+  @XmlElement(name="eduPersonEntitlement")
   Set<String> eduPersonEntitlement
   @XmlAttribute
   String socialSecurityNumber
@@ -32,19 +34,19 @@ public class SvcSuPersonVO {
   String telephoneNumber
   @XmlAttribute
   String mobile
-  @XmlAttribute
+  @XmlElement(name="sukatPULAttributes")
   Set<String> sukatPULAttributes //Adress (hem),Fax (hem),Hemsida (privat/hem),Mail (privat/hem),Mobil,Mobil (privat/hem),Stad (hem),Telefon (privat/hem)
   @XmlAttribute
   String labeledURI //hemsida
-  @XmlAttribute
-  String mail
-  @XmlAttribute
+  @XmlElement(name="mail")
+  Set<String> mail
+  @XmlElement(name="mailLocalAddress")
   Set<String> mailLocalAddress
   @XmlAttribute
-  Date sukatLOAFromDate //Tjänstledighet börjar
+  String sukatLOAFromDate //Tjänstledighet börjar
   @XmlAttribute
-  Date sukatLOAToDate   //Tjänstledighet slutar
-  @XmlAttribute
+  String sukatLOAToDate   //Tjänstledighet slutar
+  @XmlElement(name="eduPersonOrgUnitDN")
   Set<String> eduPersonOrgUnitDN
   @XmlAttribute
   String eduPersonPrimaryOrgUnitDN
@@ -58,7 +60,7 @@ public class SvcSuPersonVO {
   String homeMobilePhone
   @XmlAttribute
   String homePhone
-  @XmlAttribute
+  @XmlElement(name="homePostalAddress")
   Set<String> homePostalAddress
   @XmlAttribute
   String homeLocalityName

@@ -73,7 +73,7 @@ public class AccountServiceImpl implements AccountService{
   }
 
   /**
-   * This method updates the attributes for the specified SuPerson.uid.
+   * This method updates the attributes for the specified uid.
    *
    * @param uid  uid of the user.
    * @param person pre-populated SvcSuPersonVO object, the attributes that differ in this object to the original will be updated in ldap.

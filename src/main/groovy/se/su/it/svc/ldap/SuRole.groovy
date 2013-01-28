@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType
 import javax.xml.bind.annotation.XmlAttribute
 import javax.xml.bind.annotation.XmlRootElement
+import javax.xml.bind.annotation.XmlElement
 
 /**
  * GLDAPO schema class for SU Role.
@@ -20,8 +21,8 @@ class SuRole implements Serializable{
   @GldapoNamingAttribute
   @XmlAttribute
   String cn
-  @XmlAttribute
+  @XmlElement(name="objectClass")
   Set<String> objectClass
-  @XmlAttribute
+  @XmlElement(name="roleOccupant")
   Set<String> roleOccupant
 }
