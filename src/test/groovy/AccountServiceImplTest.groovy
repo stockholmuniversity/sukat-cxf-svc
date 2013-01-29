@@ -6,6 +6,8 @@ import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.commons.Kadmin
 import se.su.it.svc.commons.SvcSuPersonVO
+import se.su.it.svc.ldap.SuRole
+import se.su.it.svc.query.SuRoleQuery
 /**
  * Created with IntelliJ IDEA.
  * User: jqvar
@@ -190,5 +192,29 @@ class AccountServiceImplTest extends spock.lang.Specification{
     then:
     title == "knallhatt"
     listEntry0 == "other"
+  }
+
+  @Test
+  def "Test updateSuPerson when person and role exist"() {
+    setup:
+    SvcSuPersonVO suPerson = new SvcSuPersonVO()
+    suPerson.title = "knallhatt"
+    suPerson.eduPersonAffiliation = ["other"]
+    String title = null
+    String listEntry0 = null
+    int roleList = 0
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
+    SuPerson.metaClass.getDn = {return "uid=nisse,dc=it,dc=su,dc=se"}
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> new SuPerson(title: "systemdeveloper", eduPersonAffiliation: ["employee"]) }
+    SuPersonQuery.metaClass.static.saveSuPerson = {SuPerson person -> title = person.title;listEntry0=person.eduPersonAffiliation.iterator().next()}
+    SuRoleQuery.metaClass.static.getSuRoleFromDN = {String directory, String roleDN -> new SuRole(cn: "fakerole", roleOccupant: [])}
+    SuRoleQuery.metaClass.static.saveSuRole = {SuRole role -> roleList = role.roleOccupant.size()}
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.updateSuPerson("testuid","cn=Teamledare,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE",suPerson, new SvcAudit())
+    then:
+    title == "knallhatt"
+    listEntry0 == "other"
+    roleList == 1
   }
 }
