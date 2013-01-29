@@ -15,6 +15,7 @@ import javax.xml.bind.annotation.XmlAttribute
 @XmlAccessorType( XmlAccessType.NONE )
 @XmlRootElement
 public class SvcAudit implements Serializable{
+  static final long serialVersionUID = -687991492884245073L
   @XmlAttribute
   String uid
   @XmlAttribute

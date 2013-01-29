@@ -15,7 +15,8 @@ import javax.xml.bind.annotation.XmlAttribute
  */
 @XmlAccessorType( XmlAccessType.NONE )
 @XmlRootElement
-public class SvcStatus {
+public class SvcStatus implements Serializable{
+  static final long serialVersionUID = -687991492884255073L
   @XmlAttribute
   String name
   @XmlAttribute

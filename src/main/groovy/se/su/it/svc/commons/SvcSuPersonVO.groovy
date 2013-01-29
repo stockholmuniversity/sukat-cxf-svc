@@ -9,7 +9,8 @@ import javax.xml.bind.annotation.XmlElement
 
 @XmlAccessorType( XmlAccessType.NONE )
 @XmlRootElement
-public class SvcSuPersonVO {
+public class SvcSuPersonVO implements Serializable{
+  static final long serialVersionUID = -687991492884235073L
   @XmlAttribute
   String eduPersonPrimaryAffiliation
   @XmlElement(name="eduPersonAffiliation")
