@@ -88,7 +88,7 @@ public class AccountServiceImpl implements AccountService{
    */
   public void updateSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "roleDN") String roleDN, @WebParam(name = "person") SvcSuPersonVO person, @WebParam(name = "audit") SvcAudit audit){
     if (uid == null || person == null || audit == null)
-      throw new java.lang.IllegalArgumentException("updateSuPerson - Null argument values not allowed in this function")
+      throw new java.lang.IllegalArgumentException("updateSuPerson - Null argument values not allowed for uid, person or audit")
 
     SuPerson originalPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
     if(originalPerson) {
