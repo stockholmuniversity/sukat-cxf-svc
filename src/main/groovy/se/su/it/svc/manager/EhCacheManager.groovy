@@ -44,14 +44,14 @@ class EhCacheManager {
     if (!cacheInstance) {
       CacheConfiguration config = new CacheConfiguration(cacheName, 0)
       try {
-        config.setOverflowToDisk(props.ehcache?.overflodwToDisk ?: false as Boolean)
-        config.setTimeToLiveSeconds(props.ehcache?.timeToLiveSeconds as int);
-        config.setMaxElementsInMemory(props.ehcache?.maxElementsInMemory ?: 10000 as int)
-        config.setEternal(props.ehcache?.eternal as Boolean)
-        config.setTimeToIdleSeconds(props.ehcache?.timeToIdleSeconds as long)
-        config.setDiskPersistent(props.ehcache?.diskPersistent ?: false as Boolean)
-        config.setDiskExpiryThreadIntervalSeconds(props.ehcache?.diskExpiryThreadIntervalSeconds as long)
-        config.setMemoryStoreEvictionPolicy(props.ehcache?.memoryStoreEvictionPolicy as String)
+        config.setOverflowToDisk(props.ehcache?.overflowToDisk ? props.ehcache?.overflowToDisk.toBoolean(): false)
+        config.setTimeToLiveSeconds(props.ehcache?.timeToLiveSeconds ? props.ehcache?.timeToLiveSeconds.toInteger() : 600);
+        config.setMaxElementsInMemory(props.ehcache?.maxElementsInMemory ? props.ehcache?.maxElementsInMemory.toInteger() : 10000)
+        config.setEternal(props.ehcache?.eternal ? props.ehcache?.eternal.toBoolean() : false)
+        config.setTimeToIdleSeconds(props.ehcache?.timeToIdleSeconds ? props.ehcache?.timeToIdleSeconds.toInteger() : 120)
+        config.setDiskPersistent(props.ehcache?.diskPersistent ? props.ehcache?.diskPersistent.toBoolean() : false)
+        config.setDiskExpiryThreadIntervalSeconds(props.ehcache?.diskExpiryThreadIntervalSeconds ? props.ehcache?.diskExpiryThreadIntervalSeconds.toInteger() : 120)
+        config.setMemoryStoreEvictionPolicy(props.ehcache?.memoryStoreEvictionPolicy ? props.ehcache?.memoryStoreEvictionPolicy.toString() : "LRU")
       } catch (e) {
         logger.info("Cant load the cache config, check if config is present. cause: " + e.cause)
         e.printStackTrace()
@@ -62,6 +62,7 @@ class EhCacheManager {
       Searchable searchable = new Searchable(keys: false, values: false)
       searchable.addSearchAttribute(new SearchAttribute().name("se.su.it.svc.ldap.SuCard").className(CacheSearchAttributeExtractor.class.name))
       searchable.addSearchAttribute(new SearchAttribute().name("se.su.it.svc.ldap.SuPerson").className(CacheSearchAttributeExtractor.class.name))
+      searchable.addSearchAttribute(new SearchAttribute().name("se.su.it.svc.ldap.SuRole").className(CacheSearchAttributeExtractor.class.name))
       searchable.addSearchAttribute(new SearchAttribute().name("se.su.it.svc.ldap.SuService").className(CacheSearchAttributeExtractor.class.name))
       searchable.addSearchAttribute(new SearchAttribute().name("se.su.it.svc.ldap.SuServiceDescription").className(CacheSearchAttributeExtractor.class.name))
       searchable.addSearchAttribute(new SearchAttribute().name("se.su.it.svc.ldap.SuSubAccount").className(CacheSearchAttributeExtractor.class.name))

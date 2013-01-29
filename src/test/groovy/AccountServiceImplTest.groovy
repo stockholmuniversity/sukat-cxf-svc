@@ -136,7 +136,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.updateSuPerson(null,new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.updateSuPerson(null,null,new SvcSuPersonVO(), new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
@@ -146,7 +146,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.updateSuPerson("testuid",null, new SvcAudit())
+    accountServiceImpl.updateSuPerson("testuid",null,null, new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
@@ -156,7 +156,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.updateSuPerson("testuid",new SvcSuPersonVO(), null)
+    accountServiceImpl.updateSuPerson("testuid",null,new SvcSuPersonVO(), null)
     then:
     thrown(IllegalArgumentException)
   }
@@ -168,7 +168,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.updateSuPerson("testuid", new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.updateSuPerson("testuid", null,new SvcSuPersonVO(), new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
@@ -186,7 +186,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     SuPersonQuery.metaClass.static.saveSuPerson = {SuPerson person -> title = person.title;listEntry0=person.eduPersonAffiliation.iterator().next()}
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.updateSuPerson("testuid",suPerson, new SvcAudit())
+    accountServiceImpl.updateSuPerson("testuid",null,suPerson, new SvcAudit())
     then:
     title == "knallhatt"
     listEntry0 == "other"

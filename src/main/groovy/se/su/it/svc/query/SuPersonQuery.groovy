@@ -23,7 +23,7 @@ public class SuPersonQuery {
    *
    * @param directory which directory to use, see GldapoManager.
    * @param uid  the uid (user id) for the user that you want to find.
-   * @return an <code>ArrayList<SuCard></code> of SuCard objects or an empty array if no card was found.
+   * @return an <code><SuPerson></code> or null.
    * @see se.su.it.svc.ldap.SuPerson
    * @see se.su.it.svc.manager.GldapoManager
    */

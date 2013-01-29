@@ -11,6 +11,9 @@ import se.su.it.commons.Kadmin
 import se.su.it.commons.PasswordUtils
 import se.su.it.svc.audit.AuditAspectMethodDetails
 import se.su.it.svc.commons.SvcSuPersonVO
+import se.su.it.svc.ldap.SuRole
+import se.su.it.svc.query.SuRoleQuery
+import org.springframework.ldap.core.DistinguishedName
 
 /**
  * Implementing class for AccountService CXF Web Service.
@@ -76,13 +79,14 @@ public class AccountServiceImpl implements AccountService{
    * This method updates the attributes for the specified uid.
    *
    * @param uid  uid of the user.
+   * @param role String with DN that points to an SuRole or null.
    * @param person pre-populated SvcSuPersonVO object, the attributes that differ in this object to the original will be updated in ldap.
    * @param audit Audit object initilized with audit data about the client and user.
    * @return void.
    * @see se.su.it.svc.ldap.SuPerson
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public void updateSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "person") SvcSuPersonVO person, @WebParam(name = "audit") SvcAudit audit){
+  public void updateSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "roleDN") String roleDN, @WebParam(name = "person") SvcSuPersonVO person, @WebParam(name = "audit") SvcAudit audit){
     if (uid == null || person == null || audit == null)
       throw new java.lang.IllegalArgumentException("updateSuPerson - Null argument values not allowed in this function")
 
@@ -92,6 +96,22 @@ public class AccountServiceImpl implements AccountService{
       logger.debug("updateSuPerson - Trying to update SuPerson uid<${originalPerson.uid}>")
       SuPersonQuery.saveSuPerson(originalPerson)
       logger.info("updateSuPerson - Updated SuPerson uid<${originalPerson.uid}>")
+      if(roleDN != null) {
+        logger.debug("updateSuPerson - Trying to find role for DN<${roleDN}>")
+        SuRole role = SuRoleQuery.getSuRoleFromDN(GldapoManager.LDAP_RW, roleDN)
+        if(role != null) {
+          logger.debug("updateSuPerson - Role <${role.cn}> found for DN<${roleDN}>")
+          DistinguishedName uidDN = new DistinguishedName(originalPerson.getDn())
+          def roList = role.roleOccupant.collect { ro -> new DistinguishedName(ro) }
+          if(!roList.contains(uidDN)) {
+            role.roleOccupant.add(uidDN.toString())
+            SuRoleQuery.saveSuRole(role)
+            logger.info("updateSuPerson - Uid<${originalPerson.uid}> added as occupant to role <${role.cn}> ")
+          } else {
+            logger.debug("updateSuPerson - Occupant <${originalPerson.uid}> already exist for role <${role.cn}>")
+          }
+        }
+      }
     } else {
       throw new IllegalArgumentException("updateSuPerson - No such uid found: "+uid)
     }
