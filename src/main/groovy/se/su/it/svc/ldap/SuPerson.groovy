@@ -53,7 +53,7 @@ class SuPerson implements Serializable {
     if(this.socialSecurityNumber != person.socialSecurityNumber) this.socialSecurityNumber = person.socialSecurityNumber
     if(this.givenName != person.givenName) this.givenName = person.givenName
     if(this.sn != person.sn) this.sn = person.sn
-    if(this.cn != person.cn) this.cn = person.cn
+    if(this.cn != person.givenName + " " + person.sn) this.cn = person.givenName + " " + person.sn
     if(this.displayName != person.displayName) this.displayName = person.displayName
     if(this.title != person.title) this.title = person.title
     if(this.roomNumber != person.roomNumber) this.roomNumber = person.roomNumber

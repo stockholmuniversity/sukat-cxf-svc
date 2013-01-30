@@ -14,6 +14,11 @@ import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.ldap.SuRole
 import se.su.it.svc.query.SuRoleQuery
 import org.springframework.ldap.core.DistinguishedName
+import se.su.it.svc.ldap.SuInitPerson
+import se.su.it.svc.util.AccountServiceUtils
+import java.util.regex.Pattern
+import java.util.regex.Matcher
+import se.su.it.commons.ExecUtils
 
 /**
  * Implementing class for AccountService CXF Web Service.
@@ -110,10 +115,67 @@ public class AccountServiceImpl implements AccountService{
           } else {
             logger.debug("updateSuPerson - Occupant <${originalPerson.uid}> already exist for role <${role.cn}>")
           }
+        } else {
+          logger.warn("updateSuPerson - Could not update uid <${originalPerson.uid}> with role <${roleDN}>, role not found!")
         }
       }
     } else {
       throw new IllegalArgumentException("updateSuPerson - No such uid found: "+uid)
     }
   }
+
+  public String createSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "domain") String domain, @WebParam(name = "nin") String nin, @WebParam(name = "givenName") String givenName, @WebParam(name = "sn") String sn, @WebParam(name = "roleDN") String roleDN, @WebParam(name = "person") SvcSuPersonVO person, @WebParam(name = "audit") SvcAudit audit) {
+    if (uid == null || domain == null || nin == null || givenName == null || sn == null || person == null || audit == null)
+      throw new java.lang.IllegalArgumentException("createSuPerson - Null argument values not allowed for uid, domain, nin, givenName, sn, person or audit")
+    if(SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid))
+      throw new java.lang.IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
+
+    //Begin init entry in sukat
+    SuInitPerson suInitPerson = new SuInitPerson()
+    suInitPerson.uid = uid
+    suInitPerson.cn = givenName + " " + sn
+    suInitPerson.sn = sn
+    suInitPerson.givenName = givenName
+    suInitPerson.norEduPersonNIN = nin
+    suInitPerson.eduPersonPrincipalName = uid + "@su.se"
+    suInitPerson.objectClass = ["suPerson","sSNObject","norEduPerson","eduPerson","inetOrgPerson","organizationalPerson","person","top"]
+    suInitPerson.parent = AccountServiceUtils.domainToDN(domain)
+    SuPersonQuery.initSuPerson(GldapoManager.LDAP_RW, suInitPerson)
+    //End init entry in sukat
+
+    //Begin call Perlscript to init user in kdc, afs and unixshell
+    //Maybe we want to replace this with a call to the message bus in the future
+    boolean error = false
+    String uidNumber = ""
+    String output = ""
+    String password = PasswordUtils.genRandomPassword(10, 10);
+    def perlScript = ["--user", "uadminw", "/local/sukat/libexec/enable-user.pl", "--uid", uid, "--password", password, "--gidnumber", "1200"]
+    try {
+      def res = ExecUtils.exec("/local/scriptbox/bin/run-token-script.sh", perlScript.toArray(new String[perlScript.size()]))
+      Pattern p = Pattern.compile("OK \\(uidnumber:(\\d+)\\)")
+      Matcher m = p.matcher(res.trim())
+      if (m.matches()) {
+        uidNumber = m.group(1)
+      } else {
+        error = true
+      }
+    } catch (Exception e) {
+      error = true;
+      logger.error("createSuPerson - Error when creating uid<${uid}> in KDC and/or AFS! Error: " + e.message)
+      logger.error("               - posixAccount attributes will not be written to SUKAT!")
+    }
+    //End call Perlscript to init user in kdc, afs and unixshell
+    if(!error) {
+      suInitPerson.objectClass.add("posixAccount")
+      suInitPerson.loginShell = "/usr/local/bin/bash"
+      suInitPerson.homeDirectory = "/afs/su.se/home/"+uid.charAt(0)+"/"+uid.charAt(1)+"/"+uid
+      suInitPerson.uidNumber = uidNumber
+      suInitPerson.gidNumber = "1200"
+
+      SuPersonQuery.saveSuInitPerson(suInitPerson)
+    }
+    updateSuPerson(uid,roleDN,person,audit)
+    return password
+  }
+
 }

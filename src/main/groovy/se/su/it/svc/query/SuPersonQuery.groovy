@@ -3,6 +3,7 @@ package se.su.it.svc.query
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.manager.GldapoManager
 import se.su.it.svc.manager.EhCacheManager
+import se.su.it.svc.ldap.SuInitPerson
 
 /**
  * This class is a helper class for doing GLDAPO queries on the SuPerson GLDAPO schema.
@@ -55,6 +56,33 @@ public class SuPersonQuery {
     person.save()
     def params = [key: ":getSuPersonFromUID:${person.uid}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: false]
     cacheManager.put(params, { person })
+  }
+
+  /**
+   * Init SuPerson entry in sukat
+   *
+   *
+   * @param directory which directory to use, see GldapoManager.
+   * @param suInitPerson a SuInitPerson object to be saved in SUKAT.
+   * @return void.
+   * @see se.su.it.svc.ldap.SuInitPerson
+   * @see se.su.it.svc.manager.GldapoManager
+   */
+  static void initSuPerson(String directory, SuInitPerson suInitPerson) {
+    suInitPerson.directory = directory
+    suInitPerson.save()
+  }
+
+  /**
+   * Save a SuInitPerson object to ldap.
+   * and putting the changed object in the cache so that the objects returned by this svc is always up-to-date.
+   *
+   * @return void.
+   * @see se.su.it.svc.ldap.SuInitPerson
+   * @see se.su.it.svc.manager.GldapoManager
+   */
+  static void saveSuInitPerson(SuInitPerson person) {
+    person.save()
   }
 
 }

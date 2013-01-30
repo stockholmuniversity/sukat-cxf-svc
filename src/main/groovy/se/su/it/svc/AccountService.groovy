@@ -12,4 +12,5 @@ public interface AccountService {
   @AuditAspectMethodDetails(details = "setPassword")
   public String resetPassword(String uid, SvcAudit audit)
   public void updateSuPerson(String uid,String roleDN,SvcSuPersonVO person, SvcAudit audit)
+  public String createSuPerson(String uid, String domain, String nin, String givenName, String sn, String roleDN, SvcSuPersonVO person, SvcAudit audit)
 }

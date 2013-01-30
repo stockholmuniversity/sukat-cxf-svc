@@ -24,8 +24,6 @@ public class SvcSuPersonVO implements Serializable{
   @XmlAttribute
   String sn
   @XmlAttribute
-  String cn
-  @XmlAttribute
   String displayName
   @XmlAttribute
   String title
