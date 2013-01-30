@@ -89,6 +89,7 @@ public class AccountServiceImpl implements AccountService{
    * @param audit Audit object initilized with audit data about the client and user.
    * @return void.
    * @see se.su.it.svc.ldap.SuPerson
+   * @see se.su.it.svc.commons.SvcSuPersonVO
    * @see se.su.it.svc.commons.SvcAudit
    */
   public void updateSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "roleDN") String roleDN, @WebParam(name = "person") SvcSuPersonVO person, @WebParam(name = "audit") SvcAudit audit){
@@ -124,6 +125,23 @@ public class AccountServiceImpl implements AccountService{
     }
   }
 
+  /**
+   * This method creates a SuPerson in sukat.
+   *
+   * @param uid of the SuPerson to be created.
+   * @param domain domain for the SuPerson.
+   * @param nin 12-digit social security number for the SuPerson.
+   * @param givenName given name for the SuPerson.
+   * @param sn surname of the SuPerson.
+   * @param role String with DN that points to an SuRole or null.
+   * @param person pre-populated SvcSuPersonVO object. This will be used to populate standard attributes for the SuPerson.
+   * @param audit Audit object initilized with audit data about the client and user.
+   * @return String with newly created password for the SuPerson.
+   * @see se.su.it.svc.ldap.SuPerson
+   * @see se.su.it.svc.ldap.SuInitPerson
+   * @see se.su.it.svc.commons.SvcSuPersonVO
+   * @see se.su.it.svc.commons.SvcAudit
+   */
   public String createSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "domain") String domain, @WebParam(name = "nin") String nin, @WebParam(name = "givenName") String givenName, @WebParam(name = "sn") String sn, @WebParam(name = "roleDN") String roleDN, @WebParam(name = "person") SvcSuPersonVO person, @WebParam(name = "audit") SvcAudit audit) {
     if (uid == null || domain == null || nin == null || givenName == null || sn == null || person == null || audit == null)
       throw new java.lang.IllegalArgumentException("createSuPerson - Null argument values not allowed for uid, domain, nin, givenName, sn, person or audit")
@@ -131,6 +149,7 @@ public class AccountServiceImpl implements AccountService{
       throw new java.lang.IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
 
     //Begin init entry in sukat
+    logger.debug("createSuPerson - Creating initial sukat record from function arguments for uid<${uid}>")
     SuInitPerson suInitPerson = new SuInitPerson()
     suInitPerson.uid = uid
     suInitPerson.cn = givenName + " " + sn
@@ -140,6 +159,7 @@ public class AccountServiceImpl implements AccountService{
     suInitPerson.eduPersonPrincipalName = uid + "@su.se"
     suInitPerson.objectClass = ["suPerson","sSNObject","norEduPerson","eduPerson","inetOrgPerson","organizationalPerson","person","top"]
     suInitPerson.parent = AccountServiceUtils.domainToDN(domain)
+    logger.debug("createSuPerson - Writing initial sukat record to sukat for uid<${uid}>")
     SuPersonQuery.initSuPerson(GldapoManager.LDAP_RW, suInitPerson)
     //End init entry in sukat
 
@@ -151,6 +171,7 @@ public class AccountServiceImpl implements AccountService{
     String password = PasswordUtils.genRandomPassword(10, 10);
     def perlScript = ["--user", "uadminw", "/local/sukat/libexec/enable-user.pl", "--uid", uid, "--password", password, "--gidnumber", "1200"]
     try {
+      logger.debug("createSuPerson - Running perlscript to create user in KDC and AFS for uid<${uid}>")
       def res = ExecUtils.exec("/local/scriptbox/bin/run-token-script.sh", perlScript.toArray(new String[perlScript.size()]))
       Pattern p = Pattern.compile("OK \\(uidnumber:(\\d+)\\)")
       Matcher m = p.matcher(res.trim())
@@ -166,6 +187,8 @@ public class AccountServiceImpl implements AccountService{
     }
     //End call Perlscript to init user in kdc, afs and unixshell
     if(!error) {
+      logger.debug("createSuPerson - Perlscript success for uid<${uid}>")
+      logger.debug("createSuPerson - Writing posixAccount attributes to sukat for uid<${uid}>")
       suInitPerson.objectClass.add("posixAccount")
       suInitPerson.loginShell = "/usr/local/bin/bash"
       suInitPerson.homeDirectory = "/afs/su.se/home/"+uid.charAt(0)+"/"+uid.charAt(1)+"/"+uid
@@ -174,7 +197,10 @@ public class AccountServiceImpl implements AccountService{
 
       SuPersonQuery.saveSuInitPerson(suInitPerson)
     }
+    logger.debug("createSuPerson - Updating standard attributes according to function argument object for uid<${uid}>")
     updateSuPerson(uid,roleDN,person,audit)
+    logger.info("createSuPerson - Uid<${uid}> created")
+    logger.debug("createSuPerson - Returning password for uid<${uid}>")
     return password
   }
 
