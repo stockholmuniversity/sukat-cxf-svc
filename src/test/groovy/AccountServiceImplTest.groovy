@@ -8,6 +8,11 @@ import se.su.it.commons.Kadmin
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.ldap.SuRole
 import se.su.it.svc.query.SuRoleQuery
+import se.su.it.svc.ldap.SuInitPerson
+import se.su.it.commons.ExecUtils
+import se.su.it.commons.PasswordUtils
+import se.su.it.svc.util.AccountServiceUtils
+import se.su.it.svc.AccountService
 /**
  * Created with IntelliJ IDEA.
  * User: jqvar
@@ -216,5 +221,127 @@ class AccountServiceImplTest extends spock.lang.Specification{
     title == "knallhatt"
     listEntry0 == "other"
     roleList == 1
+  }
+
+  @Test
+  def "Test createSuPerson with null uid argument"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.createSuPerson(null,"it.su.se","196601010357","Test","Testsson",null,new SvcSuPersonVO(), new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test createSuPerson with already exist uid argument"() {
+    setup:
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> new SuPerson() }
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",null,new SvcSuPersonVO(), new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test createSuPerson with null domain argument"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.createSuPerson("testtest",null,"196601010357","Test","Testsson",null,new SvcSuPersonVO(), new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test createSuPerson with null nin argument"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.createSuPerson("testtest","it.su.se",null,"Test","Testsson",null,new SvcSuPersonVO(), new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test createSuPerson with null givenName argument"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357",null,"Testsson",null,new SvcSuPersonVO(), new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test createSuPerson with null sn argument"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test",null,null,new SvcSuPersonVO(), new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test createSuPerson with null person argument"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",null,null, new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test createSuPerson with null audit argument"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",null,new SvcSuPersonVO(), null)
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test createSuPerson true flow"() {
+    setup:
+    SuInitPerson person1
+    SuInitPerson person2
+    String script
+    String[] argArray
+    boolean updatePersArgsOk = false
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
+    SuInitPerson.metaClass.parent = "stuts"
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
+    SuPersonQuery.metaClass.static.initSuPerson = {String directory, SuInitPerson tmpPerson -> person1 = tmpPerson}
+    PasswordUtils.metaClass.static.genRandomPassword = {int a, int b -> return "secretpwd"}
+    ExecUtils.metaClass.static.exec = {String tmpScript, String[] tmpArgArray -> script = tmpScript; argArray = tmpArgArray; return "OK (uidnumber:245234)"}
+    SuPersonQuery.metaClass.static.saveSuInitPerson = {SuInitPerson tmpPerson2 -> person2 = tmpPerson2}
+    def accountServiceImpl = Spy(AccountServiceImpl)
+    accountServiceImpl.updateSuPerson(*_) >> {String uid, String roleDN, SvcSuPersonVO person,SvcAudit audit -> if(uid == "testtest" && roleDN == null) updatePersArgsOk = true}
+    when:
+    def pwd = accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",null,new SvcSuPersonVO(), new SvcAudit())
+    then:
+    pwd == "secretpwd"
+    person1.uid == "testtest"
+    person1.cn == "Test Testsson"
+    person1.sn == "Testsson"
+    person1.givenName == "Test"
+    person1.norEduPersonNIN == "196601010357"
+    person1.eduPersonPrincipalName == "testtest@su.se"
+    person1.objectClass.containsAll(["suPerson","sSNObject","norEduPerson","eduPerson","inetOrgPerson","organizationalPerson","person","top"])
+    person1.parent == "dc=it,dc=su,dc=se"
+
+    person2.objectClass.contains("posixAccount")
+    person2.loginShell == "/usr/local/bin/bash"
+    person2.homeDirectory == "/afs/su.se/home/t/e/testtest"
+    person2.uidNumber == "245234"
+    person2.gidNumber == "1200"
+
+    script == "/local/scriptbox/bin/run-token-script.sh"
+    argArray.toList().containsAll(["--user", "uadminw", "/local/sukat/libexec/enable-user.pl", "--uid", "testtest", "--password", "secretpwd", "--gidnumber", "1200"])
+    updatePersArgsOk == true
   }
 }

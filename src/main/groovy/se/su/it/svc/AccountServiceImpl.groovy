@@ -168,7 +168,7 @@ public class AccountServiceImpl implements AccountService{
     boolean error = false
     String uidNumber = ""
     String output = ""
-    String password = PasswordUtils.genRandomPassword(10, 10);
+    String password = PasswordUtils.genRandomPassword(10, 10)
     def perlScript = ["--user", "uadminw", "/local/sukat/libexec/enable-user.pl", "--uid", uid, "--password", password, "--gidnumber", "1200"]
     try {
       logger.debug("createSuPerson - Running perlscript to create user in KDC and AFS for uid<${uid}>")
