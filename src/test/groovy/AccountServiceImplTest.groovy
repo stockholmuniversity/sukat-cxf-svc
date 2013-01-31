@@ -6,8 +6,6 @@ import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.commons.Kadmin
 import se.su.it.svc.commons.SvcSuPersonVO
-import se.su.it.svc.ldap.SuRole
-import se.su.it.svc.query.SuRoleQuery
 import se.su.it.svc.ldap.SuInitPerson
 import se.su.it.commons.ExecUtils
 import se.su.it.commons.PasswordUtils
@@ -143,7 +141,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.updateSuPerson(null,null,new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.updateSuPerson(null,new SvcSuPersonVO(), new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
@@ -153,7 +151,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.updateSuPerson("testuid",null,null, new SvcAudit())
+    accountServiceImpl.updateSuPerson("testuid",null, new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
@@ -163,7 +161,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.updateSuPerson("testuid",null,new SvcSuPersonVO(), null)
+    accountServiceImpl.updateSuPerson("testuid",new SvcSuPersonVO(), null)
     then:
     thrown(IllegalArgumentException)
   }
@@ -175,7 +173,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.updateSuPerson("testuid", null,new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.updateSuPerson("testuid",new SvcSuPersonVO(), new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
@@ -193,34 +191,10 @@ class AccountServiceImplTest extends spock.lang.Specification{
     SuPersonQuery.metaClass.static.saveSuPerson = {SuPerson person -> title = person.title;listEntry0=person.eduPersonAffiliation.iterator().next()}
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.updateSuPerson("testuid",null,suPerson, new SvcAudit())
+    accountServiceImpl.updateSuPerson("testuid",suPerson, new SvcAudit())
     then:
     title == "knallhatt"
     listEntry0 == "other"
-  }
-
-  @Test
-  def "Test updateSuPerson when person and role exist"() {
-    setup:
-    SvcSuPersonVO suPerson = new SvcSuPersonVO()
-    suPerson.title = "knallhatt"
-    suPerson.eduPersonAffiliation = ["other"]
-    String title = null
-    String listEntry0 = null
-    int roleList = 0
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
-    SuPerson.metaClass.getDn = {return "uid=nisse,dc=it,dc=su,dc=se"}
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> new SuPerson(title: "systemdeveloper", eduPersonAffiliation: ["employee"]) }
-    SuPersonQuery.metaClass.static.saveSuPerson = {SuPerson person -> title = person.title;listEntry0=person.eduPersonAffiliation.iterator().next()}
-    SuRoleQuery.metaClass.static.getSuRoleFromDN = {String directory, String roleDN -> new SuRole(cn: "fakerole", roleOccupant: [])}
-    SuRoleQuery.metaClass.static.saveSuRole = {SuRole role -> roleList = role.roleOccupant.size()}
-    def accountServiceImpl = new AccountServiceImpl()
-    when:
-    accountServiceImpl.updateSuPerson("testuid","cn=Teamledare,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE",suPerson, new SvcAudit())
-    then:
-    title == "knallhatt"
-    listEntry0 == "other"
-    roleList == 1
   }
 
   @Test
@@ -228,7 +202,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.createSuPerson(null,"it.su.se","196601010357","Test","Testsson",null,new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.createSuPerson(null,"it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
@@ -239,7 +213,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> new SuPerson() }
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",null,new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
@@ -249,7 +223,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.createSuPerson("testtest",null,"196601010357","Test","Testsson",null,new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest",null,"196601010357","Test","Testsson",new SvcSuPersonVO(), new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
@@ -259,7 +233,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se",null,"Test","Testsson",null,new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","it.su.se",null,"Test","Testsson",new SvcSuPersonVO(), new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
@@ -269,7 +243,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357",null,"Testsson",null,new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357",null,"Testsson",new SvcSuPersonVO(), new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
@@ -279,7 +253,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test",null,null,new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test",null,new SvcSuPersonVO(), new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
@@ -289,7 +263,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",null,null, new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",null, new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
@@ -299,7 +273,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",null,new SvcSuPersonVO(), null)
+    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), null)
     then:
     thrown(IllegalArgumentException)
   }
@@ -320,9 +294,9 @@ class AccountServiceImplTest extends spock.lang.Specification{
     ExecUtils.metaClass.static.exec = {String tmpScript, String[] tmpArgArray -> script = tmpScript; argArray = tmpArgArray; return "OK (uidnumber:245234)"}
     SuPersonQuery.metaClass.static.saveSuInitPerson = {SuInitPerson tmpPerson2 -> person2 = tmpPerson2}
     def accountServiceImpl = Spy(AccountServiceImpl)
-    accountServiceImpl.updateSuPerson(*_) >> {String uid, String roleDN, SvcSuPersonVO person,SvcAudit audit -> if(uid == "testtest" && roleDN == null) updatePersArgsOk = true}
+    accountServiceImpl.updateSuPerson(*_) >> {String uid, SvcSuPersonVO person,SvcAudit audit -> if(uid == "testtest") updatePersArgsOk = true}
     when:
-    def pwd = accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",null,new SvcSuPersonVO(), new SvcAudit())
+    def pwd = accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), new SvcAudit())
     then:
     pwd == "secretpwd"
     person1.uid == "testtest"

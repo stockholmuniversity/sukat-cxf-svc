@@ -11,9 +11,6 @@ import se.su.it.commons.Kadmin
 import se.su.it.commons.PasswordUtils
 import se.su.it.svc.audit.AuditAspectMethodDetails
 import se.su.it.svc.commons.SvcSuPersonVO
-import se.su.it.svc.ldap.SuRole
-import se.su.it.svc.query.SuRoleQuery
-import org.springframework.ldap.core.DistinguishedName
 import se.su.it.svc.ldap.SuInitPerson
 import se.su.it.svc.util.AccountServiceUtils
 import java.util.regex.Pattern
@@ -84,7 +81,6 @@ public class AccountServiceImpl implements AccountService{
    * This method updates the attributes for the specified uid.
    *
    * @param uid  uid of the user.
-   * @param role String with DN that points to an SuRole or null.
    * @param person pre-populated SvcSuPersonVO object, the attributes that differ in this object to the original will be updated in ldap.
    * @param audit Audit object initilized with audit data about the client and user.
    * @return void.
@@ -92,7 +88,7 @@ public class AccountServiceImpl implements AccountService{
    * @see se.su.it.svc.commons.SvcSuPersonVO
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public void updateSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "roleDN") String roleDN, @WebParam(name = "person") SvcSuPersonVO person, @WebParam(name = "audit") SvcAudit audit){
+  public void updateSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "person") SvcSuPersonVO person, @WebParam(name = "audit") SvcAudit audit){
     if (uid == null || person == null || audit == null)
       throw new java.lang.IllegalArgumentException("updateSuPerson - Null argument values not allowed for uid, person or audit")
 
@@ -102,24 +98,6 @@ public class AccountServiceImpl implements AccountService{
       logger.debug("updateSuPerson - Trying to update SuPerson uid<${originalPerson.uid}>")
       SuPersonQuery.saveSuPerson(originalPerson)
       logger.info("updateSuPerson - Updated SuPerson uid<${originalPerson.uid}>")
-      if(roleDN != null) {
-        logger.debug("updateSuPerson - Trying to find role for DN<${roleDN}>")
-        SuRole role = SuRoleQuery.getSuRoleFromDN(GldapoManager.LDAP_RW, roleDN)
-        if(role != null) {
-          logger.debug("updateSuPerson - Role <${role.cn}> found for DN<${roleDN}>")
-          DistinguishedName uidDN = new DistinguishedName(originalPerson.getDn())
-          def roList = role.roleOccupant.collect { ro -> new DistinguishedName(ro) }
-          if(!roList.contains(uidDN)) {
-            role.roleOccupant.add(uidDN.toString())
-            SuRoleQuery.saveSuRole(role)
-            logger.info("updateSuPerson - Uid<${originalPerson.uid}> added as occupant to role <${role.cn}> ")
-          } else {
-            logger.debug("updateSuPerson - Occupant <${originalPerson.uid}> already exist for role <${role.cn}>")
-          }
-        } else {
-          logger.warn("updateSuPerson - Could not update uid <${originalPerson.uid}> with role <${roleDN}>, role not found!")
-        }
-      }
     } else {
       throw new IllegalArgumentException("updateSuPerson - No such uid found: "+uid)
     }
@@ -133,7 +111,6 @@ public class AccountServiceImpl implements AccountService{
    * @param nin 12-digit social security number for the SuPerson.
    * @param givenName given name for the SuPerson.
    * @param sn surname of the SuPerson.
-   * @param role String with DN that points to an SuRole or null.
    * @param person pre-populated SvcSuPersonVO object. This will be used to populate standard attributes for the SuPerson.
    * @param audit Audit object initilized with audit data about the client and user.
    * @return String with newly created password for the SuPerson.
@@ -142,7 +119,7 @@ public class AccountServiceImpl implements AccountService{
    * @see se.su.it.svc.commons.SvcSuPersonVO
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public String createSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "domain") String domain, @WebParam(name = "nin") String nin, @WebParam(name = "givenName") String givenName, @WebParam(name = "sn") String sn, @WebParam(name = "roleDN") String roleDN, @WebParam(name = "person") SvcSuPersonVO person, @WebParam(name = "audit") SvcAudit audit) {
+  public String createSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "domain") String domain, @WebParam(name = "nin") String nin, @WebParam(name = "givenName") String givenName, @WebParam(name = "sn") String sn, @WebParam(name = "person") SvcSuPersonVO person, @WebParam(name = "audit") SvcAudit audit) {
     if (uid == null || domain == null || nin == null || givenName == null || sn == null || person == null || audit == null)
       throw new java.lang.IllegalArgumentException("createSuPerson - Null argument values not allowed for uid, domain, nin, givenName, sn, person or audit")
     if(SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid))
@@ -198,7 +175,7 @@ public class AccountServiceImpl implements AccountService{
       SuPersonQuery.saveSuInitPerson(suInitPerson)
     }
     logger.debug("createSuPerson - Updating standard attributes according to function argument object for uid<${uid}>")
-    updateSuPerson(uid,roleDN,person,audit)
+    updateSuPerson(uid,person,audit)
     logger.info("createSuPerson - Uid<${uid}> created")
     logger.debug("createSuPerson - Returning password for uid<${uid}>")
     return password

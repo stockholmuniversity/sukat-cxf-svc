@@ -124,6 +124,13 @@
     implementor="#enrollmentserviceEndpoint"
     address="/EnrollmentService" />
 
+  <bean id="roleserviceEndpoint" class="se.su.it.svc.RoleServiceImpl" />
+  <jaxws:endpoint
+    id="roleservice"
+    implementorClass="se.su.it.svc.RoleServiceImpl"
+    implementor="#roleserviceEndpoint"
+    address="/RoleService" />
+
   <bean id="webserviceadminEndpoint" class="se.su.it.svc.WebServiceAdminImpl" />
   <jaxws:endpoint
     id="webserviceadmin"

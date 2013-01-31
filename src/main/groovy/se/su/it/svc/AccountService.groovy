@@ -11,6 +11,6 @@ public interface AccountService {
   public void updatePrimaryAffiliation(String uid, String affiliation, SvcAudit audit)
   @AuditAspectMethodDetails(details = "setPassword")
   public String resetPassword(String uid, SvcAudit audit)
-  public void updateSuPerson(String uid,String roleDN,SvcSuPersonVO person, SvcAudit audit)
-  public String createSuPerson(String uid, String domain, String nin, String givenName, String sn, String roleDN, SvcSuPersonVO person, SvcAudit audit)
+  public void updateSuPerson(String uid,SvcSuPersonVO person, SvcAudit audit)
+  public String createSuPerson(String uid, String domain, String nin, String givenName, String sn, SvcSuPersonVO person, SvcAudit audit)
 }
