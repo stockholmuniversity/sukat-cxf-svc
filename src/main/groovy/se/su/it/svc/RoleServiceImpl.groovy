@@ -84,8 +84,8 @@ public class RoleServiceImpl implements RoleService {
           logger.debug("removeUidFromRoles - Role <${role.cn}> found for DN<${roleDN.toString()}>")
           DistinguishedName uidDN = new DistinguishedName(person.getDn())
           def roList = role.roleOccupant.collect { ro -> new DistinguishedName(ro) }
-          if (roList.contains(uidDN)) {
-            roList.remove(uidDN)
+          if (roList.find {roListItem -> if(roListItem.compareTo(uidDN) == 0) return true; return false}) {
+            roList.remove(roList.find {roListItem -> if(roListItem.compareTo(uidDN) == 0) return true; return false})
             role.roleOccupant = new LinkedList<String>(roList.collect {dn -> dn.toString()} )//      roList.toArray(new String[roList.size()]))
             SuRoleQuery.saveSuRole(role)
             logger.info("removeUidFromRoles - Uid<${person.uid}> removed as occupant from role <${role.cn}> ")
