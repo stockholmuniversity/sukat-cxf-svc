@@ -34,6 +34,8 @@ public class RoleServiceImpl implements RoleService {
   public void addUidToRoles(@WebParam(name = "uid") String uid, @WebParam(name = "roleDNList") List<String> roleDNList, @WebParam(name = "audit") SvcAudit audit) {
     if (uid == null || roleDNList == null || audit == null)
       throw new java.lang.IllegalArgumentException("addUidToRoles - Null argument values not allowed for uid, roleDNList or audit")
+    if(roleDNList.size() <= 0)
+      throw new java.lang.IllegalArgumentException("addUidToRoles - roleDNList cant be empty")
 
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
     if(person) {
@@ -73,6 +75,8 @@ public class RoleServiceImpl implements RoleService {
   public void removeUidFromRoles(@WebParam(name = "uid") String uid, @WebParam(name = "roleDNList") List<String> roleDNList, @WebParam(name = "audit") SvcAudit audit) {
     if (uid == null || roleDNList == null || audit == null)
       throw new java.lang.IllegalArgumentException("removeUidFromRoles - Null argument values not allowed for uid, roleDNList or audit")
+    if(roleDNList.size() <= 0)
+      throw new java.lang.IllegalArgumentException("addUidToRoles - roleDNList cant be empty")
 
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
     if(person) {
