@@ -44,7 +44,7 @@ public class RoleServiceImpl implements RoleService {
           logger.debug("addUidToRoles - Role <${role.cn}> found for DN<${roleDN}>")
           DistinguishedName uidDN = new DistinguishedName(person.getDn())
           def roList = role.roleOccupant.collect { ro -> new DistinguishedName(ro) }
-          if (!roList.contains(uidDN)) {
+          if (!roList.find {roListItem -> if(roListItem.compareTo(uidDN) == 0) return true; return false}) {
             role.roleOccupant.add(uidDN.toString())
             SuRoleQuery.saveSuRole(role)
             logger.info("addUidToRoles - Uid<${person.uid}> added as occupant to role <${role.cn}> ")
