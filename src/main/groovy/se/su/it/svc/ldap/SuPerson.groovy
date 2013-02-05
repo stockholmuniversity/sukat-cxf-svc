@@ -23,7 +23,7 @@ class SuPerson implements Serializable {
   String sn
   String cn
   String displayName
-  String title
+  Set<String> title
   String roomNumber
   String telephoneNumber
   String mobile
@@ -55,7 +55,7 @@ class SuPerson implements Serializable {
     if(this.sn != person.sn) this.sn = person.sn
     if(this.cn != person.givenName + " " + person.sn) this.cn = person.givenName + " " + person.sn
     if(this.displayName != person.displayName) this.displayName = person.displayName
-    if(this.title != person.title) this.title = person.title
+    if(!isEqualSets(this.title, person.title)) this.title = person.title
     if(this.roomNumber != person.roomNumber) this.roomNumber = person.roomNumber
     if(this.telephoneNumber != person.telephoneNumber) this.telephoneNumber = person.telephoneNumber
     if(this.mobile != person.mobile) this.mobile = person.mobile

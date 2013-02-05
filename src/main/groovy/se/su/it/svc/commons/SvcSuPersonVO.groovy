@@ -25,8 +25,8 @@ public class SvcSuPersonVO implements Serializable{
   String sn
   @XmlAttribute
   String displayName
-  @XmlAttribute
-  String title
+  @XmlElement(name="title")
+  Set<String> title
   @XmlAttribute
   String roomNumber
   @XmlAttribute
