@@ -182,18 +182,18 @@ class AccountServiceImplTest extends spock.lang.Specification{
   def "Test updateSuPerson when person exist"() {
     setup:
     SvcSuPersonVO suPerson = new SvcSuPersonVO()
-    suPerson.title = "knallhatt"
+    suPerson.title = ["knallhatt"]
     suPerson.eduPersonAffiliation = ["other"]
-    String title = null
+    def title = []
     String listEntry0 = null
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> new SuPerson(title: "systemdeveloper", eduPersonAffiliation: ["employee"]) }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> new SuPerson(title: ["systemdeveloper"], eduPersonAffiliation: ["employee"]) }
     SuPersonQuery.metaClass.static.saveSuPerson = {SuPerson person -> title = person.title;listEntry0=person.eduPersonAffiliation.iterator().next()}
     def accountServiceImpl = new AccountServiceImpl()
     when:
     accountServiceImpl.updateSuPerson("testuid",suPerson, new SvcAudit())
     then:
-    title == "knallhatt"
+    title.iterator().next() == "knallhatt"
     listEntry0 == "other"
   }
 
