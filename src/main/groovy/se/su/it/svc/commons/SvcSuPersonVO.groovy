@@ -27,10 +27,10 @@ public class SvcSuPersonVO implements Serializable{
   String displayName
   @XmlElement(name="title")
   Set<String> title
-  @XmlAttribute
-  String roomNumber
-  @XmlAttribute
-  String telephoneNumber
+  @XmlElement(name="roomNumber")
+  Set<String> roomNumber
+  @XmlElement(name="telephoneNumber")
+  Set<String> telephoneNumber
   @XmlAttribute
   String mobile
   @XmlElement(name="sukatPULAttributes")
