@@ -210,7 +210,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
   @Test
   def "Test createSuPerson with already exist uid argument"() {
     setup:
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> new SuPerson() }
+    SuPersonQuery.metaClass.static.getSuPersonFromUIDNoCache = {String directory,String uid -> new SuPerson() }
     def accountServiceImpl = new AccountServiceImpl()
     when:
     accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), new SvcAudit())
@@ -288,7 +288,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     boolean updatePersArgsOk = false
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuInitPerson.metaClass.parent = "stuts"
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
+    SuPersonQuery.metaClass.static.getSuPersonFromUIDNoCache = {String directory,String uid -> return null }
     SuPersonQuery.metaClass.static.initSuPerson = {String directory, SuInitPerson tmpPerson -> person1 = tmpPerson}
     PasswordUtils.metaClass.static.genRandomPassword = {int a, int b -> return "secretpwd"}
     ExecUtils.metaClass.static.exec = {String tmpScript, String[] tmpArgArray -> script = tmpScript; argArray = tmpArgArray; return "OK (uidnumber:245234)"}

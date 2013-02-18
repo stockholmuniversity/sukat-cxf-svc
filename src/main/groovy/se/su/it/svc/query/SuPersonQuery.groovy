@@ -33,7 +33,7 @@ public class SuPersonQuery {
       SuPerson.find(directory: qDirectory, base: "") {
         and {
           eq("uid", qUid)
-          eq("objectclass", "superson")
+          eq("objectclass", "suPerson")
         }
       }
     }
@@ -42,6 +42,25 @@ public class SuPersonQuery {
     def suPerson = (SuPerson) cacheManager.get(params, { query(directory, uid) })
 
     return suPerson
+  }
+
+  /**
+   * Returns a non-cached SuPerson object, specified by the parameter uid.
+   *
+   *
+   * @param directory which directory to use, see GldapoManager.
+   * @param uid  the uid (user id) for the user that you want to find.
+   * @return an <code><SuPerson></code> or null.
+   * @see se.su.it.svc.ldap.SuPerson
+   * @see se.su.it.svc.manager.GldapoManager
+   */
+  static SuPerson getSuPersonFromUIDNoCache(String directory, String uid) {
+    return SuPerson.find(directory: directory, base: "") {
+      and {
+        eq("uid", uid)
+        eq("objectclass", "suPerson")
+      }
+    }
   }
 
   /**

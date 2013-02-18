@@ -1,5 +1,7 @@
 package se.su.it.svc
 
+import se.su.it.svc.manager.EhCacheManager
+
 import javax.jws.WebService
 import org.apache.log4j.Logger
 import se.su.it.svc.commons.SvcAudit
@@ -122,7 +124,7 @@ public class AccountServiceImpl implements AccountService{
   public String createSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "domain") String domain, @WebParam(name = "nin") String nin, @WebParam(name = "givenName") String givenName, @WebParam(name = "sn") String sn, @WebParam(name = "person") SvcSuPersonVO person, @WebParam(name = "audit") SvcAudit audit) {
     if (uid == null || domain == null || nin == null || givenName == null || sn == null || person == null || audit == null)
       throw new java.lang.IllegalArgumentException("createSuPerson - Null argument values not allowed for uid, domain, nin, givenName, sn, person or audit")
-    if(SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid))
+    if(SuPersonQuery.getSuPersonFromUIDNoCache(GldapoManager.LDAP_RW, uid))
       throw new java.lang.IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
 
     //Begin init entry in sukat
