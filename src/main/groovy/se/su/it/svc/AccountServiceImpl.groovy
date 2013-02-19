@@ -114,6 +114,7 @@ public class AccountServiceImpl implements AccountService{
    * @param givenName given name for the SuPerson.
    * @param sn surname of the SuPerson.
    * @param person pre-populated SvcSuPersonVO object. This will be used to populate standard attributes for the SuPerson.
+   * @param  boolean fullAccount if true will try to create AFS and KDC entries else the posix part will be missing.
    * @param audit Audit object initilized with audit data about the client and user.
    * @return String with newly created password for the SuPerson.
    * @see se.su.it.svc.ldap.SuPerson
@@ -121,7 +122,7 @@ public class AccountServiceImpl implements AccountService{
    * @see se.su.it.svc.commons.SvcSuPersonVO
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public String createSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "domain") String domain, @WebParam(name = "nin") String nin, @WebParam(name = "givenName") String givenName, @WebParam(name = "sn") String sn, @WebParam(name = "person") SvcSuPersonVO person, @WebParam(name = "audit") SvcAudit audit) {
+  public String createSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "domain") String domain, @WebParam(name = "nin") String nin, @WebParam(name = "givenName") String givenName, @WebParam(name = "sn") String sn, @WebParam(name = "person") SvcSuPersonVO person, @WebParam(name = "fullAccount") boolean fullAccount, @WebParam(name = "audit") SvcAudit audit) {
     if (uid == null || domain == null || nin == null || givenName == null || sn == null || person == null || audit == null)
       throw new java.lang.IllegalArgumentException("createSuPerson - Null argument values not allowed for uid, domain, nin, givenName, sn, person or audit")
     if(SuPersonQuery.getSuPersonFromUIDNoCache(GldapoManager.LDAP_RW, uid))
@@ -148,33 +149,38 @@ public class AccountServiceImpl implements AccountService{
     String uidNumber = ""
     String output = ""
     String password = PasswordUtils.genRandomPassword(10, 10)
-    def perlScript = ["--user", "uadminw", "/local/sukat/libexec/enable-user.pl", "--uid", uid, "--password", password, "--gidnumber", "1200"]
-    try {
-      logger.debug("createSuPerson - Running perlscript to create user in KDC and AFS for uid<${uid}>")
-      def res = ExecUtils.exec("/local/scriptbox/bin/run-token-script.sh", perlScript.toArray(new String[perlScript.size()]))
-      Pattern p = Pattern.compile("OK \\(uidnumber:(\\d+)\\)")
-      Matcher m = p.matcher(res.trim())
-      if (m.matches()) {
-        uidNumber = m.group(1)
-      } else {
-        error = true
+    if (fullAccount != null && fullAccount == true) {
+      def perlScript = ["--user", "uadminw", "/local/sukat/libexec/enable-user.pl", "--uid", uid, "--password", password, "--gidnumber", "1200"]
+      try {
+        logger.debug("createSuPerson - Running perlscript to create user in KDC and AFS for uid<${uid}>")
+        def res = ExecUtils.exec("/local/scriptbox/bin/run-token-script.sh", perlScript.toArray(new String[perlScript.size()]))
+        Pattern p = Pattern.compile("OK \\(uidnumber:(\\d+)\\)")
+        Matcher m = p.matcher(res.trim())
+        if (m.matches()) {
+          uidNumber = m.group(1)
+        } else {
+          error = true
+        }
+      } catch (Exception e) {
+        error = true;
+        logger.error("createSuPerson - Error when creating uid<${uid}> in KDC and/or AFS! Error: " + e.message)
+        logger.error("               - posixAccount attributes will not be written to SUKAT!")
       }
-    } catch (Exception e) {
-      error = true;
-      logger.error("createSuPerson - Error when creating uid<${uid}> in KDC and/or AFS! Error: " + e.message)
-      logger.error("               - posixAccount attributes will not be written to SUKAT!")
-    }
-    //End call Perlscript to init user in kdc, afs and unixshell
-    if(!error) {
-      logger.debug("createSuPerson - Perlscript success for uid<${uid}>")
-      logger.debug("createSuPerson - Writing posixAccount attributes to sukat for uid<${uid}>")
-      suInitPerson.objectClass.add("posixAccount")
-      suInitPerson.loginShell = "/usr/local/bin/bash"
-      suInitPerson.homeDirectory = "/afs/su.se/home/"+uid.charAt(0)+"/"+uid.charAt(1)+"/"+uid
-      suInitPerson.uidNumber = uidNumber
-      suInitPerson.gidNumber = "1200"
+      //End call Perlscript to init user in kdc, afs and unixshell
+      if (!error) {
+        logger.debug("createSuPerson - Perlscript success for uid<${uid}>")
+        logger.debug("createSuPerson - Writing posixAccount attributes to sukat for uid<${uid}>")
+        suInitPerson.objectClass.add("posixAccount")
+        suInitPerson.loginShell = "/usr/local/bin/bash"
+        suInitPerson.homeDirectory = "/afs/su.se/home/" + uid.charAt(0) + "/" + uid.charAt(1) + "/" + uid
+        suInitPerson.uidNumber = uidNumber
+        suInitPerson.gidNumber = "1200"
 
-      SuPersonQuery.saveSuInitPerson(suInitPerson)
+        SuPersonQuery.saveSuInitPerson(suInitPerson)
+      }
+    } else {
+      logger.warn("createSuPerson - FullAccount attribute not set. PosixAccount entries will not be set and no AFS or KDC entries will be generated.")
+      logger.warn("createSuPerson - Password returned will be fake/dummy")
     }
     logger.debug("createSuPerson - Updating standard attributes according to function argument object for uid<${uid}>")
     updateSuPerson(uid,person,audit)

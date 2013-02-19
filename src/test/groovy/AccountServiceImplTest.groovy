@@ -202,7 +202,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.createSuPerson(null,"it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.createSuPerson(null,"it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), false, new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
@@ -213,7 +213,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     SuPersonQuery.metaClass.static.getSuPersonFromUIDNoCache = {String directory,String uid -> new SuPerson() }
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), false, new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
@@ -223,7 +223,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.createSuPerson("testtest",null,"196601010357","Test","Testsson",new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest",null,"196601010357","Test","Testsson",new SvcSuPersonVO(), false, new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
@@ -233,7 +233,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se",null,"Test","Testsson",new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","it.su.se",null,"Test","Testsson",new SvcSuPersonVO(), false, new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
@@ -243,7 +243,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357",null,"Testsson",new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357",null,"Testsson",new SvcSuPersonVO(), false, new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
@@ -253,7 +253,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test",null,new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test",null,new SvcSuPersonVO(), false, new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
@@ -263,7 +263,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",null, new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",null, false, new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
@@ -273,7 +273,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), null)
+    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), false, null)
     then:
     thrown(IllegalArgumentException)
   }
@@ -296,7 +296,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     def accountServiceImpl = Spy(AccountServiceImpl)
     accountServiceImpl.updateSuPerson(*_) >> {String uid, SvcSuPersonVO person,SvcAudit audit -> if(uid == "testtest") updatePersArgsOk = true}
     when:
-    def pwd = accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), new SvcAudit())
+    def pwd = accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), true, new SvcAudit())
     then:
     pwd == "secretpwd"
     person1.uid == "testtest"
