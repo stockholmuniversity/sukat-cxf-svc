@@ -77,6 +77,7 @@ class SuPerson implements Serializable {
     if(this.homePostalCode != person.homePostalCode) this.homePostalCode = person.homePostalCode
     if(this.description != person.description) this.description = person.description
     if(this.sukatComment != person.sukatComment) this.sukatComment = person.sukatComment
+    checkAndCorrectEmptyValues()
   }
 
   private boolean isEqualSets(Set<String> org, Set<String> mod) {
@@ -84,5 +85,58 @@ class SuPerson implements Serializable {
     if(org != null && mod == null) return false
     if(org == null && mod != null) return false
     return org.equals(mod)
+  }
+
+  private void checkAndCorrectEmptyValues() {
+    this.eduPersonPrimaryAffiliation = stringCheck(this.eduPersonPrimaryAffiliation)
+    this.eduPersonAffiliation = setCheck(this.eduPersonAffiliation)
+    this.eduPersonEntitlement = setCheck(this.eduPersonEntitlement)
+    this.socialSecurityNumber = stringCheck(this.socialSecurityNumber)
+    this.givenName = stringCheck(this.givenName)
+    this.sn = stringCheck(this.sn)
+    this.cn = stringCheck(this.cn)
+    this.displayName = stringCheck(this.displayName)
+    this.title = setCheck(this.title)
+    this.roomNumber = setCheck(this.roomNumber)
+    this.telephoneNumber = setCheck(this.telephoneNumber)
+    this.mobile = stringCheck(this.mobile)
+    this.sukatPULAttributes = setCheck(this.sukatPULAttributes)
+    this.labeledURI = stringCheck(this.labeledURI)
+    this.mail = setCheck(this.mail)
+    this.mailLocalAddress = setCheck(this.mailLocalAddress)
+    this.sukatLOAFromDate = stringCheck(this.sukatLOAFromDate)
+    this.sukatLOAToDate = stringCheck(this.sukatLOAToDate)
+    this.eduPersonOrgUnitDN = setCheck(this.eduPersonOrgUnitDN)
+    this.eduPersonPrimaryOrgUnitDN = stringCheck(this.eduPersonPrimaryOrgUnitDN)
+    this.registeredAddress = stringCheck(this.registeredAddress)
+    this.mailRoutingAddress = stringCheck(this.mailRoutingAddress)
+    this.departmentNumber = stringCheck(this.departmentNumber)
+    this.homeMobilePhone = stringCheck(this.homeMobilePhone)
+    this.homePhone = stringCheck(this.homePhone)
+    this.homePostalAddress = setCheck(this.homePostalAddress)
+    this.homeLocalityName = stringCheck(this.homeLocalityName)
+    this.homePostalCode = stringCheck(this.homePostalCode)
+    this.description = stringCheck(this.description)
+    this.sukatComment = stringCheck(this.sukatComment)
+  }
+
+  private String stringCheck(String aString) {
+    if (aString != null && aString.trim().isEmpty()) {
+      return null
+    }
+    return aString
+  }
+
+  private Set<String> setCheck(Set<String> aSet) {
+    if (aSet == null) {
+      return null
+    }
+    for (Iterator<String> itr = aSet.iterator(); itr.hasNext();) {
+      String aString = itr.next()
+      if (aString != null && aString.trim().isEmpty()) {
+        itr.remove()
+      }
+    }
+    return aSet
   }
 }
