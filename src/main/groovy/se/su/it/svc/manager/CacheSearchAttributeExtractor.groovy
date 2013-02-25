@@ -14,6 +14,9 @@ import sun.reflect.generics.scope.ClassScope
 public class CacheSearchAttributeExtractor implements AttributeExtractor{
 
   public Object attributeFor(Element element, String s) {
+    if (element == null || element.value == null){
+      return null
+    }
     if(element.value instanceof java.util.LinkedList) {
       if(element.value.find {entry -> entry.class.getName() == s }) {
         return true

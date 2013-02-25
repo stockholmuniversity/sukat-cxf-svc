@@ -18,6 +18,7 @@ import se.su.it.svc.util.AccountServiceUtils
 import java.util.regex.Pattern
 import java.util.regex.Matcher
 import se.su.it.commons.ExecUtils
+import org.apache.commons.lang.NotImplementedException
 
 /**
  * Implementing class for AccountService CXF Web Service.
@@ -187,6 +188,36 @@ public class AccountServiceImpl implements AccountService{
     logger.info("createSuPerson - Uid<${uid}> created")
     logger.debug("createSuPerson - Returning password for uid<${uid}>")
     return password
+  }
+
+  /**
+   * This method terminates the account for the specified uid in sukat.
+   *
+   * @param uid  uid of the user.
+   * @param audit Audit object initilized with audit data about the client and user.
+   * @return void.
+   * @see se.su.it.svc.commons.SvcAudit
+   */
+  public void terminateSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
+    if (uid == null || audit == null)
+      throw new java.lang.IllegalArgumentException("terminateSuPerson - Null argument values not allowed for uid or audit")
+
+    SuPerson terminatePerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+    if(terminatePerson) {
+      //TODO: This serves as a stubfunction right now. We need input on how a terminate should work
+      //TODO: Below is some code that might do the trick, but what about mail address and stuff
+      //TODO: For now we cast exception to notify clients.
+      throw new NotImplementedException("terminateSuPerson - This function is not yet implemented!")
+      //terminatePerson.eduPersonAffiliation ["other"]
+      //terminatePerson.eduPersonPrimaryAffiliation = "other"
+      //logger.debug("terminateSuPerson - Trying to terminate SuPerson uid<${terminatePerson.uid}>")
+      //SuPersonQuery.saveSuPerson(terminatePerson)
+      //Kadmin kadmin = Kadmin.newInstance()
+      //kadmin.resetOrCreatePrincipal(uid);
+      //logger.info("terminateSuPerson - Terminated SuPerson uid<${terminatePerson.uid}>")
+    } else {
+      throw new IllegalArgumentException("terminateSuPerson - No such uid found: "+uid)
+    }
   }
 
 }

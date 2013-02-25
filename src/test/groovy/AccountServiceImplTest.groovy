@@ -1,3 +1,4 @@
+import org.apache.commons.lang.NotImplementedException
 import org.junit.Test
 import se.su.it.svc.AccountServiceImpl
 import se.su.it.svc.commons.SvcAudit
@@ -317,5 +318,49 @@ class AccountServiceImplTest extends spock.lang.Specification{
     script == "/local/scriptbox/bin/run-token-script.sh"
     argArray.toList().containsAll(["--user", "uadminw", "/local/sukat/libexec/enable-user.pl", "--uid", "testtest", "--password", "secretpwd", "--gidnumber", "1200"])
     updatePersArgsOk == true
+  }
+
+  @Test
+  def "Test terminateSuPerson with null uid argument"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.terminateSuPerson(null, new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test terminateSuPerson with null SvcAudit argument"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.terminateSuPerson("testuid", null)
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test terminateSuPerson without person exist"() {
+    setup:
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.terminateSuPerson("testuid", new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test terminateSuPerson when person exist"() {
+    setup:
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> new SuPerson() }
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.terminateSuPerson("testuid", new SvcAudit())
+    then:
+    thrown(NotImplementedException)
   }
 }
