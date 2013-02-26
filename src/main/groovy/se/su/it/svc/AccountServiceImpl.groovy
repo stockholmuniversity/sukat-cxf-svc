@@ -1,5 +1,6 @@
 package se.su.it.svc
 
+import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.manager.EhCacheManager
 
 import javax.jws.WebService
@@ -28,7 +29,6 @@ import org.apache.commons.lang.NotImplementedException
 @WebService
 public class AccountServiceImpl implements AccountService{
   private static final Logger logger = Logger.getLogger(AccountServiceImpl.class)
-
   /**
    * This method sets the primary affiliation for the specified uid.
    *
@@ -41,8 +41,17 @@ public class AccountServiceImpl implements AccountService{
    * @see se.su.it.svc.commons.SvcAudit
    */
   public void updatePrimaryAffiliation(@WebParam(name = "uid") String uid, @WebParam(name = "affiliation") String affiliation, @WebParam(name = "audit") SvcAudit audit) {
-    if(uid == null || affiliation == null || audit == null)
-      throw new java.lang.IllegalArgumentException("updatePrimaryAffiliation - Null argument values not allowed in this function")
+    //if(uid == null || affiliation == null || audit == null)
+    //  throw new java.lang.IllegalArgumentException("updatePrimaryAffiliation - Null argument values not allowed in this function")
+    /*try {
+      LdapAttributeValidator.validateAttributes(["uid":uid,"eduPersonPrimaryAffiliation":affiliation,"audit":audit])
+    } catch (Exception ex) {
+      throw new java.lang.IllegalArgumentException("updatePrimaryAffiliation - " + ex.message)
+    } */
+    String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,"eduPersonPrimaryAffiliation":affiliation,"audit":audit])
+    if (attributeError)
+      throw new java.lang.IllegalArgumentException("updatePrimaryAffiliation - ${attributeError}")
+
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
     if(person) {
       logger.debug("updatePrimaryAffiliation - Replacing affiliation=<${person?.eduPersonPrimaryAffiliation}> with affiliation=<${affiliation}> for uid=<${uid}>")
@@ -92,8 +101,9 @@ public class AccountServiceImpl implements AccountService{
    * @see se.su.it.svc.commons.SvcAudit
    */
   public void updateSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "person") SvcSuPersonVO person, @WebParam(name = "audit") SvcAudit audit){
-    if (uid == null || person == null || audit == null)
-      throw new java.lang.IllegalArgumentException("updateSuPerson - Null argument values not allowed for uid, person or audit")
+    String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,"svcsuperson":person,"audit":audit])
+    if (attributeError)
+      throw new java.lang.IllegalArgumentException("updateSuPerson - ${attributeError}")
 
     SuPerson originalPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
     if(originalPerson) {
@@ -124,8 +134,9 @@ public class AccountServiceImpl implements AccountService{
    * @see se.su.it.svc.commons.SvcAudit
    */
   public String createSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "domain") String domain, @WebParam(name = "nin") String nin, @WebParam(name = "givenName") String givenName, @WebParam(name = "sn") String sn, @WebParam(name = "person") SvcSuPersonVO person, @WebParam(name = "fullAccount") boolean fullAccount, @WebParam(name = "audit") SvcAudit audit) {
-    if (uid == null || domain == null || nin == null || givenName == null || sn == null || person == null || audit == null)
-      throw new java.lang.IllegalArgumentException("createSuPerson - Null argument values not allowed for uid, domain, nin, givenName, sn, person or audit")
+    String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,"domain":domain,"nin":nin,"givenName":givenName,"sn":sn,"svcsuperson":person,"audit":audit])
+    if (attributeError)
+      throw new java.lang.IllegalArgumentException("createSuPerson - ${attributeError}")
     if(SuPersonQuery.getSuPersonFromUIDNoCache(GldapoManager.LDAP_RW, uid))
       throw new java.lang.IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
 
@@ -199,8 +210,9 @@ public class AccountServiceImpl implements AccountService{
    * @see se.su.it.svc.commons.SvcAudit
    */
   public void terminateSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
-    if (uid == null || audit == null)
-      throw new java.lang.IllegalArgumentException("terminateSuPerson - Null argument values not allowed for uid or audit")
+    String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,"audit":audit])
+    if (attributeError)
+      throw new java.lang.IllegalArgumentException("terminateSuPerson - ${attributeError}")
 
     SuPerson terminatePerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
     if(terminatePerson) {
