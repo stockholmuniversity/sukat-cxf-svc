@@ -17,6 +17,8 @@ public class LdapAttributeValidator {
   public static String validateAttributes(Map<String, Object> map) {
     String error = null
     map.each {String attributeName, Object val ->
+      if (error)
+        return
       switch (attributeName.toLowerCase()) {
         case "audit"                        : try {validateAudit(val)}                        catch (Exception x) {error = x.message};break
         case "uid"                          : try {validateUid(val)}                          catch (Exception x) {error = x.message};break
@@ -77,7 +79,7 @@ public class LdapAttributeValidator {
     if (!nin instanceof String)
       throwMe(validateAttributesString,"Attribute validation failed for nin <${nin}>. nin need to be a String object.")
     String tmpNin = (String)nin
-    if (!tmpNin ==~ /^[12]{1}[90]{1}[0-9]{6}[0-9]{4}$/)
+    if (!(tmpNin ==~ /^[12]{1}[90]{1}[0-9]{6}[0-9]{4}$/))
       throwMe(validateAttributesString,"Attribute validation failed for nin <${tmpNin}>. nin need to be a valid 12 digit socialsecuritynumber.")
   }
 

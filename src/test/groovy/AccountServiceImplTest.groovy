@@ -240,6 +240,16 @@ class AccountServiceImplTest extends spock.lang.Specification{
   }
 
   @Test
+  def "Test createSuPerson with wrong nin argument"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.createSuPerson("testtest","it.su.se","20001128-5764","Test","Testsson",new SvcSuPersonVO(), false, new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
   def "Test createSuPerson with null givenName argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
