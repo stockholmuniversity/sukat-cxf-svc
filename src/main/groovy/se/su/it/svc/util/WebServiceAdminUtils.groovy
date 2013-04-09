@@ -27,12 +27,12 @@ public class WebServiceAdminUtils {
     }
   }
 
-  public static byte getFunctionByteFromLoggerAndString(String logger, String level) {
-    if(logger == null || logger.length() <= 0 || level == null || level.length() <= 0) {
+  public static byte getFunctionByteFromLoggerAndString(String loggerString, String level) {
+    if(loggerString == null || loggerString.length() <= 0 || level == null || level.length() <= 0) {
       logger.info("logger/level <null>! Using default log level INFO for root logger!")
-      return Level.INFO
+      return 0
     }
-    switch (logger) {
+    switch (loggerString) {
 
       case "root" : switch (level.toLowerCase()) {
         case  "all"   : return 1
@@ -94,8 +94,8 @@ public class WebServiceAdminUtils {
         default       : logger.info("No such log level <" + level + ">! Using default log level INFO!")
           return 36
       }
-      default : logger.info("No such logger <" + logger + ">! Using default root logger setting level to INFO!")
-        return 4
+      default : logger.info("No such logger <" + loggerString + ">! Using default root logger setting level to INFO!")
+        return 0
     }
   }
 }
