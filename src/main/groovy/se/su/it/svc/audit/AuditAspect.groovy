@@ -1,5 +1,7 @@
 package se.su.it.svc.audit
 
+import groovy.util.logging.Slf4j
+
 /**
  * Created with IntelliJ IDEA.
  * User: jqvar
@@ -8,15 +10,16 @@ package se.su.it.svc.audit
  * To change this template use File | Settings | File Templates.
  */
 
-import org.apache.log4j.Logger
 import org.aopalliance.intercept.MethodInterceptor
 import org.aopalliance.intercept.MethodInvocation
+
+import java.lang.annotation.Annotation
 import java.lang.reflect.Method
 import java.sql.Timestamp
 import se.su.it.svc.commons.SvcAudit
 
+@Slf4j
 public class AuditAspect implements MethodInterceptor {
-  private static final Logger logger = Logger.getLogger(AuditAspect.class)
   private static final String STATE_INPROGRESS = "IN PROGRESS"
   private static final String STATE_SUCCESS = "SUCCESS"
   private static final String STATE_EXCEPTION = "EXCEPTION"
@@ -31,7 +34,7 @@ public class AuditAspect implements MethodInterceptor {
     try {
       auditRef = logBefore(invocation.getMethod(), invocation.getArguments())
     } catch (Exception e) {
-      logger.warn("logBefore failed for " + invocation.getMethod().getName() + " - Not proceeding.")
+      log.warn("logBefore failed for " + invocation.getMethod().getName() + " - Not proceeding.")
       throw new Exception("Audit Engine is DOWN - not performing any actions at the moment", e)
     }
 
@@ -42,7 +45,7 @@ public class AuditAspect implements MethodInterceptor {
       if (auditRef != null) {
         logException(auditRef, e)
       }
-      logger.debug("Method invocation threw exception, re-throwing to caller")
+      log.debug("Method invocation threw exception, re-throwing to caller")
       throw e
     }
 
@@ -57,12 +60,12 @@ public class AuditAspect implements MethodInterceptor {
   protected Object logBefore(Method mi, Object[] args) throws Exception {
     // Surround the audit logging with a global try/catch so that we can do softFail in a single catch block
     try {
-      logger.info("Invoked " + mi.getName() + " with " + args.length + " params")
+      log.info("Invoked " + mi.getName() + " with " + args.length + " params")
 
       //Generate MethodDetails from annotation on method to be able to describe
       //functions that will be invoked by this method
       List<String> methodDetails = []
-      mi.getAnnotations().each {annotation ->
+      for (Annotation annotation in mi?.getAnnotations()) {
         if (annotation.annotationType().getName().equalsIgnoreCase("se.su.it.svc.audit.AuditAspectMethodDetails")) {
           Method[] methods = annotation.getClass().getMethods();
           for (int i = 0; i < methods.length; i++) {
@@ -88,15 +91,23 @@ public class AuditAspect implements MethodInterceptor {
       String auditUid
       String auditClient
 
-      int lastArgIdx = args.length - 1
-      if (args[lastArgIdx] != null && args[lastArgIdx] instanceof SvcAudit) {
-        logger.debug("Found a non-null SvcAudit as last argument to method, extracting uid and ip")
-        SvcAudit audit = (SvcAudit) args[lastArgIdx]
-        auditIp = audit.getIpAddress()
-        auditUid = audit.getUid()
-        auditClient = audit.getClient()
+      SvcAudit svcAudit = null
+      try {
+        def lastArg = args[-1]
+        if (lastArg && lastArg instanceof SvcAudit) {
+          svcAudit = (SvcAudit) lastArg
+        }
+      } catch (ex) {
+        log.debug "Couldn't get svc audit obj.", ex
+      }
+
+      if (svcAudit) {
+        log.debug("Found a non-null SvcAudit as last argument to method, extracting uid and ip")
+        auditIp = svcAudit.getIpAddress()
+        auditUid = svcAudit.getUid()
+        auditClient = svcAudit.getClient()
       } else {
-        logger.warn("No suitable SvcAudit supplied for call to " + mi.getName() +
+        log.warn("No suitable SvcAudit supplied for call to " + mi.getName() +
           " - will not be able to log originator IP/UID.")
         auditIp = UNKNOWN
         auditUid = UNKNOWN
@@ -104,26 +115,27 @@ public class AuditAspect implements MethodInterceptor {
       }
 
       // Create an AuditEntity based on the gathered information
-      AuditEntity ae = new AuditEntity()
-      ae.Created = new Timestamp(new Date().getTime()).toString()
-      ae.Ip_address = auditIp
-      ae.Uid = auditUid
-      ae.Client = auditClient
-      ae.Operation = mi.getName()
-      ae.Text_args = objectToString(args)
-      ae.Raw_args = bsArgs.toByteArray().toString()
-      ae.Text_return = UNKNOWN
-      ae.Raw_return = UNKNOWN
-      ae.State = STATE_INPROGRESS
-      ae.MethodDetails = methodDetails
+      AuditEntity ae = AuditEntity.getInstance(
+          new Timestamp(new Date().getTime()).toString(),
+          auditIp,
+          auditUid,
+          auditClient,
+          mi?.getName(),
+          objectToString(args),
+          bsArgs.toByteArray().toString(),
+          UNKNOWN,
+          UNKNOWN,
+          STATE_INPROGRESS,
+          methodDetails
+      )
 
       //TODO: Call RabbitMQ here to transmit the "audit before data"
-      logger.info("Audit before -\r\n" + ae)
-      // Return a reference to the ae for reuse in success/exception loggers
+      log.info("Audit before -\r\n" + ae)
+      // Return a reference to the ae for reuse in success/exception logs
       return ae
 
     } catch (Exception e) {
-        logger.warn("Audit logging failed, catching exception due to SoftFail-mode being set to true", e)
+        log.warn("Audit logging failed, catching exception due to SoftFail-mode being set to true", e)
         return null
     }
   }
@@ -133,7 +145,7 @@ public class AuditAspect implements MethodInterceptor {
     try {
       AuditEntity ae = (AuditEntity) ref
 
-      //logger.info("Decorating ae " + ae + " with return value: " + ret)
+      //log.info("Decorating ae " + ae + " with return value: " + ret)
 
       // Serialize the Return object into a ByteArray
       ByteArrayOutputStream bsRet = new ByteArrayOutputStream()
@@ -142,15 +154,15 @@ public class AuditAspect implements MethodInterceptor {
       outRet.close()
 
       // Append return value to the audit entity
-      ae.Text_return = objectToString(ret)
-      ae.Raw_return = bsRet.toByteArray().toString()
-      ae.State = STATE_SUCCESS
+      ae.text_return = objectToString(ret)
+      ae.raw_return = bsRet.toByteArray().toString()
+      ae.state = STATE_SUCCESS
 
       //TODO: Call RabbitMQ here to transmit the "audit after data"
-      logger.info("Audit after -\r\n" + ae)
+      log.info("Audit after -\r\n" + ae)
 
     } catch (Exception e) {
-      logger.warn("Audit logging failed, no return value will be stored", e)
+      log.warn("Audit logging failed, no return value will be stored", e)
     }
   }
 
@@ -160,40 +172,33 @@ public class AuditAspect implements MethodInterceptor {
       AuditEntity ae = (AuditEntity) ref
 
       // TBD: Check for cast exception and nullity of ref
-      //logger.info("Decorating ae " + ae + " with exception " + t.getClass().getCanonicalName())
+      //log.info("Decorating ae " + ae + " with exception " + t.getClass().getCanonicalName())
 
       // Append return value to the audit entity
-      ae.Text_return = t.toString()
-      ae.State = STATE_EXCEPTION
+      ae.text_return = t.toString()
+      ae.state = STATE_EXCEPTION
 
       //TODO: Call RabbitMQ here to transmit the "audit after data"
-      logger.info("Audit exception occured -\r\n" + ae)
+      log.info("Audit exception occured -\r\n" + ae)
 
     } catch (Exception e) {
-      logger.warn("Audit logging of thrown exception failed", e)
+      log.warn("Audit logging of thrown exception failed", e)
     }
   }
 
   protected String objectToString(Object o) {
-    if (o == null)
+    if (o == null) {
       return "null"
+    }
 
     return o.toString()
   }
 
   protected String objectToString(Object[] o) {
-    if (o == null)
+    if (o == null) {
       return "null"
-
-    StringBuilder strBuilder = new StringBuilder()
-    strBuilder.append("[")
-    for (Object obj : o) {
-      strBuilder.append(objectToString(obj))
-      strBuilder.append(",")
     }
-    strBuilder.deleteCharAt(strBuilder.length() - 1)
-    strBuilder.append("]")
-    return strBuilder.toString()
 
+    return '['.plus(o?.collect { it?.toString() }?.join(',')).plus(']')
   }
 }
