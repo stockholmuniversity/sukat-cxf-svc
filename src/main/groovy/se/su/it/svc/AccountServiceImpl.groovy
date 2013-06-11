@@ -2,6 +2,7 @@ package se.su.it.svc
 
 import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.manager.EhCacheManager
+import se.su.it.svc.util.EnrollmentServiceUtils
 
 import javax.jws.WebService
 import org.apache.log4j.Logger
@@ -157,43 +158,15 @@ public class AccountServiceImpl implements AccountService{
 
     //Begin call Perlscript to init user in kdc, afs and unixshell
     //Maybe we want to replace this with a call to the message bus in the future
-    boolean error = false
-    String uidNumber = ""
-    String output = ""
     String password = PasswordUtils.genRandomPassword(10, 10)
-    if (fullAccount != null && fullAccount == true) {
-      def perlScript = ["--user", "uadminw", "/local/sukat/libexec/enable-user.pl", "--uid", uid, "--password", password, "--gidnumber", "1200"]
-      try {
-        logger.debug("createSuPerson - Running perlscript to create user in KDC and AFS for uid<${uid}>")
-        def res = ExecUtils.exec("/local/scriptbox/bin/run-token-script.sh", perlScript.toArray(new String[perlScript.size()]))
-        Pattern p = Pattern.compile("OK \\(uidnumber:(\\d+)\\)")
-        Matcher m = p.matcher(res.trim())
-        if (m.matches()) {
-          uidNumber = m.group(1)
-        } else {
-          error = true
-        }
-      } catch (Exception e) {
-        error = true;
-        logger.error("createSuPerson - Error when creating uid<${uid}> in KDC and/or AFS! Error: " + e.message)
-        logger.error("               - posixAccount attributes will not be written to SUKAT!")
-      }
-      //End call Perlscript to init user in kdc, afs and unixshell
-      if (!error) {
-        logger.debug("createSuPerson - Perlscript success for uid<${uid}>")
-        logger.debug("createSuPerson - Writing posixAccount attributes to sukat for uid<${uid}>")
-        suInitPerson.objectClass.add("posixAccount")
-        suInitPerson.loginShell = "/usr/local/bin/bash"
-        suInitPerson.homeDirectory = "/afs/su.se/home/" + uid.charAt(0) + "/" + uid.charAt(1) + "/" + uid
-        suInitPerson.uidNumber = uidNumber
-        suInitPerson.gidNumber = "1200"
-
-        SuPersonQuery.saveSuInitPerson(suInitPerson)
-      }
+    if(fullAccount != null && fullAccount == true) {
+      EnrollmentServiceUtils.enableUser(uid, password, suInitPerson)
     } else {
       logger.warn("createSuPerson - FullAccount attribute not set. PosixAccount entries will not be set and no AFS or KDC entries will be generated.")
       logger.warn("createSuPerson - Password returned will be fake/dummy")
     }
+    //End call Perlscript to init user in kdc, afs and unixshell
+
     logger.debug("createSuPerson - Updating standard attributes according to function argument object for uid<${uid}>")
     updateSuPerson(uid,person,audit)
     logger.info("createSuPerson - Uid<${uid}> created")
