@@ -56,7 +56,7 @@ class EnrollmentServiceImpl implements EnrollmentService{
    * @return SvcUidPwd object with the uid and password.
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public SvcUidPwd enrollUserByNIN(String nin, SvcAudit audit) {
+  public SvcUidPwd enrollUserByNIN(@WebParam(name = "nin") String nin, @WebParam(name = "audit") SvcAudit audit) {
     if(nin == null || audit == null)
       throw new java.lang.IllegalArgumentException("enrollUserByNIN - Null argument values not allowed in this function")
     if(nin.length() != 10 && nin.length() != 12)
