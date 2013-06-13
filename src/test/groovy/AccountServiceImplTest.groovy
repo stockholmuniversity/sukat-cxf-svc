@@ -373,4 +373,115 @@ class AccountServiceImplTest extends spock.lang.Specification{
     then:
     thrown(NotImplementedException)
   }
+
+  @Test
+  def "Test getMailRoutingAddress with null uid argument"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.getMailRoutingAddress(null, new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test getMailRoutingAddress with null audit argument"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.getMailRoutingAddress("testuid", null)
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test getMailRoutingAddress with person not found"() {
+    setup:
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.getMailRoutingAddress("testuid", new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test getMailRoutingAddress Happy Path"() {
+    setup:
+    SuPerson suPerson = new SuPerson(mailRoutingAddress: "kalle")
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return suPerson }
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    def ret = accountServiceImpl.getMailRoutingAddress("testuid", new SvcAudit())
+    then:
+    ret == "kalle"
+  }
+
+  @Test
+  def "Test setMailRoutingAddress with null uid argument"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.setMailRoutingAddress(null, "mail@test.su.se", new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test setMailRoutingAddress with null mail argument"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.setMailRoutingAddress("testuid", null, new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test setMailRoutingAddress with wrong format mail argument"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.setMailRoutingAddress("testuid", "testuser.mail.se", new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test setMailRoutingAddress with null audit argument"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.setMailRoutingAddress("testuid", "mail@test.su.se", null)
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test setMailRoutingAddress with person not found"() {
+    setup:
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.setMailRoutingAddress("testuid", "mail@test.su.se", new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test setMailRoutingAddress Happy Path"() {
+    setup:
+    SuPerson suPerson = new SuPerson(mailRoutingAddress: "kalle")
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return suPerson }
+    SuPersonQuery.metaClass.static.saveSuPerson = {SuPerson tmpp -> suPerson.mailRoutingAddress = tmpp.mailRoutingAddress}
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.setMailRoutingAddress("testuid", "mail@test.su.se", new SvcAudit())
+    then:
+    suPerson.mailRoutingAddress == "mail@test.su.se"
+  }
 }

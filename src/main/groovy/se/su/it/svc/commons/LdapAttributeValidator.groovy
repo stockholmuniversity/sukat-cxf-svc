@@ -28,6 +28,7 @@ public class LdapAttributeValidator {
         case "givenname"                    : try {validategivenName(val)}                    catch (Exception x) {error = x.message};break
         case "sn"                           : try {validateSn(val)}                           catch (Exception x) {error = x.message};break
         case "svcsuperson"                  : try {validateSvcSuPersonVO(val)}                catch (Exception x) {error = x.message};break
+        case "mailroutingaddress"           : try {validateMailRoutingAddress(val)}           catch (Exception x) {error = x.message};break
         default: logger.debug("${validateAttributesString} - Attribute <${attributeName}> dont have a validation role!");break
       }
     }
@@ -112,7 +113,25 @@ public class LdapAttributeValidator {
     SvcSuPersonVO tmpSP = (SvcSuPersonVO)svcPerson
   }
 
+  private static void validateMailRoutingAddress(Object mailRoutingAddress) {
+    if (mailRoutingAddress == null)
+      throwMe(validateAttributesString,"Attribute validation failed for mailRoutingAddress <${mailRoutingAddress}>. mailRoutingAddress can not be null.")
+    if (!mailRoutingAddress instanceof String)
+      throwMe(validateAttributesString,"Attribute validation failed for mailRoutingAddress <${mailRoutingAddress}>. mailRoutingAddress need to be a String object.")
+    String tmpMailRoutingAddress = (String)mailRoutingAddress
+    if (!checkValidMailAddress(tmpMailRoutingAddress))
+      throwMe(validateAttributesString,"Attribute validation failed for mailRoutingAddress <${tmpMailRoutingAddress}>. mailRoutingAddress need to be a valid email address.")
+  }
+
   private static void throwMe(String function, String message) {
     throw new java.lang.IllegalArgumentException("${function} - ${message}!")
+  }
+
+  private static boolean checkValidMailAddress(String mailAddress) {
+    def emailPattern = /[_A-Za-z0-9-]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})/
+    if (!(mailAddress ==~ emailPattern)) {
+      return false
+    }
+    return true
   }
 }

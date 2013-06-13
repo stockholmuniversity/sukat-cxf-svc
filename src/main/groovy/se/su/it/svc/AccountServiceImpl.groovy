@@ -205,4 +205,52 @@ public class AccountServiceImpl implements AccountService{
     }
   }
 
+  /**
+   * This method gets the mailroutingaddress for the specified uid in sukat.
+   *
+   * @param uid  uid of the user.
+   * @param audit Audit object initilized with audit data about the client and user.
+   * @return void.
+   * @see se.su.it.svc.commons.SvcAudit
+   */
+  public String getMailRoutingAddress(@WebParam(name = "uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
+    String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,"audit":audit])
+    if (attributeError)
+      throw new java.lang.IllegalArgumentException("getMailRoutingAddress - ${attributeError}")
+
+    SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+    if(suPerson) {
+      return suPerson.mailRoutingAddress
+    } else {
+      throw new IllegalArgumentException("getMailRoutingAddress - No such uid found: "+uid)
+    }
+    return null
+  }
+
+  /**
+   * This method sets the mailroutingaddress for the specified uid in sukat.
+   *
+   * @param uid  uid of the user.
+   * @param mail mailaddress to be set for uid.
+   * @param audit Audit object initilized with audit data about the client and user.
+   * @return void.
+   * @see se.su.it.svc.commons.SvcAudit
+   */
+  public void setMailRoutingAddress(@WebParam(name = "uid") String uid, @WebParam(name = "mailRoutingAddress") String mailRoutingAddress, @WebParam(name = "audit") SvcAudit audit) {
+    String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,
+                                                                       "mailroutingaddress":mailRoutingAddress,
+                                                                       "audit":audit])
+    if (attributeError)
+      throw new java.lang.IllegalArgumentException("setMailRoutingAddress - ${attributeError}")
+
+    SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+    if(suPerson) {
+      suPerson.mailRoutingAddress = mailRoutingAddress
+      SuPersonQuery.saveSuPerson(suPerson)
+      logger.debug("setMailRoutingAddress - Changed mailroutingaddress to <${mailRoutingAddress}> for uid <${uid}>")
+    } else {
+      throw new IllegalArgumentException("setMailRoutingAddress - No such uid found: "+uid)
+    }
+  }
+
 }

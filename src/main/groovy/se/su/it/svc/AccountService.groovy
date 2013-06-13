@@ -14,4 +14,6 @@ public interface AccountService {
   public void updateSuPerson(String uid,SvcSuPersonVO person, SvcAudit audit)
   public String createSuPerson(String uid, String domain, String nin, String givenName, String sn, SvcSuPersonVO person, boolean fullAccount, SvcAudit audit)
   public void terminateSuPerson(String uid, SvcAudit audit)
+  public String getMailRoutingAddress(String uid, SvcAudit audit)
+  public void setMailRoutingAddress(String uid, String mail, SvcAudit audit)
 }
