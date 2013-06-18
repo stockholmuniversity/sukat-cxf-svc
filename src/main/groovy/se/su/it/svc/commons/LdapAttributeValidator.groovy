@@ -25,6 +25,7 @@ public class LdapAttributeValidator {
         case "edupersonprimaryaffiliation"  : try {validateEduPersonPrimaryAffiliation(val)}  catch (Exception x) {error = x.message};break
         case "domain"                       : try {validateDomain(val)}                       catch (Exception x) {error = x.message};break
         case "nin"                          : try {validateNin(val)}                          catch (Exception x) {error = x.message};break
+        case "ssnornin"                     : try {validateSsnOrNin(val)}                     catch (Exception x) {error = x.message};break
         case "givenname"                    : try {validategivenName(val)}                    catch (Exception x) {error = x.message};break
         case "sn"                           : try {validateSn(val)}                           catch (Exception x) {error = x.message};break
         case "svcsuperson"                  : try {validateSvcSuPersonVO(val)}                catch (Exception x) {error = x.message};break
@@ -80,8 +81,20 @@ public class LdapAttributeValidator {
     if (!nin instanceof String)
       throwMe(validateAttributesString,"Attribute validation failed for nin <${nin}>. nin need to be a String object.")
     String tmpNin = (String)nin
-    if (!(tmpNin ==~ /^[12]{1}[90]{1}[0-9]{6}[0-9]{4}$/))
-      throwMe(validateAttributesString,"Attribute validation failed for nin <${tmpNin}>. nin need to be a valid 12 digit socialsecuritynumber.")
+    if(tmpNin.length() != 12) {
+      throwMe(validateAttributesString,"Attribute validation failed for nin <${tmpNin}>. nin need to be a 12 in length.")
+    }
+  }
+
+  private static void validateSsnOrNin(Object ssnOrNin) {
+    if (ssnOrNin == null)
+      throwMe(validateAttributesString,"Attribute validation failed for nin/ssn <${ssnOrNin}>. nin can not be null.")
+    if (!ssnOrNin instanceof String)
+      throwMe(validateAttributesString,"Attribute validation failed for nin/ssn <${ssnOrNin}>. nin need to be a String object.")
+    String tmpSsnOrNin = (String)ssnOrNin
+    if(tmpSsnOrNin.length() != 10 && tmpSsnOrNin.length() != 12) {
+      throwMe(validateAttributesString,"Attribute validation failed for nin/ssn <${tmpSsnOrNin}>. nin need to be a 10 or 12 in length.")
+    }
   }
 
   private static void validategivenName(Object givenName) {

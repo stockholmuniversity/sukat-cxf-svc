@@ -3,6 +3,7 @@ package se.su.it.svc.util
 import org.apache.log4j.Logger
 import se.su.it.commons.ExecUtils
 import se.su.it.commons.PasswordUtils
+import se.su.it.svc.ldap.SuEnrollPerson
 import se.su.it.svc.ldap.SuInitPerson
 import se.su.it.svc.query.SuPersonQuery
 
@@ -19,7 +20,7 @@ import java.util.regex.Pattern
 class EnrollmentServiceUtils {
   private static final Logger logger = Logger.getLogger(EnrollmentServiceUtils.class)
 
-  public static boolean enableUser(String uid, String password, SuInitPerson person) {
+  public static boolean enableUser(String uid, String password, Object person) {
     boolean error = false
     String uidNumber = ""
     def perlScript = ["--user", "uadminw", "/local/sukat/libexec/enable-user.pl", "--uid", uid, "--password", password, "--gidnumber", "1200"]
@@ -47,8 +48,14 @@ class EnrollmentServiceUtils {
       person.homeDirectory = "/afs/su.se/home/" + uid.charAt(0) + "/" + uid.charAt(1) + "/" + uid
       person.uidNumber = uidNumber
       person.gidNumber = "1200"
-
-      SuPersonQuery.saveSuInitPerson(person)
+      if(person instanceof SuInitPerson)
+        SuPersonQuery.saveSuInitPerson((SuInitPerson)person)
+      else if(person instanceof SuEnrollPerson)
+        SuPersonQuery.saveSuEnrollPerson((SuEnrollPerson)person)
+      else {
+        logger.error("enableUser - Could not figure out wich objectClass to use. Sukat posix attributes write failed")
+        error = true
+      }
     }
     return !error
   }

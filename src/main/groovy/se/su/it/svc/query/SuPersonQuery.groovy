@@ -1,5 +1,6 @@
 package se.su.it.svc.query
 
+import se.su.it.svc.ldap.SuEnrollPerson
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.manager.GldapoManager
 import se.su.it.svc.manager.EhCacheManager
@@ -97,6 +98,58 @@ public class SuPersonQuery {
   }
 
   /**
+   * Returns a SuEnrollPerson object, specified by the parameter nin.
+   *
+   *
+   * @param directory which directory to use, see GldapoManager.
+   * @param nin  the nin (12 digit social security number) for the user that you want to find.
+   * @return an <code><SuPerson></code> or null.
+   * @see se.su.it.svc.ldap.SuInitPerson
+   * @see se.su.it.svc.manager.GldapoManager
+   */
+  static SuEnrollPerson getSuEnrollPersonFromNin(String directory, String nin) {
+    def query = { qDirectory, qNin ->
+      SuEnrollPerson.find(directory: qDirectory, base: "") {
+        and {
+          eq("norEduPersonNIN", qNin)
+          eq("objectclass", "person")
+        }
+      }
+    }
+
+    def params = [key: ":getSuEnrollPersonFromNin:${nin}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
+    def suEnrollPerson = (SuEnrollPerson) cacheManager.get(params, { query(directory, nin) })
+
+    return suEnrollPerson
+  }
+
+  /**
+   * Returns a SuEnrollPerson object, specified by the parameter ssn.
+   *
+   *
+   * @param directory which directory to use, see GldapoManager.
+   * @param ssn  the ssn (social security number) for the user that you want to find.
+   * @return an <code><SuPerson></code> or null.
+   * @see se.su.it.svc.ldap.SuInitPerson
+   * @see se.su.it.svc.manager.GldapoManager
+   */
+  static SuEnrollPerson getSuEnrollPersonFromSsn(String directory, String ssn) {
+    def query = { qDirectory, qSsn ->
+      SuEnrollPerson.find(directory: qDirectory, base: "") {
+        and {
+          eq("socialSecurityNumber", qSsn)
+          eq("objectclass", "person")
+        }
+      }
+    }
+
+    def params = [key: ":getSuEnrollPersonFromSsn:${ssn}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
+    def suEnrollPerson = (SuEnrollPerson) cacheManager.get(params, { query(directory, ssn) })
+
+    return suEnrollPerson
+  }
+
+  /**
    * Returns a non-cached SuPerson object, specified by the parameter uid.
    *
    *
@@ -145,14 +198,39 @@ public class SuPersonQuery {
   }
 
   /**
+   * Init SuEnrollPerson entry in sukat
+   *
+   *
+   * @param directory which directory to use, see GldapoManager.
+   * @param suInitPerson a SuInitPerson object to be saved in SUKAT.
+   * @return void.
+   * @see se.su.it.svc.ldap.SuEnrollPerson
+   * @see se.su.it.svc.manager.GldapoManager
+   */
+  static void initSuEnrollPerson(String directory, SuEnrollPerson suEnrollPerson) {
+    suEnrollPerson.directory = directory
+    suEnrollPerson.save()
+  }
+
+  /**
    * Save a SuInitPerson object to ldap.
-   * and putting the changed object in the cache so that the objects returned by this svc is always up-to-date.
    *
    * @return void.
    * @see se.su.it.svc.ldap.SuInitPerson
    * @see se.su.it.svc.manager.GldapoManager
    */
   static void saveSuInitPerson(SuInitPerson person) {
+    person.save()
+  }
+
+  /**
+   * Save a SuEnrollPerson object to ldap.
+   *
+   * @return void.
+   * @see se.su.it.svc.ldap.SuInitPerson
+   * @see se.su.it.svc.manager.GldapoManager
+   */
+  static void saveSuEnrollPerson(SuEnrollPerson person) {
     person.save()
   }
 

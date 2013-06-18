@@ -13,5 +13,5 @@ import se.su.it.svc.commons.SvcUidPwd
 public interface EnrollmentService {
   @AuditAspectMethodDetails(details = "resetOrCreatePrincipal,setPasswordExpiry")
   public String resetAndExpirePwd(java.lang.String uid, SvcAudit audit)
-  public SvcUidPwd enrollUserByNIN(String nin, SvcAudit audit)
+  public SvcUidPwd enrollUser(String domain, String givenName, String sn, String eduPersonPrimaryAffiliation, String nin, SvcAudit audit)
 }
