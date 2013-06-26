@@ -46,6 +46,32 @@ public class SuPersonQuery {
   }
 
   /**
+   * Returns a SuPerson object, specified by the parameter uid.
+   *
+   *
+   * @param directory which directory to use, see GldapoManager.
+   * @param uid  the uid (user id) for the user that you want to find.
+   * @return an <code><SuPerson></code> or null.
+   * @see se.su.it.svc.ldap.SuPerson
+   * @see se.su.it.svc.manager.GldapoManager
+   */
+  static SuPerson getSuPersonFromNin(String directory, String nin) {
+    def query = { qDirectory, qNin ->
+      SuPerson.find(directory: qDirectory, base: "") {
+        and {
+          eq("norEduPersonNIN", qNin)
+          eq("objectclass", "suPerson")
+        }
+      }
+    }
+
+    def params = [key: ":getSuPersonFromNin:${nin}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
+    def suPerson = (SuPerson) cacheManager.get(params, { query(directory, nin) })
+
+    return suPerson
+  }
+
+  /**
    * Returns a SuInitPerson object, specified by the parameter nin.
    *
    *

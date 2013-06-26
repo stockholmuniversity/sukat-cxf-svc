@@ -12,6 +12,8 @@ import javax.xml.bind.annotation.XmlElement
 public class SvcSuPersonVO implements Serializable{
   static final long serialVersionUID = -687991492884235073L
   @XmlAttribute
+  String uid
+  @XmlAttribute
   String eduPersonPrimaryAffiliation
   @XmlElement(name="eduPersonAffiliation")
   Set<String> eduPersonAffiliation

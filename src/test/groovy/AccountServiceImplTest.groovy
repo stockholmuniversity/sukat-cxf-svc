@@ -484,4 +484,42 @@ class AccountServiceImplTest extends spock.lang.Specification{
     then:
     suPerson.mailRoutingAddress == "mail@test.su.se"
   }
+
+  @Test
+  def "Test findSuInitPersonByNorEduPersonNIN: with invalid nin"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.findSuPersonByNorEduPersonNIN(null, new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test findSuInitPersonByNorEduPersonNIN: When a user ain't found"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    SuPersonQuery.metaClass.static.getSuPersonFromNin = {String directory,String uid -> return null }
+    when:
+    accountServiceImpl.findSuPersonByNorEduPersonNIN('180001010000', new SvcAudit())
+    then:
+    thrown(Exception)
+  }
+
+  @Test
+  def "Test findSuPersonByNorEduPersonNIN: When a user is found"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    SuPersonQuery.metaClass.static.getSuPersonFromNin = {String directory,String uid -> new SuPerson(uid:'foo') }
+
+    when:
+    def resp = accountServiceImpl.findSuPersonByNorEduPersonNIN('180001010000', new SvcAudit())
+
+    then:
+    resp instanceof SvcSuPersonVO
+
+    and:
+    resp.uid == 'foo'
+  }
+
 }
