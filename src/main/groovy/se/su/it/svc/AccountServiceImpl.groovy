@@ -296,11 +296,12 @@ public class AccountServiceImpl implements AccountService{
     SuPerson suPerson = SuPersonQuery.getSuPersonFromSsn(GldapoManager.LDAP_RW, ssn)
 
     if (suPerson) {
-      svcSuPersonVO.uid               = suPerson.uid
-      svcSuPersonVO.givenName         = suPerson.givenName
-      svcSuPersonVO.sn                = suPerson.sn
-      svcSuPersonVO.displayName       = suPerson.displayName
-      svcSuPersonVO.registeredAddress = suPerson.registeredAddress
+      svcSuPersonVO.uid                   = suPerson.uid
+      svcSuPersonVO.socialSecurityNumber  = suPerson.socialSecurityNumber
+      svcSuPersonVO.givenName             = suPerson.givenName
+      svcSuPersonVO.sn                    = suPerson.sn
+      svcSuPersonVO.displayName           = suPerson.displayName
+      svcSuPersonVO.registeredAddress     = suPerson.registeredAddress
       svcSuPersonVO.mail = new LinkedHashSet(suPerson.mail)
 
     }
@@ -308,4 +309,34 @@ public class AccountServiceImpl implements AccountService{
     return svcSuPersonVO
   }
 
+  /**
+   * Finds a SuPerson in ldap based on uid
+   * @param uid without (@domain)
+   * @param audit Audit object initilized with audit data about the client and user.
+   * @return SvcSuPersonVO instance if found.
+   */
+
+  public SvcSuPersonVO findSuPersonByUid(
+      @WebParam(name = "uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
+
+    SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO()
+
+    String attributeError = LdapAttributeValidator.validateAttributes(["uid": uid, "audit": audit])
+    if (attributeError)
+      throw new IllegalArgumentException("uid - ${attributeError}")
+
+    SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+
+    if (suPerson) {
+      svcSuPersonVO.uid                  = suPerson.uid
+      svcSuPersonVO.socialSecurityNumber = suPerson.socialSecurityNumber
+      svcSuPersonVO.givenName            = suPerson.givenName
+      svcSuPersonVO.sn                   = suPerson.sn
+      svcSuPersonVO.displayName          = suPerson.displayName
+      svcSuPersonVO.registeredAddress    = suPerson.registeredAddress
+      svcSuPersonVO.mail = new LinkedHashSet(suPerson.mail)
+    }
+
+    return svcSuPersonVO
+  }
 }

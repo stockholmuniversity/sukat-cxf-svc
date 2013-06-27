@@ -523,7 +523,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
   }
 
   @Test
-  def "Test findSuPersonBySocialSecurityNumber: with invalid nin"() {
+  def "Test findSuPersonBySocialSecurityNumber: with invalid ssn"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     when:
@@ -563,6 +563,61 @@ class AccountServiceImplTest extends spock.lang.Specification{
 
     when:
     def resp = accountServiceImpl.findSuPersonBySocialSecurityNumber('1001010000', new SvcAudit())
+
+    then:
+    resp instanceof SvcSuPersonVO
+
+    and:
+    resp.uid == 'foo'
+    resp.givenName == 'givenName'
+    resp.sn == 'sn'
+    resp.displayName == 'displayName'
+    resp.registeredAddress == 'registeredAddress'
+    (resp.mail as Set).contains('email1@su.se')
+    (resp.mail as Set).contains('email2@su.se')
+  }
+
+  @Test
+  def "Test findSuPersonByUid: with invalid ssn"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.findSuPersonByUid(null, new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test findSuPersonByUid: When a user ain't found"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
+    when:
+    def resp = accountServiceImpl.findSuPersonByUid('foo', new SvcAudit())
+    then:
+    resp instanceof SvcSuPersonVO
+
+    and:
+    resp.uid == null
+  }
+
+  @Test
+  def "Test findSuPersonByUid: When a user is found"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid ->
+      new SuPerson(
+          uid:'foo',
+          givenName:'givenName',
+          sn:'sn',
+          displayName:'displayName',
+          registeredAddress: 'registeredAddress',
+          mail:['email1@su.se', 'email2@su.se']
+      )
+    }
+
+    when:
+    def resp = accountServiceImpl.findSuPersonByUid('foo', new SvcAudit())
 
     then:
     resp instanceof SvcSuPersonVO
