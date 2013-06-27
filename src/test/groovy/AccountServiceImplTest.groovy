@@ -522,4 +522,59 @@ class AccountServiceImplTest extends spock.lang.Specification{
     resp.uid == 'foo'
   }
 
+  @Test
+  def "Test findSuPersonBySocialSecurityNumber: with invalid nin"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    when:
+    accountServiceImpl.findSuPersonBySocialSecurityNumber(null, new SvcAudit())
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test findSuPersonBySocialSecurityNumber: When a user ain't found"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    SuPersonQuery.metaClass.static.getSuPersonFromSsn = {String directory,String uid -> return null }
+    when:
+    def resp = accountServiceImpl.findSuPersonBySocialSecurityNumber('1001010000', new SvcAudit())
+    then:
+    resp instanceof SvcSuPersonVO
+
+    and:
+    resp.uid == null
+  }
+
+  @Test
+  def "Test findSuPersonBySocialSecurityNumber: When a user is found"() {
+    setup:
+    def accountServiceImpl = new AccountServiceImpl()
+    SuPersonQuery.metaClass.static.getSuPersonFromSsn = {String directory,String uid ->
+      new SuPerson(
+          uid:'foo',
+          givenName:'givenName',
+          sn:'sn',
+          displayName:'displayName',
+          registeredAddress: 'registeredAddress',
+          mail:['email1@su.se', 'email2@su.se']
+      )
+    }
+
+    when:
+    def resp = accountServiceImpl.findSuPersonBySocialSecurityNumber('1001010000', new SvcAudit())
+
+    then:
+    resp instanceof SvcSuPersonVO
+
+    and:
+    resp.uid == 'foo'
+    resp.givenName == 'givenName'
+    resp.sn == 'sn'
+    resp.displayName == 'displayName'
+    resp.registeredAddress == 'registeredAddress'
+    (resp.mail as Set).contains('email1@su.se')
+    (resp.mail as Set).contains('email2@su.se')
+  }
+
 }

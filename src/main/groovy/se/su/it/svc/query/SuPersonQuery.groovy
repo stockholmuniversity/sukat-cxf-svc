@@ -124,6 +124,31 @@ public class SuPersonQuery {
   }
 
   /**
+   * Returns a SuPerson object, specified by the parameter ssn.
+   *
+   * @param directory which directory to use, see GldapoManager.
+   * @param ssn  the ssn (social security number) for the user that you want to find.
+   * @return an <code><SuPerson></code> or null.
+   * @see se.su.it.svc.ldap.SuPerson
+   * @see se.su.it.svc.manager.GldapoManager
+   */
+  static SuPerson getSuPersonFromSsn(String directory, String ssn) {
+    def query = { qDirectory, qSsn ->
+      SuPerson.find(directory: qDirectory, base: "") {
+        and {
+          eq("socialSecurityNumber", qSsn)
+          eq("objectclass", "person")
+        }
+      }
+    }
+
+    def params = [key: ":getSuPersonFromSsn:${ssn}", ttl: cacheManager.DEFAULT_TTL,
+        cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
+    def suPerson = (SuPerson) cacheManager.get(params, { query(directory, ssn) })
+
+    return suPerson
+  }
+  /**
    * Returns a SuEnrollPerson object, specified by the parameter nin.
    *
    *

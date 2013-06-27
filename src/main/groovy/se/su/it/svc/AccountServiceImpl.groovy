@@ -258,7 +258,7 @@ public class AccountServiceImpl implements AccountService{
    * Finds a SuPerson in ldap based on norEduPersonNin
    * @param nin in 12 numbers (ex. 198101010101)
    * @param audit Audit object initilized with audit data about the client and user.
-   * @return SuPerson instance if found.
+   * @return SvcSuPersonVO instance if found.
    */
 
   public SvcSuPersonVO findSuPersonByNorEduPersonNIN(
@@ -271,9 +271,41 @@ public class AccountServiceImpl implements AccountService{
     SuPerson suPerson = SuPersonQuery.getSuPersonFromNin(GldapoManager.LDAP_RW, nin)
 
     if (!suPerson) {
-      throw new Exception("ssnornin - No suInitPerson with the supplied ssnornin was found: " + nin)
+      throw new Exception("ssnornin - No suPerson with the supplied ssnornin was found: " + nin)
     }
 
     return new SvcSuPersonVO(uid:suPerson.uid)
   }
+
+  /**
+   * Finds a SuPerson in ldap based on socialSecurityNumber
+   * @param ssn in 10 numbers (ex. 7201010101)
+   * @param audit Audit object initilized with audit data about the client and user.
+   * @return SvcSuPersonVO instance if found.
+   */
+
+  public SvcSuPersonVO findSuPersonBySocialSecurityNumber(
+      @WebParam(name = "socialSecurityNumber") String ssn, @WebParam(name = "audit") SvcAudit audit) {
+
+    SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO()
+
+    String attributeError = LdapAttributeValidator.validateAttributes(["ssnornin": ssn, "audit": audit])
+    if (attributeError)
+      throw new IllegalArgumentException("ssnornin - ${attributeError}")
+
+    SuPerson suPerson = SuPersonQuery.getSuPersonFromSsn(GldapoManager.LDAP_RW, ssn)
+
+    if (suPerson) {
+      svcSuPersonVO.uid               = suPerson.uid
+      svcSuPersonVO.givenName         = suPerson.givenName
+      svcSuPersonVO.sn                = suPerson.sn
+      svcSuPersonVO.displayName       = suPerson.displayName
+      svcSuPersonVO.registeredAddress = suPerson.registeredAddress
+      svcSuPersonVO.mail = new LinkedHashSet(suPerson.mail)
+
+    }
+
+    return svcSuPersonVO
+  }
+
 }
