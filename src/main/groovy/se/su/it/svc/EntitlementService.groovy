@@ -12,6 +12,6 @@ import se.su.it.svc.commons.SvcAudit
  */
 @SuCxfSvcSpocpRole(role = "sukat-entitlement-admin")
 public interface EntitlementService {
-  public void addEntitlement(String uid, String entitlement, SvcAudit audit)
-  public void removeEntitlement(String uid,String entitlement,SvcAudit audit)
+  void addEntitlement(String uid, String entitlement, SvcAudit audit)
+  void removeEntitlement(String uid,String entitlement,SvcAudit audit)
 }

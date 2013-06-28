@@ -6,7 +6,6 @@ import se.su.it.svc.annotations.SuCxfSvcSpocpRole
 
 @SuCxfSvcSpocpRole(role = "sukat-card-reader")
 public interface CardInfoService {
-
-  public SuCard[] getAllCards(String uid, boolean onlyActive, SvcAudit audit);
-  public SuCard getCardByUUID(String suCardUUID, SvcAudit audit);
+  SuCard[] getAllCards(String uid, boolean onlyActive, SvcAudit audit);
+  SuCard getCardByUUID(String suCardUUID, SvcAudit audit);
 }

@@ -8,11 +8,11 @@ import se.su.it.svc.audit.AuditAspectMethodDetails
 
 @SuCxfSvcSpocpRole(role = "sukat-service-admin")
 public interface ServiceService {
-  public SuService[] getServices(String uid, SvcAudit audit)
-  public SuServiceDescription getServiceTemplate(String serviceType, SvcAudit audit)
-  public SuServiceDescription[] getServiceTemplates(SvcAudit audit)
+  SuService[] getServices(String uid, SvcAudit audit)
+  SuServiceDescription getServiceTemplate(String serviceType, SvcAudit audit)
+  SuServiceDescription[] getServiceTemplates(SvcAudit audit)
   @AuditAspectMethodDetails(details = "resetOrCreatePrincipal")
-  public SuService enableServiceFully(String uid, String serviceType, String qualifier, String description, SvcAudit audit)
-  public void blockService(String uid, String serviceType, SvcAudit audit)
-  public void unblockService(String uid, String serviceType, SvcAudit audit)
+  SuService enableServiceFully(String uid, String serviceType, String qualifier, String description, SvcAudit audit)
+  void blockService(String uid, String serviceType, SvcAudit audit)
+  void unblockService(String uid, String serviceType, SvcAudit audit)
 }

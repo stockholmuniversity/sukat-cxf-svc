@@ -7,6 +7,6 @@ import se.su.it.svc.commons.SvcSuPersonVO
 
 @SuCxfSvcSpocpRole(role = "sukat-account-admin")
 public interface RoleService {
-  public void addUidToRoles(String uid,List<String> roleDNList, SvcAudit audit)
-  public void removeUidFromRoles(String uid,List<String> roleDNList, SvcAudit audit)
+  void addUidToRoles(String uid,List<String> roleDNList, SvcAudit audit)
+  void removeUidFromRoles(String uid,List<String> roleDNList, SvcAudit audit)
 }
