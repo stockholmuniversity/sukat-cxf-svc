@@ -23,7 +23,7 @@ class SuCardOrderQuery {
 
     if (!rows) { return [] }
 
-    List cardOrders = []
+    def cardOrders = []
 
     for (row in rows) {
       try {
