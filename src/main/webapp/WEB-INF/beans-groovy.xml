@@ -40,13 +40,13 @@
 
   <context:component-scan base-package="se.su.it.svc"/>
 
-  <!--uncomment the following if gorm and mysql support is to be enabled-->
-  <!--<bean id="proopertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">-->
-    <!--<property name="location" value="file:/local/cxf-server/conf/config.properties" />-->
-  <!--<property name="ignoreResourceNotFound" value="true" />-->
-  <!--<property name="ignoreUnresolvablePlaceholders" value="true" />-->
-  <!--<property name="valueSeparator" value="?" />-->
-  <!--</bean>-->
+  <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="location" value="file:/local/cxf-server/conf/config.properties" />
+    <property name="ignoreResourceNotFound" value="true" />
+    <property name="ignoreUnresolvablePlaceholders" value="true" />
+    <!--<property name="valueSeparator" value="?" /> -->
+  </bean>
+
   <bean id="suCardDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
 		<property name="driverClassName" value="${sucard.database.driver}" />
 		<property name="url" value="${sucard.database.url}" />
