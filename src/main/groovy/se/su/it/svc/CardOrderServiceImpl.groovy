@@ -24,26 +24,4 @@ class CardOrderServiceImpl implements CardOrderService {
 
     return cardOrders
   }
-
-  @Override
-  String fetchOrdersForUid(@WebParam(name="uid") String uid) {
-
-    System.err.println "fetchOrdersForUid $uid"
-    if (!uid) {
-      return []
-    }
-
-    /** TODO: Implement audit */
-
-    List cardOrders = SuCardOrderQuery.findAllCardOrdersForUid(uid)
-
-    System.err.println "fetchOrdersForUid: cardOrders: ${cardOrders?.size()}"
-
-    return 'value'
-  }
-
-  @Override
-  boolean test() {
-    return true  //To change body of implemented methods use File | Settings | File Templates.
-  }
 }
