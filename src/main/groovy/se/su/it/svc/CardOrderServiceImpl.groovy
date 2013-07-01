@@ -1,13 +1,14 @@
 package se.su.it.svc
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcCardOrderVO
-import se.su.it.svc.query.SuCardOrderQuery
 
 import javax.jws.WebParam
 import javax.jws.WebService
 
 @WebService
 class CardOrderServiceImpl implements CardOrderService {
+
+  def suCardOrderQuery
 
   @Override
   SvcCardOrderVO[] findAllCardOrdersForUid(@WebParam(name="uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
@@ -21,7 +22,9 @@ class CardOrderServiceImpl implements CardOrderService {
 
     /** TODO: Implement audit */
 
-    def cardOrders = (SuCardOrderQuery.findAllCardOrdersForUid(uid))?:[]
+
+
+    def cardOrders = (suCardOrderQuery.findAllCardOrdersForUid(uid))?:[]
 
     return (SvcCardOrderVO[]) cardOrders.toArray()
   }

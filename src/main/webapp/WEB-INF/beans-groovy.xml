@@ -82,6 +82,10 @@
   <bean id="applicationContextProvider" class="se.su.it.svc.manager.ApplicationContextProvider"/>
   <bean id="gldapoManager" class="se.su.it.svc.manager.GldapoManager"/>
 
+  <bean id="suCardOrderQuery" class="se.su.it.svc.query.SuCardOrderQuery">
+    <property name="suCardDataSource" ref="suCardDataSource"/>
+  </bean>
+
   <bean id="cardinfoserviceEndpoint" class="se.su.it.svc.CardInfoServiceImpl" />
   <jaxws:endpoint
 	  id="cardinfoservice"

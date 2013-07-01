@@ -11,7 +11,10 @@ class SuCardOrderQuery {
 
   def suCardDataSource
 
-  public static List findAllCardOrdersForUid(String uid) {
+  public List findAllCardOrdersForUid(String uid) {
+
+    log.info "Querying card orders for uid: $uid"
+
     def rows = runQuery("SELECT " +
         "r.id, r.serial, r.createTime, r.firstname, r.lastname, r.printer, " +
         "a.streetaddress1, a.streetaddress2, a.locality, a.zipcode, " +
@@ -23,11 +26,15 @@ class SuCardOrderQuery {
 
     if (!rows) { return [] }
 
+    log.info "Found ${rows?.size()} order entries in the database."
+
     def cardOrders = []
 
     for (row in rows) {
       try {
-        cardOrders << new SvcCardOrderVO( row as GroovyRowResult )
+        SvcCardOrderVO svcCardOrderVO = new SvcCardOrderVO( row as GroovyRowResult )
+        log.debug "Adding card order ${svcCardOrderVO?.id} to $uid's orders."
+        cardOrders << svcCardOrderVO
       } catch (ex) {
         log.error "Failed to add order $row to orders.", ex
       }
@@ -37,7 +44,7 @@ class SuCardOrderQuery {
     return cardOrders
   }
 
-  private static runQuery(String query , Map args) {
+  private runQuery(String query , Map args) {
 
     Closure queryClosure = { Sql sql ->
       if (!sql) { return null }
@@ -47,7 +54,7 @@ class SuCardOrderQuery {
     return withConnection(queryClosure)
   }
 
-  private static withConnection = { Closure query ->
+  private withConnection = { Closure query ->
     def response = null
     Sql sql = null
     try {
