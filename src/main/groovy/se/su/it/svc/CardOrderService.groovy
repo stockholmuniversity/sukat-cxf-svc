@@ -4,4 +4,5 @@ import se.su.it.svc.commons.SvcAudit
 
 public interface CardOrderService {
   List findAllCardOrdersForUid(String uid, SvcAudit audit)
+  String fetchOrdersForUid(String uid)
 }

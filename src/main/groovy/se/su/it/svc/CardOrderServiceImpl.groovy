@@ -26,4 +26,25 @@ class CardOrderServiceImpl implements CardOrderService {
 
     return cardOrders
   }
+
+  @Override
+  String fetchOrdersForUid(@WebParam(name="uid") String uid) {
+    log.info "fetchOrderForUid called for $uid"
+    if (!uid) {
+      return []
+    }
+
+    /** TODO: Implement audit */
+
+    List cardOrders = SuCardOrderQuery.findAllCardOrdersForUid(uid)
+
+    log.info "cardOrders: ${cardOrders?.size()}"
+
+    for (order in cardOrders) {
+      log.info "Order: ${order?.dump()}"
+    }
+
+    // return cardOrders
+    return 'value'
+  }
 }
