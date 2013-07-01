@@ -1,13 +1,11 @@
 package se.su.it.svc
-
-import groovy.util.logging.Slf4j
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.query.SuCardOrderQuery
 
 import javax.jws.WebParam
 import javax.jws.WebService
 
-@WebService @Slf4j
+@WebService
 class CardOrderServiceImpl implements CardOrderService {
 
   @Override
@@ -29,7 +27,8 @@ class CardOrderServiceImpl implements CardOrderService {
 
   @Override
   String fetchOrdersForUid(@WebParam(name="uid") String uid) {
-    log.info "fetchOrderForUid called for $uid"
+
+    System.err.println "fetchOrdersForUid $uid"
     if (!uid) {
       return []
     }
@@ -38,13 +37,13 @@ class CardOrderServiceImpl implements CardOrderService {
 
     List cardOrders = SuCardOrderQuery.findAllCardOrdersForUid(uid)
 
-    log.info "cardOrders: ${cardOrders?.size()}"
+    System.err.println "fetchOrdersForUid: cardOrders: ${cardOrders?.size()}"
 
-    for (order in cardOrders) {
-      log.info "Order: ${order?.dump()}"
-    }
-
-    // return cardOrders
     return 'value'
+  }
+
+  @Override
+  boolean test() {
+    return true  //To change body of implemented methods use File | Settings | File Templates.
   }
 }

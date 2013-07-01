@@ -9,8 +9,6 @@ import javax.xml.bind.annotation.XmlRootElement
 @XmlRootElement
 class SvcCardOrderVO implements Serializable {
 
-  static final long serialVersionUID = -687983744884255071L
-
   @XmlAttribute
   String id
   @XmlAttribute
