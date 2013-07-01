@@ -15,14 +15,9 @@ class SuCardOrderQuery {
 
     log.info "Querying card orders for uid: $uid"
 
-    def rows = runQuery("SELECT " +
-        "r.id, r.serial, r.createTime, r.firstname, r.lastname, r.printer, " +
-        "a.streetaddress1, a.streetaddress2, a.locality, a.zipcode, " +
-        "" +
-        "FROM request r JOIN " +
-        "address a ON r.address = a.id JOIN " +
-        "status s ON r.status = s.id WHERE " +
-        "request.owner = :uid", [uid:uid])
+    def rows = runQuery(
+        "SELECT * FROM request r JOIN address a ON r.address = a.id JOIN status s ON r.status = s.id WHERE request.owner = :uid",
+        [uid:uid])
 
     if (!rows) { return [] }
 
