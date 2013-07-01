@@ -33,7 +33,7 @@
        http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd
        http://cxf.apache.org/simple http://cxf.apache.org/schemas/simple.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd"
        default-autowire="byName">
-  <bean id="sukatLogManager" class="se.su.it.svc.manager.SukatLogManager"></bean>
+  <bean id="sukatLogManager" class="se.su.it.svc.manager.SukatLogManager"/>
 	<import resource="classpath:META-INF/cxf/cxf.xml" />
   <import resource="classpath:META-INF/cxf/cxf-extension-soap.xml" />
 	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
@@ -47,12 +47,12 @@
   <!--<property name="ignoreUnresolvablePlaceholders" value="true" />-->
   <!--<property name="valueSeparator" value="?" />-->
   <!--</bean>-->
-  <!--<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">-->
-		<!--<property name="driverClassName" value="${database.driver?com.mysql.jdbc.Driver}" />-->
-		<!--<property name="url" value="${database.url?jdbc:mysql://localhost/gormtest}" />-->
-		<!--<property name="username" value="${database.user?gormtest}" />-->
-		<!--<property name="password" value="${database.password?gormtest}" />-->
-	<!--</bean>-->
+  <bean id="suCardDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${sucard.database.driver}" />
+		<property name="url" value="${sucard.database.url}" />
+		<property name="username" value="${sucard.database.user}" />
+		<property name="password" value="${sucard.database.password}" />
+	</bean>
 
 	<bean id="messageSource"
 	      class="org.springframework.context.support.ResourceBundleMessageSource">
@@ -79,8 +79,8 @@
   <tx:annotation-driven/>
 
   <bean name="annotationHandlerMapping" class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
-  <bean id="applicationContextProvider" class="se.su.it.svc.manager.ApplicationContextProvider"></bean>
-  <bean id="gldapoManager" class="se.su.it.svc.manager.GldapoManager"></bean>
+  <bean id="applicationContextProvider" class="se.su.it.svc.manager.ApplicationContextProvider"/>
+  <bean id="gldapoManager" class="se.su.it.svc.manager.GldapoManager"/>
 
   <bean id="cardinfoserviceEndpoint" class="se.su.it.svc.CardInfoServiceImpl" />
   <jaxws:endpoint
@@ -159,6 +159,5 @@
       </list>
     </property>
   </bean>
-
 </beans>
 <!-- END SNIPPET: beans -->

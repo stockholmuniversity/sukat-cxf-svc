@@ -58,6 +58,13 @@ class Properties {
       props.put("database.driver", "com.mysql.jdbc.Driver")
       props.put("database.user", "gormtest")
       props.put("database.password", "gormtest")
+
+      //SuCard Database
+      props.put("sucard.database.url", "jdbc:mysql://localhost/sucard")
+      props.put("sucard.database.driver", "com.mysql.jdbc.Driver")
+      props.put("sucard.database.user", "sucard")
+      props.put("sucard.database.password", "sommar123")
+
       //Ldap
       props.put("ldap.serverro", "ldap://ldap-test.su.se")
       props.put("ldap.serverrw", "ldap://sukat-test-ldaprw02.it.su.se")
