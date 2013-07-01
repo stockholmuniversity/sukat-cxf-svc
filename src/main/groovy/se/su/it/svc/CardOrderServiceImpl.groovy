@@ -11,7 +11,19 @@ import javax.jws.WebService
 class CardOrderServiceImpl implements CardOrderService {
 
   @Override
-  void findAllCardOrders(@WebParam(name = "audit") SvcAudit audit) {
-    SuCardOrderQuery.findAllCardOrders()
+  List findAllCardOrdersForUid(@WebParam(name="uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
+    if (!uid) {
+      return []
+    }
+
+    if (!audit) {
+      throw new IllegalArgumentException('Missing audit')
+    }
+
+    /** TODO: Implement audit */
+
+    List cardOrders = SuCardOrderQuery.findAllCardOrdersForUid(uid)
+
+    return cardOrders
   }
 }

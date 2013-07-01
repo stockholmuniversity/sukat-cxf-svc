@@ -1,17 +1,40 @@
 package se.su.it.svc.query
 
+import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
 import groovy.util.logging.Slf4j
 import org.apache.commons.dbcp.BasicDataSource
+import se.su.it.svc.commons.SvcCardOrderVO
 
 @Slf4j
 class SuCardOrderQuery {
 
   def suCardDataSource
 
-  public static findAllCardOrders() {
-    def resp = runQuery("SELECT count(id) FROM request", [:])
-    log.error "resp $resp"
+  public static List findAllCardOrdersForUid(String uid) {
+    def rows = runQuery("SELECT " +
+        "r.id, r.serial, r.createTime, r.firstname, r.lastname, r.printer, " +
+        "a.streetaddress1, a.streetaddress2, a.locality, a.zipcode, " +
+        "" +
+        "FROM request r JOIN " +
+        "address a ON r.address = a.id JOIN " +
+        "status s ON r.status = s.id WHERE " +
+        "request.owner = :uid", [uid:uid])
+
+    if (!rows) { return [] }
+
+    List cardOrders = []
+
+    for (row in rows) {
+      try {
+        cardOrders << new SvcCardOrderVO( row as GroovyRowResult )
+      } catch (ex) {
+        log.error "Failed to add order $row to orders.", ex
+      }
+
+    }
+
+    return cardOrders
   }
 
   private static runQuery(String query , Map args) {
