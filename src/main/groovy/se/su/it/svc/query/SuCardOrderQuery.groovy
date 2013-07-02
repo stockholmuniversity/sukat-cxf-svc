@@ -87,23 +87,24 @@ class SuCardOrderQuery {
 
       Closure queryClosure = { Sql sql ->
         if (!sql) { return null }
-
         sql.withTransaction {
-          sql.withBatch {
-            def addressResponse = sql?.executeInsert(addressQuery, addressArgs)
-            requestArgs['address'] = addressResponse[0][0] // Get the address id and set it as the request address id.
-            def requestResponse = sql?.executeInsert(requestQuery, requestArgs)
-            return requestResponse[0][0] // return the id of the insert. (should be the same as the supplied uuid.)
-          }
+          def addressResponse = sql?.executeInsert(addressQuery, addressArgs)
+          log.info "addressResponse: ${addressResponse?.dump()}"
+          def addressId = addressResponse[0][0]
+          log.info "addressId: $addressId"
+          requestArgs['address'] = addressId // Get the address id and set it as the request address id.
+          def requestResponse = sql?.executeInsert(requestQuery, requestArgs)
+          log.info "requestResponse: ${requestResponse?.dump()}"
         }
 
       }
 
-      uuid = withConnection(queryClosure)
+      withConnection(queryClosure)
 
       log.info "Card order successfully added to database!"
     } catch (ex) {
       log.error "Failed to create card order for ${cardOrderVO.owner}", ex
+      return null
     }
 
     log.info "Returning $uuid"
