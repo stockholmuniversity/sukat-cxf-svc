@@ -15,7 +15,7 @@ class CardOrderServiceUtils {
       throw new IllegalArgumentException("CardOrderVO: Object is invalid")
     }
 
-    List shouldBeUnset = ['id', 'serial']
+    List shouldBeUnset = ['id', 'value', 'description', 'createTime']
 
     for (attr in shouldBeUnset) {
       if (cardOrderVO["$attr"]) {
