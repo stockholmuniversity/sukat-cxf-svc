@@ -6,18 +6,28 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.dbcp.BasicDataSource
 import se.su.it.svc.commons.SvcCardOrderVO
 
+import java.sql.Timestamp
+
 @Slf4j
 class SuCardOrderQuery {
 
   def suCardDataSource
 
+  private final int DEFAULT_ORDER_STATUS = 3 // WEB (online order)
+
   public List findAllCardOrdersForUid(String uid) {
 
     log.info "Querying card orders for uid: $uid"
 
-    def rows = runQuery(
-        "SELECT r.id,serial,owner,printer,createTime,firstname,lastname,streetaddress1,streetaddress2,locality,zipcode,value,description FROM request r JOIN address a ON r.address = a.id JOIN status s ON r.status = s.id WHERE r.owner = :uid",
-        [uid:uid])
+    def query = "SELECT r.id,serial,owner,printer,createTime,firstname,lastname,streetaddress1,streetaddress2,locality,zipcode,value,description FROM request r JOIN address a ON r.address = a.id JOIN status s ON r.status = s.id WHERE r.owner = :uid"
+    def args = [uid:uid]
+
+    Closure queryClosure = { Sql sql ->
+      if (!sql) { return null }
+      return sql?.rows(query, args)
+    }
+
+    def rows = withConnection(queryClosure)
 
     if (!rows) { return [] }
 
@@ -39,15 +49,77 @@ class SuCardOrderQuery {
     return cardOrders
   }
 
-  private runQuery(String query , Map args) {
+  public String orderCard(SvcCardOrderVO cardOrderVO) {
 
-    Closure queryClosure = { Sql sql ->
-      if (!sql) { return null }
-      return sql?.rows(query, args)
+    String uuid = ""
+
+    try {
+      def addressQuery = "INSERT INTO address VALUES(:id, :streetaddress1, :streetaddress2, :locality, :zipcode)"
+      def addressArgs = [
+          id: null,
+          streetaddress1:cardOrderVO.streetaddress1,
+          streetaddress2:cardOrderVO.streetaddress2,
+          locality:cardOrderVO.locality,
+          zipcode:cardOrderVO.zipcode
+      ]
+
+      def requestQuery = "INSERT INTO request VALUES(:id, :serial, :owner, :printer, :createTime, :firstname, :lastname, :address, :status)"
+      def requestArgs = [
+        id: findFreeUUID(),
+        serial: cardOrderVO.serial,
+        owner: cardOrderVO.owner,
+        printer: cardOrderVO.printer,
+        createTime: new Timestamp(new Date().getTime()),
+        firstname: cardOrderVO.firstname,
+        lastname: cardOrderVO.lastname,
+        address:null,
+        status: DEFAULT_ORDER_STATUS
+      ]
+
+
+      Closure queryClosure = { Sql sql ->
+        if (!sql) { return null }
+
+        sql.withTransaction {
+          sql.withBatch {
+            def addressResponse = sql?.executeInsert(addressQuery, addressArgs)
+            requestArgs['address'] = addressResponse[0][0] // Get the address id and set it as the request address id.
+            def requestResponse = sql?.executeInsert(requestQuery, requestArgs)
+            return requestResponse[0][0] // return the id of the insert. (should be the same as the supplied uuid.)
+          }
+        }
+
+      }
+
+      uuid = withConnection(queryClosure)
+    } catch (ex) {
+      log.error "Failed to create card order for ${cardOrderVO.owner}", ex
     }
 
-    return withConnection(queryClosure)
+    log.info "Card order successfully added to database!"
+
+    return uuid
   }
+
+  private findFreeUUID() {
+    /** WHYYY use uuids :~/ */
+    boolean newUUID = false
+    String uuid = ''
+    String query = "SELECT id FROM request WHERE id = :uuid"
+
+    while (!newUUID) {
+      uuid = UUID.randomUUID().toString()
+      def result = withConnection({Sql sql ->
+        return sql.rows(query, [uuid:uuid])
+      })
+
+      if (result?.size() == 0) {
+        newUUID = true
+      }
+    }
+    return uuid
+  }
+
 
   private withConnection = { Closure query ->
     def response = null
@@ -67,4 +139,5 @@ class SuCardOrderQuery {
     }
     return response
   }
+
 }

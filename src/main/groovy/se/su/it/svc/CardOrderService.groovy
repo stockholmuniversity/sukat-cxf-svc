@@ -5,4 +5,5 @@ import se.su.it.svc.commons.SvcCardOrderVO
 
 public interface CardOrderService {
   SvcCardOrderVO[] findAllCardOrdersForUid(String uid, SvcAudit audit)
+  String orderCard(SvcCardOrderVO svcCardOrderVO, SvcAudit audit)
 }
