@@ -87,6 +87,25 @@ class SuCardOrderQuery {
 
       Closure queryClosure = { Sql sql ->
         if (!sql) { return null }
+
+        /** WHYYY use uuids :~/ */
+        boolean newUUID = false
+        String query = "SELECT id FROM request WHERE id = :uuid"
+
+        while (!newUUID) {
+          uuid = UUID.randomUUID().toString()
+          log.info "findFreeUUID: Querying for uuid: ${uuid}"
+
+          def rows = sql.rows(query, [uuid:uuid])
+
+          if (rows?.size() == 0) {
+            newUUID = true
+            requestArgs.id = uuid
+          } else {
+            log.info "findFreeUUID: ${uuid} was already take, retrying."
+          }
+        }
+
         sql.withTransaction {
           def addressResponse = sql?.executeInsert(addressQuery, addressArgs)
           log.info "addressResponse: ${addressResponse?.dump()}"
@@ -109,29 +128,6 @@ class SuCardOrderQuery {
 
     log.info "Returning $uuid"
 
-    return uuid
-  }
-
-  private String findFreeUUID() {
-    /** WHYYY use uuids :~/ */
-    boolean newUUID = false
-    String uuid = ''
-    String query = "SELECT id FROM request WHERE id = :uuid"
-
-    while (!newUUID) {
-      uuid = UUID.randomUUID().toString()
-      log.info "findFreeUUID: Querying for uuid: ${uuid}"
-      def result = withConnection({Sql sql ->
-        return sql.rows(query, [uuid:uuid])
-      })
-
-      if (result?.size() == 0) {
-        newUUID = true
-      } else {
-        log.info "findFreeUUID: ${uuid} was already take, retrying."
-      }
-    }
-    log.info "findFreeUUID: Returning free uuid ${uuid}"
     return uuid
   }
 
