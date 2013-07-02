@@ -12,7 +12,7 @@ import javax.jws.WebService
 @WebService @Slf4j
 class CardOrderServiceImpl implements CardOrderService {
 
-  SuCardOrderQuery suCardOrderQuery
+  def suCardOrderQuery
 
   /** TODO: Implement
    * Audit
@@ -58,8 +58,6 @@ class CardOrderServiceImpl implements CardOrderService {
     }
 
     String uuid = suCardOrderQuery.orderCard(cardOrderVO)
-
-
 
     return uuid
   }
