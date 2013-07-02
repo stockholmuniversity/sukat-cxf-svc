@@ -51,31 +51,39 @@ class SuCardOrderQuery {
 
   public String orderCard(SvcCardOrderVO cardOrderVO) {
 
-    String uuid = ""
+    String uuid = ''
 
     try {
-      def addressQuery = "INSERT INTO address VALUES(:id, :streetaddress1, :streetaddress2, :locality, :zipcode)"
+     uuid = findFreeUUID()
+    } catch (ex) {
+      log.error "Failed when fetching free uuid", ex
+    }
+
+    if (!uuid) {
+      return uuid
+    }
+
+    try {
+      def addressQuery = "INSERT INTO address VALUES(null, :streetaddress1, :streetaddress2, :locality, :zipcode)"
       def addressArgs = [
-          id: null,
           streetaddress1:cardOrderVO.streetaddress1,
           streetaddress2:cardOrderVO.streetaddress2,
           locality:cardOrderVO.locality,
           zipcode:cardOrderVO.zipcode
       ]
 
-      def requestQuery = "INSERT INTO request VALUES(:id, :serial, :owner, :printer, :createTime, :firstname, :lastname, :address, :status)"
+      def requestQuery = "INSERT INTO request VALUES(:id, :serial, :owner, :printer, :createTime, :address, :status, :firstname, :lastname)"
       def requestArgs = [
-        id: findFreeUUID(),
+        id: uuid,
         serial: cardOrderVO.serial,
         owner: cardOrderVO.owner,
         printer: cardOrderVO.printer,
         createTime: new Timestamp(new Date().getTime()),
         firstname: cardOrderVO.firstname,
         lastname: cardOrderVO.lastname,
-        address:null,
+        address: null,
         status: DEFAULT_ORDER_STATUS
       ]
-
 
       Closure queryClosure = { Sql sql ->
         if (!sql) { return null }
@@ -92,16 +100,18 @@ class SuCardOrderQuery {
       }
 
       uuid = withConnection(queryClosure)
+
+      log.info "Card order successfully added to database!"
     } catch (ex) {
       log.error "Failed to create card order for ${cardOrderVO.owner}", ex
     }
 
-    log.info "Card order successfully added to database!"
+    log.info "Returning $uuid"
 
     return uuid
   }
 
-  private findFreeUUID() {
+  private String findFreeUUID() {
     /** WHYYY use uuids :~/ */
     boolean newUUID = false
     String uuid = ''
@@ -109,27 +119,30 @@ class SuCardOrderQuery {
 
     while (!newUUID) {
       uuid = UUID.randomUUID().toString()
+      log.info "findFreeUUID: Querying for uuid: ${uuid}"
       def result = withConnection({Sql sql ->
         return sql.rows(query, [uuid:uuid])
       })
 
       if (result?.size() == 0) {
         newUUID = true
+      } else {
+        log.info "findFreeUUID: ${uuid} was already take, retrying."
       }
     }
+    log.info "findFreeUUID: Returning free uuid ${uuid}"
     return uuid
   }
-
 
   private withConnection = { Closure query ->
     def response = null
     Sql sql = null
     try {
       /** getDataSource added for mock and testing purposes */
-      sql = new Sql(suCardDataSource as BasicDataSource)
+      sql = new Sql(suCardDataSource)
       response = query(sql)
     } catch (ex) {
-      log.error "Connection to LADOK failed", ex
+      log.error "Connection to SuCardDB failed", ex
     } finally {
       try {
         sql.close()
