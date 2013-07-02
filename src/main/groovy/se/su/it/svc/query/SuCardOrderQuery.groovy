@@ -51,17 +51,7 @@ class SuCardOrderQuery {
 
   public String orderCard(SvcCardOrderVO cardOrderVO) {
 
-    String uuid = ''
-
-    try {
-     uuid = findFreeUUID()
-    } catch (ex) {
-      log.error "Failed when fetching free uuid", ex
-    }
-
-    if (!uuid) {
-      return uuid
-    }
+    String uuid = null
 
     try {
       def addressQuery = "INSERT INTO address VALUES(null, :streetaddress1, :streetaddress2, :locality, :zipcode)"
@@ -72,11 +62,11 @@ class SuCardOrderQuery {
           zipcode:cardOrderVO.zipcode
       ]
 
-      def requestQuery = "INSERT INTO request VALUES(:id, :serial, :owner, :printer, :createTime, :address, :status, :firstname, :lastname)"
+      def requestQuery = "INSERT INTO request VALUES(:id, :owner, :serial, :printer, :createTime, :address, :status, :firstname, :lastname)"
       def requestArgs = [
         id: uuid,
-        serial: cardOrderVO.serial,
         owner: cardOrderVO.owner,
+        serial: cardOrderVO.serial,
         printer: cardOrderVO.printer,
         createTime: new Timestamp(new Date().getTime()),
         firstname: cardOrderVO.firstname,
@@ -88,7 +78,6 @@ class SuCardOrderQuery {
       Closure queryClosure = { Sql sql ->
         if (!sql) { return null }
 
-        /** WHYYY use uuids :~/ */
         boolean newUUID = false
         String query = "SELECT id FROM request WHERE id = :uuid"
 
@@ -102,18 +91,16 @@ class SuCardOrderQuery {
             newUUID = true
             requestArgs.id = uuid
           } else {
-            log.info "findFreeUUID: ${uuid} was already take, retrying."
+            log.info "${uuid} was already taken, retrying."
           }
         }
 
         sql.withTransaction {
           def addressResponse = sql?.executeInsert(addressQuery, addressArgs)
-          log.info "addressResponse: ${addressResponse?.dump()}"
           def addressId = addressResponse[0][0]
-          log.info "addressId: $addressId"
-          requestArgs['address'] = addressId // Get the address id and set it as the request address id.
-          def requestResponse = sql?.executeInsert(requestQuery, requestArgs)
-          log.info "requestResponse: ${requestResponse?.dump()}"
+          /** Get the address id and set it as the request address id. */
+          requestArgs['address'] = addressId
+          sql?.executeInsert(requestQuery, requestArgs)
         }
 
       }
@@ -135,7 +122,6 @@ class SuCardOrderQuery {
     def response = null
     Sql sql = null
     try {
-      /** getDataSource added for mock and testing purposes */
       sql = new Sql(suCardDataSource)
       response = query(sql)
     } catch (ex) {
