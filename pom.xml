@@ -186,6 +186,11 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <dependency>
+      <groupId>net.sf.ehcache</groupId>
+      <artifactId>ehcache-terracotta</artifactId>
+      <version>2.0.1</version>
+    </dependency>
 
     <dependency>
       <groupId>se.su.it.commons</groupId>
