@@ -25,7 +25,7 @@ class CardOrderServiceUtils {
       }
     }
 
-    List notNullable = ['serial', 'owner', 'firstname', 'lastname', 'streetaddress1', 'locality', 'zipcode']
+    List notNullable = ['owner', 'firstname', 'lastname', 'streetaddress1', 'locality', 'zipcode']
 
     for (attr in notNullable) {
       if (!cardOrderVO["$attr"]) {
