@@ -78,14 +78,16 @@ class SuCardOrderQuery {
         if (!sql) { return null }
 
         def findActiveCardOrdersQuery = "SELECT r.id,serial,owner,printer,createTime,firstname,lastname,streetaddress1,streetaddress2,locality,zipcode,value,description FROM request r JOIN address a ON r.address = a.id JOIN status s ON r.status = s.id WHERE r.owner = :owner AND status in (1,2,3)"
-        def findActiveCardOrdersArgs = [owner:owner]
+        def findActiveCardOrdersArgs = [owner:cardOrderVO.owner]
 
         def cardOrders = sql?.rows(findActiveCardOrdersQuery, findActiveCardOrdersArgs)
+
+        log.debug "Active card orders returned: ${cardOrders?.size()}"
 
         if (cardOrders?.size() > 0) {
           log.error "Can't order new card since an order already exists."
           for (order in cardOrders) {
-            log.info "Order: $order"
+            log.debug "Order: $order"
           }
           return null
         }
@@ -108,19 +110,26 @@ class SuCardOrderQuery {
         }
 
         sql.withTransaction {
+          log.debug "Sending: $addressQuery with arguments $addressArgs"
           def addressResponse = sql?.executeInsert(addressQuery, addressArgs)
+          log.debug "Address response is $addressResponse"
           def addressId = addressResponse[0][0]
+          log.debug "Recieved: $addressId as response."
+
           /** Get the address id and set it as the request address id. */
           requestArgs['address'] = addressId
-          def requestResponse = sql?.executeInsert(requestQuery, requestArgs)
-          def requestId = requestResponse[0][0]
-          def comment = "Created by $owner while activating account"
-          sql?.executeInsert("INSERT INTO status_history VALUES (null, :status, :request, :comment, :timestamp)",
+          log.debug "Sending: $requestQuery with arguments $requestArgs"
+          sql?.executeInsert(requestQuery, requestArgs)
+          String comment = "Created by " + owner + " while activating account"
+
+          def statusResponse = sql?.executeInsert("INSERT INTO status_history VALUES (null, :status, :request, :comment, :createTime)",
               [status:DEFAULT_ORDER_STATUS,
-               request:requestId,
+               request:uuid,
                comment: comment,
-               timestamp:new Timestamp(new Date().getTime())
+               createTime:new Timestamp(new Date().getTime())
               ])
+
+          log.debug "Status response: $statusResponse"
         }
 
       }
@@ -146,6 +155,7 @@ class SuCardOrderQuery {
       response = query(sql)
     } catch (ex) {
       log.error "Connection to SuCardDB failed", ex
+      throw(ex)
     } finally {
       try {
         sql.close()
