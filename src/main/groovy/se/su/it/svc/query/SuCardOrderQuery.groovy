@@ -121,7 +121,7 @@ class SuCardOrderQuery {
             requestArgs['address'] = addressId
             log.debug "Sending: $requestQuery with arguments $requestArgs"
             sql?.executeInsert(requestQuery, requestArgs)
-            String comment = "Created by " + owner + " while activating account"
+            String comment = "Created by " + cardOrderVO.owner + " while activating account"
 
             def statusResponse = sql?.executeInsert("INSERT INTO status_history VALUES (null, :status, :request, :comment, :createTime)",
                 [status:DEFAULT_ORDER_STATUS,
