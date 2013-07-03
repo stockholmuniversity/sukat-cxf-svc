@@ -50,7 +50,6 @@ class SuCardOrderQuery {
   }
 
   public String orderCard(SvcCardOrderVO cardOrderVO) {
-
     String uuid = null
 
     try {
@@ -78,14 +77,27 @@ class SuCardOrderQuery {
       Closure queryClosure = { Sql sql ->
         if (!sql) { return null }
 
+        def findActiveCardOrdersQuery = "SELECT r.id,serial,owner,printer,createTime,firstname,lastname,streetaddress1,streetaddress2,locality,zipcode,value,description FROM request r JOIN address a ON r.address = a.id JOIN status s ON r.status = s.id WHERE r.owner = :owner AND status in (1,2,3)"
+        def findActiveCardOrdersArgs = [owner:owner]
+
+        def cardOrders = sql?.rows(findActiveCardOrdersQuery, findActiveCardOrdersArgs)
+
+        if (cardOrders?.size() > 0) {
+          log.error "Can't order new card since an order already exists."
+          for (order in cardOrders) {
+            log.info "Order: $order"
+          }
+          return null
+        }
+
         boolean newUUID = false
-        String query = "SELECT id FROM request WHERE id = :uuid"
+        def findFreeUUIDQuery = "SELECT id FROM request WHERE id = :uuid"
 
         while (!newUUID) {
           uuid = UUID.randomUUID().toString()
           log.info "findFreeUUID: Querying for uuid: ${uuid}"
 
-          def rows = sql.rows(query, [uuid:uuid])
+          def rows = sql.rows(findFreeUUIDQuery, [uuid:uuid])
 
           if (rows?.size() == 0) {
             newUUID = true
@@ -100,7 +112,15 @@ class SuCardOrderQuery {
           def addressId = addressResponse[0][0]
           /** Get the address id and set it as the request address id. */
           requestArgs['address'] = addressId
-          sql?.executeInsert(requestQuery, requestArgs)
+          def requestResponse = sql?.executeInsert(requestQuery, requestArgs)
+          def requestId = requestResponse[0][0]
+          def comment = "Created by $owner while activating account"
+          sql?.executeInsert("INSERT INTO status_history VALUES (null, :status, :request, :comment, :timestamp)",
+              [status:DEFAULT_ORDER_STATUS,
+               request:requestId,
+               comment: comment,
+               timestamp:new Timestamp(new Date().getTime())
+              ])
         }
 
       }
