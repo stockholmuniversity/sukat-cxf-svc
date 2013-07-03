@@ -75,7 +75,7 @@ class SuCardOrderQuery {
       ]
 
       Closure queryClosure = { Sql sql ->
-        if (!sql) { return null }
+        if (!sql) { return false }
 
         def findActiveCardOrdersQuery = "SELECT r.id,serial,owner,printer,createTime,firstname,lastname,streetaddress1,streetaddress2,locality,zipcode,value,description FROM request r JOIN address a ON r.address = a.id JOIN status s ON r.status = s.id WHERE r.owner = :owner AND status in (1,2,3)"
         def findActiveCardOrdersArgs = [owner:cardOrderVO.owner]
@@ -89,7 +89,7 @@ class SuCardOrderQuery {
           for (order in cardOrders) {
             log.debug "Order: $order"
           }
-          return null
+          return false
         }
 
         boolean newUUID = false
@@ -109,34 +109,41 @@ class SuCardOrderQuery {
           }
         }
 
-        sql.withTransaction {
-          log.debug "Sending: $addressQuery with arguments $addressArgs"
-          def addressResponse = sql?.executeInsert(addressQuery, addressArgs)
-          log.debug "Address response is $addressResponse"
-          def addressId = addressResponse[0][0]
-          log.debug "Recieved: $addressId as response."
+        try {
+          sql.withTransaction {
+            log.debug "Sending: $addressQuery with arguments $addressArgs"
+            def addressResponse = sql?.executeInsert(addressQuery, addressArgs)
+            log.debug "Address response is $addressResponse"
+            def addressId = addressResponse[0][0]
+            log.debug "Recieved: $addressId as response."
 
-          /** Get the address id and set it as the request address id. */
-          requestArgs['address'] = addressId
-          log.debug "Sending: $requestQuery with arguments $requestArgs"
-          sql?.executeInsert(requestQuery, requestArgs)
-          String comment = "Created by " + owner + " while activating account"
+            /** Get the address id and set it as the request address id. */
+            requestArgs['address'] = addressId
+            log.debug "Sending: $requestQuery with arguments $requestArgs"
+            sql?.executeInsert(requestQuery, requestArgs)
+            String comment = "Created by " + owner + " while activating account"
 
-          def statusResponse = sql?.executeInsert("INSERT INTO status_history VALUES (null, :status, :request, :comment, :createTime)",
-              [status:DEFAULT_ORDER_STATUS,
-               request:uuid,
-               comment: comment,
-               createTime:new Timestamp(new Date().getTime())
-              ])
+            def statusResponse = sql?.executeInsert("INSERT INTO status_history VALUES (null, :status, :request, :comment, :createTime)",
+                [status:DEFAULT_ORDER_STATUS,
+                    request:uuid,
+                    comment: comment,
+                    createTime:new Timestamp(new Date().getTime())
+                ])
 
-          log.debug "Status response: $statusResponse"
+            log.debug "Status response: $statusResponse"
+          }
+        } catch (ex) {
+          log.error "Error in SQL card order transaction.", ex
+          return false
         }
-
+        return true
       }
 
-      withConnection(queryClosure)
+      if (withConnection(queryClosure)) {
+        log.info "Card order successfully added to database!"
+      }
 
-      log.info "Card order successfully added to database!"
+
     } catch (ex) {
       log.error "Failed to create card order for ${cardOrderVO.owner}", ex
       return null
