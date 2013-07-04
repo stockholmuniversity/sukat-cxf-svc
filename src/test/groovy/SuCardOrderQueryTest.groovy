@@ -291,4 +291,62 @@ public class SuCardOrderQueryTest extends Specification {
         service.getRequestQueryArgs(cardOrder)
     )
   }
+
+  @Test
+  def "getMarkCardAsDiscardedQuery"() {
+    expect:
+    service.markCardAsDiscardedQuery == "UPDATE request SET status = :discardedStatus WHERE id = :id"
+  }
+
+  @Test
+  def "doMarkCardAsDiscarded"(){
+    given:
+    Sql.metaClass.executeUpdate = { String arg1, Map arg2 ->
+      switch(arg1){
+        case service.markCardAsDiscardedQuery:
+          return [true]
+        default:
+          return [false]
+      }
+    }
+    Sql.metaClass.executeInsert = { String arg1, Map arg2 ->
+      switch(arg1){
+        case service.insertStatusHistoryQuery:
+          return [true]
+        default:
+          return [false]
+      }
+    }
+
+    when:
+    def resp = service.doMarkCardAsDiscarded(
+        new Sql(service.suCardDataSource),
+        'uuid',
+        'uid'
+    )
+
+    then:
+    resp
+  }
+
+  @Test
+  "markCardAsDiscarded"(){
+    given:
+    Sql.metaClass.withTransaction = { Closure closure ->
+      return true
+    }
+    expect:
+    service.markCardAsDiscarded('uuid', 'uid')
+  }
+
+  @Test
+  "markCardAsDiscarded fails"(){
+    given:
+    Sql.metaClass.withTransaction = { Closure closure ->
+      throw new RuntimeException('foo')
+    }
+    expect:
+    !service.markCardAsDiscarded('uuid', 'uid')
+  }
+
 }

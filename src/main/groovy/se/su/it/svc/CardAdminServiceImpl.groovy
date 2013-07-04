@@ -19,7 +19,7 @@ import se.su.it.svc.manager.GldapoManager
 public class CardAdminServiceImpl implements CardAdminService{
 
   /**
-   * This method puts a university card in revoked state.
+   * This method puts a university card in revoked state in both sukat and sucard db.
    *
    *
    * @param suCardUUID  the card uuid for the card.
@@ -28,8 +28,6 @@ public class CardAdminServiceImpl implements CardAdminService{
    * @see se.su.it.svc.ldap.SuCard
    * @see se.su.it.svc.commons.SvcAudit
    */
-
-
 
   public void revokeCard(@WebParam(name = "suCardUUID") String suCardUUID, @WebParam(name = "audit") SvcAudit audit) {
     if (suCardUUID == null || audit == null)

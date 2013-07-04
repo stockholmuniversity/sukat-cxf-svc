@@ -211,25 +211,22 @@ class SuCardOrderQuery {
   }
 
   public boolean markCardAsDiscarded(String uuid, String uid) {
-    // set request status to something.
     Closure queryClosure = { Sql sql ->
-      sql.withTransaction {
-        try {
+      try {
+        sql.withTransaction {
           doMarkCardAsDiscarded(sql, uuid, uid)
-        } catch (ex) {
-          log.error "Failed to mark card as discarded in sucard db.", ex
-          return false
         }
-        return true
+      } catch (ex) {
+        log.error "Failed to mark card as discarded in sucard db.", ex
+        return false
       }
+      return true
     }
 
     return (withConnection(queryClosure))
-    // create a history entry
-
   }
 
-  private static void doMarkCardAsDiscarded(Sql sql, String uuid, String uid) {
+  private static boolean doMarkCardAsDiscarded(Sql sql, String uuid, String uid) {
     sql?.executeUpdate(markCardAsDiscardedQuery, [id:uuid])
     sql?.executeInsert(insertStatusHistoryQuery, [
         status:5,
@@ -237,6 +234,7 @@ class SuCardOrderQuery {
         comment: "Discarded by " + uid,
         createTime: new Timestamp(new Date().getTime())
     ])
+    return true
   }
 
   private withConnection = { Closure query ->
