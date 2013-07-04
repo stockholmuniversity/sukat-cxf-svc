@@ -206,11 +206,44 @@ class SuCardOrderQuery {
     return "INSERT INTO status_history VALUES (null, :status, :request, :comment, :createTime)"
   }
 
+  private static String getMarkCardAsDiscardedQuery() {
+    return "UPDATE request SET status = :discardedStatus WHERE id = :id"
+  }
+
+  public boolean markCardAsDiscarded(String uuid, String uid) {
+    // set request status to something.
+    Closure queryClosure = { Sql sql ->
+      sql.withTransaction {
+        try {
+          doMarkCardAsDiscarded(sql, uuid, uid)
+        } catch (ex) {
+          log.error "Failed to mark card as discarded in sucard db.", ex
+          return false
+        }
+        return true
+      }
+    }
+
+    return (withConnection(queryClosure))
+    // create a history entry
+
+  }
+
+  private static void doMarkCardAsDiscarded(Sql sql, String uuid, String uid) {
+    sql?.executeUpdate(markCardAsDiscardedQuery, [id:uuid])
+    sql?.executeInsert(insertStatusHistoryQuery, [
+        status:5,
+        request: uuid,
+        comment: "Discarded by " + uid,
+        createTime: new Timestamp(new Date().getTime())
+    ])
+  }
+
   private withConnection = { Closure query ->
     def response = null
     Sql sql = null
     try {
-      sql = new Sql(suCardDataSource)
+      sql = new Sql(suCardDataSource as BasicDataSource)
       response = query(sql)
     } catch (ex) {
       log.error "Connection to SuCardDB failed", ex
