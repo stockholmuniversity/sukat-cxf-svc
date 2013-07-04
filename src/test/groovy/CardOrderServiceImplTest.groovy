@@ -107,6 +107,7 @@ class CardOrderServiceImplTest extends Specification {
     given:
     def cardOrder = cardOrder
     cardOrder.id = null
+    cardOrder.serial = null
 
     service.suCardOrderQuery = Mock(SuCardOrderQuery) {
       1 * orderCard(*_) >> 'someId'
