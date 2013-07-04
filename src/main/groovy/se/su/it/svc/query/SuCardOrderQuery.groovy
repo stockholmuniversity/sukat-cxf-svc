@@ -17,70 +17,64 @@ class SuCardOrderQuery {
 
   public List findAllCardOrdersForUid(String uid) {
 
+    ArrayList cardOrders = []
+
+    if (!uid) {
+      return cardOrders
+    }
+
     log.info "Querying card orders for uid: $uid"
 
-    def query = "SELECT r.id,serial,owner,printer,createTime,firstname,lastname,streetaddress1,streetaddress2,locality,zipcode,value,description FROM request r JOIN address a ON r.address = a.id JOIN status s ON r.status = s.id WHERE r.owner = :uid"
-    def args = [uid:uid]
+    List rows = doListQuery(findAllCardsQuery, [uid:uid])
 
+    if (!rows) { return [] }
+
+    log.info "Found ${rows?.size()} order entries in the database for $uid."
+
+    cardOrders = handleOrderListResult(rows)
+
+    return cardOrders
+  }
+
+  private List doListQuery(String query, Map args) {
     Closure queryClosure = { Sql sql ->
       if (!sql) { return null }
       return sql?.rows(query, args)
     }
 
-    def rows = withConnection(queryClosure)
+    return withConnection(queryClosure)
+  }
 
-    if (!rows) { return [] }
-
-    log.info "Found ${rows?.size()} order entries in the database."
-
+  private ArrayList handleOrderListResult(List rows) {
     def cardOrders = []
 
     for (row in rows) {
       try {
-        SvcCardOrderVO svcCardOrderVO = new SvcCardOrderVO( row as GroovyRowResult )
-        log.debug "Adding card order ${svcCardOrderVO?.id} to $uid's orders."
+        SvcCardOrderVO svcCardOrderVO = new SvcCardOrderVO(row as GroovyRowResult)
         cardOrders << svcCardOrderVO
       } catch (ex) {
         log.error "Failed to add order $row to orders.", ex
       }
-
     }
-
-    return cardOrders
+    cardOrders
   }
+
+  private String getFindAllCardsQuery() {
+    return "SELECT r.id,serial,owner,printer,createTime,firstname,lastname,streetaddress1,streetaddress2,locality,zipcode,value,description FROM request r JOIN address a ON r.address = a.id JOIN status s ON r.status = s.id WHERE r.owner = :uid"
+  }
+
 
   public String orderCard(SvcCardOrderVO cardOrderVO) {
     String uuid = null
 
     try {
-      def addressQuery = "INSERT INTO address VALUES(null, :streetaddress1, :streetaddress2, :locality, :zipcode)"
-      def addressArgs = [
-          streetaddress1:cardOrderVO.streetaddress1,
-          streetaddress2:cardOrderVO.streetaddress2,
-          locality:cardOrderVO.locality,
-          zipcode:cardOrderVO.zipcode
-      ]
-
-      def requestQuery = "INSERT INTO request VALUES(:id, :owner, :serial, :printer, :createTime, :address, :status, :firstname, :lastname)"
-      def requestArgs = [
-        id: uuid,
-        owner: cardOrderVO.owner,
-        serial: cardOrderVO.serial,
-        printer: cardOrderVO.printer,
-        createTime: new Timestamp(new Date().getTime()),
-        firstname: cardOrderVO.firstname,
-        lastname: cardOrderVO.lastname,
-        address: null,
-        status: DEFAULT_ORDER_STATUS
-      ]
+      Map addressArgs = getAddressQueryArgs(cardOrderVO)
+      Map requestArgs = getRequestQueryArgs(cardOrderVO)
 
       Closure queryClosure = { Sql sql ->
         if (!sql) { return false }
 
-        def findActiveCardOrdersQuery = "SELECT r.id,serial,owner,printer,createTime,firstname,lastname,streetaddress1,streetaddress2,locality,zipcode,value,description FROM request r JOIN address a ON r.address = a.id JOIN status s ON r.status = s.id WHERE r.owner = :owner AND status in (1,2,3)"
-        def findActiveCardOrdersArgs = [owner:cardOrderVO.owner]
-
-        def cardOrders = sql?.rows(findActiveCardOrdersQuery, findActiveCardOrdersArgs)
+        def cardOrders = sql?.rows(findActiveCardOrdersQuery, [owner:cardOrderVO.owner])
 
         log.debug "Active card orders returned: ${cardOrders?.size()}"
 
@@ -92,45 +86,12 @@ class SuCardOrderQuery {
           return false
         }
 
-        boolean newUUID = false
-        def findFreeUUIDQuery = "SELECT id FROM request WHERE id = :uuid"
-
-        while (!newUUID) {
-          uuid = UUID.randomUUID().toString()
-          log.info "findFreeUUID: Querying for uuid: ${uuid}"
-
-          def rows = sql.rows(findFreeUUIDQuery, [uuid:uuid])
-
-          if (rows?.size() == 0) {
-            newUUID = true
-            requestArgs.id = uuid
-          } else {
-            log.info "${uuid} was already taken, retrying."
-          }
-        }
+        uuid = findFreeUUID(sql)
+        requestArgs.id = uuid
 
         try {
           sql.withTransaction {
-            log.debug "Sending: $addressQuery with arguments $addressArgs"
-            def addressResponse = sql?.executeInsert(addressQuery, addressArgs)
-            log.debug "Address response is $addressResponse"
-            def addressId = addressResponse[0][0]
-            log.debug "Recieved: $addressId as response."
-
-            /** Get the address id and set it as the request address id. */
-            requestArgs['address'] = addressId
-            log.debug "Sending: $requestQuery with arguments $requestArgs"
-            sql?.executeInsert(requestQuery, requestArgs)
-            String comment = "Created by " + owner + " while activating account"
-
-            def statusResponse = sql?.executeInsert("INSERT INTO status_history VALUES (null, :status, :request, :comment, :createTime)",
-                [status:DEFAULT_ORDER_STATUS,
-                    request:uuid,
-                    comment: comment,
-                    createTime:new Timestamp(new Date().getTime())
-                ])
-
-            log.debug "Status response: $statusResponse"
+            doCardOrderInsert(sql, addressArgs, requestArgs)
           }
         } catch (ex) {
           log.error "Error in SQL card order transaction.", ex
@@ -145,13 +106,104 @@ class SuCardOrderQuery {
 
 
     } catch (ex) {
-      log.error "Failed to create card order for ${cardOrderVO.owner}", ex
+      log.error "Failed to create card order for ${cardOrderVO?.owner}", ex
       return null
     }
 
     log.info "Returning $uuid"
 
     return uuid
+  }
+
+  private boolean doCardOrderInsert(Sql sql, Map addressArgs, Map requestArgs) {
+    String addressQuery = insertAddressQuery
+    String requestQuery = insertRequestQuery
+    String statusQuery = insertStatusHistoryQuery
+
+    log.debug "Sending: $addressQuery with arguments $addressArgs"
+    def addressResponse = sql?.executeInsert(addressQuery, addressArgs)
+    log.debug "Address response is $addressResponse"
+    def addressId = addressResponse[0][0]
+    log.debug "Recieved: $addressId as response."
+
+    /** Get the address id and set it as the request address id. */
+    requestArgs['address'] = addressId
+    log.debug "Sending: $requestQuery with arguments $requestArgs"
+    sql?.executeInsert(requestQuery, requestArgs)
+    String comment = "Created by " + requestArgs?.owner + " while activating account"
+
+    def statusResponse = sql?.executeInsert(statusQuery,
+        [status:DEFAULT_ORDER_STATUS,
+            request:requestArgs.id,
+            comment: comment,
+            createTime:new Timestamp(new Date().getTime())
+        ])
+
+    log.debug "Status response: $statusResponse"
+    return true
+  }
+
+  private Map getRequestQueryArgs(SvcCardOrderVO cardOrderVO) {
+    /** id and address will be set later in the process and serials should be unset. */
+    return [
+        id: null,
+        owner: cardOrderVO.owner,
+        serial: null,
+        printer: cardOrderVO.printer,
+        createTime: new Timestamp(new Date().getTime()),
+        firstname: cardOrderVO.firstname,
+        lastname: cardOrderVO.lastname,
+        address: null,
+        status: DEFAULT_ORDER_STATUS
+    ]
+  }
+
+  private static Map getAddressQueryArgs(SvcCardOrderVO cardOrderVO) {
+    return [
+        streetaddress1: cardOrderVO.streetaddress1,
+        streetaddress2: cardOrderVO.streetaddress2,
+        locality: cardOrderVO.locality,
+        zipcode: cardOrderVO.zipcode
+    ]
+  }
+
+  private static String findFreeUUID(Sql sql) {
+    String uuid = null
+    boolean newUUID = false
+
+    while (!newUUID) {
+      uuid = UUID.randomUUID().toString()
+      log.info "findFreeUUID: Querying for uuid: ${uuid}"
+
+      def rows = sql.rows(findFreeUUIDQuery, [uuid: uuid])
+
+      if (rows?.size() == 0) {
+        newUUID = true
+      } else {
+        log.info "${uuid} was already taken, retrying."
+      }
+    }
+    return uuid
+  }
+
+  private static String getInsertAddressQuery() {
+    return "INSERT INTO address VALUES(null, :streetaddress1, :streetaddress2, :locality, :zipcode)"
+  }
+
+  private static String getInsertRequestQuery() {
+    return "INSERT INTO request VALUES(:id, :owner, :serial, :printer, :createTime, :address, :status, :firstname, :lastname)"
+  }
+
+  private static String getFindActiveCardOrdersQuery() {
+    return "SELECT r.id, serial, owner, printer, createTime, firstname, lastname, streetaddress1, streetaddress2, locality, zipcode, value, description FROM request r JOIN address a ON r.address = a.id JOIN status s ON r.status = s.id WHERE r.owner = :owner AND status in (1,2,3)"
+  }
+
+  private static String getFindFreeUUIDQuery() {
+    return "SELECT id FROM request WHERE id = :uuid"
+  }
+
+  private static String getInsertStatusHistoryQuery() {
+    return "INSERT INTO status_history VALUES (null, :status, :request, :comment, :createTime)"
   }
 
   private withConnection = { Closure query ->
