@@ -14,12 +14,6 @@ class CardOrderServiceImpl implements CardOrderService {
 
   def suCardOrderQuery
 
-  /** TODO: Implement
-   * Audit
-   * Tests
-   *
-   * */
-
   @Override
   SvcCardOrderVO[] findAllCardOrdersForUid(@WebParam(name="uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
     if (!uid) {
