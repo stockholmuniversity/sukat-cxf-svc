@@ -137,9 +137,9 @@ public class AccountServiceImpl implements AccountService{
   public String createSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "domain") String domain, @WebParam(name = "nin") String nin, @WebParam(name = "givenName") String givenName, @WebParam(name = "sn") String sn, @WebParam(name = "person") SvcSuPersonVO person, @WebParam(name = "fullAccount") boolean fullAccount, @WebParam(name = "audit") SvcAudit audit) {
     String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,"domain":domain,"nin":nin,"givenName":givenName,"sn":sn,"svcsuperson":person,"audit":audit])
     if (attributeError)
-      throw new java.lang.IllegalArgumentException("createSuPerson - ${attributeError}")
+      throw new IllegalArgumentException("createSuPerson - ${attributeError}")
     if(SuPersonQuery.getSuPersonFromUIDNoCache(GldapoManager.LDAP_RW, uid))
-      throw new java.lang.IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
+      throw new IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
 
     //Begin init entry in sukat
     logger.debug("createSuPerson - Creating initial sukat record from function arguments for uid<${uid}>")
@@ -160,7 +160,7 @@ public class AccountServiceImpl implements AccountService{
     //Begin call Perlscript to init user in kdc, afs and unixshell
     //Maybe we want to replace this with a call to the message bus in the future
     String password = PasswordUtils.genRandomPassword(10, 10)
-    if(fullAccount != null && fullAccount == true) {
+    if (fullAccount) {
       EnrollmentServiceUtils.enableUser(uid, password, suInitPerson)
     } else {
       logger.warn("createSuPerson - FullAccount attribute not set. PosixAccount entries will not be set and no AFS or KDC entries will be generated.")
@@ -304,7 +304,10 @@ public class AccountServiceImpl implements AccountService{
       svcSuPersonVO.registeredAddress     = suPerson.registeredAddress
       svcSuPersonVO.mail = new LinkedHashSet(suPerson.mail)
 
+      /** The user has an account in SUKAT that is not a stub.*/
+      svcSuPersonVO.accountIsActive      = (suPerson?.objectClass?.contains('posixAccount'))?:false
     }
+
 
     return svcSuPersonVO
   }
@@ -335,6 +338,9 @@ public class AccountServiceImpl implements AccountService{
       svcSuPersonVO.displayName          = suPerson.displayName
       svcSuPersonVO.registeredAddress    = suPerson.registeredAddress
       svcSuPersonVO.mail = new LinkedHashSet(suPerson.mail)
+
+      /** The user has an account in SUKAT that is not a stub.*/
+      svcSuPersonVO.accountIsActive      = (suPerson?.objectClass?.contains('posixAccount'))?:false
     }
 
     return svcSuPersonVO
