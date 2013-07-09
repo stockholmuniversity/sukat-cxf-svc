@@ -71,4 +71,6 @@ public class SvcSuPersonVO implements Serializable{
   String description
   @XmlAttribute
   String sukatComment
+  @XmlAttribute
+  Boolean accountIsActive
 }

@@ -557,7 +557,8 @@ class AccountServiceImplTest extends spock.lang.Specification{
           sn:'sn',
           displayName:'displayName',
           registeredAddress: 'registeredAddress',
-          mail:['email1@su.se', 'email2@su.se']
+          mail:['email1@su.se', 'email2@su.se'],
+          objectClass: []
       )
     }
 
@@ -575,6 +576,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     resp.registeredAddress == 'registeredAddress'
     (resp.mail as Set).contains('email1@su.se')
     (resp.mail as Set).contains('email2@su.se')
+    !resp.accountIsActive
   }
 
   @Test
@@ -612,7 +614,8 @@ class AccountServiceImplTest extends spock.lang.Specification{
           sn:'sn',
           displayName:'displayName',
           registeredAddress: 'registeredAddress',
-          mail:['email1@su.se', 'email2@su.se']
+          mail:['email1@su.se', 'email2@su.se'],
+          objectClass: ['posixAccount']
       )
     }
 
@@ -630,6 +633,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
     resp.registeredAddress == 'registeredAddress'
     (resp.mail as Set).contains('email1@su.se')
     (resp.mail as Set).contains('email2@su.se')
+    resp.accountIsActive
   }
 
 }
