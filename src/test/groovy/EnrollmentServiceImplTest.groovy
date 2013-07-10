@@ -200,6 +200,16 @@ class EnrollmentServiceImplTest extends Specification {
   @Test
   def "Test enrollUser scripts fail"() {
     setup:
+
+    se.su.it.svc.manager.Properties.metaClass.static.getInstance = {
+      def properties1 = new se.su.it.svc.manager.Properties()
+      ConfigObject co = new ConfigObject()
+      co.put('enrollUser.skipCreate', false)
+      properties1.props = co
+      return properties1
+    }
+
+
     SuEnrollPerson suEnrollPerson = new SuEnrollPerson(uid: "testuid")
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuEnrollPersonFromSsn = {String directory,String nin -> return suEnrollPerson }
@@ -254,12 +264,9 @@ class EnrollmentServiceImplTest extends Specification {
 
     se.su.it.svc.manager.Properties.metaClass.static.getInstance = {
       def properties1 = new se.su.it.svc.manager.Properties()
-
-      ConfigObject props = Mock(ConfigObject) {
-        getProperty(*_) >> true
-      }
-
-      properties1.props = props
+      ConfigObject co = new ConfigObject()
+      co.put('enrollUser.skipCreate', true)
+      properties1.props = co
       return properties1
     }
 

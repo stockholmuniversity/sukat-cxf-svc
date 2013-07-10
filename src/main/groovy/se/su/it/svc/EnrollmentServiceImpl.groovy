@@ -65,7 +65,6 @@ class EnrollmentServiceImpl implements EnrollmentService{
   public SvcUidPwd enrollUser(@WebParam(name = "domain") String domain, @WebParam(name = "givenName") String givenName, @WebParam(name = "sn") String sn, @WebParam(name = "eduPersonPrimaryAffiliation") String eduPersonPrimaryAffiliation, @WebParam(name = "nin") String nin, @WebParam(name = "audit") SvcAudit audit) {
 
     /** Config value set in config.properties to allow for mocking out user creation */
-    boolean skipCreate = se.su.it.svc.manager.Properties.instance.props.getProperty('enrollUser.skipCreate')
 
     String attributeError = LdapAttributeValidator.validateAttributes(["ssnornin": nin, "domain": domain, "givenName": givenName, "sn": sn, "eduPersonPrimaryAffiliation": eduPersonPrimaryAffiliation, "audit": audit])
     if (attributeError) {
@@ -78,16 +77,16 @@ class EnrollmentServiceImpl implements EnrollmentService{
     SuEnrollPerson suEnrollPerson = findEnrollPerson(nin)
 
     if (suEnrollPerson) {
-      handleExistingUser(nin, suEnrollPerson, skipCreate, svcUidPwd, eduPersonPrimaryAffiliation, domain)
+      handleExistingUser(nin, suEnrollPerson, svcUidPwd, eduPersonPrimaryAffiliation, domain)
     } else {
       /** User not found in SUKAT, create user now */
-      handleNewUser(nin, givenName, sn, svcUidPwd, eduPersonPrimaryAffiliation, domain, skipCreate)
+      handleNewUser(nin, givenName, sn, svcUidPwd, eduPersonPrimaryAffiliation, domain)
     }
 
     return svcUidPwd
   }
 
-  private static void handleNewUser(String nin, String givenName, String sn, SvcUidPwd svcUidPwd, String eduPersonPrimaryAffiliation, String domain, boolean skipCreate) {
+  private static void handleNewUser(String nin, String givenName, String sn, SvcUidPwd svcUidPwd, String eduPersonPrimaryAffiliation, String domain) {
     logger.debug("enrollUser - User with nin <${nin}> not found. Trying to create and enable user in sukat/afs/kerberos.")
 
     svcUidPwd.uid = generateUid(givenName, sn)
@@ -95,16 +94,11 @@ class EnrollmentServiceImpl implements EnrollmentService{
     SuEnrollPerson suCreateEnrollPerson = setupEnrollPerson(svcUidPwd, givenName, sn, eduPersonPrimaryAffiliation, domain, nin)
     SuPersonQuery.initSuEnrollPerson(GldapoManager.LDAP_RW, suCreateEnrollPerson)
 
-    if (skipCreate) {
-      logger.warn("createSuPerson - FullAccount attribute not set. PosixAccount entries will not be set and no AFS or KDC entries will be generated.")
-      logger.warn("createSuPerson - Password returned will be fake/dummy")
+    if (EnrollmentServiceUtils.enableUser(suCreateEnrollPerson.uid, svcUidPwd.password, suCreateEnrollPerson)) {
+      logger.info("enrollUser - User with uid <${suCreateEnrollPerson.uid}> now enabled.")
     } else {
-      if (EnrollmentServiceUtils.enableUser(suCreateEnrollPerson.uid, svcUidPwd.password, suCreateEnrollPerson)) {
-        logger.info("enrollUser - User with uid <${suCreateEnrollPerson.uid}> now enabled.")
-      } else {
-        logger.error("enrollUser - enroll failed while excecuting perl scripts for uid <${suCreateEnrollPerson.uid}>")
-        throw new Exception("enrollUser - enroll failed in scripts.")
-      }
+      logger.error("enrollUser - enroll failed while excecuting perl scripts for uid <${suCreateEnrollPerson.uid}>")
+      throw new Exception("enrollUser - enroll failed in scripts.")
     }
   }
 
@@ -150,10 +144,10 @@ class EnrollmentServiceImpl implements EnrollmentService{
     return uid
   }
 
-  private static void handleExistingUser(String nin, SuEnrollPerson suEnrollPerson, boolean skipCreate, SvcUidPwd svcUidPwd, String eduPersonPrimaryAffiliation, String domain) {
+  private static void handleExistingUser(String nin, SuEnrollPerson suEnrollPerson, SvcUidPwd svcUidPwd, String eduPersonPrimaryAffiliation, String domain) {
     logger.debug("enrollUser - User with nin <${nin}> found. Now enabling uid <${suEnrollPerson.uid}>.")
 
-    boolean enabledUser = enableUser(skipCreate, suEnrollPerson, svcUidPwd)
+    boolean enabledUser = enableUser(suEnrollPerson, svcUidPwd)
 
     if (!enabledUser) {
       logger.error("enrollUser - enroll failed while excecuting perl scripts for uid <${suEnrollPerson.uid}>")
@@ -208,15 +202,8 @@ class EnrollmentServiceImpl implements EnrollmentService{
     }
   }
 
-  private static boolean enableUser(boolean skipCreate, SuEnrollPerson suEnrollPerson, SvcUidPwd svcUidPwd) {
-    boolean enabledUser
-    if (skipCreate) {
-      enabledUser = true
-      logger.warn "Running in test mode, skipping enable step (perl free)"
-    } else {
-      enabledUser = EnrollmentServiceUtils.enableUser(suEnrollPerson.uid, svcUidPwd.password, suEnrollPerson)
-    }
-    return enabledUser
+  private static boolean enableUser(SuEnrollPerson suEnrollPerson, SvcUidPwd svcUidPwd) {
+    return EnrollmentServiceUtils.enableUser(suEnrollPerson.uid, svcUidPwd.password, suEnrollPerson)
   }
 
   private static SuEnrollPerson findEnrollPerson(String nin) {

@@ -42,16 +42,20 @@ class Properties {
   private loadProperties() {
     def props = new java.util.Properties()
     String definedConfigFileName = System.getProperty("config.properties")
+
     if (definedConfigFileName != null) {
       try {
+        logger.info "Reading from defined input file $definedConfigFileName"
         new File(definedConfigFileName.trim()).withInputStream { stream ->
           props.load(stream)
         }
-      } catch (Exception e) {
-        logger.error("Exception when trying to read configuration file " + definedConfigFileName.trim() + ", exception message was: " + e.message + ".")
-        logger.error("This instance will be highly unstable!")
+      } catch (ex) {
+        logger.error "Exception when trying to read configuration file ${definedConfigFileName?.trim()} + ", ex
+        logger.error "This instance will be highly unstable!"
       }
     } else {
+      logger.info "No predefined config file set, loading default values"
+
       //Begin Default Values
       //Database
       props.put("database.url", "jdbc:mysql://localhost/gormtest")
@@ -91,7 +95,17 @@ class Properties {
       props.put("ehcache.memoryStoreEvictionPolicy", "LRU")
       //End Default Values
     }
-    this.props = new ConfigSlurper().parse(props)
+
+    try {
+      this.props = new ConfigSlurper().parse(props)
+    } catch (ex) {
+      logger.error "Slurping config file failed.", ex
+    }
+
+    logger.debug "ConfigObject: contains."
+    this.props?.each { key, value ->
+      logger.debug "$key = $value"
+    }
   }
 
 
