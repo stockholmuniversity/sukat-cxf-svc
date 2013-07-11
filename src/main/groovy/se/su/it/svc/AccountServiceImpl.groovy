@@ -3,6 +3,7 @@ package se.su.it.svc
 import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.manager.EhCacheManager
 import se.su.it.svc.util.EnrollmentServiceUtils
+import se.su.it.svc.util.GeneralUtils
 
 import javax.jws.WebService
 import org.apache.log4j.Logger
@@ -288,6 +289,8 @@ public class AccountServiceImpl implements AccountService{
       @WebParam(name = "socialSecurityNumber") String ssn, @WebParam(name = "audit") SvcAudit audit) {
 
     SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO()
+
+    ssn = GeneralUtils.pnrToSsn(ssn)
 
     String attributeError = LdapAttributeValidator.validateAttributes(["ssnornin": ssn, "audit": audit])
     if (attributeError)
