@@ -63,7 +63,7 @@ class Properties {
       props.put("database.user", "gormtest")
       props.put("database.password", "gormtest")
 
-      props.put("enrollUser.skipCreate", true) // We do skip create user for dev envs without config-file.
+      props.put("enrollment.skipCreate", false) // We do skip create user for dev envs without config-file.
 
       //SuCard Database
       props.put("sucard.database.url", "jdbc:mysql://localhost/sucard")

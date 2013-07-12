@@ -17,8 +17,8 @@ class EnrollmentServiceUtils {
 
     boolean error = false
     String uidNumber = ""
-    boolean skipCreate = se.su.it.svc.manager.Properties.instance.props.enrollment.skipCreate
 
+    boolean skipCreate = (se.su.it.svc.manager.Properties.instance.props.enrollment.skipCreate == "true")
 
     if (skipCreate) {
       log.warn "Skipping enable user since skipCreate is set to $skipCreate"
