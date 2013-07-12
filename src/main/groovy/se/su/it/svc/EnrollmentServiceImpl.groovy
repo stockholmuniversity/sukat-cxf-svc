@@ -53,6 +53,51 @@ class EnrollmentServiceImpl implements EnrollmentService{
    * This method enrolls a user in sukat, kerberos and afs. If not found in sukat user will be created.
    *
    *
+   * @param domain              domain of user in sukat. This is used to set the DN if user will be created.
+   * @param givenName           givenName of the user. This is used to set the givenName (förnamn) if user will be created.
+   * @param sn                  sn of the user. This is used to set the sn (efternamn) if user will be created.
+   * @param sn                  affiliation of the user. This is used to set the affiliation if user will be created.
+   * @param nin                 nin of the person. This can be a 10 or 12 digit social security number.
+   * @param mailRoutingAddress  The mail routing address of the user.
+   * @param audit               Audit object initilized with audit data about the client and user.
+   * @return SvcUidPwd          object with the uid and password.
+   * @see se.su.it.svc.commons.SvcAudit
+   */
+  public SvcUidPwd enrollUserWithMailRoutingAddress(
+      @WebParam(name = "domain") String domain,
+      @WebParam(name = "givenName") String givenName,
+      @WebParam(name = "sn") String sn,
+      @WebParam(name = "eduPersonPrimaryAffiliation") String eduPersonPrimaryAffiliation,
+      @WebParam(name = "nin") String nin,
+      @WebParam(name = "mailRoutingAddress") String mailRoutingAddress,
+      @WebParam(name = "audit") SvcAudit audit) {
+
+    /** Config value set in config.properties to allow for mocking out user creation */
+
+    String attributeError = LdapAttributeValidator.validateAttributes(["ssnornin": nin, "domain": domain, "givenName": givenName, "sn": sn, "eduPersonPrimaryAffiliation": eduPersonPrimaryAffiliation, "audit": audit])
+    if (attributeError) {
+      throw new IllegalArgumentException("enrollUser - ${attributeError}")
+    }
+
+    SvcUidPwd svcUidPwd = new SvcUidPwd()
+    svcUidPwd.password = PasswordUtils.genRandomPassword(10, 10)
+
+    SuEnrollPerson suEnrollPerson = findEnrollPerson(nin)
+
+    if (suEnrollPerson) {
+      handleExistingUser(nin, suEnrollPerson, svcUidPwd, eduPersonPrimaryAffiliation, domain, mailRoutingAddress)
+    } else {
+      /** User not found in SUKAT, create user now */
+      handleNewUser(nin, givenName, sn, svcUidPwd, eduPersonPrimaryAffiliation, domain, mailRoutingAddress)
+    }
+
+    return svcUidPwd
+  }
+
+  /**
+   * This method enrolls a user in sukat, kerberos and afs. If not found in sukat user will be created.
+   *
+   *
    * @param domain      domain of user in sukat. This is used to set the DN if user will be created.
    * @param givenName   givenName of the user. This is used to set the givenName (förnamn) if user will be created.
    * @param sn          sn of the user. This is used to set the sn (efternamn) if user will be created.
@@ -77,21 +122,28 @@ class EnrollmentServiceImpl implements EnrollmentService{
     SuEnrollPerson suEnrollPerson = findEnrollPerson(nin)
 
     if (suEnrollPerson) {
-      handleExistingUser(nin, suEnrollPerson, svcUidPwd, eduPersonPrimaryAffiliation, domain)
+      handleExistingUser(nin, suEnrollPerson, svcUidPwd, eduPersonPrimaryAffiliation, domain, null)
     } else {
       /** User not found in SUKAT, create user now */
-      handleNewUser(nin, givenName, sn, svcUidPwd, eduPersonPrimaryAffiliation, domain)
+      handleNewUser(nin, givenName, sn, svcUidPwd, eduPersonPrimaryAffiliation, domain, null)
     }
 
     return svcUidPwd
   }
 
-  private static void handleNewUser(String nin, String givenName, String sn, SvcUidPwd svcUidPwd, String eduPersonPrimaryAffiliation, String domain) {
+  private static void handleNewUser(String nin,
+                                    String givenName,
+                                    String sn,
+                                    SvcUidPwd svcUidPwd,
+                                    String eduPersonPrimaryAffiliation,
+                                    String domain,
+                                    String mailRoutingAddress) {
     logger.debug("enrollUser - User with nin <${nin}> not found. Trying to create and enable user in sukat/afs/kerberos.")
 
     svcUidPwd.uid = generateUid(givenName, sn)
 
-    SuEnrollPerson suCreateEnrollPerson = setupEnrollPerson(svcUidPwd, givenName, sn, eduPersonPrimaryAffiliation, domain, nin)
+    SuEnrollPerson suCreateEnrollPerson =
+      setupEnrollPerson(svcUidPwd, givenName, sn, eduPersonPrimaryAffiliation, domain, nin, mailRoutingAddress)
     SuPersonQuery.initSuEnrollPerson(GldapoManager.LDAP_RW, suCreateEnrollPerson)
 
     if (EnrollmentServiceUtils.enableUser(suCreateEnrollPerson.uid, svcUidPwd.password, suCreateEnrollPerson)) {
@@ -102,7 +154,13 @@ class EnrollmentServiceImpl implements EnrollmentService{
     }
   }
 
-  private static SuEnrollPerson setupEnrollPerson(SvcUidPwd svcUidPwd, String givenName, String sn, String eduPersonPrimaryAffiliation, String domain, String nin) {
+  private static SuEnrollPerson setupEnrollPerson(SvcUidPwd svcUidPwd,
+                                                  String givenName,
+                                                  String sn,
+                                                  String eduPersonPrimaryAffiliation,
+                                                  String domain,
+                                                  String nin,
+                                                  String mailRoutingAddress) {
     SuEnrollPerson suCreateEnrollPerson = new SuEnrollPerson()
     suCreateEnrollPerson.uid = svcUidPwd.uid
     suCreateEnrollPerson.cn = givenName + " " + sn
@@ -113,6 +171,10 @@ class EnrollmentServiceImpl implements EnrollmentService{
     suCreateEnrollPerson.eduPersonAffiliation = [eduPersonPrimaryAffiliation]
     suCreateEnrollPerson.mail = [svcUidPwd.uid + "@" + domain]
     suCreateEnrollPerson.mailLocalAddress = [svcUidPwd.uid + "@" + domain]
+
+    if (mailRoutingAddress) {
+      suCreateEnrollPerson.mailRoutingAddress = mailRoutingAddress
+    }
 
     if (nin.length() == 12) {
       suCreateEnrollPerson.norEduPersonNIN = nin
@@ -144,7 +206,12 @@ class EnrollmentServiceImpl implements EnrollmentService{
     return uid
   }
 
-  private static void handleExistingUser(String nin, SuEnrollPerson suEnrollPerson, SvcUidPwd svcUidPwd, String eduPersonPrimaryAffiliation, String domain) {
+  private static void handleExistingUser(String nin,
+                                         SuEnrollPerson suEnrollPerson,
+                                         SvcUidPwd svcUidPwd,
+                                         String eduPersonPrimaryAffiliation,
+                                         String domain,
+                                         String mailRoutingAddress) {
     logger.debug("enrollUser - User with nin <${nin}> found. Now enabling uid <${suEnrollPerson.uid}>.")
 
     boolean enabledUser = enableUser(suEnrollPerson, svcUidPwd)
@@ -157,6 +224,11 @@ class EnrollmentServiceImpl implements EnrollmentService{
     setNin(nin, suEnrollPerson)
     setPrimaryAffiliation(eduPersonPrimaryAffiliation, suEnrollPerson)
     setMailAttributes(suEnrollPerson, domain)
+
+    if (mailRoutingAddress) {
+      suEnrollPerson.mailRoutingAddress = mailRoutingAddress
+    }
+
     SuPersonQuery.saveSuEnrollPerson(suEnrollPerson)
     svcUidPwd.uid = suEnrollPerson.uid
     logger.info("enrollUser - User with uid <${suEnrollPerson.uid}> now enabled.")

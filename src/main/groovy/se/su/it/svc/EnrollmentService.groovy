@@ -14,4 +14,5 @@ public interface EnrollmentService {
   @AuditAspectMethodDetails(details = "resetOrCreatePrincipal,setPasswordExpiry")
   String resetAndExpirePwd(String uid, SvcAudit audit)
   SvcUidPwd enrollUser(String domain, String givenName, String sn, String eduPersonPrimaryAffiliation, String nin, SvcAudit audit)
+  SvcUidPwd enrollUserWithMailRoutingAddress(String domain, String givenName, String sn, String eduPersonPrimaryAffiliation, String nin, String mailRoutingAddress, SvcAudit audit)
 }

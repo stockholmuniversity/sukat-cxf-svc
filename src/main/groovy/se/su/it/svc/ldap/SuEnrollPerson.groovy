@@ -26,6 +26,7 @@ class SuEnrollPerson implements Serializable {
   String givenName
   String displayName
   String eduPersonPrimaryAffiliation
+  String mailRoutingAddress
   Set<String> eduPersonAffiliation
   Set<String> mail
   Set<String> mailLocalAddress
