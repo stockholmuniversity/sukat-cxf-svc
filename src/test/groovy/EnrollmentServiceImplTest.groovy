@@ -297,6 +297,7 @@ class EnrollmentServiceImplTest extends Specification {
   def "setNin when nin => #nin"() {
     given:
     def person = new SuEnrollPerson()
+    person.objectClass = []
 
     when:
     service.setNin(nin, person)
