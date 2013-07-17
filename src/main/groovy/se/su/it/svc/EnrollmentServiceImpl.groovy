@@ -269,6 +269,8 @@ class EnrollmentServiceImpl implements EnrollmentService{
     if (nin.length() == 12) {
       suEnrollPerson.norEduPersonNIN = nin
       suEnrollPerson.socialSecurityNumber = nin.substring(2, 12)
+
+      suEnrollPerson.objectClass.add("norEduPerson")
     } else {
       suEnrollPerson.socialSecurityNumber = nin
     }
