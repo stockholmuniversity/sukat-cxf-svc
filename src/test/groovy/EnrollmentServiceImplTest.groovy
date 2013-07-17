@@ -235,6 +235,7 @@ class EnrollmentServiceImplTest extends Specification {
     int p1=0
     int p2=0
     SuEnrollPerson suEnrollPerson = new SuEnrollPerson(uid: "testuid")
+    suEnrollPerson.objectClass = []
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuEnrollPerson.metaClass.parent = "stuts"
     SuPersonQuery.metaClass.static.getSuEnrollPersonFromSsn = {String directory,String nin -> return suEnrollPerson }
@@ -273,6 +274,7 @@ class EnrollmentServiceImplTest extends Specification {
     int p1=0
     int p2=0
     SuEnrollPerson suEnrollPerson = new SuEnrollPerson(uid: "testuid")
+    suEnrollPerson.objectClass = []
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuEnrollPerson.metaClass.parent = "stuts"
     SuPersonQuery.metaClass.static.getSuEnrollPersonFromSsn = {String directory,String nin -> return suEnrollPerson }
@@ -340,21 +342,6 @@ class EnrollmentServiceImplTest extends Specification {
     then:
     person.eduPersonPrimaryAffiliation == newPrimaryAffiliation
     person.eduPersonAffiliation.contains(newPrimaryAffiliation)
-  }
-
-  @Test
-  def "setMailAttributes: When adding a second mail"() {
-    given:
-    def person = new SuEnrollPerson()
-    person.mail = new TreeSet()
-    person.mail.add('kaka@kaka.se')
-    person.uid = 'foo'
-
-    when:
-    service.setMailAttributes(person, 'kaka.se')
-
-    then:
-    person.mail.contains('foo@kaka.se')
   }
 
   @Test
