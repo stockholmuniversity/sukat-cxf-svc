@@ -1,7 +1,9 @@
 import org.junit.Before
 import org.junit.After
 import org.junit.Test
+import se.su.it.commons.Kadmin
 import se.su.it.commons.PasswordUtils
+import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcAudit
 import gldapo.GldapoSchemaRegistry
 import se.su.it.svc.commons.SvcUidPwd
@@ -66,6 +68,118 @@ class EnrollmentServiceImplTest extends Specification {
     enrollmentServiceImpl.resetAndExpirePwd("testuid", new SvcAudit())
     then:
     thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "resetAndExpirePwd: test basic flow"() {
+    given:
+    def uid = "testuid"
+    def audit = new SvcAudit()
+
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String anUid -> return new SuPerson() }
+
+    def kadmin = Mock(Kadmin)
+    Kadmin.metaClass.static.newInstance = { -> return kadmin}
+
+    when:
+    def res = service.resetAndExpirePwd(uid, audit)
+
+    then:
+    assert res
+
+    and:
+    1 * kadmin.resetOrCreatePrincipal(*_) >> "xyz"
+
+    and:
+    1 * kadmin.setPasswordExpiry(*_)
+  }
+
+  @Test
+  def "resetAndExpirePwd: test when uid param is null, should throw IllegalArgumentException"() {
+    given:
+    def uid = null
+    def audit = new SvcAudit()
+
+    when:
+    service.resetAndExpirePwd(uid, audit)
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "resetAndExpirePwd: test when audit param is null, should throw IllegalArgumentException"() {
+    given:
+    def uid = "testuid"
+    def audit = null
+
+    when:
+    service.resetAndExpirePwd(uid, audit)
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "resetAndExpirePwd: test when search for SuPerson returns null, should throw IllegalArgumentException"() {
+    given:
+    def uid = "testuid"
+    def audit = new SvcAudit()
+
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String anUid -> return null }
+
+    when:
+    service.resetAndExpirePwd(uid, audit)
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "enrollUserWithMailRoutingAddress: test when attributes are invalid, should throw IllegalArgumentException"() {
+    when:
+    service.enrollUserWithMailRoutingAddress("domain", "givenName", "sn", "affiliation", "nin", "mailRoutingAddress", new SvcAudit())
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "enrollUserWithMailRoutingAddress: test when user exists in LDAP, should handle user and return new password"() {
+    given:
+    SuPersonQuery.metaClass.static.getSuEnrollPersonFromSsn = {
+      String directory,String nin ->
+        def enrollPerson = new SuEnrollPerson()
+        enrollPerson.objectClass = []
+        return enrollPerson
+    }
+    SuPersonQuery.metaClass.static.saveSuEnrollPerson = {SuEnrollPerson person -> return null}
+    EnrollmentServiceUtils.metaClass.static.enableUser = {String uid, String password, Object o -> return true}
+
+    when:
+    def password = service.enrollUserWithMailRoutingAddress("student.su.se", "test", "testsson", "other", "1000000000", "a@b.com", new SvcAudit())
+
+    then:
+    assert password
+  }
+
+  @Test
+  def "enrollUserWithMailRoutingAddress: test when user doesn't exist in LDAP, should handle new user and return new password"() {
+    given:
+    SuPersonQuery.metaClass.static.getSuEnrollPersonFromSsn = {
+      String directory,String nin ->
+        return null
+    }
+    SuEnrollPerson.metaClass.parent = "stuts"
+    SuPersonQuery.metaClass.static.initSuEnrollPerson = {String directory, SuEnrollPerson person -> return person}
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory, String uid -> return null}
+    EnrollmentServiceUtils.metaClass.static.enableUser = {String uid, String password, Object o -> return true}
+
+    when:
+    def password = service.enrollUserWithMailRoutingAddress("student.su.se", "test", "testsson", "other", "1000000000", "a@b.com", new SvcAudit())
+
+    then:
+    assert password
   }
 
   @Test
