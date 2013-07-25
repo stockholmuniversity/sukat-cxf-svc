@@ -5,6 +5,7 @@ import net.sf.ehcache.Ehcache
 import net.sf.ehcache.Cache
 import net.sf.ehcache.config.CacheConfiguration
 import net.sf.ehcache.Element
+import net.sf.ehcache.config.PersistenceConfiguration
 import org.apache.log4j.Logger
 import net.sf.ehcache.config.Searchable
 import net.sf.ehcache.config.SearchAttribute;
@@ -45,10 +46,18 @@ class EhCacheManager {
       CacheConfiguration config = new CacheConfiguration(cacheName, 0)
       try {
         config.setOverflowToDisk(props.ehcache?.overflowToDisk ? props.ehcache?.overflowToDisk.toBoolean(): false)
+        //TODO: This is the proposed, new, way to handle in-memory overflow. We need to decide on if we need fault tolerance (for a fee)
+//        config.persistence(new PersistenceConfiguration().strategy(PersistenceConfiguration.Strategy.LOCALTEMPSWAP))
+
         config.setTimeToLiveSeconds(props.ehcache?.timeToLiveSeconds ? props.ehcache?.timeToLiveSeconds.toInteger() : 600);
         config.setMaxElementsInMemory(props.ehcache?.maxElementsInMemory ? props.ehcache?.maxElementsInMemory.toInteger() : 10000)
+        //TODO: This is the proposed, new, way to handle objects in local heap memory
+//        config.setMaxEntriesLocalHeap(10000L)
+
         config.setEternal(props.ehcache?.eternal ? props.ehcache?.eternal.toBoolean() : false)
         config.setTimeToIdleSeconds(props.ehcache?.timeToIdleSeconds ? props.ehcache?.timeToIdleSeconds.toInteger() : 120)
+
+        //TODO: remove this configuration if uncommenting config.persistence above
         config.setDiskPersistent(props.ehcache?.diskPersistent ? props.ehcache?.diskPersistent.toBoolean() : false)
         config.setDiskExpiryThreadIntervalSeconds(props.ehcache?.diskExpiryThreadIntervalSeconds ? props.ehcache?.diskExpiryThreadIntervalSeconds.toInteger() : 120)
         config.setMemoryStoreEvictionPolicy(props.ehcache?.memoryStoreEvictionPolicy ? props.ehcache?.memoryStoreEvictionPolicy.toString() : "LRU")
@@ -104,7 +113,7 @@ class EhCacheManager {
       }
     }
 
-    // Unless alreay found in cache we refresh the value
+    // Unless already found in cache we refresh the value
     if (value == null) {
       logger.trace("Cache key: $key was not found in the cache, adding $key to cache.")
       value = put(params, function)
@@ -153,12 +162,12 @@ class EhCacheManager {
 
   private serializeObject(obj) {
     // setup streams
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    def out = new ObjectOutputStream(bos);
+    ByteArrayOutputStream bos = new ByteArrayOutputStream()
+    def out = new ObjectOutputStream(bos)
 
     // Serialize object
-    out.writeObject(obj);
-    out.close();
+    out.writeObject(obj)
+    out.close()
 
     // Return the serialized stream
     return bos.toByteArray()
