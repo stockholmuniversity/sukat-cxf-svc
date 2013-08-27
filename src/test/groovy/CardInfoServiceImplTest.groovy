@@ -51,7 +51,7 @@ class CardInfoServiceImplTest extends spock.lang.Specification {
   }
 
   @Test
-  def "Test getAllCards returns empty list when person dont exists"() {
+  def "Test getAllCards throws IllegalArgumentException when person don't exists"() {
     setup:
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
@@ -63,7 +63,7 @@ class CardInfoServiceImplTest extends spock.lang.Specification {
   }
 
   @Test
-  def "Test getCardByUUID with null suCardUUID argument"() {
+  def "Test getCardByUUID with null suCardUUID argument, should throw IllegalArgumentException"() {
     setup:
     def cardInfoServiceImpl = new CardInfoServiceImpl()
     when:
@@ -73,12 +73,40 @@ class CardInfoServiceImplTest extends spock.lang.Specification {
   }
 
   @Test
-  def "Test getCardByUUID with null SvcAudit argument"() {
+  def "Test getCardByUUID with null SvcAudit argument, should throw IllegalArgumentException"() {
     setup:
     def cardInfoServiceImpl = new CardInfoServiceImpl()
     when:
     cardInfoServiceImpl.getCardByUUID("testcarduuid",null)
     then:
     thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test getCardByUUID when card doesn't exist, should throw IllegalArgumentException"() {
+    given:
+    SuCardQuery.metaClass.static.findCardBySuCardUUID = {String directory,String uid -> return null }
+
+    def cardInfoServiceImpl = new CardInfoServiceImpl()
+
+    when:
+    cardInfoServiceImpl.getCardByUUID("testCardUUID", new SvcAudit())
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  @Test
+  def "Test getCardByUUID default flow"() {
+    given:
+    SuCardQuery.metaClass.static.findCardBySuCardUUID = {String directory,String uid -> return new SuCard() }
+
+    def cardInfoServiceImpl = new CardInfoServiceImpl()
+
+    when:
+    def res = cardInfoServiceImpl.getCardByUUID("testCardUUID", new SvcAudit())
+
+    then:
+    assert res
   }
 }

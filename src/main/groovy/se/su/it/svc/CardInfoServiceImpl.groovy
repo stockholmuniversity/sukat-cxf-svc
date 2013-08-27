@@ -40,8 +40,8 @@ public class CardInfoServiceImpl implements CardInfoService {
     } else {
       throw new IllegalArgumentException("getAllCards no such uid found: "+uid)
     }
-    logger.debug("getAllCards - No cards found with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
-    return []
+//    logger.debug("getAllCards - No cards found with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
+//    return []
   }
   /**
    * Returns a SuCard object for a specific suCardUUID, specified by the parameter suCardUUID.

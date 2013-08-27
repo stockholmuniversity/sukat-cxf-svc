@@ -228,6 +228,8 @@ class EnrollmentServiceImpl implements EnrollmentService{
 
     if (mailRoutingAddress) {
       suEnrollPerson.mailRoutingAddress = mailRoutingAddress
+
+      suEnrollPerson.objectClass.add("inetLocalMailRecipient")
     }
 
     SuPersonQuery.saveSuEnrollPerson(suEnrollPerson)
@@ -238,19 +240,16 @@ class EnrollmentServiceImpl implements EnrollmentService{
   private static void setMailAttributes(SuEnrollPerson suEnrollPerson, String domain) {
     String myMail = suEnrollPerson.uid + "@" + domain
 
-    if (suEnrollPerson.mail != null) {
-      if (!suEnrollPerson.mail.contains(myMail)) {
-        suEnrollPerson.mail.add(myMail)
-      }
-    } else {
-      suEnrollPerson.mail = [myMail]
-    }
-    if (suEnrollPerson.mailLocalAddress != null) {
+    suEnrollPerson.mail = [myMail]
+
+    if (suEnrollPerson.mailLocalAddress) {
       if (!suEnrollPerson.mailLocalAddress.contains(myMail)) {
         suEnrollPerson.mailLocalAddress.add(myMail)
       }
     } else {
       suEnrollPerson.mailLocalAddress = [myMail]
+
+      suEnrollPerson.objectClass.add("inetLocalMailRecipient")
     }
   }
 
@@ -267,12 +266,11 @@ class EnrollmentServiceImpl implements EnrollmentService{
   }
 
   private static void setNin(String nin, SuEnrollPerson suEnrollPerson) {
-    if (nin.length() == 12) {
+    if (nin?.length() == 12) {
+      suEnrollPerson.objectClass.add("norEduPerson")
       suEnrollPerson.norEduPersonNIN = nin
-      suEnrollPerson.socialSecurityNumber = GeneralUtils.pnrToSsn(nin)
-    } else {
-      suEnrollPerson.socialSecurityNumber = nin
     }
+    suEnrollPerson.socialSecurityNumber = GeneralUtils.pnrToSsn(nin)
   }
 
   private static boolean enableUser(SuEnrollPerson suEnrollPerson, SvcUidPwd svcUidPwd) {
