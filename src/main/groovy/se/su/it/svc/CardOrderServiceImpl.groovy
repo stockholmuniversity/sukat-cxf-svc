@@ -47,8 +47,9 @@ class CardOrderServiceImpl implements CardOrderService {
 
   @Override
   @Requires({ uid && audit })
+  @Ensures({ result instanceof SvcCardOrderVO[] })
   public SvcCardOrderVO[] findAllCardOrdersForUid(String uid, SvcAudit audit) {
-    def cardOrders = (suCardOrderQuery.findAllCardOrdersForUid(uid))?:[]
+    def cardOrders = suCardOrderQuery.findAllCardOrdersForUid(uid) ?: []
 
     return (SvcCardOrderVO[]) cardOrders.toArray()
   }
