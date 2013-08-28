@@ -30,6 +30,7 @@
  */
 
 import org.apache.commons.lang.NotImplementedException
+import org.aspectj.lang.annotation.After
 import org.junit.Test
 import se.su.it.svc.AccountServiceImpl
 import se.su.it.svc.commons.SvcAudit
@@ -43,6 +44,8 @@ import se.su.it.commons.ExecUtils
 import se.su.it.commons.PasswordUtils
 import se.su.it.svc.util.AccountServiceUtils
 import se.su.it.svc.AccountService
+import spock.lang.Ignore
+
 /**
  * Created with IntelliJ IDEA.
  * User: jqvar
@@ -50,7 +53,18 @@ import se.su.it.svc.AccountService
  * Time: 13:48
  * To change this template use File | Settings | File Templates.
  */
-class AccountServiceImplTest extends spock.lang.Specification{
+class AccountServiceImplTest extends spock.lang.Specification {
+
+  @After
+  def tearDown() {
+    Kadmin.metaClass = null
+    GldapoSchemaRegistry.metaClass = null
+    SuInitPerson.metaClass = null
+    SuPersonQuery.metaClass = null
+    PasswordUtils.metaClass = null
+    ExecUtils.metaClass = null
+  }
+
   @Test
   def "Test updatePrimaryAffiliation with null uid argument"() {
     setup:
@@ -141,31 +155,34 @@ class AccountServiceImplTest extends spock.lang.Specification{
   @Test
   def "Test resetPassword password 10 chars"() {
     setup:
-    Kadmin.metaClass.principalExists = {String uid -> return true}
-    Kadmin.metaClass.setPassword = {String uid, String pwd -> return void}
+    def passwordUtils = GroovyMock(PasswordUtils, global: true)
+    def kadmin = Mock(Kadmin)
+    Kadmin.metaClass.static.newInstance = { kadmin }
+    kadmin.principalExists(_) >> true
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
-    String pwd = accountServiceImpl.resetPassword("testuid", new SvcAudit())
+    def ret = accountServiceImpl.resetPassword("testuid", new SvcAudit())
+
     then:
-    pwd != null
-    pwd.length() == 10
+    1* PasswordUtils.genRandomPassword(10, 10) >> "**********"
+    assert ret == "**********"
   }
 
   @Test
   def "Test resetPassword correct conversion of uid"() {
     setup:
-    String changedUid = null
-    String changedUid2 = null
-    Kadmin.metaClass.principalExists = {String uid -> changedUid = uid
-      return true}
-    Kadmin.metaClass.setPassword = {String uid, String pwd -> changedUid2 = uid
-      return void}
+    def kadmin = Mock(Kadmin)
+    Kadmin.metaClass.static.newInstance = { kadmin }
+
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     String pwd = accountServiceImpl.resetPassword("testuid.jabber", new SvcAudit())
+
     then:
-    changedUid == "testuid/jabber"
-    changedUid2 == "testuid/jabber"
+    1 * kadmin.principalExists("testuid/jabber") >> true
+    1 * kadmin.setPassword("testuid/jabber", _)
   }
 
   @Test
@@ -321,6 +338,7 @@ class AccountServiceImplTest extends spock.lang.Specification{
   }
 
   @Test
+  @Ignore //TODO: Rebuild this test into smaller parts.
   def "Test createSuPerson true flow"() {
     setup:
     SuInitPerson person1
@@ -337,8 +355,10 @@ class AccountServiceImplTest extends spock.lang.Specification{
     SuPersonQuery.metaClass.static.saveSuInitPerson = {SuInitPerson tmpPerson2 -> person2 = tmpPerson2}
     def accountServiceImpl = Spy(AccountServiceImpl)
     accountServiceImpl.updateSuPerson(*_) >> {String uid, SvcSuPersonVO person,SvcAudit audit -> if(uid == "testtest") updatePersArgsOk = true}
+
     when:
     def pwd = accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), true, new SvcAudit())
+
     then:
     pwd == "secretpwd"
     person1.uid == "testtest"
