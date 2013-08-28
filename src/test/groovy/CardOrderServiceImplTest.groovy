@@ -99,6 +99,7 @@ class CardOrderServiceImplTest extends Specification {
     service.suCardOrderQuery = Mock(SuCardOrderQuery) {
       1 * findAllCardOrdersForUid(*_) >> []
     }
+
     expect:
     [] == service.findAllCardOrdersForUid('uid', new SvcAudit())
   }
@@ -109,6 +110,7 @@ class CardOrderServiceImplTest extends Specification {
     service.suCardOrderQuery = Mock(SuCardOrderQuery) {
       1 * findAllCardOrdersForUid(*_) >> [new SvcCardOrderVO(id:1), new SvcCardOrderVO(id:2)]
     }
+
     when:
     def resp = service.findAllCardOrdersForUid('uid', new SvcAudit())
 
