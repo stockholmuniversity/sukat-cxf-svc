@@ -45,6 +45,13 @@ class CardOrderServiceImpl implements CardOrderService {
 
   def suCardOrderQuery
 
+  /**
+   * Find all card orders for the supplied uid.
+   *
+   * @param uid the uid to find card orders for
+   * @param audit Audit object initilized with audit data about the client and user.
+   * @return an array of SvcCardOrderVO containing the card orders found for the uid
+   */
   @Override
   @Requires({ uid && audit })
   @Ensures({ result instanceof SvcCardOrderVO[] })
@@ -53,7 +60,13 @@ class CardOrderServiceImpl implements CardOrderService {
 
     return (SvcCardOrderVO[]) cardOrders.toArray()
   }
-
+  /**
+   * Create a card order
+   *
+   * @param cardOrderVO
+   * @param audit
+   * @return A UUID referencing the order created.
+   */
   @Override
   @Requires({ cardOrderVO && audit })
   @Ensures({ result?.size() == 36 })

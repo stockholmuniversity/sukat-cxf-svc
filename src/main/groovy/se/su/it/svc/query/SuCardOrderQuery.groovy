@@ -44,33 +44,66 @@ class SuCardOrderQuery {
 
   def suCardDataSource
 
-  private final int DEFAULT_ORDER_STATUS = 3 // WEB (online order)
+  /**
+   * WEB (online order)
+   */
+  private final int DEFAULT_ORDER_STATUS = 3
 
-
+  /**
+   * Find all card orders for <b>uid</b>
+   */
   public static final findAllCardsQuery = "SELECT r.id, serial, owner, printer, " +
       "createTime, firstname, lastname, streetaddress1, " +
       "streetaddress2, locality, zipcode, value, description " +
       "FROM request r JOIN address a ON r.address = a.id" +
       " JOIN status s ON r.status = s.id WHERE r.owner = :uid"
 
+  /**
+   * Find all active card orders for <b>owner</b>
+   */
   public static final findActiveCardOrdersQuery = "SELECT r.id, serial, owner, printer, createTime, firstname, " +
       "lastname, streetaddress1, streetaddress2, locality, zipcode, value, description " +
       "FROM request r JOIN address a ON r.address = a.id " +
       "JOIN status s ON r.status = s.id WHERE r.owner = :owner AND status in (1,2,3)"
 
+  /**
+   * Insert into <i>address</i> values <b>streetaddress1</b>, <b>streetaddress2</b>,
+   *  <b>locality</b> & <b>zipcode</b>
+   */
   public static final insertAddressQuery = "INSERT INTO address VALUES(null, :streetaddress1, " +
       ":streetaddress2, :locality, :zipcode)"
 
+  /**
+   * Insert into <i>request</i> values <b>id</b>, <b>owner</b>, <b>serial</b>,
+   *  <b>printer</b>, <b>createTime</b>, <b>address</b>, <b>status</b>, <b>firstname</b> &
+   *  <b>lastname</b>
+   */
   public static final insertRequestQuery = "INSERT INTO request VALUES(:id, :owner, :serial, " +
       ":printer, :createTime, :address, :status, :firstname, :lastname)"
 
+  /**
+   * Insert into <i>status_history</i> values <b>status</b>, <b>request</b>, <b>comment</b> &
+   *  <b>createTime</b>
+   */
   public static final insertStatusHistoryQuery = "INSERT INTO status_history VALUES " +
       "(null, :status, :request, :comment, :createTime)"
 
+  /**
+   * Update <i>request</i> with new <b>discardedStatus</b> for <b>id</b>
+   */
   public static final markCardAsDiscardedQuery = "UPDATE request SET status = :discardedStatus WHERE id = :id"
 
+  /**
+   * Find <i>id</i> from <i>request</i> for <b>uuid</b>
+   */
   public static final findFreeUUIDQuery = "SELECT id FROM request WHERE id = :uuid"
 
+  /**
+   * Find all card orders for supplied uid
+   *
+   * @param uid the uid to find card orders for
+   * @return a list of card orders found for the uid
+   */
   public List findAllCardOrdersForUid(String uid) {
 
     ArrayList cardOrders = []
@@ -90,9 +123,11 @@ class SuCardOrderQuery {
 
   /**
    * Accepts a cardOrderVO and returns a UUID reference to the created card.
-   * cardOrderVO needs to contain
-   * @param cardOrderVO
-   * @return
+   * cardOrderVO needs to contain: <b>owner</b>, <b>streetaddress1, <b>streetaddress2</b>,
+   * <b>locality</b>, <b>zipcode</b>, <b>printer</b>, <b>firstname</b> & <b>lastname</b>
+   *
+   * @param cardOrderVO the card order to create a new card for
+   * @return the UUID for the new card. Returns false if no card could be created.
    */
   public String orderCard(SvcCardOrderVO cardOrderVO) {
     String uuid = null
@@ -145,10 +180,11 @@ class SuCardOrderQuery {
     return uuid
   }
   /**
-   * Marks
-   * @param uuid
-   * @param uid
-   * @return
+   * Marks a card as discarded
+   *
+   * @param uuid the UUID of the card to be marked discarded
+   * @param uid the uid of the user whom discards the card
+   * @return true if the card has been marked as discarded, false if the operation fails.
    */
   public boolean markCardAsDiscarded(String uuid, String uid) {
     Closure queryClosure = { Sql sql ->
@@ -194,6 +230,14 @@ class SuCardOrderQuery {
     return true
   }
 
+  /**
+   * Creates a map composed of values partially from the supplied SvcCardOrderVO.
+   * createTime and status are supplied from this class and attributes
+   * id, address and serial should all be null as they are not to be handled by this method.
+   *
+   * @param cardOrderVO
+   * @return a map with values.
+   */
   private Map getRequestQueryArgs(SvcCardOrderVO cardOrderVO) {
     /** id and address will be set later in the process and serials should be unset. */
     return [
@@ -209,6 +253,12 @@ class SuCardOrderQuery {
     ]
   }
 
+  /**
+   * Extracts address bound attributes from the supplied SvcCardOrderVO
+   *
+   * @param cardOrderVO
+   * @return a map of address attributes.
+   */
   private static Map getAddressQueryArgs(SvcCardOrderVO cardOrderVO) {
     return [
         streetaddress1: cardOrderVO.streetaddress1,
@@ -218,6 +268,12 @@ class SuCardOrderQuery {
     ]
   }
 
+  /**
+   * Finds a free UUID for a card order, makes sure the UUID does not already exists in the database.
+   *
+   * @param sql
+   * @return a free UUID
+   */
   private static String findFreeUUID(Sql sql) {
     String uuid = null
     boolean newUUID = false
@@ -237,11 +293,12 @@ class SuCardOrderQuery {
     return uuid
   }
   /**
+   * Marks a card entry as discarded in the database, also handles setting proper status history.
    *
    * @param sql
    * @param uuid
    * @param uid
-   * @return
+   * @return true
    */
   private static boolean doMarkCardAsDiscarded(Sql sql, String uuid, String uid) {
     sql?.executeUpdate(markCardAsDiscardedQuery, [id:uuid])
@@ -254,6 +311,12 @@ class SuCardOrderQuery {
     return true
   }
 
+  /**
+   * Handles sql connectivity, executes query supplied as parameter
+   *
+   * @param query
+   * @return closure result
+   */
   private withConnection = { Closure query ->
     def response = null
     Sql sql = null
@@ -273,6 +336,13 @@ class SuCardOrderQuery {
     return response
   }
 
+  /**
+   * Perform a query expecting a list as return value.
+   *
+   * @param query
+   * @param args
+   * @return list of row entries.
+   */
   private List doListQuery(String query, Map args) {
     Closure queryClosure = { Sql sql ->
       if (!sql) { return null }
@@ -282,6 +352,12 @@ class SuCardOrderQuery {
     return withConnection(queryClosure)
   }
 
+  /**
+   * Creates a list of SvcCardOrderVOs from the sql retrieved from the database.
+   *
+   * @param rows
+   * @return a list of SvcCardOrderVO objects.
+   */
   private static ArrayList handleOrderListResult(List rows) {
     def cardOrders = []
 
