@@ -30,7 +30,7 @@
  */
 
 import org.apache.commons.lang.NotImplementedException
-import org.aspectj.lang.annotation.After
+import org.junit.After
 import org.junit.Test
 import se.su.it.svc.AccountServiceImpl
 import se.su.it.svc.commons.SvcAudit
@@ -42,8 +42,6 @@ import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.ldap.SuInitPerson
 import se.su.it.commons.ExecUtils
 import se.su.it.commons.PasswordUtils
-import se.su.it.svc.util.AccountServiceUtils
-import se.su.it.svc.AccountService
 import spock.lang.Ignore
 
 /**
