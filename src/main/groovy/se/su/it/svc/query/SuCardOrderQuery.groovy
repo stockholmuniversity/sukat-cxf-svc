@@ -50,19 +50,15 @@ class SuCardOrderQuery {
 
     ArrayList cardOrders = []
 
-    if (!uid) {
-      return cardOrders
+    if (uid) {
+      log.info "Querying card orders for uid: $uid"
+
+      List rows = doListQuery(findAllCardsQuery, [uid:uid]) ?: []
+
+      log.info "Found ${rows?.size()} order entries in the database for $uid."
+
+      cardOrders = handleOrderListResult(rows)
     }
-
-    log.info "Querying card orders for uid: $uid"
-
-    List rows = doListQuery(findAllCardsQuery, [uid:uid])
-
-    if (!rows) { return [] }
-
-    log.info "Found ${rows?.size()} order entries in the database for $uid."
-
-    cardOrders = handleOrderListResult(rows)
 
     return cardOrders
   }
@@ -286,5 +282,4 @@ class SuCardOrderQuery {
     }
     return response
   }
-
 }
