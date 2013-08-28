@@ -41,6 +41,7 @@ import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuEnrollPerson
 import se.su.it.svc.util.AccountServiceUtils
 import se.su.it.svc.util.EnrollmentServiceUtils
+import se.su.it.svc.util.GeneralUtils
 
 import javax.jws.WebService
 import javax.jws.WebParam
@@ -209,7 +210,7 @@ class EnrollmentServiceImpl implements EnrollmentService{
 
     if (nin.length() == 12) {
       suCreateEnrollPerson.norEduPersonNIN = nin
-      suCreateEnrollPerson.socialSecurityNumber = nin.substring(2, 12)
+      suCreateEnrollPerson.socialSecurityNumber = GeneralUtils.pnrToSsn(nin)
     } else {
       suCreateEnrollPerson.socialSecurityNumber = nin
     }
@@ -296,14 +297,11 @@ class EnrollmentServiceImpl implements EnrollmentService{
   }
 
   private static void setNin(String nin, SuEnrollPerson suEnrollPerson) {
-    if (nin.length() == 12) {
-      suEnrollPerson.norEduPersonNIN = nin
-      suEnrollPerson.socialSecurityNumber = nin.substring(2, 12)
-
+    if (nin?.length() == 12) {
       suEnrollPerson.objectClass.add("norEduPerson")
-    } else {
-      suEnrollPerson.socialSecurityNumber = nin
+      suEnrollPerson.norEduPersonNIN = nin
     }
+    suEnrollPerson.socialSecurityNumber = GeneralUtils.pnrToSsn(nin)
   }
 
   private static boolean enableUser(SuEnrollPerson suEnrollPerson, SvcUidPwd svcUidPwd) {
@@ -317,7 +315,7 @@ class EnrollmentServiceImpl implements EnrollmentService{
     } else {
       suEnrollPerson = SuPersonQuery.getSuEnrollPersonFromNin(GldapoManager.LDAP_RW, nin)
       if (suEnrollPerson == null) { // Try to cut the 12 - digit ssn to 10
-        suEnrollPerson = SuPersonQuery.getSuEnrollPersonFromSsn(GldapoManager.LDAP_RW, nin.substring(2, 12))
+        suEnrollPerson = SuPersonQuery.getSuEnrollPersonFromSsn(GldapoManager.LDAP_RW, GeneralUtils.pnrToSsn(nin))
       }
     }
     return suEnrollPerson
