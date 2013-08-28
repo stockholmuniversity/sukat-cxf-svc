@@ -30,6 +30,8 @@
  */
 
 
+
+import org.gcontracts.PostconditionViolation
 import org.gcontracts.PreconditionViolation
 import org.junit.After
 import org.junit.Before
@@ -38,6 +40,7 @@ import se.su.it.svc.CardOrderServiceImpl
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcCardOrderVO
 import se.su.it.svc.query.SuCardOrderQuery
+import se.su.it.svc.util.CardOrderServiceUtils
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -161,4 +164,29 @@ class CardOrderServiceImplTest extends Specification {
     resp.size() == 36
   }
 
+  @Test
+  @Unroll
+  void "orderCard ensures result"() {
+    given:
+    GroovyMock(CardOrderServiceUtils, global: true)
+    CardOrderServiceUtils.validateCardOrderVO(cardOrder) >> [ hasErrors: false, errors: [] ]
+
+    service.suCardOrderQuery = Mock(SuCardOrderQuery) {
+      1 * orderCard(*_) >> uuid
+    }
+
+    when:
+    service.orderCard(cardOrder, new SvcAudit())
+
+    then:
+    thrown(PostconditionViolation)
+
+    where:
+    uuid << [
+            null,
+            '',
+            '********-****-****-****-***********', //35 chars
+            '********-****-****-****-*************'  //37 chars
+    ]
+  }
 }
