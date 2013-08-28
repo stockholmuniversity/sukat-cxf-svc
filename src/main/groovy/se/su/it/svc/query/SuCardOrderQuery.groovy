@@ -46,6 +46,31 @@ class SuCardOrderQuery {
 
   private final int DEFAULT_ORDER_STATUS = 3 // WEB (online order)
 
+
+  public static final findAllCardsQuery = "SELECT r.id, serial, owner, printer, " +
+      "createTime, firstname, lastname, streetaddress1, " +
+      "streetaddress2, locality, zipcode, value, description " +
+      "FROM request r JOIN address a ON r.address = a.id" +
+      " JOIN status s ON r.status = s.id WHERE r.owner = :uid"
+
+  public static final findActiveCardOrdersQuery = "SELECT r.id, serial, owner, printer, createTime, firstname, " +
+      "lastname, streetaddress1, streetaddress2, locality, zipcode, value, description " +
+      "FROM request r JOIN address a ON r.address = a.id " +
+      "JOIN status s ON r.status = s.id WHERE r.owner = :owner AND status in (1,2,3)"
+
+  public static final insertAddressQuery = "INSERT INTO address VALUES(null, :streetaddress1, " +
+      ":streetaddress2, :locality, :zipcode)"
+
+  public static final insertRequestQuery = "INSERT INTO request VALUES(:id, :owner, :serial, " +
+      ":printer, :createTime, :address, :status, :firstname, :lastname)"
+
+  public static final insertStatusHistoryQuery = "INSERT INTO status_history VALUES " +
+      "(null, :status, :request, :comment, :createTime)"
+
+  public static final markCardAsDiscardedQuery = "UPDATE request SET status = :discardedStatus WHERE id = :id"
+
+  public static final findFreeUUIDQuery = "SELECT id FROM request WHERE id = :uuid"
+
   public List findAllCardOrdersForUid(String uid) {
 
     ArrayList cardOrders = []
@@ -85,11 +110,6 @@ class SuCardOrderQuery {
     }
     cardOrders
   }
-
-  private String getFindAllCardsQuery() {
-    return "SELECT r.id,serial,owner,printer,createTime,firstname,lastname,streetaddress1,streetaddress2,locality,zipcode,value,description FROM request r JOIN address a ON r.address = a.id JOIN status s ON r.status = s.id WHERE r.owner = :uid"
-  }
-
 
   public String orderCard(SvcCardOrderVO cardOrderVO) {
     String uuid = null
@@ -211,30 +231,6 @@ class SuCardOrderQuery {
       }
     }
     return uuid
-  }
-
-  private static String getInsertAddressQuery() {
-    return "INSERT INTO address VALUES(null, :streetaddress1, :streetaddress2, :locality, :zipcode)"
-  }
-
-  private static String getInsertRequestQuery() {
-    return "INSERT INTO request VALUES(:id, :owner, :serial, :printer, :createTime, :address, :status, :firstname, :lastname)"
-  }
-
-  private static String getFindActiveCardOrdersQuery() {
-    return "SELECT r.id, serial, owner, printer, createTime, firstname, lastname, streetaddress1, streetaddress2, locality, zipcode, value, description FROM request r JOIN address a ON r.address = a.id JOIN status s ON r.status = s.id WHERE r.owner = :owner AND status in (1,2,3)"
-  }
-
-  private static String getFindFreeUUIDQuery() {
-    return "SELECT id FROM request WHERE id = :uuid"
-  }
-
-  private static String getInsertStatusHistoryQuery() {
-    return "INSERT INTO status_history VALUES (null, :status, :request, :comment, :createTime)"
-  }
-
-  private static String getMarkCardAsDiscardedQuery() {
-    return "UPDATE request SET status = :discardedStatus WHERE id = :id"
   }
 
   public boolean markCardAsDiscarded(String uuid, String uid) {

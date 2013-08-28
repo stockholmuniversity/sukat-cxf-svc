@@ -77,7 +77,9 @@ public class SuCardOrderQueryTest extends Specification {
   @Test
   void "getFindAllCardsQuery"() {
     expect: 'should return'
-    service.getFindAllCardsQuery() == "SELECT r.id,serial,owner,printer,createTime,firstname,lastname,streetaddress1,streetaddress2,locality,zipcode,value,description FROM request r JOIN address a ON r.address = a.id JOIN status s ON r.status = s.id WHERE r.owner = :uid"
+    service.findAllCardsQuery == "SELECT r.id, serial, owner, printer, createTime, firstname, lastname, streetaddress1," +
+        " streetaddress2, locality, zipcode, value, description FROM request r JOIN address a " +
+        "ON r.address = a.id JOIN status s ON r.status = s.id WHERE r.owner = :uid"
   }
 
   @Test
