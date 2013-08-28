@@ -29,6 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+
+import org.gcontracts.PreconditionViolation
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -69,8 +71,12 @@ class CardOrderServiceImplTest extends Specification {
   }
   @Test @Unroll
   void "findAllCardOrdersForUid: given uid: \'#uid\'"(){
-    expect:
-    [] == service.findAllCardOrdersForUid(uid, new SvcAudit())
+    when:
+    service.findAllCardOrdersForUid(uid, new SvcAudit())
+
+    then:
+    thrown(PreconditionViolation)
+
     where:
     uid << [null, '']
   }
@@ -79,8 +85,9 @@ class CardOrderServiceImplTest extends Specification {
   void "findAllCardOrdersForUid: given no audit"(){
     when:
     service.findAllCardOrdersForUid('uid', null)
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -109,8 +116,11 @@ class CardOrderServiceImplTest extends Specification {
 
   @Test
   void "orderCard: when given no cardOrder"() {
-    expect:
-    '' == service.orderCard(null, null)
+    when:
+    service.orderCard(null, null)
+
+    then:
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -119,7 +129,7 @@ class CardOrderServiceImplTest extends Specification {
     service.orderCard(new SvcCardOrderVO(id:1), null)
 
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -141,14 +151,14 @@ class CardOrderServiceImplTest extends Specification {
     cardOrder.serial = null
 
     service.suCardOrderQuery = Mock(SuCardOrderQuery) {
-      1 * orderCard(*_) >> 'someId'
+      1 * orderCard(*_) >> UUID.randomUUID()
     }
 
     when:
     def resp = service.orderCard(cardOrder, new SvcAudit())
 
     then:
-    resp == 'someId'
+    resp.size() == 36
   }
 
 }
