@@ -34,21 +34,12 @@ package se.su.it.svc.query
 import groovy.util.logging.Slf4j
 import org.springframework.ldap.core.DistinguishedName
 import se.su.it.svc.ldap.SuCard
-import se.su.it.svc.manager.EhCacheManager
 
 /**
  * This class is a helper class for doing GLDAPO queries on the SuCard GLDAPO schema.
  */
 @Slf4j
 public class SuCardQuery {
-
-  /**
-   * the CacheManager provides an instance of EhCache and some overridden methods (get/put/remove)
-   * !important: when getting an object from LDAP which is to be changed, we always need to get it from the master,
-   *             ie: using the props.ldap.serverrw (readWrite, to ensure that we are changing the up-to-date value)
-   *             and NOT fetching the object from the cache.
-   */
-  def static cacheManager = EhCacheManager.getInstance()
 
   /**
    * Returns a list (<code>ArrayList<SuCard></code>) of SuCard objects for a specific DistinguishedName, specified by the parameter dn.
@@ -112,8 +103,5 @@ public class SuCardQuery {
    */
   static void saveSuCard(SuCard suCard) {
     suCard.save()
-    def params = [key: ":findCardBySuCardUUID:${suCard.suCardUUID}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: false]
-    cacheManager.put(params, { suCard })
-
   }
 }
