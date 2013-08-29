@@ -31,6 +31,8 @@
 
 package se.su.it.svc
 
+import org.gcontracts.annotations.Requires
+
 import javax.jws.WebService
 import javax.jws.WebParam
 import se.su.it.svc.ldap.SuCard
@@ -60,9 +62,9 @@ public class CardInfoServiceImpl implements CardInfoService {
    * @see se.su.it.svc.ldap.SuCard
    * @see se.su.it.svc.commons.SvcAudit
    */
+  @Override
+  @Requires({ uid && audit && onlyActive != null })
   public SuCard[] getAllCards(String uid, boolean onlyActive, SvcAudit audit) {
-    if(uid == null || onlyActive == null || audit == null)
-      throw new java.lang.IllegalArgumentException("getAllCards - Null argument values not allowed in this function")
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
     if(person) {
       def cards = SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(GldapoManager.LDAP_RO,person.getDn(),onlyActive)
@@ -74,6 +76,7 @@ public class CardInfoServiceImpl implements CardInfoService {
 //    logger.debug("getAllCards - No cards found with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
 //    return []
   }
+
   /**
    * Returns a SuCard object for a specific suCardUUID, specified by the parameter suCardUUID.
    *
