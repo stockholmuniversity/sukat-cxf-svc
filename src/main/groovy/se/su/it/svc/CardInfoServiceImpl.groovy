@@ -60,7 +60,7 @@ public class CardInfoServiceImpl implements CardInfoService {
    * @see se.su.it.svc.ldap.SuCard
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public SuCard[] getAllCards(@WebParam(name = "uid") String uid, @WebParam(name = "onlyActive") boolean onlyActive, @WebParam(name = "audit") SvcAudit audit) {
+  public SuCard[] getAllCards(String uid, boolean onlyActive, SvcAudit audit) {
     if(uid == null || onlyActive == null || audit == null)
       throw new java.lang.IllegalArgumentException("getAllCards - Null argument values not allowed in this function")
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
