@@ -31,6 +31,7 @@
 
 package se.su.it.svc.query
 
+import groovy.util.logging.Slf4j
 import se.su.it.svc.ldap.SuEnrollPerson
 import se.su.it.svc.ldap.SuInitPerson
 import se.su.it.svc.ldap.SuPerson
@@ -40,6 +41,7 @@ import se.su.it.svc.manager.GldapoManager
 /**
  * This class is a helper class for doing GLDAPO queries on the SuPerson GLDAPO schema.
  */
+@Slf4j
 public class SuPersonQuery {
 
   /**
@@ -61,12 +63,19 @@ public class SuPersonQuery {
    * @see se.su.it.svc.manager.GldapoManager
    */
   static SuPerson getSuPersonFromUID(String directory, String uid) {
-    return SuPerson.find(directory: directory, base: "") {
-      and {
-        eq("uid", uid)
-        eq("objectclass", "suPerson")
+    SuPerson suPerson = null
+    try {
+      suPerson = SuPerson.find(directory: directory, base: "") {
+        and {
+          eq("uid", uid)
+          eq("objectclass", "suPerson")
+        }
       }
+    } catch (ex) {
+      log.error "Failed finding SuPerson for uid: $uid", ex
     }
+
+    return suPerson
   }
 
   /**

@@ -62,12 +62,20 @@ public class SuCardQuery {
    * @see se.su.it.svc.manager.GldapoManager
    */
   static SuCard[] findAllCardsBySuPersonDnAndOnlyActiveOrNot(String directory, DistinguishedName dn, boolean onlyActiveCards) {
-    return SuCard.findAll(directory: directory, base: dn) {
-      eq("objectClass", "suCardOwner")
-      if (onlyActiveCards) {
-        eq("suCardState", "urn:x-su:su-card:state:active")
+    SuCard[] suCards = null
+
+    try {
+      SuCard.findAll(directory: directory, base: dn) {
+        eq("objectClass", "suCardOwner")
+        if (onlyActiveCards) {
+          eq("suCardState", "urn:x-su:su-card:state:active")
+        }
       }
+    } catch (ex) {
+      log.error "Failed finding all ${onlyActiveCards?'':'in'}active SuCards for user dn=$dn", ex
     }
+
+    return suCards
   }
 
   /**
