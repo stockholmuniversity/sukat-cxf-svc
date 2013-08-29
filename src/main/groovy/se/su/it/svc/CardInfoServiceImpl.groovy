@@ -35,19 +35,12 @@ import groovy.util.logging.Slf4j
 import org.gcontracts.annotations.Ensures
 import org.gcontracts.annotations.Requires
 import org.springframework.ldap.core.DistinguishedName
-
-import javax.jws.WebService
-import javax.jws.WebParam
-import se.su.it.svc.ldap.SuCard
-import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.commons.SvcAudit
-import se.su.it.svc.query.SuPersonQuery
-import se.su.it.svc.query.SuCardQuery
+import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.manager.GldapoManager
 import se.su.it.svc.query.SuCardQuery
 import se.su.it.svc.query.SuPersonQuery
 
-import javax.jws.WebParam
 import javax.jws.WebService
 
 /**
@@ -70,10 +63,10 @@ public class CardInfoServiceImpl implements CardInfoService {
    */
   @Override
   @Requires({ uid && audit && onlyActive != null })
-  @Ensures({ result && result instanceof SuCard[] })
+  @Ensures({ result != null && result instanceof SuCard[] })
   public SuCard[] getAllCards(String uid, boolean onlyActive, SvcAudit audit) {
     def cards = new SuCard[0]
-    SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
+    def person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
 
     if (person) {
       String directory = GldapoManager.LDAP_RO
