@@ -194,6 +194,14 @@ class SuCardOrderQuery {
     return true
   }
 
+  /**
+   * Creates a map composed of values partially from the supplied SvcCardOrderVO.
+   * createTime and status are supplied from this class and attributes
+   * id, address and serial should all be null as they are not to be handled by this method.
+   *
+   * @param cardOrderVO
+   * @return a map with values.
+   */
   private Map getRequestQueryArgs(SvcCardOrderVO cardOrderVO) {
     /** id and address will be set later in the process and serials should be unset. */
     return [
@@ -209,6 +217,12 @@ class SuCardOrderQuery {
     ]
   }
 
+  /**
+   * Extracts address bound attributes from the supplied SvcCardOrderVO
+   *
+   * @param cardOrderVO
+   * @return a map of address attributes.
+   */
   private static Map getAddressQueryArgs(SvcCardOrderVO cardOrderVO) {
     return [
         streetaddress1: cardOrderVO.streetaddress1,
@@ -218,6 +232,12 @@ class SuCardOrderQuery {
     ]
   }
 
+  /**
+   * Finds a free UUID for a card order, makes sure the UUID does not already exists in the database.
+   *
+   * @param sql
+   * @return a free UUID
+   */
   private static String findFreeUUID(Sql sql) {
     String uuid = null
     boolean newUUID = false
@@ -237,11 +257,12 @@ class SuCardOrderQuery {
     return uuid
   }
   /**
+   * Marks a card entry as discarded in the database, also handles setting proper status history.
    *
    * @param sql
    * @param uuid
    * @param uid
-   * @return
+   * @return true
    */
   private static boolean doMarkCardAsDiscarded(Sql sql, String uuid, String uid) {
     sql?.executeUpdate(markCardAsDiscardedQuery, [id:uuid])
@@ -254,6 +275,12 @@ class SuCardOrderQuery {
     return true
   }
 
+  /**
+   * Handles sql connectivity, executes query supplied as parameter
+   *
+   * @param query
+   * @return closure result
+   */
   private withConnection = { Closure query ->
     def response = null
     Sql sql = null
@@ -273,6 +300,13 @@ class SuCardOrderQuery {
     return response
   }
 
+  /**
+   * Perform a query expecting a list as return value.
+   *
+   * @param query
+   * @param args
+   * @return list of row entries.
+   */
   private List doListQuery(String query, Map args) {
     Closure queryClosure = { Sql sql ->
       if (!sql) { return null }
@@ -282,6 +316,12 @@ class SuCardOrderQuery {
     return withConnection(queryClosure)
   }
 
+  /**
+   * Creates a list of SvcCardOrderVOs from the sql retrieved from the database.
+   *
+   * @param rows
+   * @return a list of SvcCardOrderVO objects.
+   */
   private static ArrayList handleOrderListResult(List rows) {
     def cardOrders = []
 
