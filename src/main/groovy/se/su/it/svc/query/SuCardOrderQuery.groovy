@@ -88,29 +88,12 @@ class SuCardOrderQuery {
     return cardOrders
   }
 
-  private List doListQuery(String query, Map args) {
-    Closure queryClosure = { Sql sql ->
-      if (!sql) { return null }
-      return sql?.rows(query, args)
-    }
-
-    return withConnection(queryClosure)
-  }
-
-  private ArrayList handleOrderListResult(List rows) {
-    def cardOrders = []
-
-    for (row in rows) {
-      try {
-        SvcCardOrderVO svcCardOrderVO = new SvcCardOrderVO(row as GroovyRowResult)
-        cardOrders << svcCardOrderVO
-      } catch (ex) {
-        log.error "Failed to add order $row to orders.", ex
-      }
-    }
-    cardOrders
-  }
-
+  /**
+   * Accepts a cardOrderVO and returns a UUID reference to the created card.
+   * cardOrderVO needs to contain
+   * @param cardOrderVO
+   * @return
+   */
   public String orderCard(SvcCardOrderVO cardOrderVO) {
     String uuid = null
 
@@ -160,6 +143,27 @@ class SuCardOrderQuery {
     log.info "Returning $uuid"
 
     return uuid
+  }
+  /**
+   * Marks
+   * @param uuid
+   * @param uid
+   * @return
+   */
+  public boolean markCardAsDiscarded(String uuid, String uid) {
+    Closure queryClosure = { Sql sql ->
+      try {
+        sql.withTransaction {
+          doMarkCardAsDiscarded(sql, uuid, uid)
+        }
+      } catch (ex) {
+        log.error "Failed to mark card as discarded in sucard db.", ex
+        return false
+      }
+      return true
+    }
+
+    return (withConnection(queryClosure)) ? true : false
   }
 
   private boolean doCardOrderInsert(Sql sql, Map addressArgs, Map requestArgs) {
@@ -232,23 +236,13 @@ class SuCardOrderQuery {
     }
     return uuid
   }
-
-  public boolean markCardAsDiscarded(String uuid, String uid) {
-    Closure queryClosure = { Sql sql ->
-      try {
-        sql.withTransaction {
-          doMarkCardAsDiscarded(sql, uuid, uid)
-        }
-      } catch (ex) {
-        log.error "Failed to mark card as discarded in sucard db.", ex
-        return false
-      }
-      return true
-    }
-
-    return (withConnection(queryClosure))
-  }
-
+  /**
+   *
+   * @param sql
+   * @param uuid
+   * @param uid
+   * @return
+   */
   private static boolean doMarkCardAsDiscarded(Sql sql, String uuid, String uid) {
     sql?.executeUpdate(markCardAsDiscardedQuery, [id:uuid])
     sql?.executeInsert(insertStatusHistoryQuery, [
@@ -277,5 +271,28 @@ class SuCardOrderQuery {
       }
     }
     return response
+  }
+
+  private List doListQuery(String query, Map args) {
+    Closure queryClosure = { Sql sql ->
+      if (!sql) { return null }
+      return sql?.rows(query, args)
+    }
+
+    return withConnection(queryClosure)
+  }
+
+  private static ArrayList handleOrderListResult(List rows) {
+    def cardOrders = []
+
+    for (row in rows) {
+      try {
+        SvcCardOrderVO svcCardOrderVO = new SvcCardOrderVO(row as GroovyRowResult)
+        cardOrders << svcCardOrderVO
+      } catch (ex) {
+        log.error "Failed to add order $row to orders.", ex
+      }
+    }
+    cardOrders
   }
 }
