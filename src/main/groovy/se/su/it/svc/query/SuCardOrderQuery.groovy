@@ -44,31 +44,56 @@ class SuCardOrderQuery {
 
   def suCardDataSource
 
-  private final int DEFAULT_ORDER_STATUS = 3 // WEB (online order)
+  /**
+   * WEB (online order)
+   */
+  private final int DEFAULT_ORDER_STATUS = 3
 
-
+  /** Find all card orders for <b>uid</b> */
   public static final findAllCardsQuery = "SELECT r.id, serial, owner, printer, " +
       "createTime, firstname, lastname, streetaddress1, " +
       "streetaddress2, locality, zipcode, value, description " +
       "FROM request r JOIN address a ON r.address = a.id" +
       " JOIN status s ON r.status = s.id WHERE r.owner = :uid"
 
+  /**
+   * Find all active card orders for <b>owner</b>
+   */
   public static final findActiveCardOrdersQuery = "SELECT r.id, serial, owner, printer, createTime, firstname, " +
       "lastname, streetaddress1, streetaddress2, locality, zipcode, value, description " +
       "FROM request r JOIN address a ON r.address = a.id " +
       "JOIN status s ON r.status = s.id WHERE r.owner = :owner AND status in (1,2,3)"
 
+  /**
+   * Insert into <i>address</i> values <b>streetaddress1</b>, <b>streetaddress2</b>,
+   *  <b>locality</b> & <b>zipcode</b>
+   */
   public static final insertAddressQuery = "INSERT INTO address VALUES(null, :streetaddress1, " +
       ":streetaddress2, :locality, :zipcode)"
 
+  /**
+   * Insert into <i>request</i> values <b>id</b>, <b>owner</b>, <b>serial</b>,
+   *  <b>printer</b>, <b>createTime</b>, <b>address</b>, <b>status</b>, <b>firstname</b> &
+   *  <b>lastname</b>
+   */
   public static final insertRequestQuery = "INSERT INTO request VALUES(:id, :owner, :serial, " +
       ":printer, :createTime, :address, :status, :firstname, :lastname)"
 
+  /**
+   * Insert into <i>status_history</i> values <b>status</b>, <b>request</b>, <b>comment</b> &
+   *  <b>createTime</b>
+   */
   public static final insertStatusHistoryQuery = "INSERT INTO status_history VALUES " +
       "(null, :status, :request, :comment, :createTime)"
 
+  /**
+   * Update <i>request</i> with new <b>discardedStatus</b> for <b>id</b>
+   */
   public static final markCardAsDiscardedQuery = "UPDATE request SET status = :discardedStatus WHERE id = :id"
 
+  /**
+   * Find <i>id</i> from <i>request</i> for <b>uuid</b>
+   */
   public static final findFreeUUIDQuery = "SELECT id FROM request WHERE id = :uuid"
 
   public List findAllCardOrdersForUid(String uid) {
