@@ -156,9 +156,7 @@ class SuCardOrderQuery {
         requestArgs.id = uuid
 
         try {
-          sql.withTransaction {
-            doCardOrderInsert(sql, addressArgs, requestArgs)
-          }
+          doCardOrderInsert(sql, addressArgs, requestArgs)
         } catch (ex) {
           log.error "Error in SQL card order transaction.", ex
           return false
@@ -201,32 +199,41 @@ class SuCardOrderQuery {
 
     return (withConnection(queryClosure)) ? true : false
   }
-
+  /**
+   * Handles the persisting of the card order request.
+   *
+   * @param sql
+   * @param addressArgs
+   * @param requestArgs
+   * @return true
+   */
   private boolean doCardOrderInsert(Sql sql, Map addressArgs, Map requestArgs) {
-    String addressQuery = insertAddressQuery
-    String requestQuery = insertRequestQuery
-    String statusQuery = insertStatusHistoryQuery
+    sql.withTransaction {
+      String addressQuery = insertAddressQuery
+      String requestQuery = insertRequestQuery
+      String statusQuery = insertStatusHistoryQuery
 
-    log.debug "Sending: $addressQuery with arguments $addressArgs"
-    def addressResponse = sql?.executeInsert(addressQuery, addressArgs)
-    log.debug "Address response is $addressResponse"
-    def addressId = addressResponse[0][0]
-    log.debug "Recieved: $addressId as response."
+      log.debug "Sending: $addressQuery with arguments $addressArgs"
+      def addressResponse = sql?.executeInsert(addressQuery, addressArgs)
+      log.debug "Address response is $addressResponse"
+      def addressId = addressResponse[0][0]
+      log.debug "Recieved: $addressId as response."
 
-    /** Get the address id and set it as the request address id. */
-    requestArgs['address'] = addressId
-    log.debug "Sending: $requestQuery with arguments $requestArgs"
-    sql?.executeInsert(requestQuery, requestArgs)
-    String comment = "Created by " + requestArgs?.owner + " while activating account"
+      /** Get the address id and set it as the request address id. */
+      requestArgs['address'] = addressId
+      log.debug "Sending: $requestQuery with arguments $requestArgs"
+      sql?.executeInsert(requestQuery, requestArgs)
+      String comment = "Created by " + requestArgs?.owner + " while activating account"
 
-    def statusResponse = sql?.executeInsert(statusQuery,
-        [status:DEFAULT_ORDER_STATUS,
-            request:requestArgs.id,
-            comment: comment,
-            createTime:new Timestamp(new Date().getTime())
-        ])
+      def statusResponse = sql?.executeInsert(statusQuery,
+          [status:DEFAULT_ORDER_STATUS,
+              request:requestArgs.id,
+              comment: comment,
+              createTime:new Timestamp(new Date().getTime())
+          ])
 
-    log.debug "Status response: $statusResponse"
+      log.debug "Status response: $statusResponse"
+    }
     return true
   }
 
