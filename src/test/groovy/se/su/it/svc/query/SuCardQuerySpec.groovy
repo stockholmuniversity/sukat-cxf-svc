@@ -49,7 +49,20 @@ class SuCardQuerySpec extends Specification {
     }
 
     when:
-    SuPersonQuery.getSuPersonFromUID(null, null)
+    SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(null, null, true)
+
+    then:
+    noExceptionThrown()
+  }
+
+  def "findCardBySuCardUUID should handle exception"() {
+    given:
+    SuCard.metaClass.static.find = { String a, String b, Closure c ->
+      throw new Exception()
+    }
+
+    when:
+    SuCardQuery.findCardBySuCardUUID(null, null)
 
     then:
     noExceptionThrown()
