@@ -37,6 +37,7 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.dbcp.BasicDataSource
 import se.su.it.svc.commons.SvcCardOrderVO
 
+import java.sql.SQLException
 import java.sql.Timestamp
 
 @Slf4j
@@ -189,9 +190,7 @@ class SuCardOrderQuery {
   public boolean markCardAsDiscarded(String uuid, String uid) {
     Closure queryClosure = { Sql sql ->
       try {
-        sql.withTransaction {
-          doMarkCardAsDiscarded(sql, uuid, uid)
-        }
+        doMarkCardAsDiscarded(sql, uuid, uid)
       } catch (ex) {
         log.error "Failed to mark card as discarded in sucard db.", ex
         return false
@@ -292,8 +291,10 @@ class SuCardOrderQuery {
     }
     return uuid
   }
+
   /**
-   * Marks a card entry as discarded in the database, also handles setting proper status history.
+   * Marks a card entry as discarded in the database,
+   * also handles setting proper status history.
    *
    * @param sql
    * @param uuid
@@ -301,13 +302,15 @@ class SuCardOrderQuery {
    * @return true
    */
   private static boolean doMarkCardAsDiscarded(Sql sql, String uuid, String uid) {
-    sql?.executeUpdate(markCardAsDiscardedQuery, [id:uuid])
-    sql?.executeInsert(insertStatusHistoryQuery, [
-        status:5,
-        request: uuid,
-        comment: "Discarded by " + uid,
-        createTime: new Timestamp(new Date().getTime())
-    ])
+    sql.withTransaction {
+      sql?.executeUpdate(markCardAsDiscardedQuery, [id:uuid])
+      sql?.executeInsert(insertStatusHistoryQuery, [
+          status:5,
+          request: uuid,
+          comment: "Discarded by " + uid,
+          createTime: new Timestamp(new Date().getTime())
+      ])
+    }
     return true
   }
 
