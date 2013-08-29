@@ -29,39 +29,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import spock.lang.*
+
+
+import gldapo.GldapoSchemaRegistry
+import org.gcontracts.PreconditionViolation
 import org.junit.Test
 import se.su.it.svc.CardInfoServiceImpl
 import se.su.it.svc.commons.SvcAudit
-import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuCard
-import gldapo.GldapoSchemaRegistry
-import se.su.it.svc.query.SuPersonQuery
+import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.query.SuCardQuery
-import se.su.it.svc.manager.EhCacheManager
-import org.springframework.context.ApplicationContext
-import net.sf.ehcache.hibernate.EhCache
-import se.su.it.svc.manager.ApplicationContextProvider
+import se.su.it.svc.query.SuPersonQuery
 
 class CardInfoServiceImplTest extends spock.lang.Specification {
   @Test
   def "Test getAllCards with null uid argument"() {
     setup:
     def cardInfoServiceImpl = new CardInfoServiceImpl()
+
     when:
     cardInfoServiceImpl.getAllCards(null,false,new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
   def "Test getAllCards with null SvcAudit argument"() {
     setup:
     def cardInfoServiceImpl = new CardInfoServiceImpl()
+
     when:
     cardInfoServiceImpl.getAllCards("testuid",false,null)
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -82,15 +84,16 @@ class CardInfoServiceImplTest extends spock.lang.Specification {
   }
 
   @Test
-  def "Test getAllCards throws IllegalArgumentException when person don't exists"() {
+  def "Test getAllCards returns empty array if person doesn't exist"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
-    def cardInfoServiceImpl = new CardInfoServiceImpl()
+    GroovyMock(SuPersonQuery, global: true)
+    SuPersonQuery.getSuPersonFromUID(*_) >> { String directory, String uid -> return null }
+
     when:
-    def ret = cardInfoServiceImpl.getAllCards("testuid",true,new SvcAudit())
+    def ret = new CardInfoServiceImpl().getAllCards("testuid",true,new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    ret.size() == 0
   }
 
   @Test
