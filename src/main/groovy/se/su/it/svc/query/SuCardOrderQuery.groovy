@@ -37,7 +37,6 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.dbcp.BasicDataSource
 import se.su.it.svc.commons.SvcCardOrderVO
 
-import java.sql.SQLException
 import java.sql.Timestamp
 
 @Slf4j
