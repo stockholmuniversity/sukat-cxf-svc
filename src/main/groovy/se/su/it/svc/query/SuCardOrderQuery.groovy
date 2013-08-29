@@ -125,7 +125,7 @@ class SuCardOrderQuery {
    * Accepts a cardOrderVO and returns a UUID reference to the created card.
    * cardOrderVO needs to contain: <b>owner</b>, <b>streetaddress1, <b>streetaddress2</b>,
    * <b>locality</b>, <b>zipcode</b>, <b>printer</b>, <b>firstname</b> & <b>lastname</b>
-   * 
+   *
    * @param cardOrderVO the card order to create a new card for
    * @return the UUID for the new card. Returns false if no card could be created.
    */
@@ -180,10 +180,11 @@ class SuCardOrderQuery {
     return uuid
   }
   /**
-   * Marks
-   * @param uuid
-   * @param uid
-   * @return
+   * Marks a card as discarded
+   *
+   * @param uuid the UUID of the card to be marked discarded
+   * @param uid the uid of the user whom discards the card
+   * @return true if the card has been marked as discarded, false if the operation fails.
    */
   public boolean markCardAsDiscarded(String uuid, String uid) {
     Closure queryClosure = { Sql sql ->
