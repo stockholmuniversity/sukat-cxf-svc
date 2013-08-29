@@ -6,84 +6,12 @@
   <version>1.0.18-RC26</version>
   <packaging>war</packaging>
   <name>sukat-cxf-svc-war</name>
-  <build>
-    <resources>
-      <resource>
-        <filtering>true</filtering>
-        <directory>src/main/resources</directory>
-      </resource>
-    </resources>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.5.1</version>
-          <configuration>
-            <source>1.5</source>
-            <target>1.5</target>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-dependency-plugin</artifactId>
-          <version>2.1</version>
-          <configuration>
-            <outputDirectory>src/main/resources/WEB-INF/lib</outputDirectory>
-            <overWriteSnapshots>false</overWriteSnapshots>
-            <overWriteIfNewer>true</overWriteIfNewer>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.codehaus.gmaven</groupId>
-          <artifactId>gmaven-plugin</artifactId>
-          <version>1.4</version>
-          <configuration>
-            <providerSelection>1.8</providerSelection>
-            <sourceEncoding>UTF-8</sourceEncoding>
-          </configuration>
-          <executions>
-            <execution>
-              <goals>
-                <goal>generateStubs</goal>
-                <goal>compile</goal>
-                <goal>generateTestStubs</goal>
-                <goal>testCompile</goal>
-              </goals>
-            </execution>
-          </executions>
-          <dependencies>
-            <dependency>
-              <groupId>org.codehaus.groovy</groupId>
-              <artifactId>groovy-all</artifactId>
-              <version>1.8.0</version>
-            </dependency>
-          </dependencies>
-        </plugin>
 
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-assembly-plugin</artifactId>
-          <version>2.2-beta-3</version>
-          <configuration>
-            <finalName>sukat-cxf-svc</finalName>
-            <outputDirectory>.</outputDirectory>
-            <descriptor>src/main/assembly/execwar.xml</descriptor>
-            <archive>
-              <manifest>
-                <mainClass>Start</mainClass>
-              </manifest>
-            </archive>
-          </configuration>
-
-        </plugin>
-
-      </plugins>
-  </build>
   <dependencies>
     <dependency>
-    <groupId>org.codehaus.groovy</groupId>
-    <artifactId>groovy-all</artifactId>
-    <version>1.8.0</version>
+      <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy-all</artifactId>
+      <version>1.8.9</version>
     </dependency>
     <dependency>
     	<groupId>org.grails</groupId>
@@ -131,7 +59,7 @@
     <dependency>
       <groupId>se.su.it.svc</groupId>
       <artifactId>cxf-server</artifactId>
-      <version>1.0.11</version>
+      <version>1.0.12</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
@@ -197,7 +125,88 @@
       <artifactId>su-commons</artifactId>
       <version>1.9.2</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.gcontracts</groupId>
+      <artifactId>gcontracts-core</artifactId>
+      <version>1.2.12</version>
+    </dependency>
+
   </dependencies>
+
+  <build>
+    <resources>
+      <resource>
+        <filtering>true</filtering>
+        <directory>src/main/resources</directory>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.5.1</version>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.1</version>
+        <configuration>
+          <outputDirectory>src/main/resources/WEB-INF/lib</outputDirectory>
+          <overWriteSnapshots>false</overWriteSnapshots>
+          <overWriteIfNewer>true</overWriteIfNewer>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.gmaven</groupId>
+        <artifactId>gmaven-plugin</artifactId>
+        <version>1.4</version>
+        <configuration>
+          <providerSelection>1.8</providerSelection>
+          <sourceEncoding>UTF-8</sourceEncoding>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generateStubs</goal>
+              <goal>compile</goal>
+              <goal>generateTestStubs</goal>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>1.8.9</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.2-beta-3</version>
+        <configuration>
+          <finalName>sukat-cxf-svc</finalName>
+          <outputDirectory>.</outputDirectory>
+          <descriptor>src/main/assembly/execwar.xml</descriptor>
+          <archive>
+            <manifest>
+              <mainClass>Start</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+
+      </plugin>
+
+    </plugins>
+  </build>
 
 
   <!-- Change versions if necessary -->

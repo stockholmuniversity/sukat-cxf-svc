@@ -77,7 +77,9 @@ public class SuCardOrderQueryTest extends Specification {
   @Test
   void "getFindAllCardsQuery"() {
     expect: 'should return'
-    service.getFindAllCardsQuery() == "SELECT r.id,serial,owner,printer,createTime,firstname,lastname,streetaddress1,streetaddress2,locality,zipcode,value,description FROM request r JOIN address a ON r.address = a.id JOIN status s ON r.status = s.id WHERE r.owner = :uid"
+    service.findAllCardsQuery == "SELECT r.id, serial, owner, printer, createTime, firstname, lastname, streetaddress1," +
+        " streetaddress2, locality, zipcode, value, description FROM request r JOIN address a " +
+        "ON r.address = a.id JOIN status s ON r.status = s.id WHERE r.owner = :uid"
   }
 
   @Test
@@ -303,6 +305,7 @@ public class SuCardOrderQueryTest extends Specification {
   @Test
   def "doCardOrderInsert (is tested through orderCard but closure removes coverage)."(){
     given:
+    Sql.metaClass.withTransaction = { Closure closure -> closure() }
     Sql.metaClass.executeInsert = { String arg1, Map arg2 ->
       switch(arg1){
         case service.insertAddressQuery:
@@ -333,6 +336,7 @@ public class SuCardOrderQueryTest extends Specification {
   @Test
   def "doMarkCardAsDiscarded"(){
     given:
+    Sql.metaClass.withTransaction = { Closure closure -> closure() }
     Sql.metaClass.executeUpdate = { String arg1, Map arg2 ->
       switch(arg1){
         case service.markCardAsDiscardedQuery:
