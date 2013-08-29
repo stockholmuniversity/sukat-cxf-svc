@@ -31,17 +31,18 @@
 
 package se.su.it.svc
 
+import org.apache.log4j.Logger
+import org.gcontracts.annotations.Ensures
 import org.gcontracts.annotations.Requires
-
-import javax.jws.WebService
-import javax.jws.WebParam
+import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.ldap.SuPerson
-import se.su.it.svc.commons.SvcAudit
-import org.apache.log4j.Logger
-import se.su.it.svc.query.SuPersonQuery
-import se.su.it.svc.query.SuCardQuery
 import se.su.it.svc.manager.GldapoManager
+import se.su.it.svc.query.SuCardQuery
+import se.su.it.svc.query.SuPersonQuery
+
+import javax.jws.WebParam
+import javax.jws.WebService
 
 /**
  * Implementing class for CardInfoService CXF Web Service.
@@ -64,17 +65,19 @@ public class CardInfoServiceImpl implements CardInfoService {
    */
   @Override
   @Requires({ uid && audit && onlyActive != null })
+  @Ensures({ result instanceof SuCard[] })
   public SuCard[] getAllCards(String uid, boolean onlyActive, SvcAudit audit) {
+    def cards = new SuCard[0]
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
+
     if(person) {
-      def cards = SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(GldapoManager.LDAP_RO,person.getDn(),onlyActive)
-      logger.debug("getAllCards - Found: ${cards.size()} card(s) ${cards.collect{card -> card.suCardUUID}.join(",")} with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
-      return cards
+      cards = SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(GldapoManager.LDAP_RO,person.getDn(),onlyActive)
+      logger.debug("getAllCards: Found: ${cards.size()} card(s) ${cards.collect{card -> card.suCardUUID}.join(",")} with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
     } else {
-      throw new IllegalArgumentException("getAllCards no such uid found: "+uid)
+      logger.warn("getAllCards: no such uid found: "+uid)
     }
-//    logger.debug("getAllCards - No cards found with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
-//    return []
+
+    return cards
   }
 
   /**
