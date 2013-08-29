@@ -67,4 +67,17 @@ class SuCardQuerySpec extends Specification {
     then:
     noExceptionThrown()
   }
+
+  def "saveSuCard should save the card"() {
+    given:
+    boolean saved = false
+    SuCard suCard = new SuCard()
+    suCard.metaClass.save = { saved = true }
+
+    when:
+    SuCardQuery.saveSuCard(suCard)
+
+    then:
+    saved
+  }
 }
