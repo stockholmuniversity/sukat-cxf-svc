@@ -126,7 +126,7 @@ class SuCardOrderQuery {
    * Accepts a cardOrderVO and returns a UUID reference to the created card.
    * cardOrderVO needs to contain: <b>owner</b>, <b>streetaddress1, <b>streetaddress2</b>,
    * <b>locality</b>, <b>zipcode</b>, <b>printer</b>, <b>firstname</b> & <b>lastname</b>
-   * 
+   *
    * @param cardOrderVO the card order to create a new card for
    * @return the UUID for the new card. Returns false if no card could be created.
    */
@@ -179,17 +179,16 @@ class SuCardOrderQuery {
     return uuid
   }
   /**
-   * Marks
-   * @param uuid
-   * @param uid
-   * @return
+   * Marks a card as discarded
+   *
+   * @param uuid the UUID of the card to be marked discarded
+   * @param uid the uid of the user whom discards the card
+   * @return true if the card has been marked as discarded, false if the operation fails.
    */
   public boolean markCardAsDiscarded(String uuid, String uid) {
     Closure queryClosure = { Sql sql ->
       try {
-        sql.withTransaction {
-          doMarkCardAsDiscarded(sql, uuid, uid)
-        }
+        doMarkCardAsDiscarded(sql, uuid, uid)
       } catch (ex) {
         log.error "Failed to mark card as discarded in sucard db.", ex
         return false
@@ -299,8 +298,10 @@ class SuCardOrderQuery {
     }
     return uuid
   }
+
   /**
-   * Marks a card entry as discarded in the database, also handles setting proper status history.
+   * Marks a card entry as discarded in the database,
+   * also handles setting proper status history.
    *
    * @param sql
    * @param uuid
@@ -308,13 +309,15 @@ class SuCardOrderQuery {
    * @return true
    */
   private static boolean doMarkCardAsDiscarded(Sql sql, String uuid, String uid) {
-    sql?.executeUpdate(markCardAsDiscardedQuery, [id:uuid])
-    sql?.executeInsert(insertStatusHistoryQuery, [
-        status:5,
-        request: uuid,
-        comment: "Discarded by " + uid,
-        createTime: new Timestamp(new Date().getTime())
-    ])
+    sql.withTransaction {
+      sql?.executeUpdate(markCardAsDiscardedQuery, [id:uuid])
+      sql?.executeInsert(insertStatusHistoryQuery, [
+          status:5,
+          request: uuid,
+          comment: "Discarded by " + uid,
+          createTime: new Timestamp(new Date().getTime())
+      ])
+    }
     return true
   }
 
