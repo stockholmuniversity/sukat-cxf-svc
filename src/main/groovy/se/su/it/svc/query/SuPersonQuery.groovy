@@ -32,10 +32,10 @@
 package se.su.it.svc.query
 
 import se.su.it.svc.ldap.SuEnrollPerson
-import se.su.it.svc.ldap.SuPerson
-import se.su.it.svc.manager.GldapoManager
-import se.su.it.svc.manager.EhCacheManager
 import se.su.it.svc.ldap.SuInitPerson
+import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.manager.EhCacheManager
+import se.su.it.svc.manager.GldapoManager
 
 /**
  * This class is a helper class for doing GLDAPO queries on the SuPerson GLDAPO schema.
@@ -61,19 +61,12 @@ public class SuPersonQuery {
    * @see se.su.it.svc.manager.GldapoManager
    */
   static SuPerson getSuPersonFromUID(String directory, String uid) {
-    def query = { qDirectory, qUid ->
-      SuPerson.find(directory: qDirectory, base: "") {
-        and {
-          eq("uid", qUid)
-          eq("objectclass", "suPerson")
-        }
+    return SuPerson.find(directory: directory, base: "") {
+      and {
+        eq("uid", uid)
+        eq("objectclass", "suPerson")
       }
     }
-
-    def params = [key: ":getSuPersonFromUID:${uid}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
-    def suPerson = (SuPerson) cacheManager.get(params, { query(directory, uid) })
-
-    return suPerson
   }
 
   /**
