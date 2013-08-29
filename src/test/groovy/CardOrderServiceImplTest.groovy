@@ -187,8 +187,8 @@ class CardOrderServiceImplTest extends Specification {
     uuid << [
             null,
             '',
-            '********-****-****-****-***********', //35 chars
-            '********-****-****-****-*************'  //37 chars
+            '*' * 35,
+            '*' * 37
     ]
   }
 }
