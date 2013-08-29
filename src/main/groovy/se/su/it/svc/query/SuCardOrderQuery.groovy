@@ -180,6 +180,7 @@ class SuCardOrderQuery {
 
     return uuid
   }
+
   /**
    * Marks a card as discarded
    *
