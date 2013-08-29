@@ -31,17 +31,15 @@
 
 package se.su.it.svc.query
 
+import groovy.util.logging.Slf4j
 import se.su.it.svc.ldap.SuCard
-import se.su.it.svc.manager.ApplicationContextProvider
 import se.su.it.svc.manager.EhCacheManager
 import se.su.it.svc.manager.GldapoManager
-import net.sf.ehcache.search.Attribute
-import se.su.it.svc.ldap.SuPerson
-import net.sf.ehcache.search.Results
 
 /**
  * This class is a helper class for doing GLDAPO queries on the SuCard GLDAPO schema.
  */
+@Slf4j
 public class SuCardQuery {
 
   /**
@@ -82,24 +80,24 @@ public class SuCardQuery {
   /**
    * Returns a SuCard object for a specific suCardUUID, specified by the parameter suCardUUID.
    *
-   * @param directory which directory to use, see GldapoManager.
+   * @param directory which directory to use.
    * @param suCardUUID  the card uuid for the card.
    * @return an SuCard object or null if no card was found.
    * @see se.su.it.svc.ldap.SuCard
-   * @see se.su.it.svc.manager.GldapoManager
    */
-  static SuCard findCardBySuCardUUID(String directory,String suCardUUID) {
-    def query = { qDirectory, qSuCardUUID ->
-      SuCard.find(directory: qDirectory, base: '') {
-        eq("objectClass", "suCardOwner")
-        eq("suCardUUID", qSuCardUUID)
-      }
-    }
-    def params = [key: ":findCardBySuCardUUID:${suCardUUID}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
-    def cards = (SuCard)cacheManager.get(params, {query(directory, suCardUUID)})
-    return cards
+  static SuCard findCardBySuCardUUID(String directory, String suCardUUID) {
+    SuCard card = null
 
-//      return (SuCard)query(directory, suCardUUID)
+    try {
+      card = SuCard.find(directory: directory, base: '') {
+        eq("objectClass", "suCardOwner")
+        eq("suCardUUID", suCardUUID)
+      }
+    } catch (ex) {
+      log.error "Failed finding suCardOwner for suCardUUID: $suCardUUID", ex
+    }
+
+    return card
   }
 
   /**
