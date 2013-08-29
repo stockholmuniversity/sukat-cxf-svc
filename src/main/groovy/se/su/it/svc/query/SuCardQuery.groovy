@@ -32,9 +32,9 @@
 package se.su.it.svc.query
 
 import groovy.util.logging.Slf4j
+import org.springframework.ldap.core.DistinguishedName
 import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.manager.EhCacheManager
-import se.su.it.svc.manager.GldapoManager
 
 /**
  * This class is a helper class for doing GLDAPO queries on the SuCard GLDAPO schema.
@@ -61,20 +61,13 @@ public class SuCardQuery {
    * @see se.su.it.svc.ldap.SuCard
    * @see se.su.it.svc.manager.GldapoManager
    */
-  static SuCard[] findAllCardsBySuPersonDnAndOnlyActiveOrNot(String directory, org.springframework.ldap.core.DistinguishedName dn, boolean onlyActiveCards) {
-    def query = { qDirectory, qDn, qOnlyActiveCards ->
-      SuCard.findAll(directory: qDirectory, base: qDn) {
-        eq("objectClass", "suCardOwner")
-        if (qOnlyActiveCards) {
-          eq("suCardState", "urn:x-su:su-card:state:active")
-        }
+  static SuCard[] findAllCardsBySuPersonDnAndOnlyActiveOrNot(String directory, DistinguishedName dn, boolean onlyActiveCards) {
+    return SuCard.findAll(directory: directory, base: dn) {
+      eq("objectClass", "suCardOwner")
+      if (onlyActiveCards) {
+        eq("suCardState", "urn:x-su:su-card:state:active")
       }
     }
-
-    def params = [key: ":getAllCardsFor:${dn}:onlyActive:${onlyActiveCards}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
-    def cards = (SuCard[]) cacheManager.get(params ,{query(directory,dn,onlyActiveCards)})
-
-    return cards
   }
 
   /**
