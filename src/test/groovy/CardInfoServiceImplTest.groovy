@@ -29,18 +29,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
 import org.gcontracts.PostconditionViolation
 import org.gcontracts.PreconditionViolation
-import spock.lang.*
 import org.junit.Test
+import org.springframework.ldap.core.DistinguishedName
 import se.su.it.svc.CardInfoServiceImpl
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.query.SuCardQuery
 import se.su.it.svc.query.SuPersonQuery
+import spock.lang.Specification
 
 class CardInfoServiceImplTest extends Specification {
   @Test
@@ -70,15 +69,17 @@ class CardInfoServiceImplTest extends Specification {
   @Test
   def "Test getAllCards returns list of SuCard when person exists"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     def person = new SuPerson()
-    def suCards = [new SuCard()]
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return person }
-    person.metaClass.getDn = {""}
-    SuCardQuery.metaClass.static.findAllCardsBySuPersonDnAndOnlyActiveOrNot = {String directory,String dn, boolean onlyActiveCards -> return suCards}
-    def cardInfoServiceImpl = new CardInfoServiceImpl()
+    person.metaClass.getDn = { new DistinguishedName("") }
+    GroovyMock(SuPersonQuery, global: true)
+    SuPersonQuery.getSuPersonFromUID(*_) >> { String directory, String uid -> return person }
+
+    GroovyMock(SuCardQuery, global: true)
+    1 * SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(*_) >> [new SuCard()]
+
     when:
-    def ret = cardInfoServiceImpl.getAllCards("testuid",true,new SvcAudit())
+    def ret = new CardInfoServiceImpl().getAllCards("testuid",true,new SvcAudit())
+
     then:
     ret.size() == 1
     ret[0] instanceof SuCard
@@ -95,6 +96,24 @@ class CardInfoServiceImplTest extends Specification {
 
     then:
     ret.size() == 0
+  }
+
+  @Test
+  def "Test that getAllCards ensures SuCard[]"() {
+    setup:
+    def person = new SuPerson()
+    person.metaClass.getDn = { new DistinguishedName("") }
+    GroovyMock(SuPersonQuery, global: true)
+    SuPersonQuery.getSuPersonFromUID(*_) >> { String directory, String uid -> return person }
+
+    GroovyMock(SuCardQuery, global: true)
+    1 * SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(*_) >> null
+
+    when:
+    new CardInfoServiceImpl().getAllCards("testuid",true,new SvcAudit())
+
+    then:
+    thrown(PostconditionViolation)
   }
 
   @Test
