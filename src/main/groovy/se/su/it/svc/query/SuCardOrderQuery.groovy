@@ -37,6 +37,7 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.dbcp.BasicDataSource
 import se.su.it.svc.commons.SvcCardOrderVO
 
+import java.sql.SQLException
 import java.sql.Timestamp
 
 @Slf4j
@@ -155,9 +156,7 @@ class SuCardOrderQuery {
         requestArgs.id = uuid
 
         try {
-          sql.withTransaction {
-            doCardOrderInsert(sql, addressArgs, requestArgs)
-          }
+          doCardOrderInsert(sql, addressArgs, requestArgs)
         } catch (ex) {
           log.error "Error in SQL card order transaction.", ex
           return false
@@ -189,9 +188,7 @@ class SuCardOrderQuery {
   public boolean markCardAsDiscarded(String uuid, String uid) {
     Closure queryClosure = { Sql sql ->
       try {
-        sql.withTransaction {
-          doMarkCardAsDiscarded(sql, uuid, uid)
-        }
+        doMarkCardAsDiscarded(sql, uuid, uid)
       } catch (ex) {
         log.error "Failed to mark card as discarded in sucard db.", ex
         return false
@@ -201,32 +198,41 @@ class SuCardOrderQuery {
 
     return (withConnection(queryClosure)) ? true : false
   }
-
+  /**
+   * Handles the persisting of the card order request.
+   *
+   * @param sql
+   * @param addressArgs
+   * @param requestArgs
+   * @return true
+   */
   private boolean doCardOrderInsert(Sql sql, Map addressArgs, Map requestArgs) {
-    String addressQuery = insertAddressQuery
-    String requestQuery = insertRequestQuery
-    String statusQuery = insertStatusHistoryQuery
+    sql.withTransaction {
+      String addressQuery = insertAddressQuery
+      String requestQuery = insertRequestQuery
+      String statusQuery = insertStatusHistoryQuery
 
-    log.debug "Sending: $addressQuery with arguments $addressArgs"
-    def addressResponse = sql?.executeInsert(addressQuery, addressArgs)
-    log.debug "Address response is $addressResponse"
-    def addressId = addressResponse[0][0]
-    log.debug "Recieved: $addressId as response."
+      log.debug "Sending: $addressQuery with arguments $addressArgs"
+      def addressResponse = sql?.executeInsert(addressQuery, addressArgs)
+      log.debug "Address response is $addressResponse"
+      def addressId = addressResponse[0][0]
+      log.debug "Recieved: $addressId as response."
 
-    /** Get the address id and set it as the request address id. */
-    requestArgs['address'] = addressId
-    log.debug "Sending: $requestQuery with arguments $requestArgs"
-    sql?.executeInsert(requestQuery, requestArgs)
-    String comment = "Created by " + requestArgs?.owner + " while activating account"
+      /** Get the address id and set it as the request address id. */
+      requestArgs['address'] = addressId
+      log.debug "Sending: $requestQuery with arguments $requestArgs"
+      sql?.executeInsert(requestQuery, requestArgs)
+      String comment = "Created by " + requestArgs?.owner + " while activating account"
 
-    def statusResponse = sql?.executeInsert(statusQuery,
-        [status:DEFAULT_ORDER_STATUS,
-            request:requestArgs.id,
-            comment: comment,
-            createTime:new Timestamp(new Date().getTime())
-        ])
+      def statusResponse = sql?.executeInsert(statusQuery,
+          [status:DEFAULT_ORDER_STATUS,
+              request:requestArgs.id,
+              comment: comment,
+              createTime:new Timestamp(new Date().getTime())
+          ])
 
-    log.debug "Status response: $statusResponse"
+      log.debug "Status response: $statusResponse"
+    }
     return true
   }
 
@@ -292,8 +298,10 @@ class SuCardOrderQuery {
     }
     return uuid
   }
+
   /**
-   * Marks a card entry as discarded in the database, also handles setting proper status history.
+   * Marks a card entry as discarded in the database,
+   * also handles setting proper status history.
    *
    * @param sql
    * @param uuid
@@ -301,13 +309,15 @@ class SuCardOrderQuery {
    * @return true
    */
   private static boolean doMarkCardAsDiscarded(Sql sql, String uuid, String uid) {
-    sql?.executeUpdate(markCardAsDiscardedQuery, [id:uuid])
-    sql?.executeInsert(insertStatusHistoryQuery, [
-        status:5,
-        request: uuid,
-        comment: "Discarded by " + uid,
-        createTime: new Timestamp(new Date().getTime())
-    ])
+    sql.withTransaction {
+      sql?.executeUpdate(markCardAsDiscardedQuery, [id:uuid])
+      sql?.executeInsert(insertStatusHistoryQuery, [
+          status:5,
+          request: uuid,
+          comment: "Discarded by " + uid,
+          createTime: new Timestamp(new Date().getTime())
+      ])
+    }
     return true
   }
 
