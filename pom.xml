@@ -258,4 +258,8 @@
       <layout>default</layout>
     </repository>
   </repositories>
+
+  <prerequisites>
+    <maven>3.0.0</maven>
+  </prerequisites>
 </project>
