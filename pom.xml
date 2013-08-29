@@ -202,12 +202,21 @@
             </manifest>
           </archive>
         </configuration>
-
       </plugin>
 
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+        <version>2.6</version>
+        <configuration>
+          <formats>
+            <format>html</format>
+            <format>xml</format>
+          </formats>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
-
 
   <!-- Change versions if necessary -->
   <properties>
@@ -217,6 +226,15 @@
     <buildNumber>${maven.build.timestamp}</buildNumber>
     <sonar.language>java</sonar.language>
   </properties>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </reporting>
 
   <repositories>
     <repository>
