@@ -31,12 +31,15 @@
 
 package se.su.it.svc
 
+import groovy.util.logging.Slf4j
+import org.gcontracts.annotations.Ensures
+import org.gcontracts.annotations.Requires
+
 import javax.jws.WebService
 import javax.jws.WebParam
 import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.commons.SvcAudit
-import org.apache.log4j.Logger
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuCardQuery
 import se.su.it.svc.manager.GldapoManager
@@ -45,9 +48,8 @@ import se.su.it.svc.manager.GldapoManager
  * Implementing class for CardInfoService CXF Web Service.
  * This Class handles all University Card information in SUKAT.
  */
-@WebService
+@WebService @Slf4j
 public class CardInfoServiceImpl implements CardInfoService {
-  private static final Logger logger = Logger.getLogger(CardInfoServiceImpl.class)
 
   /**
    * Returns a list (<code>ArrayList<SuCard></code>) of SuCard objects for a specific user, specified by the parameter uid.
@@ -66,7 +68,7 @@ public class CardInfoServiceImpl implements CardInfoService {
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
     if(person) {
       def cards = SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(GldapoManager.LDAP_RO,person.getDn(),onlyActive)
-      logger.debug("getAllCards - Found: ${cards.size()} card(s) ${cards.collect{card -> card.suCardUUID}.join(",")} with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
+      log.debug("getAllCards - Found: ${cards.size()} card(s) ${cards.collect{card -> card.suCardUUID}.join(",")} with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
       return cards
     } else {
       throw new IllegalArgumentException("getAllCards no such uid found: "+uid)
@@ -74,9 +76,9 @@ public class CardInfoServiceImpl implements CardInfoService {
 //    logger.debug("getAllCards - No cards found with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
 //    return []
   }
+
   /**
    * Returns a SuCard object for a specific suCardUUID, specified by the parameter suCardUUID.
-   *
    *
    * @param suCardUUID  the card uuid for the card.
    * @param audit Audit object initilized with audit data about the client and user.
@@ -84,15 +86,11 @@ public class CardInfoServiceImpl implements CardInfoService {
    * @see se.su.it.svc.ldap.SuCard
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public SuCard getCardByUUID(@WebParam(name = "suCardUUID") String suCardUUID, @WebParam(name = "audit") SvcAudit audit) {
-    if(suCardUUID == null || audit == null)
-      throw new java.lang.IllegalArgumentException("getCardByUUID - Null argument values not allowed in this function")
-    def card = SuCardQuery.findCardBySuCardUUID(GldapoManager.LDAP_RO,suCardUUID)
-    logger.debug("getCardByUUID - Found: ${card?"1":"0"} card ${card?card.suCardUUID:""} with params: suCardUUID=<${suCardUUID}>")
-    if(card == null) {
-      throw new IllegalArgumentException("getCardByUUID: Could not find a card with uuid<${suCardUUID}>")
-    }
-    return card
+  @Override
+  @Requires({ suCardUUID && audit })
+  @Ensures({ result && result instanceof SuCard })
+  public SuCard getCardByUUID(String suCardUUID, SvcAudit audit) {
+    return SuCardQuery.findCardBySuCardUUID(GldapoManager.LDAP_RO, suCardUUID)
   }
 
 }

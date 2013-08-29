@@ -29,6 +29,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+
+import org.gcontracts.PostconditionViolation
+import org.gcontracts.PreconditionViolation
 import spock.lang.*
 import org.junit.Test
 import se.su.it.svc.CardInfoServiceImpl
@@ -38,12 +41,8 @@ import se.su.it.svc.ldap.SuCard
 import gldapo.GldapoSchemaRegistry
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuCardQuery
-import se.su.it.svc.manager.EhCacheManager
-import org.springframework.context.ApplicationContext
-import net.sf.ehcache.hibernate.EhCache
-import se.su.it.svc.manager.ApplicationContextProvider
 
-class CardInfoServiceImplTest extends spock.lang.Specification {
+class CardInfoServiceImplTest extends Specification {
   @Test
   def "Test getAllCards with null uid argument"() {
     setup:
@@ -97,34 +96,40 @@ class CardInfoServiceImplTest extends spock.lang.Specification {
   def "Test getCardByUUID with null suCardUUID argument, should throw IllegalArgumentException"() {
     setup:
     def cardInfoServiceImpl = new CardInfoServiceImpl()
+
     when:
     cardInfoServiceImpl.getCardByUUID(null,new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
   def "Test getCardByUUID with null SvcAudit argument, should throw IllegalArgumentException"() {
     setup:
     def cardInfoServiceImpl = new CardInfoServiceImpl()
+
     when:
     cardInfoServiceImpl.getCardByUUID("testcarduuid",null)
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
   def "Test getCardByUUID when card doesn't exist, should throw IllegalArgumentException"() {
     given:
-    SuCardQuery.metaClass.static.findCardBySuCardUUID = {String directory,String uid -> return null }
-
     def cardInfoServiceImpl = new CardInfoServiceImpl()
+
+    GroovySpy(SuCardQuery, global:true) {
+      findCardBySuCardUUID('ldapreadonly', 'testCardUUID') >> null
+    }
 
     when:
     cardInfoServiceImpl.getCardByUUID("testCardUUID", new SvcAudit())
 
     then:
-    thrown(IllegalArgumentException)
+    thrown(PostconditionViolation)
   }
 
   @Test
