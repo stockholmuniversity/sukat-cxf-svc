@@ -34,6 +34,7 @@ package se.su.it.svc
 import groovy.util.logging.Slf4j
 import org.gcontracts.annotations.Ensures
 import org.gcontracts.annotations.Requires
+import org.springframework.ldap.core.DistinguishedName
 
 import javax.jws.WebService
 import javax.jws.WebParam
@@ -74,11 +75,12 @@ public class CardInfoServiceImpl implements CardInfoService {
     def cards = new SuCard[0]
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
 
-    if(person) {
-      cards = SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(GldapoManager.LDAP_RO,person.getDn(),onlyActive)
-      logger.debug("getAllCards: Found: ${cards.size()} card(s) ${cards.collect{card -> card.suCardUUID}.join(",")} with params: uid=<${uid}> onlyActive=<${onlyActive?"true":"false"}>")
+    if (person) {
+      String directory = GldapoManager.LDAP_RO
+      DistinguishedName dn = person.getDn()
+      cards = SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(directory, dn, onlyActive)
     } else {
-      logger.warn("getAllCards: no such uid found: "+uid)
+      log.warn("getAllCards: no such uid found: " + uid)
     }
 
     return cards
