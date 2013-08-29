@@ -60,7 +60,13 @@ class CardOrderServiceImpl implements CardOrderService {
 
     return (SvcCardOrderVO[]) cardOrders.toArray()
   }
-
+  /**
+   * Create a card order
+   *
+   * @param cardOrderVO
+   * @param audit
+   * @return A UUID referencing the order created.
+   */
   @Override
   @Requires({ cardOrderVO && audit })
   @Ensures({ result?.size() == 36 })
