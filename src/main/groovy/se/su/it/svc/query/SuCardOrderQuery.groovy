@@ -49,7 +49,9 @@ class SuCardOrderQuery {
    */
   private final int DEFAULT_ORDER_STATUS = 3
 
-  /** Find all card orders for <b>uid</b> */
+  /**
+   * Find all card orders for <b>uid</b>
+   */
   public static final findAllCardsQuery = "SELECT r.id, serial, owner, printer, " +
       "createTime, firstname, lastname, streetaddress1, " +
       "streetaddress2, locality, zipcode, value, description " +
