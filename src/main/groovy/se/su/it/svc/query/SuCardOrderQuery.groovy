@@ -98,6 +98,12 @@ class SuCardOrderQuery {
    */
   public static final findFreeUUIDQuery = "SELECT id FROM request WHERE id = :uuid"
 
+  /**
+   * Find all card orders for supplied uid
+   *
+   * @param uid the uid to find card orders for
+   * @return a list of card orders found for the uid
+   */
   public List findAllCardOrdersForUid(String uid) {
 
     ArrayList cardOrders = []
@@ -117,9 +123,11 @@ class SuCardOrderQuery {
 
   /**
    * Accepts a cardOrderVO and returns a UUID reference to the created card.
-   * cardOrderVO needs to contain
-   * @param cardOrderVO
-   * @return
+   * cardOrderVO needs to contain: <b>owner</b>, <b>streetaddress1, <b>streetaddress2</b>,
+   * <b>locality</b>, <b>zipcode</b>, <b>printer</b>, <b>firstname</b> & <b>lastname</b>
+   * 
+   * @param cardOrderVO the card order to create a new card for
+   * @return the UUID for the new card. Returns false if no card could be created.
    */
   public String orderCard(SvcCardOrderVO cardOrderVO) {
     String uuid = null
