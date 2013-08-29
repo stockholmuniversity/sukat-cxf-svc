@@ -305,6 +305,7 @@ public class SuCardOrderQueryTest extends Specification {
   @Test
   def "doCardOrderInsert (is tested through orderCard but closure removes coverage)."(){
     given:
+    Sql.metaClass.withTransaction = { Closure closure -> closure() }
     Sql.metaClass.executeInsert = { String arg1, Map arg2 ->
       switch(arg1){
         case service.insertAddressQuery:
@@ -335,6 +336,7 @@ public class SuCardOrderQueryTest extends Specification {
   @Test
   def "doMarkCardAsDiscarded"(){
     given:
+    Sql.metaClass.withTransaction = { Closure closure -> closure() }
     Sql.metaClass.executeUpdate = { String arg1, Map arg2 ->
       switch(arg1){
         case service.markCardAsDiscardedQuery:
