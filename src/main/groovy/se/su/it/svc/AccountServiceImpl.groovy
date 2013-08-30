@@ -187,8 +187,7 @@ public class AccountServiceImpl implements AccountService {
     suInitPerson.cn = givenName + " " + sn
     suInitPerson.sn = sn
     suInitPerson.givenName = givenName
-    if(nin.length() == 12)
-      suInitPerson.norEduPersonNIN = nin
+    suInitPerson.norEduPersonNIN = nin
     suInitPerson.eduPersonPrincipalName = uid + "@su.se"
     suInitPerson.objectClass = ["suPerson","sSNObject","norEduPerson","eduPerson","inetLocalMailRecipient","inetOrgPerson","organizationalPerson","person","top"]
     suInitPerson.parent = AccountServiceUtils.domainToDN(domain)
