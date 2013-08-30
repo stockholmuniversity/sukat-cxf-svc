@@ -65,7 +65,7 @@ public class AccountServiceImpl implements AccountService {
    * @param uid  uid of the user.
    * @param affiliation the affiliation for this uid
    * @param audit Audit object initilized with audit data about the client and user.
-   * @return array of SuService.
+   * @throws IllegalArgumentException if the uid can't be found
    * @see se.su.it.svc.ldap.SuPerson
    * @see se.su.it.svc.commons.SvcAudit
    */
@@ -91,6 +91,7 @@ public class AccountServiceImpl implements AccountService {
    * @param uid  uid of the user.
    * @param audit Audit object initilized with audit data about the client and user.
    * @return String new password.
+   * @throws IllegalArgumentException if the uid can't be found
    * @see se.su.it.svc.commons.SvcAudit
    */
   @Requires({
@@ -107,9 +108,8 @@ public class AccountServiceImpl implements AccountService {
       return pwd
     } else {
       logger.debug("resetPassword - No such uid found: "+uid)
-      throw new java.lang.IllegalArgumentException("resetPassword - No such uid found: "+uid)
+      throw new IllegalArgumentException("resetPassword - No such uid found: "+uid)
     }
-    return null
   }
 
   /**
@@ -118,7 +118,7 @@ public class AccountServiceImpl implements AccountService {
    * @param uid  uid of the user.
    * @param person pre-populated SvcSuPersonVO object, the attributes that differ in this object to the original will be updated in ldap.
    * @param audit Audit object initilized with audit data about the client and user.
-   * @return void.
+   * @throws IllegalArgumentException if the uid can't be found
    * @see se.su.it.svc.ldap.SuPerson
    * @see se.su.it.svc.commons.SvcSuPersonVO
    * @see se.su.it.svc.commons.SvcAudit
@@ -151,6 +151,7 @@ public class AccountServiceImpl implements AccountService {
    * @param  boolean fullAccount if true will try to create AFS and KDC entries else the posix part will be missing.
    * @param audit Audit object initilized with audit data about the client and user.
    * @return String with newly created password for the SuPerson.
+   * @throws IllegalArgumentException if a user with the supplied uid already exists
    * @see se.su.it.svc.ldap.SuPerson
    * @see se.su.it.svc.ldap.SuInitPerson
    * @see se.su.it.svc.commons.SvcSuPersonVO
@@ -202,7 +203,7 @@ public class AccountServiceImpl implements AccountService {
    *
    * @param uid  uid of the user.
    * @param audit Audit object initilized with audit data about the client and user.
-   * @return void.
+   * @throws IllegalArgumentException if the uid can't be found
    * @see se.su.it.svc.commons.SvcAudit
    */
   @Requires({
@@ -247,7 +248,6 @@ public class AccountServiceImpl implements AccountService {
     } else {
       throw new IllegalArgumentException("getMailRoutingAddress - No such uid found: "+uid)
     }
-    return null
   }
 
   /**
@@ -256,7 +256,7 @@ public class AccountServiceImpl implements AccountService {
    * @param uid  uid of the user. 10 chars (YYMMDDXXXX)
    * @param mail mailaddress to be set for uid.
    * @param audit Audit object initilized with audit data about the client and user.
-   * @return void.
+   * @throws IllegalArgumentException if the uid can't be found
    * @see se.su.it.svc.commons.SvcAudit
    */
   @Requires({
@@ -280,6 +280,7 @@ public class AccountServiceImpl implements AccountService {
    * @param nin in 12 numbers (ex. YYYYMMDDXXXX)
    * @param audit Audit object initilized with audit data about the client and user.
    * @return SvcSuPersonVO instance if found.
+   * @throws IllegalArgumentException if the uid can't be found
    */
   @Requires({
     ! LdapAttributeValidator.validateAttributes(["ssnornin": nin, "audit": audit])
@@ -288,7 +289,7 @@ public class AccountServiceImpl implements AccountService {
     SuPerson suPerson = SuPersonQuery.getSuPersonFromNin(GldapoManager.LDAP_RW, nin)
 
     if (!suPerson) {
-      throw new Exception("ssnornin - No suPerson with the supplied ssnornin was found: " + nin)
+      throw new IllegalArgumentException("ssnornin - No suPerson with the supplied ssn or nin was found: " + nin)
     }
 
     return new SvcSuPersonVO(uid:suPerson.uid)
