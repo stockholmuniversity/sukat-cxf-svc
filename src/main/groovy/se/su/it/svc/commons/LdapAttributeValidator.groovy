@@ -112,20 +112,23 @@ public class LdapAttributeValidator {
       throwMe(validateAttributesString,"Attribute validation failed for nin <${nin}>. nin can not be null.")
     if (!nin instanceof String)
       throwMe(validateAttributesString,"Attribute validation failed for nin <${nin}>. nin need to be a String object.")
-    String tmpNin = (String)nin
-    if(tmpNin.length() != 12) {
-      throwMe(validateAttributesString,"Attribute validation failed for nin <${tmpNin}>. nin need to be a 12 in length.")
+    if(((String)nin).size() != 12) {
+      throwMe(validateAttributesString,"Attribute validation failed for nin <${nin}>. nin need to be a 12 in length.")
     }
   }
 
+  /**
+   * Validate ssn according to https://confluence.it.su.se/confluence/x/EhIfAw
+   *
+   * @param ssn the socailSecurityNumber to validate.
+   */
   private static void validateSsn(Object ssn) {
     if (ssn == null)
       throwMe(validateAttributesString,"Attribute validation failed for nin <${ssn}>. ssn can not be null.")
     if (!ssn instanceof String)
       throwMe(validateAttributesString,"Attribute validation failed for nin <${ssn}>. ssn need to be a String object.")
-    String tmpSsn = (String)ssn
-    if(tmpSsn.length() != 10) {
-      throwMe(validateAttributesString,"Attribute validation failed for nin <${tmpSsn}>. ssn need to be a 10 in length.")
+    if(! (String)ssn ==~ /[0-9]{6}([a-zA-Z0-9\*][0-9]{3}){0,1}/ ) {
+      throwMe(validateAttributesString,"Attribute validation failed for nin <${ssn}>. ssn need to be a 6 or 10 chars in length.")
     }
   }
 
