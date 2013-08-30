@@ -107,12 +107,17 @@ public class LdapAttributeValidator {
       throwMe(validateAttributesString,"Attribute validation failed for domain <${domain}>. domain need to be a valid FQDN.")
   }
 
+  /**
+   * Validate norEduPersonNIN according to https://confluence.it.su.se/confluence/x/IhIfAw
+   *
+   * @param nin the norEduPersonNIN to validate
+   */
   private static void validateNin(Object nin) {
     if (nin == null)
       throwMe(validateAttributesString,"Attribute validation failed for nin <${nin}>. nin can not be null.")
     if (!nin instanceof String)
       throwMe(validateAttributesString,"Attribute validation failed for nin <${nin}>. nin need to be a String object.")
-    if(((String)nin).size() != 12) {
+    if(! (nin ==~ /[0-9]{8}[A-Z0-9][0-9]{3}/) ) {
       throwMe(validateAttributesString,"Attribute validation failed for nin <${nin}>. nin need to be a 12 in length.")
     }
   }
@@ -127,19 +132,38 @@ public class LdapAttributeValidator {
       throwMe(validateAttributesString,"Attribute validation failed for nin <${ssn}>. ssn can not be null.")
     if (!ssn instanceof String)
       throwMe(validateAttributesString,"Attribute validation failed for nin <${ssn}>. ssn need to be a String object.")
-    if(! (String)ssn ==~ /[0-9]{6}([a-zA-Z0-9\*][0-9]{3}){0,1}/ ) {
+    if(! (ssn ==~ /[0-9]{6}([a-zA-Z0-9\*][0-9]{3}){0,1}/) ) {
       throwMe(validateAttributesString,"Attribute validation failed for nin <${ssn}>. ssn need to be a 6 or 10 chars in length.")
     }
   }
 
+  /**
+   * Validate according to socialSecurityNumber or norEduPersonNIN
+   *
+   * @param ssnOrNin the string to validate
+   * @see LdapAttributeValidator#validateSsn(java.lang.Object)
+   * @see LdapAttributeValidator#validateNin(java.lang.Object)
+   */
   private static void validateSsnOrNin(Object ssnOrNin) {
-    if (ssnOrNin == null)
-      throwMe(validateAttributesString,"Attribute validation failed for nin/ssn <${ssnOrNin}>. nin can not be null.")
-    if (!ssnOrNin instanceof String)
-      throwMe(validateAttributesString,"Attribute validation failed for nin/ssn <${ssnOrNin}>. nin need to be a String object.")
-    String tmpSsnOrNin = (String)ssnOrNin
-    if(tmpSsnOrNin.length() != 10 && tmpSsnOrNin.length() != 12) {
-      throwMe(validateAttributesString,"Attribute validation failed for nin/ssn <${tmpSsnOrNin}>. nin need to be a 10 or 12 in length.")
+    Throwable throwable = null
+
+    try {
+      validateSsn(ssnOrNin)
+    } catch (ex) {
+      throwable = ex
+    }
+
+    try {
+      if( throwable ) {
+        validateNin(ssnOrNin)
+        throwable = null
+      }
+    } catch (ex) {
+      throwable = ex
+    }
+
+    if (throwable) {
+      throw throwable
     }
   }
 

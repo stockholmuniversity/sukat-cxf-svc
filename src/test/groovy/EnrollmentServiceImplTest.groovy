@@ -29,21 +29,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.junit.Before
+
+import gldapo.GldapoSchemaRegistry
 import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import se.su.it.commons.Kadmin
 import se.su.it.commons.PasswordUtils
-import se.su.it.svc.commons.LdapAttributeValidator
+import se.su.it.svc.EnrollmentServiceImpl
 import se.su.it.svc.commons.SvcAudit
-import gldapo.GldapoSchemaRegistry
 import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuEnrollPerson
-import se.su.it.svc.query.SuPersonQuery
-import se.su.it.svc.EnrollmentServiceImpl
 import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.util.EnrollmentServiceUtils
-import spock.lang.IgnoreRest
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -291,7 +290,7 @@ class EnrollmentServiceImplTest extends Specification {
     def enrollmentServiceImpl = new EnrollmentServiceImpl()
 
     when:
-    enrollmentServiceImpl.enrollUser("student.su.se","test","testsson","other","100000", new SvcAudit())
+    enrollmentServiceImpl.enrollUser("student.su.se","test","testsson","other","10000", new SvcAudit())
 
     then:
     thrown(IllegalArgumentException)

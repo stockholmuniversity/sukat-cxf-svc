@@ -317,7 +317,7 @@ public class AccountServiceImpl implements AccountService {
     SuPerson suPerson = SuPersonQuery.getSuPersonFromNin(GldapoManager.LDAP_RW, nin)
 
     if (!suPerson) {
-      throw new IllegalArgumentException("ssnornin - No suPerson with the supplied ssn or nin was found: " + nin)
+      throw new IllegalArgumentException("findSuPersonByNorEduPersonNIN - No suPerson with the supplied nin was found: " + nin)
     }
 
     return new SvcSuPersonVO(uid:suPerson.uid)
