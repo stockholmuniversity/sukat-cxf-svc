@@ -60,7 +60,6 @@ public class AccountServiceImpl implements AccountService{
   /**
    * This method sets the primary affiliation for the specified uid.
    *
-   *
    * @param uid  uid of the user.
    * @param affiliation the affiliation for this uid
    * @param audit Audit object initilized with audit data about the client and user.
@@ -68,7 +67,7 @@ public class AccountServiceImpl implements AccountService{
    * @see se.su.it.svc.ldap.SuPerson
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public void updatePrimaryAffiliation(@WebParam(name = "uid") String uid, @WebParam(name = "affiliation") String affiliation, @WebParam(name = "audit") SvcAudit audit) {
+  public void updatePrimaryAffiliation(String uid, String affiliation, SvcAudit audit) {
     String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,"eduPersonPrimaryAffiliation":affiliation,"audit":audit])
     if (attributeError)
       throw new java.lang.IllegalArgumentException("updatePrimaryAffiliation - ${attributeError}")
@@ -93,7 +92,7 @@ public class AccountServiceImpl implements AccountService{
    * @return String new password.
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public String resetPassword(@WebParam(name = "uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
+  public String resetPassword(String uid, SvcAudit audit) {
     if (uid == null || audit == null)
       throw new java.lang.IllegalArgumentException("resetPassword - Null argument values not allowed in this function")
     String trueUid = uid.replaceFirst("\\.", "/")
@@ -121,7 +120,7 @@ public class AccountServiceImpl implements AccountService{
    * @see se.su.it.svc.commons.SvcSuPersonVO
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public void updateSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "person") SvcSuPersonVO person, @WebParam(name = "audit") SvcAudit audit){
+  public void updateSuPerson(String uid, SvcSuPersonVO person, SvcAudit audit){
     String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,"svcsuperson":person,"audit":audit])
     if (attributeError)
       throw new java.lang.IllegalArgumentException("updateSuPerson - ${attributeError}")
@@ -154,7 +153,7 @@ public class AccountServiceImpl implements AccountService{
    * @see se.su.it.svc.commons.SvcSuPersonVO
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public String createSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "domain") String domain, @WebParam(name = "nin") String nin, @WebParam(name = "givenName") String givenName, @WebParam(name = "sn") String sn, @WebParam(name = "person") SvcSuPersonVO person, @WebParam(name = "fullAccount") boolean fullAccount, @WebParam(name = "audit") SvcAudit audit) {
+  public String createSuPerson(String uid, String domain, String nin, String givenName, String sn, SvcSuPersonVO person, boolean fullAccount, SvcAudit audit) {
     String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,"domain":domain,"nin":nin,"givenName":givenName,"sn":sn,"svcsuperson":person,"audit":audit])
     if (attributeError)
       throw new IllegalArgumentException("createSuPerson - ${attributeError}")
@@ -203,7 +202,7 @@ public class AccountServiceImpl implements AccountService{
    * @return void.
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public void terminateSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
+  public void terminateSuPerson(String uid, SvcAudit audit) {
     String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,"audit":audit])
     if (attributeError)
       throw new java.lang.IllegalArgumentException("terminateSuPerson - ${attributeError}")
@@ -234,7 +233,7 @@ public class AccountServiceImpl implements AccountService{
    * @return void.
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public String getMailRoutingAddress(@WebParam(name = "uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
+  public String getMailRoutingAddress(String uid, SvcAudit audit) {
     String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,"audit":audit])
     if (attributeError)
       throw new java.lang.IllegalArgumentException("getMailRoutingAddress - ${attributeError}")
@@ -257,7 +256,7 @@ public class AccountServiceImpl implements AccountService{
    * @return void.
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public void setMailRoutingAddress(@WebParam(name = "uid") String uid, @WebParam(name = "mailRoutingAddress") String mailRoutingAddress, @WebParam(name = "audit") SvcAudit audit) {
+  public void setMailRoutingAddress(String uid, String mailRoutingAddress, SvcAudit audit) {
     String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,
                                                                        "mailroutingaddress":mailRoutingAddress,
                                                                        "audit":audit])
@@ -281,8 +280,7 @@ public class AccountServiceImpl implements AccountService{
    * @return SvcSuPersonVO instance if found.
    */
 
-  public SvcSuPersonVO findSuPersonByNorEduPersonNIN(
-      @WebParam(name = "norEduPersonNIN") String nin, @WebParam(name = "audit") SvcAudit audit) {
+  public SvcSuPersonVO findSuPersonByNorEduPersonNIN(@WebParam(name = "norEduPersonNIN") String nin, SvcAudit audit) {
 
     String attributeError = LdapAttributeValidator.validateAttributes(["ssnornin": nin, "audit": audit])
     if (attributeError)
@@ -304,8 +302,7 @@ public class AccountServiceImpl implements AccountService{
    * @return SvcSuPersonVO instance if found.
    */
 
-  public SvcSuPersonVO findSuPersonBySocialSecurityNumber(
-      @WebParam(name = "socialSecurityNumber") String ssn, @WebParam(name = "audit") SvcAudit audit) {
+  public SvcSuPersonVO findSuPersonBySocialSecurityNumber(@WebParam(name = "socialSecurityNumber") String ssn, SvcAudit audit) {
 
     SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO()
 
@@ -341,8 +338,7 @@ public class AccountServiceImpl implements AccountService{
    * @return SvcSuPersonVO instance if found.
    */
 
-  public SvcSuPersonVO findSuPersonByUid(
-      @WebParam(name = "uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
+  public SvcSuPersonVO findSuPersonByUid(String uid, SvcAudit audit) {
 
     SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO()
 
