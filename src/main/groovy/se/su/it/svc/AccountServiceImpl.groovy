@@ -38,7 +38,6 @@ import se.su.it.commons.PasswordUtils
 import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcSuPersonVO
-import se.su.it.svc.gcontract.annotations.ValidUid
 import se.su.it.svc.ldap.SuInitPerson
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.manager.GldapoManager
@@ -54,10 +53,11 @@ import javax.jws.WebService
  * Implementing class for AccountService CXF Web Service.
  * This Class handles all Account activities in SUKAT.
  */
-
 @WebService
-public class AccountServiceImpl implements AccountService{
+public class AccountServiceImpl implements AccountService {
+
   private static final Logger logger = Logger.getLogger(AccountServiceImpl.class)
+
   /**
    * This method sets the primary affiliation for the specified uid.
    *
@@ -86,7 +86,6 @@ public class AccountServiceImpl implements AccountService{
 
   /**
    * This method resets the password for the specified uid and returns the clear text password.
-   *
    *
    * @param uid  uid of the user.
    * @param audit Audit object initilized with audit data about the client and user.
@@ -251,7 +250,7 @@ public class AccountServiceImpl implements AccountService{
   /**
    * This method sets the mailroutingaddress for the specified uid in sukat.
    *
-   * @param uid  uid of the user.
+   * @param uid  uid of the user. 10 chars (YYMMDDXXXX)
    * @param mail mailaddress to be set for uid.
    * @param audit Audit object initilized with audit data about the client and user.
    * @return void.
@@ -276,7 +275,8 @@ public class AccountServiceImpl implements AccountService{
 
   /**
    * Finds a SuPerson in ldap based on norEduPersonNin
-   * @param nin in 12 numbers (ex. 198101010101)
+   *
+   * @param nin in 12 numbers (ex. YYYYMMDDXXXX)
    * @param audit Audit object initilized with audit data about the client and user.
    * @return SvcSuPersonVO instance if found.
    */
@@ -298,11 +298,11 @@ public class AccountServiceImpl implements AccountService{
 
   /**
    * Finds a SuPerson in ldap based on socialSecurityNumber
-   * @param ssn in 10 numbers (ex. 7201010101)
+   *
+   * @param ssn in 10 numbers (YYMMDDXXXX)
    * @param audit Audit object initilized with audit data about the client and user.
    * @return SvcSuPersonVO instance if found.
    */
-
   public SvcSuPersonVO findSuPersonBySocialSecurityNumber(@WebParam(name = "socialSecurityNumber") String ssn, SvcAudit audit) {
 
     SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO()
@@ -334,11 +334,11 @@ public class AccountServiceImpl implements AccountService{
 
   /**
    * Finds a SuPerson in ldap based on uid
+   *
    * @param uid without (@domain)
    * @param audit Audit object initilized with audit data about the client and user.
    * @return SvcSuPersonVO instance if found.
    */
-
   public SvcSuPersonVO findSuPersonByUid(String uid, SvcAudit audit) {
 
     SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO()
