@@ -652,13 +652,12 @@ class AccountServiceImplTest extends spock.lang.Specification {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     SuPersonQuery.metaClass.static.getSuPersonFromSsn = {String directory,String uid -> return null }
+
     when:
     def resp = accountServiceImpl.findSuPersonBySocialSecurityNumber('1001010000', new SvcAudit())
-    then:
-    resp instanceof SvcSuPersonVO
 
-    and:
-    resp.uid == null
+    then:
+    thrown IllegalArgumentException
   }
 
   @Test

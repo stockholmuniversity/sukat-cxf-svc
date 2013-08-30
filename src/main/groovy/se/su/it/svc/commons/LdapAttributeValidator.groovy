@@ -56,6 +56,7 @@ public class LdapAttributeValidator {
         case "edupersonprimaryaffiliation"  : try {validateEduPersonPrimaryAffiliation(val)}  catch (Exception x) {error = x.message};break
         case "domain"                       : try {validateDomain(val)}                       catch (Exception x) {error = x.message};break
         case "nin"                          : try {validateNin(val)}                          catch (Exception x) {error = x.message};break
+        case "ssn"                          : try {validateSsn(val)}                          catch (Exception x) {error = x.message};break
         case "ssnornin"                     : try {validateSsnOrNin(val)}                     catch (Exception x) {error = x.message};break
         case "givenname"                    : try {validategivenName(val)}                    catch (Exception x) {error = x.message};break
         case "sn"                           : try {validateSn(val)}                           catch (Exception x) {error = x.message};break
@@ -117,6 +118,17 @@ public class LdapAttributeValidator {
     }
   }
 
+  private static void validateSsn(Object ssn) {
+    if (ssn == null)
+      throwMe(validateAttributesString,"Attribute validation failed for nin <${ssn}>. ssn can not be null.")
+    if (!ssn instanceof String)
+      throwMe(validateAttributesString,"Attribute validation failed for nin <${ssn}>. ssn need to be a String object.")
+    String tmpSsn = (String)ssn
+    if(tmpSsn.length() != 10) {
+      throwMe(validateAttributesString,"Attribute validation failed for nin <${tmpSsn}>. ssn need to be a 10 in length.")
+    }
+  }
+
   private static void validateSsnOrNin(Object ssnOrNin) {
     if (ssnOrNin == null)
       throwMe(validateAttributesString,"Attribute validation failed for nin/ssn <${ssnOrNin}>. nin can not be null.")
@@ -168,7 +180,7 @@ public class LdapAttributeValidator {
   }
 
   private static void throwMe(String function, String message) {
-    throw new java.lang.IllegalArgumentException("${function} - ${message}!")
+    throw new IllegalArgumentException("${function} - ${message}!")
   }
 
   private static boolean checkValidMailAddress(String mailAddress) {

@@ -70,7 +70,10 @@ public class AccountServiceImpl implements AccountService {
    * @see se.su.it.svc.commons.SvcAudit
    */
   @Requires({
-    ! LdapAttributeValidator.validateAttributes(["uid":uid,"eduPersonPrimaryAffiliation":affiliation,"audit":audit])
+    ! LdapAttributeValidator.validateAttributes([
+            uid: uid,
+            eduPersonPrimaryAffiliation: affiliation,
+            audit: audit ])
   })
   public void updatePrimaryAffiliation(String uid, String affiliation, SvcAudit audit) {
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
@@ -124,7 +127,10 @@ public class AccountServiceImpl implements AccountService {
    * @see se.su.it.svc.commons.SvcAudit
    */
   @Requires({
-    ! LdapAttributeValidator.validateAttributes(["uid":uid,"svcsuperson":person,"audit":audit])
+    ! LdapAttributeValidator.validateAttributes([
+            uid: uid,
+            svcsuperson: person,
+            audit: audit ])
   })
   public void updateSuPerson(String uid, SvcSuPersonVO person, SvcAudit audit){
     SuPerson originalPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
@@ -158,7 +164,14 @@ public class AccountServiceImpl implements AccountService {
    * @see se.su.it.svc.commons.SvcAudit
    */
   @Requires({
-    ! LdapAttributeValidator.validateAttributes(["uid":uid,"domain":domain,"nin":nin,"givenName":givenName,"sn":sn,"svcsuperson":person,"audit":audit])
+    ! LdapAttributeValidator.validateAttributes([
+            uid: uid,
+            domain: domain,
+            nin: nin,
+            givenName: givenName,
+            sn: sn,
+            svcsuperson: person,
+            audit: audit ])
   })
   public String createSuPerson(String uid, String domain, String nin, String givenName, String sn, SvcSuPersonVO person, boolean fullAccount, SvcAudit audit) {
     if(SuPersonQuery.getSuPersonFromUIDNoCache(GldapoManager.LDAP_RW, uid))
@@ -207,7 +220,9 @@ public class AccountServiceImpl implements AccountService {
    * @see se.su.it.svc.commons.SvcAudit
    */
   @Requires({
-    ! LdapAttributeValidator.validateAttributes(["uid":uid,"audit":audit])
+    ! LdapAttributeValidator.validateAttributes([
+            uid: uid,
+            audit: audit ])
   })
   public void terminateSuPerson(String uid, SvcAudit audit) {
     SuPerson terminatePerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
@@ -234,11 +249,14 @@ public class AccountServiceImpl implements AccountService {
    *
    * @param uid  uid of the user.
    * @param audit Audit object initilized with audit data about the client and user.
-   * @return void.
+   * @return the users mailRoutingAddress
+   * @throws IllegalArgumentException if the uid can't be found
    * @see se.su.it.svc.commons.SvcAudit
    */
   @Requires({
-    ! LdapAttributeValidator.validateAttributes(["uid":uid,"audit":audit])
+    ! LdapAttributeValidator.validateAttributes([
+            uid: uid,
+            audit: audit ])
   })
   public String getMailRoutingAddress(String uid, SvcAudit audit) {
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
@@ -260,7 +278,10 @@ public class AccountServiceImpl implements AccountService {
    * @see se.su.it.svc.commons.SvcAudit
    */
   @Requires({
-    ! LdapAttributeValidator.validateAttributes(["uid":uid, "mailroutingaddress":mailRoutingAddress, "audit":audit])
+    ! LdapAttributeValidator.validateAttributes([
+            uid: uid,
+            mailroutingaddress: mailRoutingAddress,
+            audit: audit ])
   })
   public void setMailRoutingAddress(String uid, String mailRoutingAddress, SvcAudit audit) {
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
@@ -283,7 +304,9 @@ public class AccountServiceImpl implements AccountService {
    * @throws IllegalArgumentException if the uid can't be found
    */
   @Requires({
-    ! LdapAttributeValidator.validateAttributes(["ssnornin": nin, "audit": audit])
+    ! LdapAttributeValidator.validateAttributes([
+            ssnornin: nin,
+            audit: audit ])
   })
   public SvcSuPersonVO findSuPersonByNorEduPersonNIN(@WebParam(name = "norEduPersonNIN") String nin, SvcAudit audit) {
     SuPerson suPerson = SuPersonQuery.getSuPersonFromNin(GldapoManager.LDAP_RW, nin)
@@ -301,9 +324,12 @@ public class AccountServiceImpl implements AccountService {
    * @param ssn in 10 numbers (YYMMDDXXXX)
    * @param audit Audit object initilized with audit data about the client and user.
    * @return SvcSuPersonVO instance if found.
+   * @throws IllegalArgumentException if no user can be found.
    */
   @Requires({
-    ! LdapAttributeValidator.validateAttributes(["ssnornin": ssn, "audit": audit])
+    ! LdapAttributeValidator.validateAttributes([
+            ssn: ssn,
+            audit: audit ])
   })
   public SvcSuPersonVO findSuPersonBySocialSecurityNumber(@WebParam(name = "socialSecurityNumber") String ssn, SvcAudit audit) {
 
@@ -324,8 +350,9 @@ public class AccountServiceImpl implements AccountService {
 
       /** The user has an account in SUKAT that is not a stub.*/
       svcSuPersonVO.accountIsActive      = (suPerson?.objectClass?.contains('posixAccount'))?:false
+    } else  {
+      throw new IllegalArgumentException("findSuPersonBySocialSecurityNumber - No suPerson with the supplied ssn: " + ssn)
     }
-
 
     return svcSuPersonVO
   }
@@ -338,7 +365,9 @@ public class AccountServiceImpl implements AccountService {
    * @return SvcSuPersonVO instance if found.
    */
   @Requires({
-    ! LdapAttributeValidator.validateAttributes(["uid": uid, "audit": audit])
+    ! LdapAttributeValidator.validateAttributes([
+            uid: uid,
+            audit: audit ])
   })
   public SvcSuPersonVO findSuPersonByUid(String uid, SvcAudit audit) {
     SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO()
