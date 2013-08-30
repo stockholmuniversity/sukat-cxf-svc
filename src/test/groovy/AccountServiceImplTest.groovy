@@ -654,7 +654,7 @@ class AccountServiceImplTest extends spock.lang.Specification {
     SuPersonQuery.metaClass.static.getSuPersonFromSsn = {String directory,String uid -> return null }
 
     when:
-    def resp = accountServiceImpl.findSuPersonBySocialSecurityNumber('1001010000', new SvcAudit())
+    accountServiceImpl.findSuPersonBySocialSecurityNumber('1001010000', new SvcAudit())
 
     then:
     thrown IllegalArgumentException
@@ -710,13 +710,12 @@ class AccountServiceImplTest extends spock.lang.Specification {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
-    when:
-    def resp = accountServiceImpl.findSuPersonByUid('foo', new SvcAudit())
-    then:
-    resp instanceof SvcSuPersonVO
 
-    and:
-    resp.uid == null
+    when:
+    accountServiceImpl.findSuPersonByUid('foo', new SvcAudit())
+
+    then:
+    thrown IllegalArgumentException
   }
 
   @Test

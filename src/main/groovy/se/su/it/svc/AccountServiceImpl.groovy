@@ -78,14 +78,15 @@ public class AccountServiceImpl implements AccountService {
   public void updatePrimaryAffiliation(String uid, String affiliation, SvcAudit audit) {
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
 
-    if(person) {
-      logger.debug("updatePrimaryAffiliation - Replacing affiliation=<${person?.eduPersonPrimaryAffiliation}> with affiliation=<${affiliation}> for uid=<${uid}>")
-      person.eduPersonPrimaryAffiliation = affiliation
-      SuPersonQuery.saveSuPerson(person)
-      logger.info("updatePrimaryAffiliation - Updated affiliation for uid=<${uid}> with affiliation=<${person.eduPersonPrimaryAffiliation}>")
-    } else {
+    if(!person) {
       throw new IllegalArgumentException("updatePrimaryAffiliation no such uid found: "+uid)
     }
+
+    person.eduPersonPrimaryAffiliation = affiliation
+
+    logger.debug("updatePrimaryAffiliation - Replacing affiliation=<${person?.eduPersonPrimaryAffiliation}> with affiliation=<${affiliation}> for uid=<${uid}>")
+    SuPersonQuery.saveSuPerson(person)
+    logger.info("updatePrimaryAffiliation - Updated affiliation for uid=<${uid}> with affiliation=<${person.eduPersonPrimaryAffiliation}>")
   }
 
   /**
@@ -135,14 +136,15 @@ public class AccountServiceImpl implements AccountService {
   public void updateSuPerson(String uid, SvcSuPersonVO person, SvcAudit audit){
     SuPerson originalPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
 
-    if(originalPerson) {
-      originalPerson.applySuPersonDifference(person)
-      logger.debug("updateSuPerson - Trying to update SuPerson uid<${originalPerson.uid}>")
-      SuPersonQuery.saveSuPerson(originalPerson)
-      logger.info("updateSuPerson - Updated SuPerson uid<${originalPerson.uid}>")
-    } else {
+    if(!originalPerson) {
       throw new IllegalArgumentException("updateSuPerson - No such uid found: "+uid)
     }
+
+    originalPerson.applySuPersonDifference(person)
+    logger.debug("updateSuPerson - Trying to update SuPerson uid<${originalPerson.uid}>")
+
+    SuPersonQuery.saveSuPerson(originalPerson)
+    logger.info("updateSuPerson - Updated SuPerson uid<${originalPerson.uid}>")
   }
 
   /**
@@ -261,11 +263,11 @@ public class AccountServiceImpl implements AccountService {
   public String getMailRoutingAddress(String uid, SvcAudit audit) {
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
 
-    if(suPerson) {
-      return suPerson.mailRoutingAddress
-    } else {
+    if(!suPerson) {
       throw new IllegalArgumentException("getMailRoutingAddress - No such uid found: "+uid)
     }
+
+    return suPerson.mailRoutingAddress
   }
 
   /**
@@ -286,13 +288,13 @@ public class AccountServiceImpl implements AccountService {
   public void setMailRoutingAddress(String uid, String mailRoutingAddress, SvcAudit audit) {
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
 
-    if(suPerson) {
-      suPerson.mailRoutingAddress = mailRoutingAddress
-      SuPersonQuery.saveSuPerson(suPerson)
-      logger.debug("setMailRoutingAddress - Changed mailroutingaddress to <${mailRoutingAddress}> for uid <${uid}>")
-    } else {
+    if(!suPerson) {
       throw new IllegalArgumentException("setMailRoutingAddress - No such uid found: "+uid)
     }
+
+    suPerson.mailRoutingAddress = mailRoutingAddress
+    SuPersonQuery.saveSuPerson(suPerson)
+    logger.debug("setMailRoutingAddress - Changed mailroutingaddress to <${mailRoutingAddress}> for uid <${uid}>")
   }
 
   /**
@@ -332,27 +334,24 @@ public class AccountServiceImpl implements AccountService {
             audit: audit ])
   })
   public SvcSuPersonVO findSuPersonBySocialSecurityNumber(@WebParam(name = "socialSecurityNumber") String ssn, SvcAudit audit) {
-
-    SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO()
-
     ssn = GeneralUtils.pnrToSsn(ssn)
 
     SuPerson suPerson = SuPersonQuery.getSuPersonFromSsn(GldapoManager.LDAP_RW, ssn)
-
-    if (suPerson) {
-      svcSuPersonVO.uid                   = suPerson.uid
-      svcSuPersonVO.socialSecurityNumber  = suPerson.socialSecurityNumber
-      svcSuPersonVO.givenName             = suPerson.givenName
-      svcSuPersonVO.sn                    = suPerson.sn
-      svcSuPersonVO.displayName           = suPerson.displayName
-      svcSuPersonVO.registeredAddress     = suPerson.registeredAddress
-      svcSuPersonVO.mail = new LinkedHashSet(suPerson.mail)
-
-      /** The user has an account in SUKAT that is not a stub.*/
-      svcSuPersonVO.accountIsActive      = (suPerson?.objectClass?.contains('posixAccount'))?:false
-    } else  {
+    if (!suPerson) {
       throw new IllegalArgumentException("findSuPersonBySocialSecurityNumber - No suPerson with the supplied ssn: " + ssn)
     }
+
+    SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO()
+    svcSuPersonVO.uid                   = suPerson.uid
+    svcSuPersonVO.socialSecurityNumber  = suPerson.socialSecurityNumber
+    svcSuPersonVO.givenName             = suPerson.givenName
+    svcSuPersonVO.sn                    = suPerson.sn
+    svcSuPersonVO.displayName           = suPerson.displayName
+    svcSuPersonVO.registeredAddress     = suPerson.registeredAddress
+    svcSuPersonVO.mail = new LinkedHashSet(suPerson.mail)
+
+    /** The user has an account in SUKAT that is not a stub.*/
+    svcSuPersonVO.accountIsActive      = (suPerson?.objectClass?.contains('posixAccount'))?:false
 
     return svcSuPersonVO
   }
@@ -370,21 +369,23 @@ public class AccountServiceImpl implements AccountService {
             audit: audit ])
   })
   public SvcSuPersonVO findSuPersonByUid(String uid, SvcAudit audit) {
-    SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO()
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
 
-    if (suPerson) {
-      svcSuPersonVO.uid                  = suPerson.uid
-      svcSuPersonVO.socialSecurityNumber = suPerson.socialSecurityNumber
-      svcSuPersonVO.givenName            = suPerson.givenName
-      svcSuPersonVO.sn                   = suPerson.sn
-      svcSuPersonVO.displayName          = suPerson.displayName
-      svcSuPersonVO.registeredAddress    = suPerson.registeredAddress
-      svcSuPersonVO.mail = new LinkedHashSet(suPerson.mail)
-
-      /** The user has an account in SUKAT that is not a stub.*/
-      svcSuPersonVO.accountIsActive      = (suPerson?.objectClass?.contains('posixAccount'))?:false
+    if (!suPerson) {
+      throw new IllegalArgumentException("findSuPersonByUid - No suPerson with the supplied uid: " + uid)
     }
+
+    SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO()
+    svcSuPersonVO.uid                  = suPerson.uid
+    svcSuPersonVO.socialSecurityNumber = suPerson.socialSecurityNumber
+    svcSuPersonVO.givenName            = suPerson.givenName
+    svcSuPersonVO.sn                   = suPerson.sn
+    svcSuPersonVO.displayName          = suPerson.displayName
+    svcSuPersonVO.registeredAddress    = suPerson.registeredAddress
+    svcSuPersonVO.mail = new LinkedHashSet(suPerson.mail)
+
+    /** The user has an account in SUKAT that is not a stub.*/
+    svcSuPersonVO.accountIsActive      = (suPerson?.objectClass?.contains('posixAccount'))?:false
 
     return svcSuPersonVO
   }
