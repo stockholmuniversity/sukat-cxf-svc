@@ -32,6 +32,9 @@
 package se.su.it.svc.util
 
 class GeneralUtils {
+
+  public static final String SU_SE_SCOPE = "@su.se"
+
   /**
    * Transform any 12 char pnr to 10 char for use in finding by socialSecurityNumber
    * @param pnr
@@ -39,5 +42,15 @@ class GeneralUtils {
    */
   public static String pnrToSsn(String pnr) {
     return (pnr?.length() == 12) ? pnr[2..11] : pnr
+  }
+
+  /**
+   * Convert a uid to a principal string
+   *
+   * @param uid the uid to convert
+   * @return <uid>@<SCOPE>
+   */
+  public static String uidToPrincipal(uid) {
+    return uid == null ? null : uid + SU_SE_SCOPE
   }
 }

@@ -35,9 +35,10 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 class GeneralUtilsSpec extends Specification {
+
   @Test
   @Unroll
-  void "pnrToSsn: When given pnr: \'#pnr\' we expect '\'#expected\'"() {
+  void "pnrToSsn: When given pnr: '#pnr' we expect '#expected'"() {
     expect:
     GeneralUtils.pnrToSsn(pnr)
 
@@ -48,4 +49,14 @@ class GeneralUtilsSpec extends Specification {
     '++***********' | '++***********' // 13 chars, nothing happens.
   }
 
+  @Unroll
+  def "uidToPrincipal: When given uid: '#uid' expect '#principal'"() {
+    expect: GeneralUtils.uidToPrincipal(uid) == principal
+
+    where:
+    uid    | principal
+    null   | null
+    ''     | '' + GeneralUtils.SU_SE_SCOPE
+    'test' | 'test' + GeneralUtils.SU_SE_SCOPE
+  }
 }

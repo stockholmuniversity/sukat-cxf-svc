@@ -46,6 +46,7 @@ import se.su.it.svc.manager.GldapoManager
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.util.AccountServiceUtils
 import se.su.it.svc.util.EnrollmentServiceUtils
+import se.su.it.svc.util.GeneralUtils
 
 import javax.jws.WebParam
 import javax.jws.WebService
@@ -190,7 +191,7 @@ public class AccountServiceImpl implements AccountService {
             sn: sn,
             givenName: givenName,
             norEduPersonNIN: nin,
-            eduPersonPrincipalName: uid + "@su.se",
+            eduPersonPrincipalName: GeneralUtils.uidToPrincipal(uid),
             objectClass: ["suPerson","sSNObject","norEduPerson","eduPerson","inetLocalMailRecipient","inetOrgPerson","organizationalPerson","person","top"],
             parent: AccountServiceUtils.domainToDN(domain)
     )
