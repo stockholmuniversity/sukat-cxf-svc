@@ -104,10 +104,12 @@ public class AccountServiceImpl implements AccountService {
   public String resetPassword(String uid, SvcAudit audit) {
     String trueUid = uid.replaceFirst("\\.", "/")
 
-    if (Kadmin.newInstance().principalExists(trueUid)) {
+    def kadmin = Kadmin.newInstance()
+
+    if (kadmin.principalExists(trueUid)) {
       log.debug("resetPassword - Trying to reset password for uid=<${uid}>")
       String pwd = PasswordUtils.genRandomPassword(10, 10)
-      Kadmin.newInstance().setPassword(trueUid, pwd)
+      kadmin.setPassword(trueUid, pwd)
       log.info("resetPassword - Password was reset for uid=<${uid}>")
       return pwd
     } else {
@@ -182,15 +184,17 @@ public class AccountServiceImpl implements AccountService {
 
     //Begin init entry in sukat
     log.debug("createSuPerson - Creating initial sukat record from function arguments for uid<${uid}>")
-    SuInitPerson suInitPerson = new SuInitPerson()
-    suInitPerson.uid = uid
-    suInitPerson.cn = givenName + " " + sn
-    suInitPerson.sn = sn
-    suInitPerson.givenName = givenName
-    suInitPerson.norEduPersonNIN = nin
-    suInitPerson.eduPersonPrincipalName = uid + "@su.se"
-    suInitPerson.objectClass = ["suPerson","sSNObject","norEduPerson","eduPerson","inetLocalMailRecipient","inetOrgPerson","organizationalPerson","person","top"]
-    suInitPerson.parent = AccountServiceUtils.domainToDN(domain)
+    SuInitPerson suInitPerson = new SuInitPerson(
+            uid: uid,
+            cn: givenName + " " + sn,
+            sn: sn,
+            givenName: givenName,
+            norEduPersonNIN: nin,
+            eduPersonPrincipalName: uid + "@su.se",
+            objectClass: ["suPerson","sSNObject","norEduPerson","eduPerson","inetLocalMailRecipient","inetOrgPerson","organizationalPerson","person","top"],
+            parent: AccountServiceUtils.domainToDN(domain)
+    )
+
     log.debug("createSuPerson - Writing initial sukat record to sukat for uid<${uid}>")
     SuPersonQuery.initSuPerson(GldapoManager.LDAP_RW, suInitPerson)
     //End init entry in sukat
