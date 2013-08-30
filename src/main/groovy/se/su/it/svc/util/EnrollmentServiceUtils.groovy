@@ -45,21 +45,47 @@ import java.util.regex.Pattern
 @Slf4j
 class EnrollmentServiceUtils {
 
+  /**
+   * Path to create home directories in.
+   */
   public static final String AFS_HOME_DIR_BASE = "/afs/su.se/home/"
+
+  /**
+   * Path to set as user shell
+   */
   public static final String SHELL_PATH = "/usr/local/bin/bash"
-  public static final String SU_USER_GID = 1200
+
+  /**
+   * Defalt GID for new users.
+   */
+  public static final String DEFAULT_USER_GID = "1200"
+
+  /**
+   * User to run enable-user script as.
+   */
+  public static final String SCRIPT_USER = "uadminw"
+
+  /**
+   * Path to 'enable-user' script
+   */
+  public static final String ENABLE_SCRIPT = "/local/sukat/libexec/enable-user.pl"
+
+  /**
+   * Path to 'run-token-script'
+   */
+  public static final String TOKEN_SCRIPT = "/local/scriptbox/bin/run-token-script.sh"
 
   /**
    * Enables the user through the 'enable-user.pl' script & saves the new data in SUKAT
    *
    * @param uid uid of the user to be enabled
    * @param password the password
-   * @param person
-   * @return
+   * @param person a object to set attributes on.
+   * @return true the operation succeeds, false if it fails.
    */
   public static boolean enableUser(String uid, String password, Object person) {
     boolean error = false
-    String uidNumber = ""
+    String uidNumber
 
     boolean skipCreate = Properties.instance.props.enrollment.skipCreate == "true"
 
@@ -67,27 +93,9 @@ class EnrollmentServiceUtils {
       log.warn "Skipping enable user since skipCreate is set to $skipCreate"
       uidNumber = "-1"
     } else {
-      def perlScript = [
-              "--user", "uadminw",
-              "/local/sukat/libexec/enable-user.pl",
-              "--uid", uid,
-              "--password", password,
-              "--gidnumber", SU_USER_GID]
-
-      try {
-        log.debug("enableUser - Running perlscript to create user in KDC and AFS for uid<${uid}>")
-        def res = ExecUtils.exec("/local/scriptbox/bin/run-token-script.sh", perlScript.toArray(new String[perlScript.size()]))
-        Pattern p = Pattern.compile("OK \\(uidnumber:(\\d+)\\)")
-        Matcher m = p.matcher(res.trim())
-        if (m.matches()) {
-          uidNumber = m.group(1)
-        } else {
-          error = true
-        }
-      } catch (Exception e) {
+      uidNumber = runEnableScript(uid, password)
+      if (!uidNumber) {
         error = true
-        log.error("enableUser - Error when enabling uid<${uid}> in KDC and/or AFS! Error: " + e.message)
-        log.error("           - posixAccount attributes will not be written to SUKAT!")
       }
     }
 
@@ -99,7 +107,7 @@ class EnrollmentServiceUtils {
       person.loginShell = SHELL_PATH
       person.homeDirectory = getHomeDirectoryPath(uid)
       person.uidNumber = uidNumber
-      person.gidNumber = SU_USER_GID
+      person.gidNumber = DEFAULT_USER_GID
 
       if (person instanceof SuInitPerson) {
         SuPersonQuery.saveSuInitPerson((SuInitPerson) person)
@@ -112,6 +120,39 @@ class EnrollmentServiceUtils {
     }
 
     return !error
+  }
+
+  /**
+   * Run the script that enables the user in AFS & KDC
+   *
+   * @param uid the uid to enable
+   * @param password the password
+   * @return the uid of the enabled user, null if the operation fails.
+   */
+  public static String runEnableScript(String uid, String password) {
+    String uidNumber = null
+
+    def perlScript = [
+            "--user", SCRIPT_USER,
+            ENABLE_SCRIPT,
+            "--uid", uid,
+            "--password", password,
+            "--gidnumber", DEFAULT_USER_GID ]
+
+    try {
+      log.debug("enableUser - Running perlscript to create user in KDC and AFS for uid<${uid}>")
+      def res = ExecUtils.exec(TOKEN_SCRIPT, perlScript.toArray(new String[perlScript.size()]))
+      Pattern p = Pattern.compile("OK \\(uidnumber:(\\d+)\\)")
+      Matcher m = p.matcher(res.trim())
+      if (m.matches()) {
+        uidNumber = m.group(1)
+      }
+    } catch (ex) {
+      log.error("enableUser - Error when enabling uid<${uid}> in KDC and/or AFS! Error: " + ex.message)
+      log.error("           - posixAccount attributes will not be written to SUKAT!")
+    }
+
+    return uidNumber
   }
 
   /**
