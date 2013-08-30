@@ -32,13 +32,24 @@
 package se.su.it.svc.util
 
 class AccountServiceUtils {
+
+  /**
+   * Convert a domain to a dn (ex. it.su.se -> dc=it,dc=su,dc=se)
+   *
+   * @param domain the domain to be converted
+   * @return a dn string, or empty string if domain==null
+   */
   public static String domainToDN(String domain) {
-    String retString = ""
-    def domainSplit = domain.split("\\.")
-    domainSplit.eachWithIndex {String name, int index ->
-      if(index > 0) {retString += ",dc=${name}"}
-      else {retString += "dc=${name}"}
+    String retString = ''
+
+    if (domain) {
+      def domainSplit = domain.split("\\.")
+
+      domainSplit.eachWithIndex {String name, int index ->
+        retString += (index > 0) ? ",dc=${name}":"dc=${name}"
+      }
     }
+
     return retString
   }
 }
