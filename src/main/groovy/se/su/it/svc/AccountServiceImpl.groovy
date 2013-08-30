@@ -38,6 +38,7 @@ import se.su.it.commons.PasswordUtils
 import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcSuPersonVO
+import se.su.it.svc.gcontract.annotations.ValidUid
 import se.su.it.svc.ldap.SuInitPerson
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.manager.GldapoManager
@@ -258,8 +259,8 @@ public class AccountServiceImpl implements AccountService{
    */
   public void setMailRoutingAddress(String uid, String mailRoutingAddress, SvcAudit audit) {
     String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,
-                                                                       "mailroutingaddress":mailRoutingAddress,
-                                                                       "audit":audit])
+            "mailroutingaddress":mailRoutingAddress,
+            "audit":audit])
     if (attributeError)
       throw new java.lang.IllegalArgumentException("setMailRoutingAddress - ${attributeError}")
 
