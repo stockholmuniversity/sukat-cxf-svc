@@ -46,6 +46,8 @@ import java.util.regex.Pattern
 class EnrollmentServiceUtils {
 
   public static final String AFS_HOME_DIR_BASE = "/afs/su.se/home/"
+  public static final String SHELL_PATH = "/usr/local/bin/bash"
+  public static final String SU_USER_GID = 1200
 
   /**
    * Enables the user through the 'enable-user.pl' script & saves the new data in SUKAT
@@ -56,7 +58,6 @@ class EnrollmentServiceUtils {
    * @return
    */
   public static boolean enableUser(String uid, String password, Object person) {
-
     boolean error = false
     String uidNumber = ""
 
@@ -66,7 +67,12 @@ class EnrollmentServiceUtils {
       log.warn "Skipping enable user since skipCreate is set to $skipCreate"
       uidNumber = "-1"
     } else {
-      def perlScript = ["--user", "uadminw", "/local/sukat/libexec/enable-user.pl", "--uid", uid, "--password", password, "--gidnumber", "1200"]
+      def perlScript = [
+              "--user", "uadminw",
+              "/local/sukat/libexec/enable-user.pl",
+              "--uid", uid,
+              "--password", password,
+              "--gidnumber", SU_USER_GID]
 
       try {
         log.debug("enableUser - Running perlscript to create user in KDC and AFS for uid<${uid}>")
@@ -90,10 +96,10 @@ class EnrollmentServiceUtils {
       log.debug("enableUser - Perlscript success for uid<${uid}>")
       log.debug("enableUser - Writing posixAccount attributes to sukat for uid<${uid}>")
       person.objectClass.add("posixAccount")
-      person.loginShell = "/usr/local/bin/bash"
+      person.loginShell = SHELL_PATH
       person.homeDirectory = getHomeDirectoryPath(uid)
       person.uidNumber = uidNumber
-      person.gidNumber = "1200"
+      person.gidNumber = SU_USER_GID
 
       if (person instanceof SuInitPerson) {
         SuPersonQuery.saveSuInitPerson((SuInitPerson) person)
