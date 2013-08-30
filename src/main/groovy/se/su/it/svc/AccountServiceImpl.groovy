@@ -33,6 +33,7 @@ package se.su.it.svc
 
 import org.apache.commons.lang.NotImplementedException
 import org.apache.log4j.Logger
+import org.gcontracts.annotations.Requires
 import se.su.it.commons.Kadmin
 import se.su.it.commons.PasswordUtils
 import se.su.it.svc.commons.LdapAttributeValidator
@@ -68,12 +69,12 @@ public class AccountServiceImpl implements AccountService {
    * @see se.su.it.svc.ldap.SuPerson
    * @see se.su.it.svc.commons.SvcAudit
    */
+  @Requires({
+    ! LdapAttributeValidator.validateAttributes(["uid":uid,"eduPersonPrimaryAffiliation":affiliation,"audit":audit])
+  })
   public void updatePrimaryAffiliation(String uid, String affiliation, SvcAudit audit) {
-    String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,"eduPersonPrimaryAffiliation":affiliation,"audit":audit])
-    if (attributeError)
-      throw new java.lang.IllegalArgumentException("updatePrimaryAffiliation - ${attributeError}")
-
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+
     if(person) {
       logger.debug("updatePrimaryAffiliation - Replacing affiliation=<${person?.eduPersonPrimaryAffiliation}> with affiliation=<${affiliation}> for uid=<${uid}>")
       person.eduPersonPrimaryAffiliation = affiliation
@@ -92,10 +93,12 @@ public class AccountServiceImpl implements AccountService {
    * @return String new password.
    * @see se.su.it.svc.commons.SvcAudit
    */
+  @Requires({
+    uid && audit
+  })
   public String resetPassword(String uid, SvcAudit audit) {
-    if (uid == null || audit == null)
-      throw new java.lang.IllegalArgumentException("resetPassword - Null argument values not allowed in this function")
     String trueUid = uid.replaceFirst("\\.", "/")
+
     if (Kadmin.newInstance().principalExists(trueUid)) {
       logger.debug("resetPassword - Trying to reset password for uid=<${uid}>")
       String pwd = PasswordUtils.genRandomPassword(10, 10)
@@ -120,12 +123,12 @@ public class AccountServiceImpl implements AccountService {
    * @see se.su.it.svc.commons.SvcSuPersonVO
    * @see se.su.it.svc.commons.SvcAudit
    */
+  @Requires({
+    ! LdapAttributeValidator.validateAttributes(["uid":uid,"svcsuperson":person,"audit":audit])
+  })
   public void updateSuPerson(String uid, SvcSuPersonVO person, SvcAudit audit){
-    String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,"svcsuperson":person,"audit":audit])
-    if (attributeError)
-      throw new java.lang.IllegalArgumentException("updateSuPerson - ${attributeError}")
-
     SuPerson originalPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+
     if(originalPerson) {
       originalPerson.applySuPersonDifference(person)
       logger.debug("updateSuPerson - Trying to update SuPerson uid<${originalPerson.uid}>")
@@ -153,10 +156,10 @@ public class AccountServiceImpl implements AccountService {
    * @see se.su.it.svc.commons.SvcSuPersonVO
    * @see se.su.it.svc.commons.SvcAudit
    */
+  @Requires({
+    ! LdapAttributeValidator.validateAttributes(["uid":uid,"domain":domain,"nin":nin,"givenName":givenName,"sn":sn,"svcsuperson":person,"audit":audit])
+  })
   public String createSuPerson(String uid, String domain, String nin, String givenName, String sn, SvcSuPersonVO person, boolean fullAccount, SvcAudit audit) {
-    String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,"domain":domain,"nin":nin,"givenName":givenName,"sn":sn,"svcsuperson":person,"audit":audit])
-    if (attributeError)
-      throw new IllegalArgumentException("createSuPerson - ${attributeError}")
     if(SuPersonQuery.getSuPersonFromUIDNoCache(GldapoManager.LDAP_RW, uid))
       throw new IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
 
@@ -202,12 +205,12 @@ public class AccountServiceImpl implements AccountService {
    * @return void.
    * @see se.su.it.svc.commons.SvcAudit
    */
+  @Requires({
+    ! LdapAttributeValidator.validateAttributes(["uid":uid,"audit":audit])
+  })
   public void terminateSuPerson(String uid, SvcAudit audit) {
-    String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,"audit":audit])
-    if (attributeError)
-      throw new java.lang.IllegalArgumentException("terminateSuPerson - ${attributeError}")
-
     SuPerson terminatePerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+
     if(terminatePerson) {
       //TODO: This serves as a stubfunction right now. We need input on how a terminate should work
       //TODO: Below is some code that might do the trick, but what about mail address and stuff
@@ -233,12 +236,12 @@ public class AccountServiceImpl implements AccountService {
    * @return void.
    * @see se.su.it.svc.commons.SvcAudit
    */
+  @Requires({
+    ! LdapAttributeValidator.validateAttributes(["uid":uid,"audit":audit])
+  })
   public String getMailRoutingAddress(String uid, SvcAudit audit) {
-    String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,"audit":audit])
-    if (attributeError)
-      throw new java.lang.IllegalArgumentException("getMailRoutingAddress - ${attributeError}")
-
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+
     if(suPerson) {
       return suPerson.mailRoutingAddress
     } else {
@@ -256,14 +259,12 @@ public class AccountServiceImpl implements AccountService {
    * @return void.
    * @see se.su.it.svc.commons.SvcAudit
    */
+  @Requires({
+    ! LdapAttributeValidator.validateAttributes(["uid":uid, "mailroutingaddress":mailRoutingAddress, "audit":audit])
+  })
   public void setMailRoutingAddress(String uid, String mailRoutingAddress, SvcAudit audit) {
-    String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,
-            "mailroutingaddress":mailRoutingAddress,
-            "audit":audit])
-    if (attributeError)
-      throw new java.lang.IllegalArgumentException("setMailRoutingAddress - ${attributeError}")
-
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+
     if(suPerson) {
       suPerson.mailRoutingAddress = mailRoutingAddress
       SuPersonQuery.saveSuPerson(suPerson)
@@ -280,13 +281,10 @@ public class AccountServiceImpl implements AccountService {
    * @param audit Audit object initilized with audit data about the client and user.
    * @return SvcSuPersonVO instance if found.
    */
-
+  @Requires({
+    ! LdapAttributeValidator.validateAttributes(["ssnornin": nin, "audit": audit])
+  })
   public SvcSuPersonVO findSuPersonByNorEduPersonNIN(@WebParam(name = "norEduPersonNIN") String nin, SvcAudit audit) {
-
-    String attributeError = LdapAttributeValidator.validateAttributes(["ssnornin": nin, "audit": audit])
-    if (attributeError)
-      throw new IllegalArgumentException("ssnornin - ${attributeError}")
-
     SuPerson suPerson = SuPersonQuery.getSuPersonFromNin(GldapoManager.LDAP_RW, nin)
 
     if (!suPerson) {
@@ -303,15 +301,14 @@ public class AccountServiceImpl implements AccountService {
    * @param audit Audit object initilized with audit data about the client and user.
    * @return SvcSuPersonVO instance if found.
    */
+  @Requires({
+    ! LdapAttributeValidator.validateAttributes(["ssnornin": ssn, "audit": audit])
+  })
   public SvcSuPersonVO findSuPersonBySocialSecurityNumber(@WebParam(name = "socialSecurityNumber") String ssn, SvcAudit audit) {
 
     SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO()
 
     ssn = GeneralUtils.pnrToSsn(ssn)
-
-    String attributeError = LdapAttributeValidator.validateAttributes(["ssnornin": ssn, "audit": audit])
-    if (attributeError)
-      throw new IllegalArgumentException("ssnornin - ${attributeError}")
 
     SuPerson suPerson = SuPersonQuery.getSuPersonFromSsn(GldapoManager.LDAP_RW, ssn)
 
@@ -339,14 +336,11 @@ public class AccountServiceImpl implements AccountService {
    * @param audit Audit object initilized with audit data about the client and user.
    * @return SvcSuPersonVO instance if found.
    */
+  @Requires({
+    ! LdapAttributeValidator.validateAttributes(["uid": uid, "audit": audit])
+  })
   public SvcSuPersonVO findSuPersonByUid(String uid, SvcAudit audit) {
-
     SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO()
-
-    String attributeError = LdapAttributeValidator.validateAttributes(["uid": uid, "audit": audit])
-    if (attributeError)
-      throw new IllegalArgumentException("uid - ${attributeError}")
-
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
 
     if (suPerson) {

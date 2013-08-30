@@ -29,19 +29,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+
+import gldapo.GldapoSchemaRegistry
 import org.apache.commons.lang.NotImplementedException
+import org.gcontracts.PreconditionViolation
 import org.junit.After
 import org.junit.Test
+import se.su.it.commons.ExecUtils
+import se.su.it.commons.Kadmin
+import se.su.it.commons.PasswordUtils
 import se.su.it.svc.AccountServiceImpl
 import se.su.it.svc.commons.SvcAudit
-import gldapo.GldapoSchemaRegistry
-import se.su.it.svc.query.SuPersonQuery
-import se.su.it.svc.ldap.SuPerson
-import se.su.it.commons.Kadmin
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.ldap.SuInitPerson
-import se.su.it.commons.ExecUtils
-import se.su.it.commons.PasswordUtils
+import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.query.SuPersonQuery
 import spock.lang.Ignore
 
 /**
@@ -67,30 +69,36 @@ class AccountServiceImplTest extends spock.lang.Specification {
   def "Test updatePrimaryAffiliation with null uid argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.updatePrimaryAffiliation(null, "employee", new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
   def "Test updatePrimaryAffiliation with null affiliation argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.updatePrimaryAffiliation("testuid", null, new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
   def "Test updatePrimaryAffiliation with null SvcAudit argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.updatePrimaryAffiliation("testuid", "employee", null)
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -123,20 +131,24 @@ class AccountServiceImplTest extends spock.lang.Specification {
   def "Test resetPassword with null uid argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.resetPassword(null, new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
   def "Test resetPassword with null audit argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.resetPassword("testuid", null)
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -144,8 +156,10 @@ class AccountServiceImplTest extends spock.lang.Specification {
     setup:
     Kadmin.metaClass.principalExists = {String uid -> return false}
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.resetPassword("testuid", new SvcAudit())
+
     then:
     thrown(IllegalArgumentException)
   }
@@ -187,30 +201,36 @@ class AccountServiceImplTest extends spock.lang.Specification {
   def "Test updateSuPerson with null uid argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.updateSuPerson(null,new SvcSuPersonVO(), new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
   def "Test updateSuPerson with null personVO argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.updateSuPerson("testuid",null, new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
   def "Test updateSuPerson with null SvcAudit argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.updateSuPerson("testuid",new SvcSuPersonVO(), null)
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -219,8 +239,10 @@ class AccountServiceImplTest extends spock.lang.Specification {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.updateSuPerson("testuid",new SvcSuPersonVO(), new SvcAudit())
+
     then:
     thrown(IllegalArgumentException)
   }
@@ -248,10 +270,12 @@ class AccountServiceImplTest extends spock.lang.Specification {
   def "Test createSuPerson with null uid argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.createSuPerson(null,"it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), false, new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -259,8 +283,10 @@ class AccountServiceImplTest extends spock.lang.Specification {
     setup:
     SuPersonQuery.metaClass.static.getSuPersonFromUIDNoCache = {String directory,String uid -> new SuPerson() }
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), false, new SvcAudit())
+
     then:
     thrown(IllegalArgumentException)
   }
@@ -269,70 +295,84 @@ class AccountServiceImplTest extends spock.lang.Specification {
   def "Test createSuPerson with null domain argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.createSuPerson("testtest",null,"196601010357","Test","Testsson",new SvcSuPersonVO(), false, new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
   def "Test createSuPerson with null nin argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.createSuPerson("testtest","it.su.se",null,"Test","Testsson",new SvcSuPersonVO(), false, new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
   def "Test createSuPerson with wrong nin argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.createSuPerson("testtest","it.su.se","20001128-5764","Test","Testsson",new SvcSuPersonVO(), false, new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
   def "Test createSuPerson with null givenName argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357",null,"Testsson",new SvcSuPersonVO(), false, new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
   def "Test createSuPerson with null sn argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test",null,new SvcSuPersonVO(), false, new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
   def "Test createSuPerson with null person argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",null, false, new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
   def "Test createSuPerson with null audit argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), false, null)
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -383,20 +423,24 @@ class AccountServiceImplTest extends spock.lang.Specification {
   def "Test terminateSuPerson with null uid argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.terminateSuPerson(null, new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
   def "Test terminateSuPerson with null SvcAudit argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.terminateSuPerson("testuid", null)
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -405,8 +449,10 @@ class AccountServiceImplTest extends spock.lang.Specification {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.terminateSuPerson("testuid", new SvcAudit())
+
     then:
     thrown(IllegalArgumentException)
   }
@@ -427,20 +473,24 @@ class AccountServiceImplTest extends spock.lang.Specification {
   def "Test getMailRoutingAddress with null uid argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.getMailRoutingAddress(null, new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
   def "Test getMailRoutingAddress with null audit argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.getMailRoutingAddress("testuid", null)
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -449,8 +499,10 @@ class AccountServiceImplTest extends spock.lang.Specification {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.getMailRoutingAddress("testuid", new SvcAudit())
+
     then:
     thrown(IllegalArgumentException)
   }
@@ -472,40 +524,48 @@ class AccountServiceImplTest extends spock.lang.Specification {
   def "Test setMailRoutingAddress with null uid argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.setMailRoutingAddress(null, "mail@test.su.se", new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
   def "Test setMailRoutingAddress with null mail argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.setMailRoutingAddress("testuid", null, new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
   def "Test setMailRoutingAddress with wrong format mail argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.setMailRoutingAddress("testuid", "testuser.mail.se", new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
   def "Test setMailRoutingAddress with null audit argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.setMailRoutingAddress("testuid", "mail@test.su.se", null)
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -514,8 +574,10 @@ class AccountServiceImplTest extends spock.lang.Specification {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.setMailRoutingAddress("testuid", "mail@test.su.se", new SvcAudit())
+
     then:
     thrown(IllegalArgumentException)
   }
@@ -538,10 +600,12 @@ class AccountServiceImplTest extends spock.lang.Specification {
   def "Test findSuInitPersonByNorEduPersonNIN: with invalid nin"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.findSuPersonByNorEduPersonNIN(null, new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -575,10 +639,12 @@ class AccountServiceImplTest extends spock.lang.Specification {
   def "Test findSuPersonBySocialSecurityNumber: with invalid ssn"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.findSuPersonBySocialSecurityNumber(null, new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -632,10 +698,12 @@ class AccountServiceImplTest extends spock.lang.Specification {
   def "Test findSuPersonByUid: with invalid ssn"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.findSuPersonByUid(null, new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -684,5 +752,4 @@ class AccountServiceImplTest extends spock.lang.Specification {
     (resp.mail as Set).contains('email2@su.se')
     resp.accountIsActive
   }
-
 }
