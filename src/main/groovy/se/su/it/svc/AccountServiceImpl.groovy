@@ -31,8 +31,8 @@
 
 package se.su.it.svc
 
+import groovy.util.logging.Slf4j
 import org.apache.commons.lang.NotImplementedException
-import org.apache.log4j.Logger
 import org.gcontracts.annotations.Ensures
 import org.gcontracts.annotations.Requires
 import se.su.it.commons.Kadmin
@@ -55,10 +55,9 @@ import javax.jws.WebService
  * Implementing class for AccountService CXF Web Service.
  * This Class handles all Account activities in SUKAT.
  */
+@Slf4j
 @WebService
 public class AccountServiceImpl implements AccountService {
-
-  private static final Logger logger = Logger.getLogger(AccountServiceImpl.class)
 
   /**
    * This method sets the primary affiliation for the specified uid.
@@ -85,9 +84,9 @@ public class AccountServiceImpl implements AccountService {
 
     person.eduPersonPrimaryAffiliation = affiliation
 
-    logger.debug("updatePrimaryAffiliation - Replacing affiliation=<${person?.eduPersonPrimaryAffiliation}> with affiliation=<${affiliation}> for uid=<${uid}>")
+    log.debug("updatePrimaryAffiliation - Replacing affiliation=<${person?.eduPersonPrimaryAffiliation}> with affiliation=<${affiliation}> for uid=<${uid}>")
     SuPersonQuery.saveSuPerson(person)
-    logger.info("updatePrimaryAffiliation - Updated affiliation for uid=<${uid}> with affiliation=<${person.eduPersonPrimaryAffiliation}>")
+    log.info("updatePrimaryAffiliation - Updated affiliation for uid=<${uid}> with affiliation=<${person.eduPersonPrimaryAffiliation}>")
   }
 
   /**
@@ -107,13 +106,13 @@ public class AccountServiceImpl implements AccountService {
     String trueUid = uid.replaceFirst("\\.", "/")
 
     if (Kadmin.newInstance().principalExists(trueUid)) {
-      logger.debug("resetPassword - Trying to reset password for uid=<${uid}>")
+      log.debug("resetPassword - Trying to reset password for uid=<${uid}>")
       String pwd = PasswordUtils.genRandomPassword(10, 10)
       Kadmin.newInstance().setPassword(trueUid, pwd)
-      logger.info("resetPassword - Password was reset for uid=<${uid}>")
+      log.info("resetPassword - Password was reset for uid=<${uid}>")
       return pwd
     } else {
-      logger.debug("resetPassword - No such uid found: "+uid)
+      log.debug("resetPassword - No such uid found: "+uid)
       throw new IllegalArgumentException("resetPassword - No such uid found: "+uid)
     }
   }
@@ -143,10 +142,10 @@ public class AccountServiceImpl implements AccountService {
     }
 
     originalPerson.applySuPersonDifference(person)
-    logger.debug("updateSuPerson - Trying to update SuPerson uid<${originalPerson.uid}>")
+    log.debug("updateSuPerson - Trying to update SuPerson uid<${originalPerson.uid}>")
 
     SuPersonQuery.saveSuPerson(originalPerson)
-    logger.info("updateSuPerson - Updated SuPerson uid<${originalPerson.uid}>")
+    log.info("updateSuPerson - Updated SuPerson uid<${originalPerson.uid}>")
   }
 
   /**
@@ -183,7 +182,7 @@ public class AccountServiceImpl implements AccountService {
       throw new IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
 
     //Begin init entry in sukat
-    logger.debug("createSuPerson - Creating initial sukat record from function arguments for uid<${uid}>")
+    log.debug("createSuPerson - Creating initial sukat record from function arguments for uid<${uid}>")
     SuInitPerson suInitPerson = new SuInitPerson()
     suInitPerson.uid = uid
     suInitPerson.cn = givenName + " " + sn
@@ -194,7 +193,7 @@ public class AccountServiceImpl implements AccountService {
     suInitPerson.eduPersonPrincipalName = uid + "@su.se"
     suInitPerson.objectClass = ["suPerson","sSNObject","norEduPerson","eduPerson","inetLocalMailRecipient","inetOrgPerson","organizationalPerson","person","top"]
     suInitPerson.parent = AccountServiceUtils.domainToDN(domain)
-    logger.debug("createSuPerson - Writing initial sukat record to sukat for uid<${uid}>")
+    log.debug("createSuPerson - Writing initial sukat record to sukat for uid<${uid}>")
     SuPersonQuery.initSuPerson(GldapoManager.LDAP_RW, suInitPerson)
     //End init entry in sukat
 
@@ -204,15 +203,15 @@ public class AccountServiceImpl implements AccountService {
     if (fullAccount) {
       EnrollmentServiceUtils.enableUser(uid, password, suInitPerson)
     } else {
-      logger.warn("createSuPerson - FullAccount attribute not set. PosixAccount entries will not be set and no AFS or KDC entries will be generated.")
-      logger.warn("createSuPerson - Password returned will be fake/dummy")
+      log.warn("createSuPerson - FullAccount attribute not set. PosixAccount entries will not be set and no AFS or KDC entries will be generated.")
+      log.warn("createSuPerson - Password returned will be fake/dummy")
     }
     //End call Perlscript to init user in kdc, afs and unixshell
 
-    logger.debug("createSuPerson - Updating standard attributes according to function argument object for uid<${uid}>")
+    log.debug("createSuPerson - Updating standard attributes according to function argument object for uid<${uid}>")
     updateSuPerson(uid,person,audit)
-    logger.info("createSuPerson - Uid<${uid}> created")
-    logger.debug("createSuPerson - Returning password for uid<${uid}>")
+    log.info("createSuPerson - Uid<${uid}> created")
+    log.debug("createSuPerson - Returning password for uid<${uid}>")
     return password
   }
 
@@ -239,11 +238,11 @@ public class AccountServiceImpl implements AccountService {
       throw new NotImplementedException("terminateSuPerson - This function is not yet implemented!")
       //TODO: terminatePerson.eduPersonAffiliation ["other"]
       //TODO: terminatePerson.eduPersonPrimaryAffiliation = "other"
-      //TODO: logger.debug("terminateSuPerson - Trying to terminate SuPerson uid<${terminatePerson.uid}>")
+      //TODO: log.debug("terminateSuPerson - Trying to terminate SuPerson uid<${terminatePerson.uid}>")
       //TODO: SuPersonQuery.saveSuPerson(terminatePerson)
       //TODO: Kadmin kadmin = Kadmin.newInstance()
       //TODO: kadmin.resetOrCreatePrincipal(uid);
-      //TODO: logger.info("terminateSuPerson - Terminated SuPerson uid<${terminatePerson.uid}>")
+      //TODO: log.info("terminateSuPerson - Terminated SuPerson uid<${terminatePerson.uid}>")
     } else {
       throw new IllegalArgumentException("terminateSuPerson - No such uid found: "+uid)
     }
@@ -298,7 +297,7 @@ public class AccountServiceImpl implements AccountService {
 
     suPerson.mailRoutingAddress = mailRoutingAddress
     SuPersonQuery.saveSuPerson(suPerson)
-    logger.debug("setMailRoutingAddress - Changed mailroutingaddress to <${mailRoutingAddress}> for uid <${uid}>")
+    log.debug("setMailRoutingAddress - Changed mailroutingaddress to <${mailRoutingAddress}> for uid <${uid}>")
   }
 
   /**
