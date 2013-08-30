@@ -177,8 +177,8 @@ class AccountServiceImplTest extends spock.lang.Specification {
     def ret = accountServiceImpl.resetPassword("testuid", new SvcAudit())
 
     then:
-    1* PasswordUtils.genRandomPassword(10, 10) >> "**********"
-    assert ret == "**********"
+    1* PasswordUtils.genRandomPassword(10, 10) >> "*" *10
+    assert ret == "*" *10
   }
 
   @Test

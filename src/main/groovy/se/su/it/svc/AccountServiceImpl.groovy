@@ -33,6 +33,7 @@ package se.su.it.svc
 
 import org.apache.commons.lang.NotImplementedException
 import org.apache.log4j.Logger
+import org.gcontracts.annotations.Ensures
 import org.gcontracts.annotations.Requires
 import se.su.it.commons.Kadmin
 import se.su.it.commons.PasswordUtils
@@ -101,6 +102,7 @@ public class AccountServiceImpl implements AccountService {
   @Requires({
     uid && audit
   })
+  @Ensures({ result && result instanceof String && result.size() == 10 })
   public String resetPassword(String uid, SvcAudit audit) {
     String trueUid = uid.replaceFirst("\\.", "/")
 
@@ -175,6 +177,7 @@ public class AccountServiceImpl implements AccountService {
             svcsuperson: person,
             audit: audit ])
   })
+  @Ensures({ result && result instanceof String && result.size() == 10 })
   public String createSuPerson(String uid, String domain, String nin, String givenName, String sn, SvcSuPersonVO person, boolean fullAccount, SvcAudit audit) {
     if(SuPersonQuery.getSuPersonFromUIDNoCache(GldapoManager.LDAP_RW, uid))
       throw new IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
@@ -260,6 +263,7 @@ public class AccountServiceImpl implements AccountService {
             uid: uid,
             audit: audit ])
   })
+  @Ensures({ result == null || result instanceof String})
   public String getMailRoutingAddress(String uid, SvcAudit audit) {
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
 
@@ -310,6 +314,7 @@ public class AccountServiceImpl implements AccountService {
             ssnornin: nin,
             audit: audit ])
   })
+  @Ensures({ result && result instanceof SvcSuPersonVO })
   public SvcSuPersonVO findSuPersonByNorEduPersonNIN(@WebParam(name = "norEduPersonNIN") String nin, SvcAudit audit) {
     SuPerson suPerson = SuPersonQuery.getSuPersonFromNin(GldapoManager.LDAP_RW, nin)
 
@@ -333,6 +338,7 @@ public class AccountServiceImpl implements AccountService {
             ssn: ssn,
             audit: audit ])
   })
+  @Ensures({ result && result instanceof SvcSuPersonVO })
   public SvcSuPersonVO findSuPersonBySocialSecurityNumber(@WebParam(name = "socialSecurityNumber") String ssn, SvcAudit audit) {
     ssn = GeneralUtils.pnrToSsn(ssn)
 
@@ -351,7 +357,7 @@ public class AccountServiceImpl implements AccountService {
     svcSuPersonVO.mail = new LinkedHashSet(suPerson.mail)
 
     /** The user has an account in SUKAT that is not a stub.*/
-    svcSuPersonVO.accountIsActive      = (suPerson?.objectClass?.contains('posixAccount'))?:false
+    svcSuPersonVO.accountIsActive = (suPerson?.objectClass?.contains('posixAccount'))?:false
 
     return svcSuPersonVO
   }
@@ -368,6 +374,7 @@ public class AccountServiceImpl implements AccountService {
             uid: uid,
             audit: audit ])
   })
+  @Ensures({ result && result instanceof SvcSuPersonVO })
   public SvcSuPersonVO findSuPersonByUid(String uid, SvcAudit audit) {
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
 
@@ -385,7 +392,7 @@ public class AccountServiceImpl implements AccountService {
     svcSuPersonVO.mail = new LinkedHashSet(suPerson.mail)
 
     /** The user has an account in SUKAT that is not a stub.*/
-    svcSuPersonVO.accountIsActive      = (suPerson?.objectClass?.contains('posixAccount'))?:false
+    svcSuPersonVO.accountIsActive = (suPerson?.objectClass?.contains('posixAccount'))?:false
 
     return svcSuPersonVO
   }
