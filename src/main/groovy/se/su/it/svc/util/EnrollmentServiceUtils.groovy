@@ -32,10 +32,11 @@
 package se.su.it.svc.util
 
 import groovy.util.logging.Slf4j
-import org.apache.log4j.Logger
 import se.su.it.commons.ExecUtils
+import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.ldap.SuEnrollPerson
 import se.su.it.svc.ldap.SuInitPerson
+import se.su.it.svc.manager.Properties
 import se.su.it.svc.query.SuPersonQuery
 
 import java.util.regex.Matcher
@@ -44,12 +45,22 @@ import java.util.regex.Pattern
 @Slf4j
 class EnrollmentServiceUtils {
 
+  public static final String AFS_HOME_DIR_BASE = "/afs/su.se/home/"
+
+  /**
+   * Enables the user through the 'enable-user.pl' script & saves the new data in SUKAT
+   *
+   * @param uid uid of the user to be enabled
+   * @param password the password
+   * @param person
+   * @return
+   */
   public static boolean enableUser(String uid, String password, Object person) {
 
     boolean error = false
     String uidNumber = ""
 
-    boolean skipCreate = (se.su.it.svc.manager.Properties.instance.props.enrollment.skipCreate == "true")
+    boolean skipCreate = Properties.instance.props.enrollment.skipCreate == "true"
 
     if (skipCreate) {
       log.warn "Skipping enable user since skipCreate is set to $skipCreate"
@@ -80,7 +91,7 @@ class EnrollmentServiceUtils {
       log.debug("enableUser - Writing posixAccount attributes to sukat for uid<${uid}>")
       person.objectClass.add("posixAccount")
       person.loginShell = "/usr/local/bin/bash"
-      person.homeDirectory = "/afs/su.se/home/" + uid.charAt(0) + "/" + uid.charAt(1) + "/" + uid
+      person.homeDirectory = getHomeDirectoryPath(uid)
       person.uidNumber = uidNumber
       person.gidNumber = "1200"
 
@@ -95,5 +106,16 @@ class EnrollmentServiceUtils {
     }
 
     return !error
+  }
+
+  /**
+   * Generate a homeDirectory path string from uid
+   *
+   * @param uid the uid to base the home directory on.
+   * @return homeDirectory absolute path or null if uid is null or empty
+   */
+  public static String getHomeDirectoryPath(String uid) {
+    def invalid = LdapAttributeValidator.validateAttributes(uid: uid)
+    invalid ? null : AFS_HOME_DIR_BASE + uid.charAt(0) + "/" + uid.charAt(1) + "/" + uid
   }
 }
