@@ -40,13 +40,13 @@ class GeneralUtilsSpec extends Specification {
   @Unroll
   void "pnrToSsn: When given pnr: '#pnr' we expect '#expected'"() {
     expect:
-    GeneralUtils.pnrToSsn(pnr)
+    GeneralUtils.pnrToSsn(pnr) == expected
 
     where:
-    pnr             | expected
-    '***********'   | '***********'   // 11 chars, nothing happens.
-    '++**********'  | '*********'     // 12 chars, first 2 chars should be cut.
-    '++***********' | '++***********' // 13 chars, nothing happens.
+    pnr           | expected
+    '_'*11        | '_'*11        // 11 chars, nothing happens.
+    '++' + '_'*10 | '_'*10        // 12 chars, first 2 chars should be cut.
+    '++' + '_'*11 | '++' + '_'*11 // 13 chars, nothing happens.
   }
 
   @Unroll
