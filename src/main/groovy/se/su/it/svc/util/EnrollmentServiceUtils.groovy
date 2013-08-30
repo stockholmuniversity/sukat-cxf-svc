@@ -34,10 +34,8 @@ package se.su.it.svc.util
 import groovy.util.logging.Slf4j
 import se.su.it.commons.ExecUtils
 import se.su.it.svc.commons.LdapAttributeValidator
-import se.su.it.svc.ldap.SuEnrollPerson
-import se.su.it.svc.ldap.SuInitPerson
+import se.su.it.svc.ldap.PosixAccount
 import se.su.it.svc.manager.Properties
-import se.su.it.svc.query.SuPersonQuery
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -83,7 +81,7 @@ class EnrollmentServiceUtils {
    * @param person a object to set attributes on.
    * @return true the operation succeeds, false if it fails.
    */
-  public static boolean enableUser(String uid, String password, Object person) {
+  public static boolean enableUser(String uid, String password, PosixAccount person) {
     boolean error = false
     String uidNumber
 
@@ -103,20 +101,13 @@ class EnrollmentServiceUtils {
     if (!error) {
       log.debug("enableUser - Perlscript success for uid<${uid}>")
       log.debug("enableUser - Writing posixAccount attributes to sukat for uid<${uid}>")
+
       person.objectClass.add("posixAccount")
       person.loginShell = SHELL_PATH
       person.homeDirectory = getHomeDirectoryPath(uid)
       person.uidNumber = uidNumber
       person.gidNumber = DEFAULT_USER_GID
-
-      if (person instanceof SuInitPerson) {
-        SuPersonQuery.saveSuInitPerson((SuInitPerson) person)
-      } else if (person instanceof SuEnrollPerson) {
-        SuPersonQuery.saveSuEnrollPerson((SuEnrollPerson) person)
-      } else {
-        log.error("enableUser - Could not figure out wich objectClass to use. Sukat posix attributes write failed")
-        error = true
-      }
+      person.save()
     }
 
     return !error

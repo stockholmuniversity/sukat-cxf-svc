@@ -32,10 +32,10 @@
 package se.su.it.svc.query
 
 import se.su.it.svc.ldap.SuEnrollPerson
-import se.su.it.svc.ldap.SuPerson
-import se.su.it.svc.manager.GldapoManager
-import se.su.it.svc.manager.EhCacheManager
 import se.su.it.svc.ldap.SuInitPerson
+import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.manager.EhCacheManager
+import se.su.it.svc.manager.GldapoManager
 
 /**
  * This class is a helper class for doing GLDAPO queries on the SuPerson GLDAPO schema.
@@ -292,17 +292,6 @@ public class SuPersonQuery {
   static void initSuEnrollPerson(String directory, SuEnrollPerson suEnrollPerson) {
     suEnrollPerson.directory = directory
     suEnrollPerson.save()
-  }
-
-  /**
-   * Save a SuInitPerson object to ldap.
-   *
-   * @return void.
-   * @see se.su.it.svc.ldap.SuInitPerson
-   * @see se.su.it.svc.manager.GldapoManager
-   */
-  static void saveSuInitPerson(SuInitPerson person) {
-    person.save()
   }
 
   /**
