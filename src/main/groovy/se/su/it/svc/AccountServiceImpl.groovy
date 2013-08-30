@@ -31,28 +31,23 @@
 
 package se.su.it.svc
 
+import org.apache.commons.lang.NotImplementedException
+import org.apache.log4j.Logger
+import se.su.it.commons.Kadmin
+import se.su.it.commons.PasswordUtils
 import se.su.it.svc.commons.LdapAttributeValidator
-import se.su.it.svc.manager.EhCacheManager
+import se.su.it.svc.commons.SvcAudit
+import se.su.it.svc.commons.SvcSuPersonVO
+import se.su.it.svc.ldap.SuInitPerson
+import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.manager.GldapoManager
+import se.su.it.svc.query.SuPersonQuery
+import se.su.it.svc.util.AccountServiceUtils
 import se.su.it.svc.util.EnrollmentServiceUtils
 import se.su.it.svc.util.GeneralUtils
 
-import javax.jws.WebService
-import org.apache.log4j.Logger
-import se.su.it.svc.commons.SvcAudit
 import javax.jws.WebParam
-import se.su.it.svc.manager.GldapoManager
-import se.su.it.svc.query.SuPersonQuery
-import se.su.it.svc.ldap.SuPerson
-import se.su.it.commons.Kadmin
-import se.su.it.commons.PasswordUtils
-import se.su.it.svc.audit.AuditAspectMethodDetails
-import se.su.it.svc.commons.SvcSuPersonVO
-import se.su.it.svc.ldap.SuInitPerson
-import se.su.it.svc.util.AccountServiceUtils
-import java.util.regex.Pattern
-import java.util.regex.Matcher
-import se.su.it.commons.ExecUtils
-import org.apache.commons.lang.NotImplementedException
+import javax.jws.WebService
 
 /**
  * Implementing class for AccountService CXF Web Service.
@@ -74,13 +69,6 @@ public class AccountServiceImpl implements AccountService{
    * @see se.su.it.svc.commons.SvcAudit
    */
   public void updatePrimaryAffiliation(@WebParam(name = "uid") String uid, @WebParam(name = "affiliation") String affiliation, @WebParam(name = "audit") SvcAudit audit) {
-    //if(uid == null || affiliation == null || audit == null)
-    //  throw new java.lang.IllegalArgumentException("updatePrimaryAffiliation - Null argument values not allowed in this function")
-    /*try {
-      LdapAttributeValidator.validateAttributes(["uid":uid,"eduPersonPrimaryAffiliation":affiliation,"audit":audit])
-    } catch (Exception ex) {
-      throw new java.lang.IllegalArgumentException("updatePrimaryAffiliation - " + ex.message)
-    } */
     String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,"eduPersonPrimaryAffiliation":affiliation,"audit":audit])
     if (attributeError)
       throw new java.lang.IllegalArgumentException("updatePrimaryAffiliation - ${attributeError}")
@@ -226,13 +214,13 @@ public class AccountServiceImpl implements AccountService{
       //TODO: Below is some code that might do the trick, but what about mail address and stuff
       //TODO: For now we cast exception to notify clients.
       throw new NotImplementedException("terminateSuPerson - This function is not yet implemented!")
-      //terminatePerson.eduPersonAffiliation ["other"]
-      //terminatePerson.eduPersonPrimaryAffiliation = "other"
-      //logger.debug("terminateSuPerson - Trying to terminate SuPerson uid<${terminatePerson.uid}>")
-      //SuPersonQuery.saveSuPerson(terminatePerson)
-      //Kadmin kadmin = Kadmin.newInstance()
-      //kadmin.resetOrCreatePrincipal(uid);
-      //logger.info("terminateSuPerson - Terminated SuPerson uid<${terminatePerson.uid}>")
+      //TODO: terminatePerson.eduPersonAffiliation ["other"]
+      //TODO: terminatePerson.eduPersonPrimaryAffiliation = "other"
+      //TODO: logger.debug("terminateSuPerson - Trying to terminate SuPerson uid<${terminatePerson.uid}>")
+      //TODO: SuPersonQuery.saveSuPerson(terminatePerson)
+      //TODO: Kadmin kadmin = Kadmin.newInstance()
+      //TODO: kadmin.resetOrCreatePrincipal(uid);
+      //TODO: logger.info("terminateSuPerson - Terminated SuPerson uid<${terminatePerson.uid}>")
     } else {
       throw new IllegalArgumentException("terminateSuPerson - No such uid found: "+uid)
     }
