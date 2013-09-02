@@ -33,22 +33,21 @@ package se.su.it.svc
 
 import org.apache.commons.collections.Predicate
 import org.apache.log4j.Logger
+import se.su.it.commons.Kadmin
 import se.su.it.commons.PasswordUtils
 import se.su.it.commons.PrincipalUtils
 import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuEnrollPerson
+import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.manager.GldapoManager
+import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.util.AccountServiceUtils
 import se.su.it.svc.util.EnrollmentServiceUtils
 import se.su.it.svc.util.GeneralUtils
 
 import javax.jws.WebService
-import javax.jws.WebParam
-import se.su.it.svc.ldap.SuPerson
-import se.su.it.svc.query.SuPersonQuery
-import se.su.it.svc.manager.GldapoManager
-import se.su.it.commons.Kadmin
 
 /**
  * Implementing class for EnrollmentService CXF Web Service.
@@ -68,7 +67,7 @@ class EnrollmentServiceImpl implements EnrollmentService{
    * @return String with temporary password.
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public String resetAndExpirePwd(@WebParam(name = "uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
+  public String resetAndExpirePwd(String uid, SvcAudit audit) {
     if(uid == null || audit == null)
       throw new IllegalArgumentException("resetAndExpirePwd - Null argument values not allowed in this function")
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
@@ -96,13 +95,13 @@ class EnrollmentServiceImpl implements EnrollmentService{
    * @see se.su.it.svc.commons.SvcAudit
    */
   public SvcUidPwd enrollUserWithMailRoutingAddress(
-      @WebParam(name = "domain") String domain,
-      @WebParam(name = "givenName") String givenName,
-      @WebParam(name = "sn") String sn,
-      @WebParam(name = "eduPersonPrimaryAffiliation") String eduPersonPrimaryAffiliation,
-      @WebParam(name = "nin") String nin,
-      @WebParam(name = "mailRoutingAddress") String mailRoutingAddress,
-      @WebParam(name = "audit") SvcAudit audit) {
+      String domain,
+      String givenName,
+      String sn,
+      String eduPersonPrimaryAffiliation,
+      String nin,
+      String mailRoutingAddress,
+      SvcAudit audit) {
 
     /** Config value set in config.properties to allow for mocking out user creation */
 
@@ -139,7 +138,13 @@ class EnrollmentServiceImpl implements EnrollmentService{
    * @return SvcUidPwd  object with the uid and password.
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public SvcUidPwd enrollUser(@WebParam(name = "domain") String domain, @WebParam(name = "givenName") String givenName, @WebParam(name = "sn") String sn, @WebParam(name = "eduPersonPrimaryAffiliation") String eduPersonPrimaryAffiliation, @WebParam(name = "nin") String nin, @WebParam(name = "audit") SvcAudit audit) {
+  public SvcUidPwd enrollUser(
+          String domain,
+          String givenName,
+          String sn,
+          String eduPersonPrimaryAffiliation,
+          String nin,
+          SvcAudit audit) {
 
     /** Config value set in config.properties to allow for mocking out user creation */
 
