@@ -89,58 +89,6 @@ public class SuPersonQuery {
   }
 
   /**
-   * Returns a SuInitPerson object, specified by the parameter nin.
-   *
-   *
-   * @param directory which directory to use, see GldapoManager.
-   * @param nin  the nin (12 digit social security number) for the user that you want to find.
-   * @return an <code><SuPerson></code> or null.
-   * @see se.su.it.svc.ldap.SuInitPerson
-   * @see se.su.it.svc.manager.GldapoManager
-   */
-  static SuInitPerson getSuInitPersonFromNin(String directory, String nin) {
-    def query = { qDirectory, qNin ->
-      SuInitPerson.find(directory: qDirectory, base: "") {
-        and {
-          eq("norEduPersonNIN", qNin)
-          eq("objectclass", "person")
-        }
-      }
-    }
-
-    def params = [key: ":getSuInitPersonFromNin:${nin}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
-    def suInitPerson = (SuInitPerson) cacheManager.get(params, { query(directory, nin) })
-
-    return suInitPerson
-  }
-
-  /**
-   * Returns a SuInitPerson object, specified by the parameter ssn.
-   *
-   *
-   * @param directory which directory to use, see GldapoManager.
-   * @param ssn  the ssn (social security number) for the user that you want to find.
-   * @return an <code><SuPerson></code> or null.
-   * @see se.su.it.svc.ldap.SuInitPerson
-   * @see se.su.it.svc.manager.GldapoManager
-   */
-  static SuInitPerson getSuInitPersonFromSsn(String directory, String ssn) {
-    def query = { qDirectory, qSsn ->
-      SuInitPerson.find(directory: qDirectory, base: "") {
-        and {
-          eq("socialSecurityNumber", qSsn)
-          eq("objectclass", "person")
-        }
-      }
-    }
-
-    def params = [key: ":getSuInitPersonFromSsn:${ssn}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
-    def suInitPerson = (SuInitPerson) cacheManager.get(params, { query(directory, ssn) })
-
-    return suInitPerson
-  }
-
-  /**
    * Returns a SuPerson object, specified by the parameter ssn.
    *
    * @param directory which directory to use, see GldapoManager.
