@@ -80,19 +80,12 @@ public class SuPersonQuery {
    * @see se.su.it.svc.manager.GldapoManager
    */
   static SuPerson getSuPersonFromNin(String directory, String nin) {
-    def query = { qDirectory, qNin ->
-      SuPerson.find(directory: qDirectory, base: "") {
-        and {
-          eq("norEduPersonNIN", qNin)
-          eq("objectclass", "suPerson")
-        }
+    return SuPerson.find(directory: directory, base: "") {
+      and {
+        eq("norEduPersonNIN", nin)
+        eq("objectclass", "suPerson")
       }
     }
-
-    def params = [key: ":getSuPersonFromNin:${nin}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
-    def suPerson = (SuPerson) cacheManager.get(params, { query(directory, nin) })
-
-    return suPerson
   }
 
   /**
