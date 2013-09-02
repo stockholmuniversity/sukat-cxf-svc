@@ -142,16 +142,6 @@ class EnrollmentServiceImpl implements EnrollmentService {
    * @return SvcUidPwd  object with the uid and password.
    * @see se.su.it.svc.commons.SvcAudit
    */
-  @Requires({
-    ! LdapAttributeValidator.validateAttributes([
-            ssnornin: nin,
-            domain: domain,
-            givenName: givenName,
-            sn: sn,
-            eduPersonPrimaryAffiliation: eduPersonPrimaryAffiliation,
-            audit: audit])
-  })
-  @Ensures({ result && result.uid && result.password && result.password.size() == 10 })
   public SvcUidPwd enrollUser(
           String domain,
           String givenName,
@@ -159,21 +149,7 @@ class EnrollmentServiceImpl implements EnrollmentService {
           String eduPersonPrimaryAffiliation,
           String nin,
           SvcAudit audit) {
-
-    /** Config value set in config.properties to allow for mocking out user creation */
-
-    SvcUidPwd svcUidPwd = new SvcUidPwd()
-    svcUidPwd.password = PasswordUtils.genRandomPassword(10, 10)
-
-    SuEnrollPerson suEnrollPerson = EnrollmentServiceUtils.findEnrollPerson(nin)
-
-    if (suEnrollPerson) {
-      EnrollmentServiceUtils.handleExistingUser(nin, suEnrollPerson, svcUidPwd, eduPersonPrimaryAffiliation, domain, null)
-    } else {
-      /** User not found in SUKAT, create user now */
-      EnrollmentServiceUtils.handleNewUser(nin, givenName, sn, svcUidPwd, eduPersonPrimaryAffiliation, domain, null)
-    }
-
-    return svcUidPwd
+    // Run existing almost identical method.
+    return enrollUserWithMailRoutingAddress(domain, givenName, sn, eduPersonPrimaryAffiliation, nin, null, audit)
   }
 }
