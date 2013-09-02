@@ -31,28 +31,23 @@
 
 package se.su.it.svc
 
+import org.apache.commons.lang.NotImplementedException
+import org.apache.log4j.Logger
+import se.su.it.commons.Kadmin
+import se.su.it.commons.PasswordUtils
 import se.su.it.svc.commons.LdapAttributeValidator
-import se.su.it.svc.manager.EhCacheManager
+import se.su.it.svc.commons.SvcAudit
+import se.su.it.svc.commons.SvcSuPersonVO
+import se.su.it.svc.ldap.SuInitPerson
+import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.manager.GldapoManager
+import se.su.it.svc.query.SuPersonQuery
+import se.su.it.svc.util.AccountServiceUtils
 import se.su.it.svc.util.EnrollmentServiceUtils
 import se.su.it.svc.util.GeneralUtils
 
-import javax.jws.WebService
-import org.apache.log4j.Logger
-import se.su.it.svc.commons.SvcAudit
 import javax.jws.WebParam
-import se.su.it.svc.manager.GldapoManager
-import se.su.it.svc.query.SuPersonQuery
-import se.su.it.svc.ldap.SuPerson
-import se.su.it.commons.Kadmin
-import se.su.it.commons.PasswordUtils
-import se.su.it.svc.audit.AuditAspectMethodDetails
-import se.su.it.svc.commons.SvcSuPersonVO
-import se.su.it.svc.ldap.SuInitPerson
-import se.su.it.svc.util.AccountServiceUtils
-import java.util.regex.Pattern
-import java.util.regex.Matcher
-import se.su.it.commons.ExecUtils
-import org.apache.commons.lang.NotImplementedException
+import javax.jws.WebService
 
 /**
  * Implementing class for AccountService CXF Web Service.
@@ -108,7 +103,7 @@ public class AccountServiceImpl implements AccountService{
   public String resetPassword(@WebParam(name = "uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
     if (uid == null || audit == null)
       throw new java.lang.IllegalArgumentException("resetPassword - Null argument values not allowed in this function")
-    String trueUid = uid.replaceFirst("\\.", "/")
+    String trueUid = GeneralUtils.uidToKrb5Principal(uid)
     if (Kadmin.newInstance().principalExists(trueUid)) {
       logger.debug("resetPassword - Trying to reset password for uid=<${uid}>")
       String pwd = PasswordUtils.genRandomPassword(10, 10)

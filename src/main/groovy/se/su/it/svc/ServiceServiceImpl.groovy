@@ -31,21 +31,22 @@
 
 package se.su.it.svc
 
-import javax.jws.WebService
 import org.apache.log4j.Logger
-import javax.jws.WebParam
-import se.su.it.svc.commons.SvcAudit
-import se.su.it.svc.ldap.SuService
-import se.su.it.svc.manager.GldapoManager
-import se.su.it.svc.ldap.SuPerson
-import se.su.it.svc.query.SuPersonQuery
-import se.su.it.svc.query.SuServiceQuery
-import se.su.it.svc.ldap.SuServiceDescription
-import se.su.it.svc.query.SuServiceDescriptionQuery
-import se.su.it.svc.ldap.SuSubAccount
-import se.su.it.svc.query.SuSubAccountQuery
 import se.su.it.commons.Kadmin
-import javax.naming.OperationNotSupportedException
+import se.su.it.svc.commons.SvcAudit
+import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.ldap.SuService
+import se.su.it.svc.ldap.SuServiceDescription
+import se.su.it.svc.ldap.SuSubAccount
+import se.su.it.svc.manager.GldapoManager
+import se.su.it.svc.query.SuPersonQuery
+import se.su.it.svc.query.SuServiceDescriptionQuery
+import se.su.it.svc.query.SuServiceQuery
+import se.su.it.svc.query.SuSubAccountQuery
+import se.su.it.svc.util.GeneralUtils
+
+import javax.jws.WebParam
+import javax.jws.WebService
 
 /**
  * Implementing class for ServiceService CXF Web Service.
@@ -149,7 +150,7 @@ public class ServiceServiceImpl implements ServiceService {
           subAcc.jabberID = uid + "@su.se"
         }
         SuSubAccountQuery.createSubAccount(GldapoManager.LDAP_RW, subAcc)
-        def subAccountPwd = Kadmin.newInstance().resetOrCreatePrincipal(subUid.replaceFirst("\\.", "/"))
+        def subAccountPwd = Kadmin.newInstance().resetOrCreatePrincipal(GeneralUtils.uidToKrb5Principal(subUid))
         logger.info("enableServiceFully - Created sub account uid=<${subUid}> to be used by service=<${serviceType}> for uid=<${uid}>")
       } else {
         logger.info("enableServiceFully - Sub account uid=<${subUid}> to be used by service=<${serviceType}> for uid=<${uid}> already exist. Using it.")
