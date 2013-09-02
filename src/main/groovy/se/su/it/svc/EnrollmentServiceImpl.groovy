@@ -43,6 +43,7 @@ import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.manager.GldapoManager
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.util.EnrollmentServiceUtils
+import se.su.it.svc.util.GeneralUtils
 
 import javax.jws.WebService
 
@@ -69,8 +70,9 @@ class EnrollmentServiceImpl implements EnrollmentService {
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
 
     if(person) {
-      String pwd = Kadmin.newInstance().resetOrCreatePrincipal(uid.replaceFirst("\\.", "/"))
-      Kadmin.newInstance().setPasswordExpiry(uid.replaceFirst("\\.", "/"), new Date())
+      String principal = GeneralUtils.uidToKrb5Principal(uid)
+      String pwd = Kadmin.newInstance().resetOrCreatePrincipal(principal)
+      Kadmin.newInstance().setPasswordExpiry(principal, new Date())
       return pwd
     } else {
       throw new IllegalArgumentException("resetAndExpirePwd - no such uid found: "+uid)
