@@ -29,24 +29,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.junit.Before
+
+
+import gldapo.GldapoSchemaRegistry
+import org.gcontracts.PreconditionViolation
 import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import se.su.it.commons.Kadmin
 import se.su.it.commons.PasswordUtils
-import se.su.it.svc.commons.LdapAttributeValidator
+import se.su.it.svc.EnrollmentServiceImpl
 import se.su.it.svc.commons.SvcAudit
-import gldapo.GldapoSchemaRegistry
 import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuEnrollPerson
-import se.su.it.svc.query.SuPersonQuery
-import se.su.it.svc.EnrollmentServiceImpl
 import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.util.EnrollmentServiceUtils
-import spock.lang.IgnoreRest
 import spock.lang.Shared
 import spock.lang.Specification
-import spock.lang.Unroll
 
 /**
  * Created with IntelliJ IDEA.
@@ -67,6 +67,8 @@ class EnrollmentServiceImplTest extends Specification {
   @After
   def cleanup() {
     this.service = null
+    EnrollmentServiceImpl.metaClass = null
+    EnrollmentServiceUtils.metaClass = null
   }
 
   @Test
@@ -76,7 +78,7 @@ class EnrollmentServiceImplTest extends Specification {
     when:
     enrollmentServiceImpl.resetAndExpirePwd(null, new SvcAudit())
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -86,7 +88,7 @@ class EnrollmentServiceImplTest extends Specification {
     when:
     enrollmentServiceImpl.resetAndExpirePwd("testuid", null)
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -135,7 +137,7 @@ class EnrollmentServiceImplTest extends Specification {
     service.resetAndExpirePwd(uid, audit)
 
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -148,7 +150,7 @@ class EnrollmentServiceImplTest extends Specification {
     service.resetAndExpirePwd(uid, audit)
 
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -172,26 +174,39 @@ class EnrollmentServiceImplTest extends Specification {
     service.enrollUserWithMailRoutingAddress("domain", "givenName", "sn", "affiliation", "nin", "mailRoutingAddress", new SvcAudit())
 
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
   def "enrollUserWithMailRoutingAddress: test when user exists in LDAP, should handle user and return new password"() {
     given:
-    SuPersonQuery.metaClass.static.getSuEnrollPersonFromSsn = {
-      String directory,String nin ->
-        def enrollPerson = new SuEnrollPerson()
-        enrollPerson.objectClass = []
-        return enrollPerson
+    def nin_ = '0' *12
+    boolean existingCalled = false
+    EnrollmentServiceUtils.metaClass.static.findEnrollPerson = { String nin -> new SuEnrollPerson() }
+
+    EnrollmentServiceUtils.metaClass.static.handleExistingUser = { String nin,
+                                         SuEnrollPerson suEnrollPerson,
+                                         SvcUidPwd svcUidPwd,
+                                         String eduPersonPrimaryAffiliation,
+                                         String domain,
+                                         String mailRoutingAddress ->
+      svcUidPwd.uid = "foo"
+      existingCalled = true
     }
-    SuPersonQuery.metaClass.static.saveSuEnrollPerson = {SuEnrollPerson person -> return null}
-    EnrollmentServiceUtils.metaClass.static.enableUser = {String uid, String password, Object o -> return true}
 
     when:
-    def password = service.enrollUserWithMailRoutingAddress("student.su.se", "test", "testsson", "other", "1000000000", "a@b.com", new SvcAudit())
+    def password = service.enrollUserWithMailRoutingAddress(
+            "student.su.se",
+            "test",
+            "testsson",
+            "other",
+            nin_,
+            "a@b.com",
+            new SvcAudit())
 
     then:
-    assert password
+    existingCalled
+    password
   }
 
   @Test
@@ -222,7 +237,7 @@ class EnrollmentServiceImplTest extends Specification {
     enrollmentServiceImpl.enrollUser(null,"test","testsson","other","100000000000", new SvcAudit())
 
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -234,7 +249,7 @@ class EnrollmentServiceImplTest extends Specification {
     enrollmentServiceImpl.enrollUser("student.su.se",null,"testsson","other","100000000000", new SvcAudit())
 
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -246,7 +261,7 @@ class EnrollmentServiceImplTest extends Specification {
     enrollmentServiceImpl.enrollUser("student.su.se","test",null,"other","100000000000", new SvcAudit())
 
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -258,7 +273,7 @@ class EnrollmentServiceImplTest extends Specification {
     enrollmentServiceImpl.enrollUser("student.su.se","test","testsson",null,"100000000000", new SvcAudit())
 
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -270,7 +285,7 @@ class EnrollmentServiceImplTest extends Specification {
     enrollmentServiceImpl.enrollUser("student.su.se","test","testsson","other",null, new SvcAudit())
 
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -282,7 +297,7 @@ class EnrollmentServiceImplTest extends Specification {
     enrollmentServiceImpl.enrollUser("student.su.se","test","testsson","other","100000000000", null)
 
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -294,7 +309,7 @@ class EnrollmentServiceImplTest extends Specification {
     enrollmentServiceImpl.enrollUser("student.su.se","test","testsson","other","100000", new SvcAudit())
 
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   @Test
@@ -377,6 +392,7 @@ class EnrollmentServiceImplTest extends Specification {
   @Test
   def "Test enrollUser Happy Path"() {
     setup:
+    def pass = '*' *10
     int p1=0
     int p2=0
     SuEnrollPerson suEnrollPerson = new SuEnrollPerson(uid: "testuid")
@@ -386,7 +402,7 @@ class EnrollmentServiceImplTest extends Specification {
     SuPersonQuery.metaClass.static.getSuEnrollPersonFromSsn = {String directory,String nin -> return suEnrollPerson }
     SuPersonQuery.metaClass.static.saveSuEnrollPerson = {SuEnrollPerson sip -> return null}
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> new SuPerson(eduPersonPrimaryAffiliation: "kalle") }
-    PasswordUtils.metaClass.static.genRandomPassword = {int a, int b -> p1 = a; p2 = b; return "hacker"}
+    PasswordUtils.metaClass.static.genRandomPassword = {int a, int b -> p1 = a; p2 = b; return pass}
     EnrollmentServiceUtils.metaClass.static.enableUser = {String uid, String password, Object o -> return true}
 
     def enrollmentServiceImpl = new EnrollmentServiceImpl()
@@ -396,7 +412,7 @@ class EnrollmentServiceImplTest extends Specification {
 
     then:
     ret.uid == "testuid"
-    ret.password == "hacker"
+    ret.password == pass
     p1 == 10
     p2 == 10
   }
@@ -404,7 +420,7 @@ class EnrollmentServiceImplTest extends Specification {
   @Test
   def "Test enrollUser with skipCreate"() {
     setup:
-
+    def pass = '*' *10
     /** needs to be fully qualified or java Properties will be chosen by default. */
 
 
@@ -425,7 +441,7 @@ class EnrollmentServiceImplTest extends Specification {
     SuPersonQuery.metaClass.static.getSuEnrollPersonFromSsn = {String directory,String nin -> return suEnrollPerson }
     SuPersonQuery.metaClass.static.saveSuEnrollPerson = {SuEnrollPerson sip -> return null}
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> new SuPerson(eduPersonPrimaryAffiliation: "kalle") }
-    PasswordUtils.metaClass.static.genRandomPassword = {int a, int b -> p1 = a; p2 = b; return "hacker"}
+    PasswordUtils.metaClass.static.genRandomPassword = {int a, int b -> p1 = a; p2 = b; return pass}
     EnrollmentServiceUtils.metaClass.static.enableUser = {String uid, String password, Object o -> return true}
 
     def enrollmentServiceImpl = new EnrollmentServiceImpl()
@@ -435,73 +451,8 @@ class EnrollmentServiceImplTest extends Specification {
 
     then:
     ret.uid == "testuid"
-    ret.password == "hacker"
+    ret.password == pass
     p1 == 10
     p2 == 10
   }
-
-  @Test @Unroll
-  def "setNin when nin => #nin"() {
-    given:
-    def person = new SuEnrollPerson()
-    person.objectClass = []
-
-    when:
-    service.setNin(nin, person)
-
-    then: '01 gets cut from case 2, the others are untouched.'
-    person.socialSecurityNumber == expected
-
-    where:
-    nin << ['abc', '0123456789AB', '0123456789ABC']
-    expected << ['abc', '23456789AB', '0123456789ABC']
-  }
-
-  @Test
-  def "setPrimaryAffiliation: Test adding new primary affiliation"() {
-    given:
-    def person = new SuEnrollPerson()
-    def affiliation = 'kaka'
-    person.eduPersonPrimaryAffiliation = affiliation
-    person.eduPersonAffiliation = new TreeSet()
-    person.eduPersonAffiliation.add(affiliation)
-    String newPrimaryAffiliation = 'foo'
-
-    when:
-    service.setPrimaryAffiliation(newPrimaryAffiliation, person)
-
-    then:
-    person.eduPersonPrimaryAffiliation == newPrimaryAffiliation
-    person.eduPersonAffiliation.contains(newPrimaryAffiliation)
-  }
-
-  @Test
-  def "setPrimaryAffiliation: when no affiliations exists"() {
-    given:
-    def person = new SuEnrollPerson()
-    String newPrimaryAffiliation = 'foo'
-
-    when:
-    service.setPrimaryAffiliation(newPrimaryAffiliation, person)
-
-    then:
-    person.eduPersonPrimaryAffiliation == newPrimaryAffiliation
-    person.eduPersonAffiliation.contains(newPrimaryAffiliation)
-  }
-
-  @Test
-  def "setMailAttributes: When adding a second mailLocalAddress"() {
-    given:
-    def person = new SuEnrollPerson()
-    person.mailLocalAddress = new TreeSet()
-    person.mailLocalAddress.add('kaka@kaka.se')
-    person.uid = 'foo'
-
-    when:
-    service.setMailAttributes(person, 'kaka.se')
-
-    then:
-    person.mailLocalAddress.contains('foo@kaka.se')
-  }
-
 }
