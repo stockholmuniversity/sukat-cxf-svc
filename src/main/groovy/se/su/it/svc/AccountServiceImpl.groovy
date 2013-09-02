@@ -193,8 +193,8 @@ public class AccountServiceImpl implements AccountService {
             norEduPersonNIN: nin,
             eduPersonPrincipalName: GeneralUtils.uidToPrincipal(uid),
             objectClass: ["suPerson","sSNObject","norEduPerson","eduPerson","inetLocalMailRecipient","inetOrgPerson","organizationalPerson","person","top"],
-            parent: AccountServiceUtils.domainToDN(domain)
     )
+    suInitPerson.parent = AccountServiceUtils.domainToDN(domain)
 
     log.debug("createSuPerson - Writing initial sukat record to sukat for uid<${uid}>")
     SuPersonQuery.initSuPerson(GldapoManager.LDAP_RW, suInitPerson)

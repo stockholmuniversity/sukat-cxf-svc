@@ -30,6 +30,7 @@
  */
 
 
+
 import gldapo.GldapoSchemaRegistry
 import org.apache.commons.lang.NotImplementedException
 import org.gcontracts.PreconditionViolation
@@ -41,10 +42,12 @@ import se.su.it.commons.PasswordUtils
 import se.su.it.svc.AccountServiceImpl
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcSuPersonVO
+import se.su.it.svc.ldap.PosixAccount
 import se.su.it.svc.ldap.SuInitPerson
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.query.SuPersonQuery
-import spock.lang.Ignore
+import se.su.it.svc.util.EnrollmentServiceUtils
+import se.su.it.svc.util.GeneralUtils
 
 /**
  * Created with IntelliJ IDEA.
@@ -376,47 +379,85 @@ class AccountServiceImplTest extends spock.lang.Specification {
   }
 
   @Test
-  @Ignore //TODO: Rebuild this test into smaller parts.
-  def "Test createSuPerson true flow"() {
-    setup:
-    SuInitPerson person1
-    SuInitPerson person2
-    String script
-    String[] argArray
-    boolean updatePersArgsOk = false
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
-    SuInitPerson.metaClass.parent = "stuts"
-    SuPersonQuery.metaClass.static.getSuPersonFromUIDNoCache = {String directory,String uid -> return null }
-    SuPersonQuery.metaClass.static.initSuPerson = {String directory, SuInitPerson tmpPerson -> person1 = tmpPerson}
-    PasswordUtils.metaClass.static.genRandomPassword = {int a, int b -> return "secretpwd"}
-    ExecUtils.metaClass.static.exec = {String tmpScript, String[] tmpArgArray -> script = tmpScript; argArray = tmpArgArray; return "OK (uidnumber:245234)"}
-    SuPersonQuery.metaClass.static.saveSuInitPerson = {SuInitPerson tmpPerson2 -> person2 = tmpPerson2}
-    def accountServiceImpl = Spy(AccountServiceImpl)
-    accountServiceImpl.updateSuPerson(*_) >> {String uid, SvcSuPersonVO person,SvcAudit audit -> if(uid == "testtest") updatePersArgsOk = true}
+  def "Test createSuPerson generates correct password"() {
+  setup:
+    def pass = '*' *10
+
+
+    SuInitPerson.metaClass.parent = "_"
+    GroovyMock(EnrollmentServiceUtils, global: true)
+    GroovyMock(PasswordUtils, global: true)
+    GroovyMock(SuPersonQuery, global: true)
+    def spy = Spy(AccountServiceImpl) {
+      updateSuPerson(_, _, _) >> {}
+    }
+
+    SuPersonQuery.getSuPersonFromUID(*_) >> null
 
     when:
-    def pwd = accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), true, new SvcAudit())
+    def pwd = spy.createSuPerson(
+            "testtest",
+            "it.su.se",
+            "196601010357",
+            "Test",
+            "Testsson",
+            new SvcSuPersonVO(),
+            false,
+            new SvcAudit())
 
     then:
-    pwd == "secretpwd"
-    person1.uid == "testtest"
-    person1.cn == "Test Testsson"
-    person1.sn == "Testsson"
-    person1.givenName == "Test"
-    person1.norEduPersonNIN == "196601010357"
-    person1.eduPersonPrincipalName == "testtest@su.se"
-    person1.objectClass.containsAll(["suPerson","sSNObject","norEduPerson","eduPerson","inetOrgPerson","organizationalPerson","person","top"])
-    person1.parent == "dc=it,dc=su,dc=se"
+    1 * PasswordUtils.genRandomPassword(*_) >> pass
+    pwd.size() == 10
+  }
 
-    person2.objectClass.contains("posixAccount")
-    person2.loginShell == "/usr/local/bin/bash"
-    person2.homeDirectory == "/afs/su.se/home/t/e/testtest"
-    person2.uidNumber == "245234"
-    person2.gidNumber == "1200"
+  @Test
+  def "Test createSuPerson true flow"() {
+    setup:
+    def uid = 'uid'
+    def domain = 'it.su.se'
+    def nin = '000000000000'
+    def givenName = 'Test'
+    def sn = 'Testsson'
+    def person = new SvcSuPersonVO()
+    boolean fullAccount = true
+    def initPersson = null
+    boolean updateOk = false
 
-    script == "/local/scriptbox/bin/run-token-script.sh"
-    argArray.toList().containsAll(["--user", "uadminw", "/local/sukat/libexec/enable-user.pl", "--uid", "testtest", "--password", "secretpwd", "--gidnumber", "1200"])
-    updatePersArgsOk == true
+    SuInitPerson.metaClass.parent = "_"
+    GroovyMock(EnrollmentServiceUtils, global: true)
+    GroovyMock(PasswordUtils, global: true)
+    GroovyMock(SuPersonQuery, global: true)
+
+    EnrollmentServiceUtils.enableUser(*_) >> { String uid_, String pass, PosixAccount posixAccount -> initPersson = posixAccount }
+
+    SuPersonQuery.getSuPersonFromUID(*_) >> null
+    PasswordUtils.genRandomPassword(*_) >> '*' * 10
+
+    def spy = Spy(AccountServiceImpl) {
+      1* updateSuPerson(uid, person, _) >> { updateOk = true }
+    }
+
+    when:
+    spy.createSuPerson(
+            uid,
+            domain,
+            nin,
+            givenName,
+            sn,
+            person,
+            fullAccount,
+            new SvcAudit())
+
+    then:
+    updateOk
+    initPersson.uid == uid
+    initPersson.cn == givenName + ' ' + sn
+    initPersson.sn == sn
+    initPersson.givenName == givenName
+    initPersson.norEduPersonNIN == nin
+    initPersson.eduPersonPrincipalName == uid + GeneralUtils.SU_SE_SCOPE
+    initPersson.objectClass.containsAll(["suPerson","sSNObject","norEduPerson","eduPerson","inetOrgPerson","organizationalPerson","person","top"])
+    initPersson.parent == "dc=it,dc=su,dc=se"
   }
 
   @Test
