@@ -98,21 +98,14 @@ public class SuPersonQuery {
    * @see se.su.it.svc.manager.GldapoManager
    */
   static SuPerson getSuPersonFromSsn(String directory, String ssn) {
-    def query = { qDirectory, qSsn ->
-      SuPerson.find(directory: qDirectory, base: "") {
-        and {
-          eq("socialSecurityNumber", qSsn)
-          eq("objectclass", "person")
-        }
+    return SuPerson.find(directory: directory, base: "") {
+      and {
+        eq("socialSecurityNumber", ssn)
+        eq("objectclass", "person")
       }
     }
-
-    def params = [key: ":getSuPersonFromSsn:${ssn}", ttl: cacheManager.DEFAULT_TTL,
-        cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
-    def suPerson = (SuPerson) cacheManager.get(params, { query(directory, ssn) })
-
-    return suPerson
   }
+
   /**
    * Returns a SuEnrollPerson object, specified by the parameter nin.
    *
