@@ -180,7 +180,7 @@ public class AccountServiceImpl implements AccountService {
   })
   @Ensures({ result && result instanceof String && result.size() == 10 })
   public String createSuPerson(String uid, String domain, String nin, String givenName, String sn, SvcSuPersonVO person, boolean fullAccount, SvcAudit audit) {
-    if(SuPersonQuery.getSuPersonFromUIDNoCache(GldapoManager.LDAP_RW, uid))
+    if(SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid))
       throw new IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
 
     //Begin init entry in sukat

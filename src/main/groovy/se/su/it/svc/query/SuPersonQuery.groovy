@@ -61,19 +61,12 @@ public class SuPersonQuery {
    * @see se.su.it.svc.manager.GldapoManager
    */
   static SuPerson getSuPersonFromUID(String directory, String uid) {
-    def query = { qDirectory, qUid ->
-      SuPerson.find(directory: qDirectory, base: "") {
-        and {
-          eq("uid", qUid)
-          eq("objectclass", "suPerson")
-        }
+    return SuPerson.find(directory: directory, base: "") {
+      and {
+        eq("uid", uid)
+        eq("objectclass", "suPerson")
       }
     }
-
-    def params = [key: ":getSuPersonFromUID:${uid}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
-    def suPerson = (SuPerson) cacheManager.get(params, { query(directory, uid) })
-
-    return suPerson
   }
 
   /**
@@ -232,25 +225,6 @@ public class SuPersonQuery {
   }
 
   /**
-   * Returns a non-cached SuPerson object, specified by the parameter uid.
-   *
-   *
-   * @param directory which directory to use, see GldapoManager.
-   * @param uid  the uid (user id) for the user that you want to find.
-   * @return an <code><SuPerson></code> or null.
-   * @see se.su.it.svc.ldap.SuPerson
-   * @see se.su.it.svc.manager.GldapoManager
-   */
-  static SuPerson getSuPersonFromUIDNoCache(String directory, String uid) {
-    return SuPerson.find(directory: directory, base: "") {
-      and {
-        eq("uid", uid)
-        eq("objectclass", "suPerson")
-      }
-    }
-  }
-
-  /**
    * Save a SuPerson object to ldap.
    * and putting the changed object in the cache so that the objects returned by this svc is always up-to-date.
    *
@@ -260,8 +234,6 @@ public class SuPersonQuery {
    */
   static void saveSuPerson(SuPerson person) {
     person.save()
-    def params = [key: ":getSuPersonFromUID:${person.uid}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: false]
-    cacheManager.put(params, { person })
   }
 
   /**
