@@ -5,6 +5,7 @@ import org.junit.Before
 import org.junit.Test
 import se.su.it.commons.ExecUtils
 import se.su.it.svc.ldap.SuEnrollPerson
+import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.manager.Properties
 import spock.lang.Shared
 import spock.lang.Specification
@@ -126,7 +127,7 @@ class EnrollmentServiceUtilsSpec extends Specification {
   @Test
   def "setPrimaryAffiliation: Test adding new primary affiliation"() {
     given:
-    def person = new SuEnrollPerson()
+    def person = new SuPerson()
     def affiliation = 'kaka'
     person.eduPersonPrimaryAffiliation = affiliation
     person.eduPersonAffiliation = new TreeSet()
@@ -144,7 +145,7 @@ class EnrollmentServiceUtilsSpec extends Specification {
   @Test
   def "setPrimaryAffiliation: when no affiliations exists"() {
     given:
-    def person = new SuEnrollPerson()
+    def person = new SuPerson()
     String newPrimaryAffiliation = 'foo'
 
     when:

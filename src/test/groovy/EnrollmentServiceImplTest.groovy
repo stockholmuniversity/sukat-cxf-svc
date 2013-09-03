@@ -173,7 +173,7 @@ class EnrollmentServiceImplTest extends Specification {
   @Test
   def "enrollUserWithMailRoutingAddress: test when attributes are invalid, should throw IllegalArgumentException"() {
     when:
-    service.enrollUserWithMailRoutingAddress("domain", "givenName", "sn", "affiliation", "nin", "mailRoutingAddress", new SvcAudit())
+    service.enrollUser("uid", "domain", "affiliation", "mailRoutingAddress", new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -182,47 +182,36 @@ class EnrollmentServiceImplTest extends Specification {
   @Test
   def "enrollUserWithMailRoutingAddress: test when user exists in LDAP, should handle user and return new password"() {
     given:
-    def nin_ = '0' *12
-    boolean existingCalled = false
-    EnrollmentServiceUtils.metaClass.static.findEnrollPerson = { String nin -> new SuEnrollPerson() }
+    GroovyMock(SuPersonQuery, global: true)
+    SuPersonQuery.getSuPersonFromUID(_,_) >> { new SuPerson() }
 
-    EnrollmentServiceUtils.metaClass.static.handleExistingUser = { String nin,
-                                                                   SuEnrollPerson suEnrollPerson,
-                                                                   SvcUidPwd svcUidPwd,
-                                                                   String eduPersonPrimaryAffiliation,
-                                                                   String domain,
-                                                                   String mailRoutingAddress ->
-      svcUidPwd.uid = "foo"
-      existingCalled = true
-    }
+    GroovyMock(EnrollmentServiceUtils, global: true)
 
     when:
-    def password = service.enrollUserWithMailRoutingAddress(
+    def svcUidPwd = service.enrollUser(
+            "uid",
             "student.su.se",
-            "test",
-            "testsson",
             "other",
-            nin_,
             "a@b.com",
             new SvcAudit())
 
     then:
-    existingCalled
-    password
+    1 * EnrollmentServiceUtils.handleExistingUser(*_)
+    svcUidPwd.uid == 'uid'
+    svcUidPwd.password.size() == 10
   }
 
   @Test
-  def "enrollUserWithMailRoutingAddress: test when user doesn't exist in LDAP, should handle new user and return new password"() {
+  def "enrollUser: test when user doesn't exist in LDAP, should throw exception"() {
     given:
-    GroovyMock(EnrollmentServiceUtils, global: true)
-    EnrollmentServiceUtils.handleExistingUser(*_) >> { a, b, c, d, e, f -> c.uid = b.uid }
-    EnrollmentServiceUtils.findEnrollPerson(_) >> new SuEnrollPerson(uid: 'apa')
+    GroovyMock(SuPersonQuery, global: true)
+    SuPersonQuery.getSuPersonFromUID(_,_) >> { null }
 
     when:
-    def password = service.enrollUserWithMailRoutingAddress("student.su.se", "test", "testsson", "other", "1000000000", "a@b.com", new SvcAudit())
+    service.enrollUser('uid', "student.su.se", "other", "a@b.com", new SvcAudit())
 
     then:
-    assert password
+    thrown(IllegalArgumentException)
   }
 
   @Test
@@ -231,31 +220,7 @@ class EnrollmentServiceImplTest extends Specification {
     def enrollmentServiceImpl = new EnrollmentServiceImpl()
 
     when:
-    enrollmentServiceImpl.enrollUser(null,"test","testsson","other","100000000000", new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  @Test
-  def "Test enrollUser without null givenName argument"() {
-    setup:
-    def enrollmentServiceImpl = new EnrollmentServiceImpl()
-
-    when:
-    enrollmentServiceImpl.enrollUser("student.su.se",null,"testsson","other","100000000000", new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  @Test
-  def "Test enrollUser without null sn argument"() {
-    setup:
-    def enrollmentServiceImpl = new EnrollmentServiceImpl()
-
-    when:
-    enrollmentServiceImpl.enrollUser("student.su.se","test",null,"other","100000000000", new SvcAudit())
+    enrollmentServiceImpl.enrollUser('uid', null, "other", "a@b.com", new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -267,19 +232,7 @@ class EnrollmentServiceImplTest extends Specification {
     def enrollmentServiceImpl = new EnrollmentServiceImpl()
 
     when:
-    enrollmentServiceImpl.enrollUser("student.su.se","test","testsson",null,"100000000000", new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  @Test
-  def "Test enrollUser without null nin argument"() {
-    setup:
-    def enrollmentServiceImpl = new EnrollmentServiceImpl()
-
-    when:
-    enrollmentServiceImpl.enrollUser("student.su.se","test","testsson","other",null, new SvcAudit())
+    enrollmentServiceImpl.enrollUser('uid', "student.su.se", null, "a@b.com", new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -291,50 +244,10 @@ class EnrollmentServiceImplTest extends Specification {
     def enrollmentServiceImpl = new EnrollmentServiceImpl()
 
     when:
-    enrollmentServiceImpl.enrollUser("student.su.se","test","testsson","other","100000000000", null)
+    enrollmentServiceImpl.enrollUser('uid', "student.su.se", "other", "a@b.com", null)
 
     then:
     thrown(PreconditionViolation)
-  }
-
-  @Test
-  def "Test enrollUser with bad format nin argument"() {
-    setup:
-    def enrollmentServiceImpl = new EnrollmentServiceImpl()
-
-    when:
-    enrollmentServiceImpl.enrollUser("student.su.se","test","testsson","other","10000", new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  @Test
-  def "Test enrollUser search with 10 - digit"() {
-    setup:
-    GroovyMock(EnrollmentServiceUtils, global: true)
-    EnrollmentServiceUtils.handleExistingUser(*_) >> { a, b, c, d, e, f -> c.uid = b.uid }
-    def nin = '1' * 10
-
-    when:
-    service.enrollUser("student.su.se","test","testsson","other",nin, new SvcAudit())
-
-    then:
-    1 * EnrollmentServiceUtils.findEnrollPerson(nin) >> { new SuEnrollPerson(uid: 'foo') }
-  }
-
-  @Test
-  def "Test enrollUser search with 12 - digit"() {
-    setup:
-    GroovyMock(EnrollmentServiceUtils, global: true)
-    EnrollmentServiceUtils.handleExistingUser(*_) >> { a, b, c, d, e, f -> c.uid = b.uid }
-    def nin = '1' * 12
-
-    when:
-    service.enrollUser("student.su.se","test","testsson","other",nin, new SvcAudit())
-
-    then:
-    1 * EnrollmentServiceUtils.findEnrollPerson(nin) >> { new SuEnrollPerson(uid: 'foo') }
   }
 
   @Test
@@ -355,7 +268,7 @@ class EnrollmentServiceImplTest extends Specification {
     def enrollmentServiceImpl = new EnrollmentServiceImpl()
 
     when:
-    enrollmentServiceImpl.enrollUser("student.su.se","test","testsson","other","1000000000", new SvcAudit())
+    enrollmentServiceImpl.enrollUser('uid', "student.su.se", "other", 'a@b.com', new SvcAudit())
 
     then:
     thrown(Exception)
@@ -364,19 +277,17 @@ class EnrollmentServiceImplTest extends Specification {
   @Test
   def "Test enrollUser Happy Path"() {
     setup:
-    def nin = "1000000000"
     def uid = "testuid"
     def password = "*" * 10
-    SuEnrollPerson suEnrollPerson = new SuEnrollPerson(uid: uid)
+
+    GroovyMock(SuPersonQuery, global: true)
+    SuPersonQuery.getSuPersonFromUID(_,_) >> { new SuPerson() }
 
     GroovyMock(EnrollmentServiceUtils, global: true)
-    1 * EnrollmentServiceUtils.findEnrollPerson(nin) >> suEnrollPerson
-    1 * EnrollmentServiceUtils.handleExistingUser(*_) >> { a, b, c, d, e, f -> c.uid = uid }
-
     GroovyMock(PasswordUtils, global: true)
 
     when:
-    SvcUidPwd ret = service.enrollUser("student.su.se","test","testsson","other", nin, new SvcAudit())
+    SvcUidPwd ret = service.enrollUser(uid, "student.su.se", "other", 'a@b.com', new SvcAudit())
 
     then:
     ret.uid == uid

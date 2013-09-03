@@ -38,7 +38,6 @@ import se.su.it.commons.PasswordUtils
 import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcUidPwd
-import se.su.it.svc.ldap.SuEnrollPerson
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.manager.GldapoManager
 import se.su.it.svc.query.SuPersonQuery
@@ -80,76 +79,46 @@ class EnrollmentServiceImpl implements EnrollmentService {
   }
 
   /**
-   * This method enrolls a user in sukat, kerberos and afs. If not found in sukat user will be created.
-   *
+   * This method enrolls a user in sukat, kerberos and afs.
    *
    * @param domain              domain of user in sukat. This is used to set the DN if user will be created.
    * @param givenName           givenName of the user. This is used to set the givenName (förnamn) if user will be created.
    * @param sn                  sn of the user. This is used to set the sn (efternamn) if user will be created.
    * @param sn                  affiliation of the user. This is used to set the affiliation if user will be created.
-   * @param nin                 nin of the person. This can be a 10 or 12 digit social security number.
+   * @param ssn                 ssn of the person. This can be a 6 or 10 digit social security number.
    * @param mailRoutingAddress  The mail routing address of the user.
    * @param audit               Audit object initilized with audit data about the client and user.
    * @return SvcUidPwd          object with the uid and password.
+   * @throws IllegalArgumentException if a user with the supplied uid can't be found
    * @see se.su.it.svc.commons.SvcAudit
    */
   @Requires({
     ! LdapAttributeValidator.validateAttributes([
-            ssnornin: nin,
+            uid: uid,
             domain: domain,
-            givenName: givenName,
-            sn: sn,
             eduPersonPrimaryAffiliation: eduPersonPrimaryAffiliation,
             audit: audit])
   })
   @Ensures({ result && result.uid && result.password && result.password.size() == 10 })
-  public SvcUidPwd enrollUserWithMailRoutingAddress(
-      String domain,
-      String givenName,
-      String sn,
-      String eduPersonPrimaryAffiliation,
-      String nin,
-      String mailRoutingAddress,
-      SvcAudit audit) {
-
-    /** Config value set in config.properties to allow for mocking out user creation */
-
-    SvcUidPwd svcUidPwd = new SvcUidPwd()
-    svcUidPwd.password = PasswordUtils.genRandomPassword(10, 10)
-
-    SuEnrollPerson suEnrollPerson = EnrollmentServiceUtils.findEnrollPerson(nin)
-
-    if (suEnrollPerson) {
-      EnrollmentServiceUtils.handleExistingUser(nin, suEnrollPerson, svcUidPwd, eduPersonPrimaryAffiliation, domain, mailRoutingAddress)
-    } else {
-      /** User not found in SUKAT, create user now */
-      EnrollmentServiceUtils.handleNewUser(nin, givenName, sn, svcUidPwd, eduPersonPrimaryAffiliation, domain, mailRoutingAddress)
-    }
-
-    return svcUidPwd
-  }
-
-  /**
-   * This method enrolls a user in sukat, kerberos and afs. If not found in sukat user will be created.
-   *
-   *
-   * @param domain      domain of user in sukat. This is used to set the DN if user will be created.
-   * @param givenName   givenName of the user. This is used to set the givenName (förnamn) if user will be created.
-   * @param sn          sn of the user. This is used to set the sn (efternamn) if user will be created.
-   * @param sn          affiliation of the user. This is used to set the affiliation if user will be created.
-   * @param nin         nin of the person. This can be a 10 or 12 digit social security number.
-   * @param audit       Audit object initilized with audit data about the client and user.
-   * @return SvcUidPwd  object with the uid and password.
-   * @see se.su.it.svc.commons.SvcAudit
-   */
   public SvcUidPwd enrollUser(
+          String uid,
           String domain,
-          String givenName,
-          String sn,
           String eduPersonPrimaryAffiliation,
-          String nin,
+          String mailRoutingAddress,
           SvcAudit audit) {
-    // Run existing almost identical method.
-    return enrollUserWithMailRoutingAddress(domain, givenName, sn, eduPersonPrimaryAffiliation, nin, null, audit)
+
+    SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+
+    if (suPerson) {
+      SvcUidPwd svcUidPwd = new SvcUidPwd(uid: uid)
+      svcUidPwd.password = PasswordUtils.genRandomPassword(10, 10)
+
+      EnrollmentServiceUtils.handleExistingUser(suPerson, svcUidPwd, eduPersonPrimaryAffiliation, domain, mailRoutingAddress)
+
+      return svcUidPwd
+    }
+    else {
+      throw new IllegalArgumentException("enrollUser - no such uid found: " + uid)
+    }
   }
 }

@@ -39,6 +39,7 @@ import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.PosixAccount
 import se.su.it.svc.ldap.SuEnrollPerson
+import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.manager.GldapoManager
 import se.su.it.svc.manager.Properties
 import se.su.it.svc.query.SuPersonQuery
@@ -204,15 +205,15 @@ class EnrollmentServiceUtils {
    * @param eduPersonPrimaryAffiliation the affiliation
    * @param suEnrollPerson the SuEnrollPerson
    */
-  static void setPrimaryAffiliation(String eduPersonPrimaryAffiliation, SuEnrollPerson suEnrollPerson) {
-    suEnrollPerson.eduPersonPrimaryAffiliation = eduPersonPrimaryAffiliation
+  static void setPrimaryAffiliation(String eduPersonPrimaryAffiliation, SuPerson suPerson) {
+    suPerson.eduPersonPrimaryAffiliation = eduPersonPrimaryAffiliation
 
-    if (suEnrollPerson.eduPersonAffiliation != null) {
-      if (!suEnrollPerson.eduPersonAffiliation.contains(eduPersonPrimaryAffiliation)) {
-        suEnrollPerson.eduPersonAffiliation.add(eduPersonPrimaryAffiliation)
+    if (suPerson.eduPersonAffiliation != null) {
+      if (!suPerson.eduPersonAffiliation.contains(eduPersonPrimaryAffiliation)) {
+        suPerson.eduPersonAffiliation.add(eduPersonPrimaryAffiliation)
       }
     } else {
-      suEnrollPerson.eduPersonAffiliation = [eduPersonPrimaryAffiliation]
+      suPerson.eduPersonAffiliation = [eduPersonPrimaryAffiliation]
     }
   }
 
@@ -248,34 +249,34 @@ class EnrollmentServiceUtils {
    * @param domain the domain
    * @param mailRoutingAddress the mailRoutingAddress
    */
-  static void handleExistingUser(String nin,
-                                 SuEnrollPerson suEnrollPerson,
-                                 SvcUidPwd svcUidPwd,
-                                 String eduPersonPrimaryAffiliation,
-                                 String domain,
-                                 String mailRoutingAddress) {
-    log.debug("enrollUser - User with nin <${nin}> found. Now enabling uid <${suEnrollPerson.uid}>.")
+  static void handleExistingUser(
+          SuPerson suPerson,
+          SvcUidPwd svcUidPwd,
+          String eduPersonPrimaryAffiliation,
+          String domain,
+          String mailRoutingAddress) {
+    log.debug("enrollUser - Now enabling uid <${suPerson.uid}>.")
 
-    boolean enabledUser = enableUser(suEnrollPerson.uid, svcUidPwd.password, suEnrollPerson)
+    suPerson = new SuEnrollPerson(suPerson.properties)
+
+    boolean enabledUser = enableUser(suPerson.uid, svcUidPwd.password, suPerson)
 
     if (!enabledUser) {
-      log.error("enrollUser - enroll failed while excecuting perl scripts for uid <${suEnrollPerson.uid}>")
+      log.error("enrollUser - enroll failed while excecuting perl scripts for uid <${suPerson.uid}>")
       throw new Exception("enrollUser - enroll failed in scripts.")
     }
 
-    setNin(nin, suEnrollPerson)
-    setPrimaryAffiliation(eduPersonPrimaryAffiliation, suEnrollPerson)
-    setMailAttributes(suEnrollPerson, domain)
+    setPrimaryAffiliation(eduPersonPrimaryAffiliation, suPerson)
+    setMailAttributes(suPerson, domain)
 
     if (mailRoutingAddress) {
-      suEnrollPerson.mailRoutingAddress = mailRoutingAddress
+      suPerson.mailRoutingAddress = mailRoutingAddress
 
-      suEnrollPerson.objectClass.add("inetLocalMailRecipient")
+      suPerson.objectClass.add("inetLocalMailRecipient")
     }
 
-    SuPersonQuery.saveSuEnrollPerson(suEnrollPerson)
-    svcUidPwd.uid = suEnrollPerson.uid
-    log.info("enrollUser - User with uid <${suEnrollPerson.uid}> now enabled.")
+    SuPersonQuery.saveSuPerson(suPerson)
+    log.info("enrollUser - User with uid <${suPerson.uid}> now enabled.")
   }
 
   /**
