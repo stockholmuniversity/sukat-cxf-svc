@@ -280,40 +280,6 @@ class EnrollmentServiceUtils {
   }
 
   /**
-   * Enroll a new user
-   *
-   * @param nin
-   * @param givenName
-   * @param sn
-   * @param svcUidPwd
-   * @param eduPersonPrimaryAffiliation
-   * @param domain
-   * @param mailRoutingAddress
-   */
-  static void handleNewUser(String nin,
-                            String givenName,
-                            String sn,
-                            SvcUidPwd svcUidPwd,
-                            String eduPersonPrimaryAffiliation,
-                            String domain,
-                            String mailRoutingAddress) {
-    log.debug("enrollUser - User with nin <${nin}> not found. Trying to create and enable user in sukat/afs/kerberos.")
-
-    svcUidPwd.uid = generateUid(givenName, sn)
-
-    SuEnrollPerson suCreateEnrollPerson =
-      setupEnrollPerson(svcUidPwd, givenName, sn, eduPersonPrimaryAffiliation, domain, nin, mailRoutingAddress)
-    SuPersonQuery.initSuEnrollPerson(GldapoManager.LDAP_RW, suCreateEnrollPerson)
-
-    if (enableUser(suCreateEnrollPerson.uid, svcUidPwd.password, suCreateEnrollPerson)) {
-      log.info("enrollUser - User with uid <${suCreateEnrollPerson.uid}> now enabled.")
-    } else {
-      log.error("enrollUser - enroll failed while excecuting perl scripts for uid <${suCreateEnrollPerson.uid}>")
-      throw new Exception("enrollUser - enroll failed in scripts.")
-    }
-  }
-
-  /**
    * Generate a uid based on the given name and surname
    *
    * @param givenName the given name
@@ -335,53 +301,5 @@ class EnrollmentServiceUtils {
 
     log.debug "Returning $uid for user with name $givenName $sn"
     return uid
-  }
-
-  /**
-   * Set up a new SuEnrollPerson based on the incoming attributes.
-   *
-   * @param svcUidPwd
-   * @param givenName
-   * @param sn
-   * @param eduPersonPrimaryAffiliation
-   * @param domain
-   * @param nin
-   * @param mailRoutingAddress
-   * @return
-   */
-  static SuEnrollPerson setupEnrollPerson(SvcUidPwd svcUidPwd,
-                                          String givenName,
-                                          String sn,
-                                          String eduPersonPrimaryAffiliation,
-                                          String domain,
-                                          String nin,
-                                          String mailRoutingAddress) {
-    SuEnrollPerson suCreateEnrollPerson = new SuEnrollPerson()
-    suCreateEnrollPerson.uid = svcUidPwd.uid
-    suCreateEnrollPerson.cn = givenName + " " + sn
-    suCreateEnrollPerson.sn = sn
-    suCreateEnrollPerson.givenName = givenName
-    suCreateEnrollPerson.displayName = givenName + " " + sn
-    suCreateEnrollPerson.eduPersonPrimaryAffiliation = eduPersonPrimaryAffiliation
-    suCreateEnrollPerson.eduPersonAffiliation = [eduPersonPrimaryAffiliation]
-    suCreateEnrollPerson.mail = [svcUidPwd.uid + "@" + domain]
-    suCreateEnrollPerson.mailLocalAddress = [svcUidPwd.uid + "@" + domain]
-
-    if (mailRoutingAddress) {
-      suCreateEnrollPerson.mailRoutingAddress = mailRoutingAddress
-    }
-
-    if (nin.length() == 12) {
-      suCreateEnrollPerson.norEduPersonNIN = nin
-      suCreateEnrollPerson.socialSecurityNumber = GeneralUtils.pnrToSsn(nin)
-    } else {
-      suCreateEnrollPerson.socialSecurityNumber = nin
-    }
-
-    suCreateEnrollPerson.eduPersonPrincipalName = GeneralUtils.uidToPrincipal(svcUidPwd.uid)
-    suCreateEnrollPerson.objectClass = ["suPerson", "sSNObject", "norEduPerson", "eduPerson", "inetLocalMailRecipient", "inetOrgPerson", "organizationalPerson", "person", "top"]
-    suCreateEnrollPerson.parent = AccountServiceUtils.domainToDN(domain)
-    log.debug("createSuPerson - Writing initial sukat record to sukat for uid<${svcUidPwd.uid}>")
-    return suCreateEnrollPerson
   }
 }
