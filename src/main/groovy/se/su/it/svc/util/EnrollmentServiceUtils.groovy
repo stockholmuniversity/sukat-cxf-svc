@@ -377,7 +377,7 @@ class EnrollmentServiceUtils {
       suCreateEnrollPerson.socialSecurityNumber = nin
     }
 
-    suCreateEnrollPerson.eduPersonPrincipalName = svcUidPwd.uid + "@su.se"
+    suCreateEnrollPerson.eduPersonPrincipalName = GeneralUtils.uidToPrincipal(svcUidPwd.uid)
     suCreateEnrollPerson.objectClass = ["suPerson", "sSNObject", "norEduPerson", "eduPerson", "inetLocalMailRecipient", "inetOrgPerson", "organizationalPerson", "person", "top"]
     suCreateEnrollPerson.parent = AccountServiceUtils.domainToDN(domain)
     log.debug("createSuPerson - Writing initial sukat record to sukat for uid<${svcUidPwd.uid}>")
