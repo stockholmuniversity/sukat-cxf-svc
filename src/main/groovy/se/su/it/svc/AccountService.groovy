@@ -42,7 +42,7 @@ public interface AccountService {
   @AuditAspectMethodDetails(details = "setPassword")
   String resetPassword(String uid, SvcAudit audit)
   void updateSuPerson(String uid,SvcSuPersonVO person, SvcAudit audit)
-  String createSuPerson(String uid, String domain, String nin, String givenName, String sn, SvcSuPersonVO person, boolean fullAccount, SvcAudit audit)
+  String createSuPerson(String uid, String domain, String ssn, String givenName, String sn, SvcSuPersonVO person, boolean fullAccount, SvcAudit audit)
   void terminateSuPerson(String uid, SvcAudit audit)
   String getMailRoutingAddress(String uid, SvcAudit audit)
   void setMailRoutingAddress(String uid, String mail, SvcAudit audit)

@@ -289,7 +289,7 @@ class AccountServiceImplTest extends spock.lang.Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), false, new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","it.su.se","6601010357","Test","Testsson",new SvcSuPersonVO(), false, new SvcAudit())
 
     then:
     thrown(IllegalArgumentException)
@@ -399,7 +399,7 @@ class AccountServiceImplTest extends spock.lang.Specification {
     def pwd = spy.createSuPerson(
             "testtest",
             "it.su.se",
-            "196601010357",
+            "6601010357",
             "Test",
             "Testsson",
             new SvcSuPersonVO(),
@@ -416,7 +416,7 @@ class AccountServiceImplTest extends spock.lang.Specification {
     setup:
     def uid = 'uid'
     def domain = 'it.su.se'
-    def nin = '000000000000'
+    def ssn = '0000000000'
     def givenName = 'Test'
     def sn = 'Testsson'
     def person = new SvcSuPersonVO()
@@ -442,7 +442,7 @@ class AccountServiceImplTest extends spock.lang.Specification {
     spy.createSuPerson(
             uid,
             domain,
-            nin,
+            ssn,
             givenName,
             sn,
             person,
@@ -455,9 +455,9 @@ class AccountServiceImplTest extends spock.lang.Specification {
     initPersson.cn == givenName + ' ' + sn
     initPersson.sn == sn
     initPersson.givenName == givenName
-    initPersson.norEduPersonNIN == nin
+    initPersson.socialSecurityNumber == ssn
     initPersson.eduPersonPrincipalName == uid + GeneralUtils.SU_SE_SCOPE
-    initPersson.objectClass.containsAll(["suPerson","sSNObject","norEduPerson","eduPerson","inetOrgPerson","organizationalPerson","person","top"])
+    initPersson.objectClass.containsAll(["suPerson","sSNObject","eduPerson","inetOrgPerson","organizationalPerson","person","top"])
     initPersson.parent == "dc=it,dc=su,dc=se"
   }
 

@@ -155,7 +155,7 @@ public class AccountServiceImpl implements AccountService {
    *
    * @param uid of the SuPerson to be created.
    * @param domain domain for the SuPerson.
-   * @param nin 12-digit social security number for the SuPerson.
+   * @param ssn 6-10 digit social security number for the SuPerson.
    * @param givenName given name for the SuPerson.
    * @param sn surname of the SuPerson.
    * @param person pre-populated SvcSuPersonVO object. This will be used to populate standard attributes for the SuPerson.
@@ -172,14 +172,14 @@ public class AccountServiceImpl implements AccountService {
     ! LdapAttributeValidator.validateAttributes([
             uid: uid,
             domain: domain,
-            nin: nin,
+            ssn: ssn,
             givenName: givenName,
             sn: sn,
             svcsuperson: person,
             audit: audit ])
   })
   @Ensures({ result && result instanceof String && result.size() == 10 })
-  public String createSuPerson(String uid, String domain, String nin, String givenName, String sn, SvcSuPersonVO person, boolean fullAccount, SvcAudit audit) {
+  public String createSuPerson(String uid, String domain, String ssn, String givenName, String sn, SvcSuPersonVO person, boolean fullAccount, SvcAudit audit) {
     if(SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid))
       throw new IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
 
@@ -190,9 +190,9 @@ public class AccountServiceImpl implements AccountService {
             cn: givenName + " " + sn,
             sn: sn,
             givenName: givenName,
-            norEduPersonNIN: nin,
+            socialSecurityNumber: ssn,
             eduPersonPrincipalName: GeneralUtils.uidToPrincipal(uid),
-            objectClass: ["suPerson","sSNObject","norEduPerson","eduPerson","inetLocalMailRecipient","inetOrgPerson","organizationalPerson","person","top"],
+            objectClass: ["suPerson","sSNObject","eduPerson","inetLocalMailRecipient","inetOrgPerson","organizationalPerson","person","top"],
     )
     suInitPerson.parent = AccountServiceUtils.domainToDN(domain)
 
