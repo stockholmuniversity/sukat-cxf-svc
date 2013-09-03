@@ -193,7 +193,6 @@ public class LdapAttributeValidator {
     if (!svcPerson instanceof SvcSuPersonVO){
       throwMe(validateAttributesString,"Attribute validation failed for SvcSuPersonVO object <${svcPerson}>. SvcSuPersonVO object need to be of class SvcSuPersonVO.")
     }
-    SvcSuPersonVO tmpSP = (SvcSuPersonVO)svcPerson
   }
 
   private static void validateMailRoutingAddress(Object mailRoutingAddress) {
