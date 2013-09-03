@@ -31,95 +31,92 @@
 
 package se.su.it.svc
 
+import groovy.util.logging.Slf4j
+import org.apache.commons.lang.NotImplementedException
+import org.gcontracts.annotations.Ensures
+import org.gcontracts.annotations.Requires
+import se.su.it.commons.Kadmin
+import se.su.it.commons.PasswordUtils
 import se.su.it.svc.commons.LdapAttributeValidator
-import se.su.it.svc.manager.EhCacheManager
+import se.su.it.svc.commons.SvcAudit
+import se.su.it.svc.commons.SvcSuPersonVO
+import se.su.it.svc.ldap.SuInitPerson
+import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.manager.GldapoManager
+import se.su.it.svc.query.SuPersonQuery
+import se.su.it.svc.util.AccountServiceUtils
 import se.su.it.svc.util.EnrollmentServiceUtils
 import se.su.it.svc.util.GeneralUtils
 
-import javax.jws.WebService
-import org.apache.log4j.Logger
-import se.su.it.svc.commons.SvcAudit
 import javax.jws.WebParam
-import se.su.it.svc.manager.GldapoManager
-import se.su.it.svc.query.SuPersonQuery
-import se.su.it.svc.ldap.SuPerson
-import se.su.it.commons.Kadmin
-import se.su.it.commons.PasswordUtils
-import se.su.it.svc.audit.AuditAspectMethodDetails
-import se.su.it.svc.commons.SvcSuPersonVO
-import se.su.it.svc.ldap.SuInitPerson
-import se.su.it.svc.util.AccountServiceUtils
-import java.util.regex.Pattern
-import java.util.regex.Matcher
-import se.su.it.commons.ExecUtils
-import org.apache.commons.lang.NotImplementedException
+import javax.jws.WebService
 
 /**
  * Implementing class for AccountService CXF Web Service.
  * This Class handles all Account activities in SUKAT.
  */
-
+@Slf4j
 @WebService
-public class AccountServiceImpl implements AccountService{
-  private static final Logger logger = Logger.getLogger(AccountServiceImpl.class)
+public class AccountServiceImpl implements AccountService {
+
   /**
    * This method sets the primary affiliation for the specified uid.
-   *
    *
    * @param uid  uid of the user.
    * @param affiliation the affiliation for this uid
    * @param audit Audit object initilized with audit data about the client and user.
-   * @return array of SuService.
+   * @throws IllegalArgumentException if the uid can't be found
    * @see se.su.it.svc.ldap.SuPerson
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public void updatePrimaryAffiliation(@WebParam(name = "uid") String uid, @WebParam(name = "affiliation") String affiliation, @WebParam(name = "audit") SvcAudit audit) {
-    //if(uid == null || affiliation == null || audit == null)
-    //  throw new java.lang.IllegalArgumentException("updatePrimaryAffiliation - Null argument values not allowed in this function")
-    /*try {
-      LdapAttributeValidator.validateAttributes(["uid":uid,"eduPersonPrimaryAffiliation":affiliation,"audit":audit])
-    } catch (Exception ex) {
-      throw new java.lang.IllegalArgumentException("updatePrimaryAffiliation - " + ex.message)
-    } */
-    String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,"eduPersonPrimaryAffiliation":affiliation,"audit":audit])
-    if (attributeError)
-      throw new java.lang.IllegalArgumentException("updatePrimaryAffiliation - ${attributeError}")
-
+  @Requires({
+    ! LdapAttributeValidator.validateAttributes([
+            uid: uid,
+            eduPersonPrimaryAffiliation: affiliation,
+            audit: audit ])
+  })
+  public void updatePrimaryAffiliation(String uid, String affiliation, SvcAudit audit) {
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
-    if(person) {
-      logger.debug("updatePrimaryAffiliation - Replacing affiliation=<${person?.eduPersonPrimaryAffiliation}> with affiliation=<${affiliation}> for uid=<${uid}>")
-      person.eduPersonPrimaryAffiliation = affiliation
-      SuPersonQuery.saveSuPerson(person)
-      logger.info("updatePrimaryAffiliation - Updated affiliation for uid=<${uid}> with affiliation=<${person.eduPersonPrimaryAffiliation}>")
-    } else {
+
+    if(!person) {
       throw new IllegalArgumentException("updatePrimaryAffiliation no such uid found: "+uid)
     }
+
+    person.eduPersonPrimaryAffiliation = affiliation
+
+    log.debug("updatePrimaryAffiliation - Replacing affiliation=<${person?.eduPersonPrimaryAffiliation}> with affiliation=<${affiliation}> for uid=<${uid}>")
+    SuPersonQuery.saveSuPerson(person)
+    log.info("updatePrimaryAffiliation - Updated affiliation for uid=<${uid}> with affiliation=<${person.eduPersonPrimaryAffiliation}>")
   }
 
   /**
    * This method resets the password for the specified uid and returns the clear text password.
    *
-   *
    * @param uid  uid of the user.
    * @param audit Audit object initilized with audit data about the client and user.
    * @return String new password.
+   * @throws IllegalArgumentException if the uid can't be found
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public String resetPassword(@WebParam(name = "uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
-    if (uid == null || audit == null)
-      throw new java.lang.IllegalArgumentException("resetPassword - Null argument values not allowed in this function")
+  @Requires({
+    uid && audit
+  })
+  @Ensures({ result && result instanceof String && result.size() == 10 })
+  public String resetPassword(String uid, SvcAudit audit) {
     String trueUid = uid.replaceFirst("\\.", "/")
-    if (Kadmin.newInstance().principalExists(trueUid)) {
-      logger.debug("resetPassword - Trying to reset password for uid=<${uid}>")
+
+    def kadmin = Kadmin.newInstance()
+
+    if (kadmin.principalExists(trueUid)) {
+      log.debug("resetPassword - Trying to reset password for uid=<${uid}>")
       String pwd = PasswordUtils.genRandomPassword(10, 10)
-      Kadmin.newInstance().setPassword(trueUid, pwd)
-      logger.info("resetPassword - Password was reset for uid=<${uid}>")
+      kadmin.setPassword(trueUid, pwd)
+      log.info("resetPassword - Password was reset for uid=<${uid}>")
       return pwd
     } else {
-      logger.debug("resetPassword - No such uid found: "+uid)
-      throw new java.lang.IllegalArgumentException("resetPassword - No such uid found: "+uid)
+      log.debug("resetPassword - No such uid found: "+uid)
+      throw new IllegalArgumentException("resetPassword - No such uid found: "+uid)
     }
-    return null
   }
 
   /**
@@ -128,25 +125,29 @@ public class AccountServiceImpl implements AccountService{
    * @param uid  uid of the user.
    * @param person pre-populated SvcSuPersonVO object, the attributes that differ in this object to the original will be updated in ldap.
    * @param audit Audit object initilized with audit data about the client and user.
-   * @return void.
+   * @throws IllegalArgumentException if the uid can't be found
    * @see se.su.it.svc.ldap.SuPerson
    * @see se.su.it.svc.commons.SvcSuPersonVO
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public void updateSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "person") SvcSuPersonVO person, @WebParam(name = "audit") SvcAudit audit){
-    String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,"svcsuperson":person,"audit":audit])
-    if (attributeError)
-      throw new java.lang.IllegalArgumentException("updateSuPerson - ${attributeError}")
-
+  @Requires({
+    ! LdapAttributeValidator.validateAttributes([
+            uid: uid,
+            svcsuperson: person,
+            audit: audit ])
+  })
+  public void updateSuPerson(String uid, SvcSuPersonVO person, SvcAudit audit){
     SuPerson originalPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
-    if(originalPerson) {
-      originalPerson.applySuPersonDifference(person)
-      logger.debug("updateSuPerson - Trying to update SuPerson uid<${originalPerson.uid}>")
-      SuPersonQuery.saveSuPerson(originalPerson)
-      logger.info("updateSuPerson - Updated SuPerson uid<${originalPerson.uid}>")
-    } else {
+
+    if(!originalPerson) {
       throw new IllegalArgumentException("updateSuPerson - No such uid found: "+uid)
     }
+
+    originalPerson.applySuPersonDifference(person)
+    log.debug("updateSuPerson - Trying to update SuPerson uid<${originalPerson.uid}>")
+
+    SuPersonQuery.saveSuPerson(originalPerson)
+    log.info("updateSuPerson - Updated SuPerson uid<${originalPerson.uid}>")
   }
 
   /**
@@ -161,31 +162,41 @@ public class AccountServiceImpl implements AccountService{
    * @param  boolean fullAccount if true will try to create AFS and KDC entries else the posix part will be missing.
    * @param audit Audit object initilized with audit data about the client and user.
    * @return String with newly created password for the SuPerson.
+   * @throws IllegalArgumentException if a user with the supplied uid already exists
    * @see se.su.it.svc.ldap.SuPerson
    * @see se.su.it.svc.ldap.SuInitPerson
    * @see se.su.it.svc.commons.SvcSuPersonVO
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public String createSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "domain") String domain, @WebParam(name = "nin") String nin, @WebParam(name = "givenName") String givenName, @WebParam(name = "sn") String sn, @WebParam(name = "person") SvcSuPersonVO person, @WebParam(name = "fullAccount") boolean fullAccount, @WebParam(name = "audit") SvcAudit audit) {
-    String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,"domain":domain,"nin":nin,"givenName":givenName,"sn":sn,"svcsuperson":person,"audit":audit])
-    if (attributeError)
-      throw new IllegalArgumentException("createSuPerson - ${attributeError}")
-    if(SuPersonQuery.getSuPersonFromUIDNoCache(GldapoManager.LDAP_RW, uid))
+  @Requires({
+    ! LdapAttributeValidator.validateAttributes([
+            uid: uid,
+            domain: domain,
+            nin: nin,
+            givenName: givenName,
+            sn: sn,
+            svcsuperson: person,
+            audit: audit ])
+  })
+  @Ensures({ result && result instanceof String && result.size() == 10 })
+  public String createSuPerson(String uid, String domain, String nin, String givenName, String sn, SvcSuPersonVO person, boolean fullAccount, SvcAudit audit) {
+    if(SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid))
       throw new IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
 
     //Begin init entry in sukat
-    logger.debug("createSuPerson - Creating initial sukat record from function arguments for uid<${uid}>")
-    SuInitPerson suInitPerson = new SuInitPerson()
-    suInitPerson.uid = uid
-    suInitPerson.cn = givenName + " " + sn
-    suInitPerson.sn = sn
-    suInitPerson.givenName = givenName
-    if(nin.length() == 12)
-      suInitPerson.norEduPersonNIN = nin
-    suInitPerson.eduPersonPrincipalName = uid + "@su.se"
-    suInitPerson.objectClass = ["suPerson","sSNObject","norEduPerson","eduPerson","inetLocalMailRecipient","inetOrgPerson","organizationalPerson","person","top"]
+    log.debug("createSuPerson - Creating initial sukat record from function arguments for uid<${uid}>")
+    SuInitPerson suInitPerson = new SuInitPerson(
+            uid: uid,
+            cn: givenName + " " + sn,
+            sn: sn,
+            givenName: givenName,
+            norEduPersonNIN: nin,
+            eduPersonPrincipalName: GeneralUtils.uidToPrincipal(uid),
+            objectClass: ["suPerson","sSNObject","norEduPerson","eduPerson","inetLocalMailRecipient","inetOrgPerson","organizationalPerson","person","top"],
+    )
     suInitPerson.parent = AccountServiceUtils.domainToDN(domain)
-    logger.debug("createSuPerson - Writing initial sukat record to sukat for uid<${uid}>")
+
+    log.debug("createSuPerson - Writing initial sukat record to sukat for uid<${uid}>")
     SuPersonQuery.initSuPerson(GldapoManager.LDAP_RW, suInitPerson)
     //End init entry in sukat
 
@@ -195,15 +206,15 @@ public class AccountServiceImpl implements AccountService{
     if (fullAccount) {
       EnrollmentServiceUtils.enableUser(uid, password, suInitPerson)
     } else {
-      logger.warn("createSuPerson - FullAccount attribute not set. PosixAccount entries will not be set and no AFS or KDC entries will be generated.")
-      logger.warn("createSuPerson - Password returned will be fake/dummy")
+      log.warn("createSuPerson - FullAccount attribute not set. PosixAccount entries will not be set and no AFS or KDC entries will be generated.")
+      log.warn("createSuPerson - Password returned will be fake/dummy")
     }
     //End call Perlscript to init user in kdc, afs and unixshell
 
-    logger.debug("createSuPerson - Updating standard attributes according to function argument object for uid<${uid}>")
+    log.debug("createSuPerson - Updating standard attributes according to function argument object for uid<${uid}>")
     updateSuPerson(uid,person,audit)
-    logger.info("createSuPerson - Uid<${uid}> created")
-    logger.debug("createSuPerson - Returning password for uid<${uid}>")
+    log.info("createSuPerson - Uid<${uid}> created")
+    log.debug("createSuPerson - Returning password for uid<${uid}>")
     return password
   }
 
@@ -212,27 +223,29 @@ public class AccountServiceImpl implements AccountService{
    *
    * @param uid  uid of the user.
    * @param audit Audit object initilized with audit data about the client and user.
-   * @return void.
+   * @throws IllegalArgumentException if the uid can't be found
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public void terminateSuPerson(@WebParam(name = "uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
-    String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,"audit":audit])
-    if (attributeError)
-      throw new java.lang.IllegalArgumentException("terminateSuPerson - ${attributeError}")
-
+  @Requires({
+    ! LdapAttributeValidator.validateAttributes([
+            uid: uid,
+            audit: audit ])
+  })
+  public void terminateSuPerson(String uid, SvcAudit audit) {
     SuPerson terminatePerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+
     if(terminatePerson) {
       //TODO: This serves as a stubfunction right now. We need input on how a terminate should work
       //TODO: Below is some code that might do the trick, but what about mail address and stuff
       //TODO: For now we cast exception to notify clients.
       throw new NotImplementedException("terminateSuPerson - This function is not yet implemented!")
-      //terminatePerson.eduPersonAffiliation ["other"]
-      //terminatePerson.eduPersonPrimaryAffiliation = "other"
-      //logger.debug("terminateSuPerson - Trying to terminate SuPerson uid<${terminatePerson.uid}>")
-      //SuPersonQuery.saveSuPerson(terminatePerson)
-      //Kadmin kadmin = Kadmin.newInstance()
-      //kadmin.resetOrCreatePrincipal(uid);
-      //logger.info("terminateSuPerson - Terminated SuPerson uid<${terminatePerson.uid}>")
+      //TODO: terminatePerson.eduPersonAffiliation ["other"]
+      //TODO: terminatePerson.eduPersonPrimaryAffiliation = "other"
+      //TODO: log.debug("terminateSuPerson - Trying to terminate SuPerson uid<${terminatePerson.uid}>")
+      //TODO: SuPersonQuery.saveSuPerson(terminatePerson)
+      //TODO: Kadmin kadmin = Kadmin.newInstance()
+      //TODO: kadmin.resetOrCreatePrincipal(uid);
+      //TODO: log.info("terminateSuPerson - Terminated SuPerson uid<${terminatePerson.uid}>")
     } else {
       throw new IllegalArgumentException("terminateSuPerson - No such uid found: "+uid)
     }
@@ -243,67 +256,72 @@ public class AccountServiceImpl implements AccountService{
    *
    * @param uid  uid of the user.
    * @param audit Audit object initilized with audit data about the client and user.
-   * @return void.
+   * @return the users mailRoutingAddress
+   * @throws IllegalArgumentException if the uid can't be found
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public String getMailRoutingAddress(@WebParam(name = "uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
-    String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,"audit":audit])
-    if (attributeError)
-      throw new java.lang.IllegalArgumentException("getMailRoutingAddress - ${attributeError}")
-
+  @Requires({
+    ! LdapAttributeValidator.validateAttributes([
+            uid: uid,
+            audit: audit ])
+  })
+  @Ensures({ result == null || result instanceof String})
+  public String getMailRoutingAddress(String uid, SvcAudit audit) {
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
-    if(suPerson) {
-      return suPerson.mailRoutingAddress
-    } else {
+
+    if(!suPerson) {
       throw new IllegalArgumentException("getMailRoutingAddress - No such uid found: "+uid)
     }
-    return null
+
+    return suPerson.mailRoutingAddress
   }
 
   /**
    * This method sets the mailroutingaddress for the specified uid in sukat.
    *
-   * @param uid  uid of the user.
+   * @param uid  uid of the user. 10 chars (YYMMDDXXXX)
    * @param mail mailaddress to be set for uid.
    * @param audit Audit object initilized with audit data about the client and user.
-   * @return void.
+   * @throws IllegalArgumentException if the uid can't be found
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public void setMailRoutingAddress(@WebParam(name = "uid") String uid, @WebParam(name = "mailRoutingAddress") String mailRoutingAddress, @WebParam(name = "audit") SvcAudit audit) {
-    String attributeError = LdapAttributeValidator.validateAttributes(["uid":uid,
-                                                                       "mailroutingaddress":mailRoutingAddress,
-                                                                       "audit":audit])
-    if (attributeError)
-      throw new java.lang.IllegalArgumentException("setMailRoutingAddress - ${attributeError}")
-
+  @Requires({
+    ! LdapAttributeValidator.validateAttributes([
+            uid: uid,
+            mailroutingaddress: mailRoutingAddress,
+            audit: audit ])
+  })
+  public void setMailRoutingAddress(String uid, String mailRoutingAddress, SvcAudit audit) {
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
-    if(suPerson) {
-      suPerson.mailRoutingAddress = mailRoutingAddress
-      SuPersonQuery.saveSuPerson(suPerson)
-      logger.debug("setMailRoutingAddress - Changed mailroutingaddress to <${mailRoutingAddress}> for uid <${uid}>")
-    } else {
+
+    if(!suPerson) {
       throw new IllegalArgumentException("setMailRoutingAddress - No such uid found: "+uid)
     }
+
+    suPerson.mailRoutingAddress = mailRoutingAddress
+    SuPersonQuery.saveSuPerson(suPerson)
+    log.debug("setMailRoutingAddress - Changed mailroutingaddress to <${mailRoutingAddress}> for uid <${uid}>")
   }
 
   /**
    * Finds a SuPerson in ldap based on norEduPersonNin
-   * @param nin in 12 numbers (ex. 198101010101)
+   *
+   * @param nin in 12 numbers (ex. YYYYMMDDXXXX)
    * @param audit Audit object initilized with audit data about the client and user.
    * @return SvcSuPersonVO instance if found.
+   * @throws IllegalArgumentException if the uid can't be found
    */
-
-  public SvcSuPersonVO findSuPersonByNorEduPersonNIN(
-      @WebParam(name = "norEduPersonNIN") String nin, @WebParam(name = "audit") SvcAudit audit) {
-
-    String attributeError = LdapAttributeValidator.validateAttributes(["ssnornin": nin, "audit": audit])
-    if (attributeError)
-      throw new IllegalArgumentException("ssnornin - ${attributeError}")
-
+  @Requires({
+    ! LdapAttributeValidator.validateAttributes([
+            nin: nin,
+            audit: audit ])
+  })
+  @Ensures({ result && result instanceof SvcSuPersonVO })
+  public SvcSuPersonVO findSuPersonByNorEduPersonNIN(@WebParam(name = "norEduPersonNIN") String nin, SvcAudit audit) {
     SuPerson suPerson = SuPersonQuery.getSuPersonFromNin(GldapoManager.LDAP_RW, nin)
 
     if (!suPerson) {
-      throw new Exception("ssnornin - No suPerson with the supplied ssnornin was found: " + nin)
+      throw new IllegalArgumentException("findSuPersonByNorEduPersonNIN - No suPerson with the supplied nin was found: " + nin)
     }
 
     return new SvcSuPersonVO(uid:suPerson.uid)
@@ -311,71 +329,71 @@ public class AccountServiceImpl implements AccountService{
 
   /**
    * Finds a SuPerson in ldap based on socialSecurityNumber
-   * @param ssn in 10 numbers (ex. 7201010101)
+   *
+   * @param ssn in 10 numbers (YYMMDDXXXX)
    * @param audit Audit object initilized with audit data about the client and user.
    * @return SvcSuPersonVO instance if found.
+   * @throws IllegalArgumentException if no user can be found.
    */
-
-  public SvcSuPersonVO findSuPersonBySocialSecurityNumber(
-      @WebParam(name = "socialSecurityNumber") String ssn, @WebParam(name = "audit") SvcAudit audit) {
-
-    SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO()
-
-    ssn = GeneralUtils.pnrToSsn(ssn)
-
-    String attributeError = LdapAttributeValidator.validateAttributes(["ssnornin": ssn, "audit": audit])
-    if (attributeError)
-      throw new IllegalArgumentException("ssnornin - ${attributeError}")
-
+  @Requires({
+    ! LdapAttributeValidator.validateAttributes([
+            ssn: ssn,
+            audit: audit ])
+  })
+  @Ensures({ result && result instanceof SvcSuPersonVO })
+  public SvcSuPersonVO findSuPersonBySocialSecurityNumber(@WebParam(name = "socialSecurityNumber") String ssn, SvcAudit audit) {
     SuPerson suPerson = SuPersonQuery.getSuPersonFromSsn(GldapoManager.LDAP_RW, ssn)
-
-    if (suPerson) {
-      svcSuPersonVO.uid                   = suPerson.uid
-      svcSuPersonVO.socialSecurityNumber  = suPerson.socialSecurityNumber
-      svcSuPersonVO.givenName             = suPerson.givenName
-      svcSuPersonVO.sn                    = suPerson.sn
-      svcSuPersonVO.displayName           = suPerson.displayName
-      svcSuPersonVO.registeredAddress     = suPerson.registeredAddress
-      svcSuPersonVO.mail = new LinkedHashSet(suPerson.mail)
-
-      /** The user has an account in SUKAT that is not a stub.*/
-      svcSuPersonVO.accountIsActive      = (suPerson?.objectClass?.contains('posixAccount'))?:false
+    if (!suPerson) {
+      throw new IllegalArgumentException("findSuPersonBySocialSecurityNumber - No suPerson with the supplied ssn: " + ssn)
     }
 
+    SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO(
+      uid:                  suPerson.uid,
+      socialSecurityNumber: suPerson.socialSecurityNumber,
+      givenName:            suPerson.givenName,
+      sn:                   suPerson.sn,
+      displayName:          suPerson.displayName,
+      registeredAddress:    suPerson.registeredAddress,
+      mail:                 new LinkedHashSet(suPerson.mail),
 
+      /** The user has an account in SUKAT that is not a stub.*/
+      accountIsActive:      (suPerson?.objectClass?.contains('posixAccount')) ?: false
+    )
     return svcSuPersonVO
   }
 
   /**
    * Finds a SuPerson in ldap based on uid
+   *
    * @param uid without (@domain)
    * @param audit Audit object initilized with audit data about the client and user.
    * @return SvcSuPersonVO instance if found.
    */
-
-  public SvcSuPersonVO findSuPersonByUid(
-      @WebParam(name = "uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
-
-    SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO()
-
-    String attributeError = LdapAttributeValidator.validateAttributes(["uid": uid, "audit": audit])
-    if (attributeError)
-      throw new IllegalArgumentException("uid - ${attributeError}")
-
+  @Requires({
+    ! LdapAttributeValidator.validateAttributes([
+            uid: uid,
+            audit: audit ])
+  })
+  @Ensures({ result && result instanceof SvcSuPersonVO })
+  public SvcSuPersonVO findSuPersonByUid(String uid, SvcAudit audit) {
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
 
-    if (suPerson) {
-      svcSuPersonVO.uid                  = suPerson.uid
-      svcSuPersonVO.socialSecurityNumber = suPerson.socialSecurityNumber
-      svcSuPersonVO.givenName            = suPerson.givenName
-      svcSuPersonVO.sn                   = suPerson.sn
-      svcSuPersonVO.displayName          = suPerson.displayName
-      svcSuPersonVO.registeredAddress    = suPerson.registeredAddress
-      svcSuPersonVO.mail = new LinkedHashSet(suPerson.mail)
-
-      /** The user has an account in SUKAT that is not a stub.*/
-      svcSuPersonVO.accountIsActive      = (suPerson?.objectClass?.contains('posixAccount'))?:false
+    if (!suPerson) {
+      throw new IllegalArgumentException("findSuPersonByUid - No suPerson with the supplied uid: " + uid)
     }
+
+    SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO(
+    uid:                   suPerson.uid,
+    socialSecurityNumber:  suPerson.socialSecurityNumber,
+    givenName:             suPerson.givenName,
+    sn:                    suPerson.sn,
+    displayName:           suPerson.displayName,
+    registeredAddress:     suPerson.registeredAddress,
+    mail:  new LinkedHashSet(suPerson.mail),
+
+    /** The user has an account in SUKAT that is not a stub.*/
+    accountIsActive:  (suPerson?.objectClass?.contains('posixAccount'))?:false
+    )
 
     return svcSuPersonVO
   }
