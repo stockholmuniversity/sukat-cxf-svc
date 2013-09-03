@@ -31,6 +31,7 @@
 
 
 
+
 import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PreconditionViolation
 import org.junit.After
@@ -43,6 +44,7 @@ import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuEnrollPerson
 import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.manager.Properties
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.util.EnrollmentServiceUtils
 import spock.lang.Shared
@@ -212,14 +214,9 @@ class EnrollmentServiceImplTest extends Specification {
   @Test
   def "enrollUserWithMailRoutingAddress: test when user doesn't exist in LDAP, should handle new user and return new password"() {
     given:
-    SuPersonQuery.metaClass.static.getSuEnrollPersonFromSsn = {
-      String directory,String nin ->
-        return null
-    }
-    SuEnrollPerson.metaClass.parent = "stuts"
-    SuPersonQuery.metaClass.static.initSuEnrollPerson = {String directory, SuEnrollPerson person -> return person}
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory, String uid -> return null}
-    EnrollmentServiceUtils.metaClass.static.enableUser = {String uid, String password, Object o -> return true}
+    GroovyMock(EnrollmentServiceUtils, global: true)
+    EnrollmentServiceUtils.handleExistingUser(*_) >> { a, b, c, d, e, f -> c.uid = b.uid }
+    EnrollmentServiceUtils.findEnrollPerson(_) >> new SuEnrollPerson(uid: 'apa')
 
     when:
     def password = service.enrollUserWithMailRoutingAddress("student.su.se", "test", "testsson", "other", "1000000000", "a@b.com", new SvcAudit())
@@ -315,27 +312,29 @@ class EnrollmentServiceImplTest extends Specification {
   @Test
   def "Test enrollUser search with 10 - digit"() {
     setup:
-    GroovyMock(EnrollmentServiceImpl, global: true)
+    GroovyMock(EnrollmentServiceUtils, global: true)
+    EnrollmentServiceUtils.handleExistingUser(*_) >> { a, b, c, d, e, f -> c.uid = b.uid }
     def nin = '1' * 10
 
     when:
     service.enrollUser("student.su.se","test","testsson","other",nin, new SvcAudit())
 
     then:
-    1 * EnrollmentServiceImpl.findEnrollPerson(nin) >> { new SuEnrollPerson() }
+    1 * EnrollmentServiceUtils.findEnrollPerson(nin) >> { new SuEnrollPerson(uid: 'foo') }
   }
 
   @Test
   def "Test enrollUser search with 12 - digit"() {
     setup:
-    GroovyMock(EnrollmentServiceImpl, global: true)
+    GroovyMock(EnrollmentServiceUtils, global: true)
+    EnrollmentServiceUtils.handleExistingUser(*_) >> { a, b, c, d, e, f -> c.uid = b.uid }
     def nin = '1' * 12
 
     when:
     service.enrollUser("student.su.se","test","testsson","other",nin, new SvcAudit())
 
     then:
-    1 * EnrollmentServiceImpl.findEnrollPerson(nin) >> { new SuEnrollPerson() }
+    1 * EnrollmentServiceUtils.findEnrollPerson(nin) >> { new SuEnrollPerson(uid: 'foo') }
   }
 
   @Test
@@ -365,67 +364,23 @@ class EnrollmentServiceImplTest extends Specification {
   @Test
   def "Test enrollUser Happy Path"() {
     setup:
-    def pass = '*' *10
-    int p1=0
-    int p2=0
-    SuEnrollPerson suEnrollPerson = new SuEnrollPerson(uid: "testuid")
-    suEnrollPerson.objectClass = []
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
-    SuEnrollPerson.metaClass.parent = "stuts"
-    SuPersonQuery.metaClass.static.getSuEnrollPersonFromSsn = {String directory,String nin -> return suEnrollPerson }
-    SuPersonQuery.metaClass.static.saveSuEnrollPerson = {SuEnrollPerson sip -> return null}
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> new SuPerson(eduPersonPrimaryAffiliation: "kalle") }
-    PasswordUtils.metaClass.static.genRandomPassword = {int a, int b -> p1 = a; p2 = b; return pass}
-    EnrollmentServiceUtils.metaClass.static.enableUser = {String uid, String password, Object o -> return true}
+    def nin = "1000000000"
+    def uid = "testuid"
+    def password = "*" * 10
+    SuEnrollPerson suEnrollPerson = new SuEnrollPerson(uid: uid)
 
-    def enrollmentServiceImpl = new EnrollmentServiceImpl()
+    GroovyMock(EnrollmentServiceUtils, global: true)
+    1 * EnrollmentServiceUtils.findEnrollPerson(nin) >> suEnrollPerson
+    1 * EnrollmentServiceUtils.handleExistingUser(*_) >> { a, b, c, d, e, f -> c.uid = uid }
+
+    GroovyMock(PasswordUtils, global: true)
 
     when:
-    SvcUidPwd ret = enrollmentServiceImpl.enrollUser("student.su.se","test","testsson","other","1000000000", new SvcAudit())
+    SvcUidPwd ret = service.enrollUser("student.su.se","test","testsson","other", nin, new SvcAudit())
 
     then:
-    ret.uid == "testuid"
-    ret.password == pass
-    p1 == 10
-    p2 == 10
-  }
-
-  @Test
-  def "Test enrollUser with skipCreate"() {
-    setup:
-    def pass = '*' *10
-    /** needs to be fully qualified or java Properties will be chosen by default. */
-
-
-    se.su.it.svc.manager.Properties.metaClass.static.getInstance = {
-      def properties1 = new se.su.it.svc.manager.Properties()
-      ConfigObject co = new ConfigObject()
-      co.put('enrollUser.skipCreate', true)
-      properties1.props = co
-      return properties1
-    }
-
-    int p1=0
-    int p2=0
-    SuEnrollPerson suEnrollPerson = new SuEnrollPerson(uid: "testuid")
-    suEnrollPerson.objectClass = []
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
-    SuEnrollPerson.metaClass.parent = "stuts"
-    SuPersonQuery.metaClass.static.getSuEnrollPersonFromSsn = {String directory,String nin -> return suEnrollPerson }
-    SuPersonQuery.metaClass.static.saveSuEnrollPerson = {SuEnrollPerson sip -> return null}
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> new SuPerson(eduPersonPrimaryAffiliation: "kalle") }
-    PasswordUtils.metaClass.static.genRandomPassword = {int a, int b -> p1 = a; p2 = b; return pass}
-    EnrollmentServiceUtils.metaClass.static.enableUser = {String uid, String password, Object o -> return true}
-
-    def enrollmentServiceImpl = new EnrollmentServiceImpl()
-
-    when:
-    SvcUidPwd ret = enrollmentServiceImpl.enrollUser("student.su.se","test","testsson","other","1000000000", new SvcAudit())
-
-    then:
-    ret.uid == "testuid"
-    ret.password == "hacker"
-    p1 == 10
-    p2 == 10
+    ret.uid == uid
+    ret.password == password
+    1 * PasswordUtils.genRandomPassword(10, 10) >> password
   }
 }
