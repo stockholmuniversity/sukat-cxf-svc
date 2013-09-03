@@ -31,17 +31,10 @@
 
 package se.su.it.svc.commons
 
-import org.apache.log4j.Logger
+import groovy.util.logging.Slf4j
 
-/**
- * Created with IntelliJ IDEA.
- * User: jqvar
- * Date: 2013-02-26
- * Time: 11:22
- * To change this template use File | Settings | File Templates.
- */
+@Slf4j
 public class LdapAttributeValidator {
-  private static final Logger logger = Logger.getLogger(LdapAttributeValidator.class)
   private static final String validateAttributesString = "validateAttributes"
   private static final List<String> affiliations = ["student","member","employee","alumni","other"]
 
@@ -62,7 +55,7 @@ public class LdapAttributeValidator {
         case "sn"                          : try { validateSn(val) }                          catch (x) {error = x.message}; break
         case "svcsuperson"                 : try { validateSvcSuPersonVO(val) }               catch (x) {error = x.message}; break
         case "mailroutingaddress"          : try { validateMailRoutingAddress(val) }          catch (x) {error = x.message}; break
-        default: logger.debug("${validateAttributesString} - Attribute <${attributeName}> dont have a validation role!"); break
+        default: log.debug("${validateAttributesString} - Attribute <${attributeName}> dont have a validation role!"); break
       }
     }
     return error
