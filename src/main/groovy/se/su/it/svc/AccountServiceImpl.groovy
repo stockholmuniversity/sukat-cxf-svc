@@ -304,30 +304,6 @@ public class AccountServiceImpl implements AccountService {
   }
 
   /**
-   * Finds a SuPerson in ldap based on norEduPersonNin
-   *
-   * @param nin in 12 numbers (ex. YYYYMMDDXXXX)
-   * @param audit Audit object initilized with audit data about the client and user.
-   * @return SvcSuPersonVO instance if found.
-   * @throws IllegalArgumentException if the uid can't be found
-   */
-  @Requires({
-    ! LdapAttributeValidator.validateAttributes([
-            nin: nin,
-            audit: audit ])
-  })
-  @Ensures({ result && result instanceof SvcSuPersonVO })
-  public SvcSuPersonVO findSuPersonByNorEduPersonNIN(@WebParam(name = "norEduPersonNIN") String nin, SvcAudit audit) {
-    SuPerson suPerson = SuPersonQuery.getSuPersonFromNin(GldapoManager.LDAP_RW, nin)
-
-    if (!suPerson) {
-      throw new IllegalArgumentException("findSuPersonByNorEduPersonNIN - No suPerson with the supplied nin was found: " + nin)
-    }
-
-    return new SvcSuPersonVO(uid:suPerson.uid)
-  }
-
-  /**
    * Finds all accounts in ldap based on socialSecurityNumber
    *
    * @param ssn in 10 numbers (YYMMDDXXXX)
