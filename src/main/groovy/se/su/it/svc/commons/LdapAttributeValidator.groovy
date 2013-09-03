@@ -51,18 +51,18 @@ public class LdapAttributeValidator {
       if (error)
         return
       switch (attributeName.toLowerCase()) {
-        case "audit"                        : try {validateAudit(val)}                        catch (Exception x) {error = x.message};break
-        case "uid"                          : try {validateUid(val)}                          catch (Exception x) {error = x.message};break
-        case "edupersonprimaryaffiliation"  : try {validateEduPersonPrimaryAffiliation(val)}  catch (Exception x) {error = x.message};break
-        case "domain"                       : try {validateDomain(val)}                       catch (Exception x) {error = x.message};break
-        case "nin"                          : try {validateNin(val)}                          catch (Exception x) {error = x.message};break
-        case "ssn"                          : try {validateSsn(val)}                          catch (Exception x) {error = x.message};break
-        case "ssnornin"                     : try {validateSsnOrNin(val)}                     catch (Exception x) {error = x.message};break
-        case "givenname"                    : try {validategivenName(val)}                    catch (Exception x) {error = x.message};break
-        case "sn"                           : try {validateSn(val)}                           catch (Exception x) {error = x.message};break
-        case "svcsuperson"                  : try {validateSvcSuPersonVO(val)}                catch (Exception x) {error = x.message};break
-        case "mailroutingaddress"           : try {validateMailRoutingAddress(val)}           catch (Exception x) {error = x.message};break
-        default: logger.debug("${validateAttributesString} - Attribute <${attributeName}> dont have a validation role!");break
+        case "audit"                       : try { validateAudit(val) }                       catch (x) {error = x.message}; break
+        case "uid"                         : try { validateUid(val) }                         catch (x) {error = x.message}; break
+        case "edupersonprimaryaffiliation" : try { validateEduPersonPrimaryAffiliation(val) } catch (x) {error = x.message}; break
+        case "domain"                      : try { validateDomain(val) }                      catch (x) {error = x.message}; break
+        case "nin"                         : try { validateNin(val) }                         catch (x) {error = x.message}; break
+        case "ssn"                         : try { validateSsn(val) }                         catch (x) {error = x.message}; break
+        case "ssnornin"                    : try { validateSsnOrNin(val) }                    catch (x) {error = x.message}; break
+        case "givenname"                   : try { validategivenName(val) }                   catch (x) {error = x.message}; break
+        case "sn"                          : try { validateSn(val) }                          catch (x) {error = x.message}; break
+        case "svcsuperson"                 : try { validateSvcSuPersonVO(val) }               catch (x) {error = x.message}; break
+        case "mailroutingaddress"          : try { validateMailRoutingAddress(val) }          catch (x) {error = x.message}; break
+        default: logger.debug("${validateAttributesString} - Attribute <${attributeName}> dont have a validation role!"); break
       }
     }
     return error
