@@ -1,9 +1,8 @@
 package se.su.it.svc.util
 
-import org.junit.Test
-import se.su.it.svc.ldap.SuEnrollPerson
 import org.junit.After
 import org.junit.Before
+import org.junit.Test
 import se.su.it.commons.ExecUtils
 import se.su.it.svc.ldap.SuEnrollPerson
 import se.su.it.svc.manager.Properties

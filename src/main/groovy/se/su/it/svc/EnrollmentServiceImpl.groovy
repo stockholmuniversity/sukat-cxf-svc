@@ -33,11 +33,8 @@ package se.su.it.svc
 
 import org.gcontracts.annotations.Ensures
 import org.gcontracts.annotations.Requires
-import org.apache.commons.collections.Predicate
-import org.apache.log4j.Logger
 import se.su.it.commons.Kadmin
 import se.su.it.commons.PasswordUtils
-import se.su.it.commons.PrincipalUtils
 import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcUidPwd
@@ -45,11 +42,9 @@ import se.su.it.svc.ldap.SuEnrollPerson
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.manager.GldapoManager
 import se.su.it.svc.query.SuPersonQuery
-import se.su.it.svc.util.AccountServiceUtils
 import se.su.it.svc.util.EnrollmentServiceUtils
 import se.su.it.svc.util.GeneralUtils
 
-import javax.jws.WebParam
 import javax.jws.WebService
 
 /**

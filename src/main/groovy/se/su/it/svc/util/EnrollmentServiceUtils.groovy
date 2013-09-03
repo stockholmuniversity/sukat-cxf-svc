@@ -35,14 +35,13 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.collections.Predicate
 import se.su.it.commons.ExecUtils
 import se.su.it.commons.PrincipalUtils
-import se.su.it.svc.commons.SvcUidPwd
-import se.su.it.svc.ldap.SuEnrollPerson
-import se.su.it.svc.ldap.SuInitPerson
-import se.su.it.svc.manager.GldapoManager
-import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.commons.LdapAttributeValidator
+import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.PosixAccount
+import se.su.it.svc.ldap.SuEnrollPerson
+import se.su.it.svc.manager.GldapoManager
 import se.su.it.svc.manager.Properties
+import se.su.it.svc.query.SuPersonQuery
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
