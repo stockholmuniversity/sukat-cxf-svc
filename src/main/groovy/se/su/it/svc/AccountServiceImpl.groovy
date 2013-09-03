@@ -328,38 +328,22 @@ public class AccountServiceImpl implements AccountService {
   }
 
   /**
-   * Finds a SuPerson in ldap based on socialSecurityNumber
+   * Finds all accounts in ldap based on socialSecurityNumber
    *
    * @param ssn in 10 numbers (YYMMDDXXXX)
    * @param audit Audit object initilized with audit data about the client and user.
-   * @return SvcSuPersonVO instance if found.
-   * @throws IllegalArgumentException if no user can be found.
+   * @return an array of SvcSuPersonVO, one for each account found
    */
   @Requires({
     ! LdapAttributeValidator.validateAttributes([
             ssn: ssn,
             audit: audit ])
   })
-  @Ensures({ result && result instanceof SvcSuPersonVO })
-  public SvcSuPersonVO findSuPersonBySocialSecurityNumber(@WebParam(name = "socialSecurityNumber") String ssn, SvcAudit audit) {
-    SuPerson suPerson = SuPersonQuery.getSuPersonFromSsn(GldapoManager.LDAP_RW, ssn)
-    if (!suPerson) {
-      throw new IllegalArgumentException("findSuPersonBySocialSecurityNumber - No suPerson with the supplied ssn: " + ssn)
-    }
+  @Ensures({ result != null && result instanceof SvcSuPersonVO[] })
+  public SvcSuPersonVO[] findAllSuPersonsBySocialSecurityNumber(@WebParam(name = "socialSecurityNumber") String ssn, SvcAudit audit) {
+    SuPerson[] suPersons = SuPersonQuery.getSuPersonFromSsn(GldapoManager.LDAP_RW, ssn)
 
-    SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO(
-      uid:                  suPerson.uid,
-      socialSecurityNumber: suPerson.socialSecurityNumber,
-      givenName:            suPerson.givenName,
-      sn:                   suPerson.sn,
-      displayName:          suPerson.displayName,
-      registeredAddress:    suPerson.registeredAddress,
-      mail:                 new LinkedHashSet(suPerson.mail),
-
-      /** The user has an account in SUKAT that is not a stub.*/
-      accountIsActive:      (suPerson?.objectClass?.contains('posixAccount')) ?: false
-    )
-    return svcSuPersonVO
+    return suPersons*.svcSuPersonVO
   }
 
   /**
@@ -382,19 +366,6 @@ public class AccountServiceImpl implements AccountService {
       throw new IllegalArgumentException("findSuPersonByUid - No suPerson with the supplied uid: " + uid)
     }
 
-    SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO(
-    uid:                   suPerson.uid,
-    socialSecurityNumber:  suPerson.socialSecurityNumber,
-    givenName:             suPerson.givenName,
-    sn:                    suPerson.sn,
-    displayName:           suPerson.displayName,
-    registeredAddress:     suPerson.registeredAddress,
-    mail:  new LinkedHashSet(suPerson.mail),
-
-    /** The user has an account in SUKAT that is not a stub.*/
-    accountIsActive:  (suPerson?.objectClass?.contains('posixAccount'))?:false
-    )
-
-    return svcSuPersonVO
+    return suPerson.svcSuPersonVO
   }
 }

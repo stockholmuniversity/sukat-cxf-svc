@@ -47,6 +47,6 @@ public interface AccountService {
   String getMailRoutingAddress(String uid, SvcAudit audit)
   void setMailRoutingAddress(String uid, String mail, SvcAudit audit)
   SvcSuPersonVO findSuPersonByNorEduPersonNIN(String norEduPersonNIN, SvcAudit audit)
-  SvcSuPersonVO findSuPersonBySocialSecurityNumber(String socialSecurityNumber, SvcAudit audit)
+  SvcSuPersonVO[] findAllSuPersonsBySocialSecurityNumber(String socialSecurityNumber, SvcAudit audit)
   SvcSuPersonVO findSuPersonByUid(String uid, SvcAudit audit)
 }

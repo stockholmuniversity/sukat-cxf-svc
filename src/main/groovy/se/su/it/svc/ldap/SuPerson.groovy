@@ -111,6 +111,23 @@ class SuPerson implements Serializable {
     checkAndCorrectEmptyValues()
   }
 
+  public SvcSuPersonVO getSvcSuPersonVO(){
+    SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO(
+      uid:                   uid,
+      socialSecurityNumber:  socialSecurityNumber,
+      givenName:             givenName,
+      sn:                    sn,
+      displayName:           displayName,
+      registeredAddress:     registeredAddress,
+      mail:  new LinkedHashSet(mail),
+
+      /** The user has an account in SUKAT that is not a stub.*/
+      accountIsActive:  (objectClass?.contains('posixAccount')) ?: false
+    )
+
+    return svcSuPersonVO
+  }
+
   private boolean isEqualSets(Set<String> org, Set<String> mod) {
     if(org == null && mod == null) return true
     if(org != null && mod == null) return false

@@ -98,16 +98,16 @@ public class SuPersonQuery {
   }
 
   /**
-   * Returns a SuPerson object, specified by the parameter ssn.
+   * Finds all SuPerson objects, specified by the parameter ssn.
    *
    * @param directory which directory to use, see GldapoManager.
    * @param ssn  the ssn (social security number) for the user that you want to find.
-   * @return an <code><SuPerson></code> or null.
+   * @return a array of <code><SuPerson></code> or null.
    * @see se.su.it.svc.ldap.SuPerson
    * @see se.su.it.svc.manager.GldapoManager
    */
-  static SuPerson getSuPersonFromSsn(String directory, String ssn) {
-    return SuPerson.find(directory: directory, base: "") {
+  static List<SuPerson> getSuPersonFromSsn(String directory, String ssn) {
+    return SuPerson.findAll(directory: directory, base: "") {
       and {
         eq("socialSecurityNumber", ssn)
         eq("objectclass", "person")

@@ -33,6 +33,7 @@
 
 import gldapo.GldapoSchemaRegistry
 import org.apache.commons.lang.NotImplementedException
+import org.gcontracts.PostconditionViolation
 import org.gcontracts.PreconditionViolation
 import org.junit.After
 import org.junit.Test
@@ -682,7 +683,7 @@ class AccountServiceImplTest extends spock.lang.Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.findSuPersonBySocialSecurityNumber(null, new SvcAudit())
+    accountServiceImpl.findAllSuPersonsBySocialSecurityNumber(null, new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -692,13 +693,15 @@ class AccountServiceImplTest extends spock.lang.Specification {
   def "Test findSuPersonBySocialSecurityNumber: When a user ain't found"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
-    SuPersonQuery.metaClass.static.getSuPersonFromSsn = {String directory,String uid -> return null }
+    GroovyMock(SuPersonQuery, global: true)
+    SuPersonQuery.getSuPersonFromSsn(_,_) >> { new SvcSuPersonVO[0] }
 
     when:
-    accountServiceImpl.findSuPersonBySocialSecurityNumber('1001010000', new SvcAudit())
+    def ret = accountServiceImpl.findAllSuPersonsBySocialSecurityNumber('1001010000', new SvcAudit())
 
     then:
-    thrown IllegalArgumentException
+    notThrown(PostconditionViolation)
+    ret.size() == 0
   }
 
   @Test
@@ -718,20 +721,20 @@ class AccountServiceImplTest extends spock.lang.Specification {
     }
 
     when:
-    def resp = accountServiceImpl.findSuPersonBySocialSecurityNumber('1001010000', new SvcAudit())
+    def resp = accountServiceImpl.findAllSuPersonsBySocialSecurityNumber('1001010000', new SvcAudit())
 
     then:
-    resp instanceof SvcSuPersonVO
+    resp instanceof SvcSuPersonVO[]
 
     and:
-    resp.uid == 'foo'
-    resp.givenName == 'givenName'
-    resp.sn == 'sn'
-    resp.displayName == 'displayName'
-    resp.registeredAddress == 'registeredAddress'
-    (resp.mail as Set).contains('email1@su.se')
-    (resp.mail as Set).contains('email2@su.se')
-    !resp.accountIsActive
+    resp.first().uid == 'foo'
+    resp.first().givenName == 'givenName'
+    resp.first().sn == 'sn'
+    resp.first().displayName == 'displayName'
+    resp.first().registeredAddress == 'registeredAddress'
+    (resp.first().mail as Set).contains('email1@su.se')
+    (resp.first().mail as Set).contains('email2@su.se')
+    !resp.first().accountIsActive
   }
 
   @Test
