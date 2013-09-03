@@ -165,27 +165,6 @@ class EnrollmentServiceUtils {
   }
 
   /**
-   * Find SuEnrollPerson by nin
-   *
-   * BEWARE!! Searching for ssn too!
-   *
-   * @param nin the nin to search for
-   * @return SuEnrollPerson for the nin, or null if not found
-   */
-  static SuEnrollPerson findEnrollPerson(String nin) {
-    SuEnrollPerson suEnrollPerson
-    if (nin.length() == 10) {
-      suEnrollPerson = SuPersonQuery.getSuEnrollPersonFromSsn(GldapoManager.LDAP_RW, nin)
-    } else {
-      suEnrollPerson = SuPersonQuery.getSuEnrollPersonFromNin(GldapoManager.LDAP_RW, nin)
-      if (suEnrollPerson == null) { // Try to cut the 12 - digit ssn to 10
-        suEnrollPerson = SuPersonQuery.getSuEnrollPersonFromSsn(GldapoManager.LDAP_RW, GeneralUtils.pnrToSsn(nin))
-      }
-    }
-    return suEnrollPerson
-  }
-
-  /**
    * Set nin & and objectClass 'norEduPerson' on SuEnrollPerson
    *
    * @param nin the nin to use
