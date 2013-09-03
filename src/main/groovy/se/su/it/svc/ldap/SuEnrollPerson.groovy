@@ -32,13 +32,11 @@
 package se.su.it.svc.ldap
 
 import gldapo.schema.annotation.GldapoNamingAttribute
-import gldapo.schema.annotation.GldapoSchemaFilter
-import se.su.it.svc.commons.SvcSuPersonVO
 
 /**
  * GLDAPO schema class for init SuEnrollPerson.
  */
-class SuEnrollPerson implements Serializable {
+class SuEnrollPerson implements PosixAccount, Serializable {
 
   static final long serialVersionUID = -687088492884005033L;
 

@@ -89,71 +89,12 @@ public class SuPersonQuery {
    * @see se.su.it.svc.manager.GldapoManager
    */
   static SuPerson getSuPersonFromNin(String directory, String nin) {
-    def query = { qDirectory, qNin ->
-      SuPerson.find(directory: qDirectory, base: "") {
-        and {
-          eq("norEduPersonNIN", qNin)
-          eq("objectclass", "suPerson")
-        }
+    return SuPerson.find(directory: directory, base: "") {
+      and {
+        eq("norEduPersonNIN", nin)
+        eq("objectclass", "suPerson")
       }
     }
-
-    def params = [key: ":getSuPersonFromNin:${nin}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
-    def suPerson = (SuPerson) cacheManager.get(params, { query(directory, nin) })
-
-    return suPerson
-  }
-
-  /**
-   * Returns a SuInitPerson object, specified by the parameter nin.
-   *
-   *
-   * @param directory which directory to use, see GldapoManager.
-   * @param nin  the nin (12 digit social security number) for the user that you want to find.
-   * @return an <code><SuPerson></code> or null.
-   * @see se.su.it.svc.ldap.SuInitPerson
-   * @see se.su.it.svc.manager.GldapoManager
-   */
-  static SuInitPerson getSuInitPersonFromNin(String directory, String nin) {
-    def query = { qDirectory, qNin ->
-      SuInitPerson.find(directory: qDirectory, base: "") {
-        and {
-          eq("norEduPersonNIN", qNin)
-          eq("objectclass", "person")
-        }
-      }
-    }
-
-    def params = [key: ":getSuInitPersonFromNin:${nin}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
-    def suInitPerson = (SuInitPerson) cacheManager.get(params, { query(directory, nin) })
-
-    return suInitPerson
-  }
-
-  /**
-   * Returns a SuInitPerson object, specified by the parameter ssn.
-   *
-   *
-   * @param directory which directory to use, see GldapoManager.
-   * @param ssn  the ssn (social security number) for the user that you want to find.
-   * @return an <code><SuPerson></code> or null.
-   * @see se.su.it.svc.ldap.SuInitPerson
-   * @see se.su.it.svc.manager.GldapoManager
-   */
-  static SuInitPerson getSuInitPersonFromSsn(String directory, String ssn) {
-    def query = { qDirectory, qSsn ->
-      SuInitPerson.find(directory: qDirectory, base: "") {
-        and {
-          eq("socialSecurityNumber", qSsn)
-          eq("objectclass", "person")
-        }
-      }
-    }
-
-    def params = [key: ":getSuInitPersonFromSsn:${ssn}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
-    def suInitPerson = (SuInitPerson) cacheManager.get(params, { query(directory, ssn) })
-
-    return suInitPerson
   }
 
   /**
@@ -166,21 +107,14 @@ public class SuPersonQuery {
    * @see se.su.it.svc.manager.GldapoManager
    */
   static SuPerson getSuPersonFromSsn(String directory, String ssn) {
-    def query = { qDirectory, qSsn ->
-      SuPerson.find(directory: qDirectory, base: "") {
-        and {
-          eq("socialSecurityNumber", qSsn)
-          eq("objectclass", "person")
-        }
+    return SuPerson.find(directory: directory, base: "") {
+      and {
+        eq("socialSecurityNumber", ssn)
+        eq("objectclass", "person")
       }
     }
-
-    def params = [key: ":getSuPersonFromSsn:${ssn}", ttl: cacheManager.DEFAULT_TTL,
-        cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
-    def suPerson = (SuPerson) cacheManager.get(params, { query(directory, ssn) })
-
-    return suPerson
   }
+
   /**
    * Returns a SuEnrollPerson object, specified by the parameter nin.
    *
@@ -234,25 +168,6 @@ public class SuPersonQuery {
   }
 
   /**
-   * Returns a non-cached SuPerson object, specified by the parameter uid.
-   *
-   *
-   * @param directory which directory to use, see GldapoManager.
-   * @param uid  the uid (user id) for the user that you want to find.
-   * @return an <code><SuPerson></code> or null.
-   * @see se.su.it.svc.ldap.SuPerson
-   * @see se.su.it.svc.manager.GldapoManager
-   */
-  static SuPerson getSuPersonFromUIDNoCache(String directory, String uid) {
-    return SuPerson.find(directory: directory, base: "") {
-      and {
-        eq("uid", uid)
-        eq("objectclass", "suPerson")
-      }
-    }
-  }
-
-  /**
    * Save a SuPerson object to ldap.
    * and putting the changed object in the cache so that the objects returned by this svc is always up-to-date.
    *
@@ -262,8 +177,6 @@ public class SuPersonQuery {
    */
   static void saveSuPerson(SuPerson person) {
     person.save()
-    def params = [key: ":getSuPersonFromUID:${person.uid}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: false]
-    cacheManager.put(params, { person })
   }
 
   /**
@@ -294,17 +207,6 @@ public class SuPersonQuery {
   static void initSuEnrollPerson(String directory, SuEnrollPerson suEnrollPerson) {
     suEnrollPerson.directory = directory
     suEnrollPerson.save()
-  }
-
-  /**
-   * Save a SuInitPerson object to ldap.
-   *
-   * @return void.
-   * @see se.su.it.svc.ldap.SuInitPerson
-   * @see se.su.it.svc.manager.GldapoManager
-   */
-  static void saveSuInitPerson(SuInitPerson person) {
-    person.save()
   }
 
   /**
