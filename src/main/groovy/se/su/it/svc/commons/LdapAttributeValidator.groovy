@@ -35,29 +35,36 @@ import groovy.util.logging.Slf4j
 
 @Slf4j
 public class LdapAttributeValidator {
+
   private static final String validateAttributesString = "validateAttributes"
   private static final List<String> affiliations = ["student","member","employee","alumni","other"]
 
   public static String validateAttributes(Map<String, Object> map) {
     String error = null
-    map.each {String attributeName, Object val ->
-      if (error)
-        return
-      switch (attributeName.toLowerCase()) {
-        case "audit"                       : try { validateAudit(val) }                       catch (x) {error = x.message}; break
-        case "uid"                         : try { validateUid(val) }                         catch (x) {error = x.message}; break
-        case "edupersonprimaryaffiliation" : try { validateEduPersonPrimaryAffiliation(val) } catch (x) {error = x.message}; break
-        case "domain"                      : try { validateDomain(val) }                      catch (x) {error = x.message}; break
-        case "nin"                         : try { validateNin(val) }                         catch (x) {error = x.message}; break
-        case "ssn"                         : try { validateSsn(val) }                         catch (x) {error = x.message}; break
-        case "ssnornin"                    : try { validateSsnOrNin(val) }                    catch (x) {error = x.message}; break
-        case "givenname"                   : try { validategivenName(val) }                   catch (x) {error = x.message}; break
-        case "sn"                          : try { validateSn(val) }                          catch (x) {error = x.message}; break
-        case "svcsuperson"                 : try { validateSvcSuPersonVO(val) }               catch (x) {error = x.message}; break
-        case "mailroutingaddress"          : try { validateMailRoutingAddress(val) }          catch (x) {error = x.message}; break
-        default: log.debug("${validateAttributesString} - Attribute <${attributeName}> dont have a validation role!"); break
+
+    try {
+      map.each { String attributeName, Object val ->
+        switch (attributeName.toLowerCase()) {
+          case "audit"                       : validateAudit(val); break
+          case "uid"                         : validateUid(val); break
+          case "edupersonprimaryaffiliation" : validateEduPersonPrimaryAffiliation(val); break
+          case "domain"                      : validateDomain(val); break
+          case "nin"                         : validateNin(val); break
+          case "ssn"                         : validateSsn(val); break
+          case "ssnornin"                    : validateSsnOrNin(val); break
+          case "givenname"                   : validategivenName(val); break
+          case "sn"                          : validateSn(val); break
+          case "svcsuperson"                 : validateSvcSuPersonVO(val); break
+          case "mailroutingaddress"          : validateMailRoutingAddress(val); break
+          default:
+            log.debug("${validateAttributesString} - Attribute <${attributeName}> dont have a validation role!")
+            break
+        }
       }
+    } catch (x) {
+      error = x.message
     }
+
     return error
   }
 
