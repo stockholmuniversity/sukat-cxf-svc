@@ -31,10 +31,9 @@
 
 package se.su.it.svc.query
 
-import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.ldap.SuRole
 import se.su.it.svc.manager.EhCacheManager
 import se.su.it.svc.manager.GldapoManager
-import se.su.it.svc.ldap.SuRole
 
 /**
  * This class is a helper class for doing GLDAPO queries on the SuRole GLDAPO schema.

@@ -29,20 +29,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.junit.Test
-import se.su.it.svc.commons.SvcAudit
-import se.su.it.svc.ServiceServiceImpl
+
 import gldapo.GldapoSchemaRegistry
+import org.junit.Test
+import se.su.it.commons.Kadmin
+import se.su.it.svc.ServiceServiceImpl
+import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
-import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.ldap.SuService
+import se.su.it.svc.ldap.SuServiceDescription
+import se.su.it.svc.ldap.SuSubAccount
+import se.su.it.svc.query.SuPersonQuery
+import se.su.it.svc.query.SuServiceDescriptionQuery
 import se.su.it.svc.query.SuServiceQuery
 import se.su.it.svc.query.SuSubAccountQuery
-import se.su.it.svc.ldap.SuSubAccount
-import se.su.it.commons.Kadmin
-import javax.naming.OperationNotSupportedException
-import se.su.it.svc.query.SuServiceDescriptionQuery
-import se.su.it.svc.ldap.SuServiceDescription
 
 /**
  * Created with IntelliJ IDEA.

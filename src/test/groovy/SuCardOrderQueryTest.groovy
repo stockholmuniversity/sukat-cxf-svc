@@ -39,7 +39,6 @@ import org.junit.Before
 import org.junit.Test
 import se.su.it.svc.commons.SvcCardOrderVO
 import spock.lang.Ignore
-import spock.lang.IgnoreRest
 import spock.lang.Shared
 import spock.lang.Specification
 

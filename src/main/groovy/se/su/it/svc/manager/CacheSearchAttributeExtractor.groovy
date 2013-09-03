@@ -31,9 +31,8 @@
 
 package se.su.it.svc.manager
 
-import net.sf.ehcache.search.attribute.AttributeExtractor
 import net.sf.ehcache.Element
-import sun.reflect.generics.scope.ClassScope
+import net.sf.ehcache.search.attribute.AttributeExtractor
 
 /**
  * Created with IntelliJ IDEA.

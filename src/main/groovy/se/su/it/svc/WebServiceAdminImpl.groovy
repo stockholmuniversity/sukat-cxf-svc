@@ -31,15 +31,15 @@
 
 package se.su.it.svc
 
-import javax.jws.WebService
-import org.apache.log4j.Logger
-import org.apache.log4j.Level
 import org.apache.log4j.LogManager
-import se.su.it.svc.util.WebServiceAdminUtils
-import javax.jws.WebParam
+import org.apache.log4j.Logger
 import se.su.it.svc.commons.SvcAudit
-import java.nio.channels.FileChannel
+import se.su.it.svc.util.WebServiceAdminUtils
+
+import javax.jws.WebParam
+import javax.jws.WebService
 import java.nio.MappedByteBuffer
+import java.nio.channels.FileChannel
 
 @WebService
 public class WebServiceAdminImpl implements WebServiceAdmin{

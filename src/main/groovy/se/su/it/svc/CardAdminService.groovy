@@ -31,9 +31,8 @@
 
 package se.su.it.svc
 
-import se.su.it.svc.ldap.SuCard
-import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.annotations.SuCxfSvcSpocpRole
+import se.su.it.svc.commons.SvcAudit
 
 @SuCxfSvcSpocpRole(role = "sukat-card-admin")
 public interface CardAdminService {
