@@ -29,39 +29,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package se.su.it.svc.util
+package se.su.it.svc.query
 
-class GeneralUtils {
+import org.junit.After
+import se.su.it.svc.ldap.SuPerson
+import spock.lang.Specification
 
-  public static final String SU_SE_SCOPE = "@su.se"
+class SuPersonQuerySpec extends Specification {
 
-  /**
-   * Transform any 12 char pnr to 10 char for use in finding by socialSecurityNumber
-   *
-   * @param pnr
-   * @return
-   */
-  public static String pnrToSsn(String pnr) {
-    return (pnr?.length() == 12) ? pnr[2..11] : pnr
+  @After
+  def tearDown(){
+    SuPerson.metaClass = null
   }
 
-  /**
-   * Convert a uid to a principal string
-   *
-   * @param uid the uid to convert
-   * @return <uid>@<SCOPE>
-   */
-  public static String uidToPrincipal(uid) {
-    return uid == null ? null : uid + SU_SE_SCOPE
-  }
+  def "getSuPersonFromUID should handle exception"() {
+    given:
+    SuPerson.metaClass.static.find = { String a, String b, Closure c ->
+      throw new Exception()
+    }
 
-  /**
-   * Transform uid of syntax 'uid.service' to uid/service
-   *
-   * @param uid the uid to transform
-   * @return the transformed uid
-   */
-  public static String uidToKrb5Principal(String uid) {
-    return uid?.replaceFirst("\\.", "/")
+    when:
+    SuPersonQuery.getSuPersonFromUID(null, null)
+
+    then:
+    noExceptionThrown()
   }
 }

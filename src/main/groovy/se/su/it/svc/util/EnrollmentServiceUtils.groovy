@@ -40,6 +40,9 @@ import se.su.it.svc.ldap.SuEnrollPerson
 import se.su.it.svc.ldap.SuInitPerson
 import se.su.it.svc.manager.GldapoManager
 import se.su.it.svc.query.SuPersonQuery
+import se.su.it.svc.commons.LdapAttributeValidator
+import se.su.it.svc.ldap.PosixAccount
+import se.su.it.svc.manager.Properties
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -47,33 +50,57 @@ import java.util.regex.Pattern
 @Slf4j
 class EnrollmentServiceUtils {
 
-  public static boolean enableUser(String uid, String password, Object person) {
+  /**
+   * Path to create home directories in.
+   */
+  public static final String AFS_HOME_DIR_BASE = "/afs/su.se/home/"
 
+  /**
+   * Path to set as user shell
+   */
+  public static final String SHELL_PATH = "/usr/local/bin/bash"
+
+  /**
+   * Defalt GID for new users.
+   */
+  public static final String DEFAULT_USER_GID = "1200"
+
+  /**
+   * User to run enable-user script as.
+   */
+  public static final String SCRIPT_USER = "uadminw"
+
+  /**
+   * Path to 'enable-user' script
+   */
+  public static final String ENABLE_SCRIPT = "/local/sukat/libexec/enable-user.pl"
+
+  /**
+   * Path to 'run-token-script'
+   */
+  public static final String TOKEN_SCRIPT = "/local/scriptbox/bin/run-token-script.sh"
+
+  /**
+   * Enables the user through the 'enable-user.pl' script & saves the new data in SUKAT
+   *
+   * @param uid uid of the user to be enabled
+   * @param password the password
+   * @param person a object to set attributes on.
+   * @return true the operation succeeds, false if it fails.
+   */
+  public static boolean enableUser(String uid, String password, PosixAccount person) {
     boolean error = false
-    String uidNumber = ""
+    String uidNumber
 
-    boolean skipCreate = (se.su.it.svc.manager.Properties.instance.props.enrollment.skipCreate == "true")
+    boolean skipCreate = Properties.instance.props.enrollment.skipCreate == "true"
 
     if (skipCreate) {
       log.warn "Skipping enable user since skipCreate is set to $skipCreate"
       uidNumber = "-1"
     } else {
-      def perlScript = ["--user", "uadminw", "/local/sukat/libexec/enable-user.pl", "--uid", uid, "--password", password, "--gidnumber", "1200"]
-
-      try {
-        log.debug("enableUser - Running perlscript to create user in KDC and AFS for uid<${uid}>")
-        def res = ExecUtils.exec("/local/scriptbox/bin/run-token-script.sh", perlScript.toArray(new String[perlScript.size()]))
-        Pattern p = Pattern.compile("OK \\(uidnumber:(\\d+)\\)")
-        Matcher m = p.matcher(res.trim())
-        if (m.matches()) {
-          uidNumber = m.group(1)
-        } else {
-          error = true
-        }
-      } catch (Exception e) {
+      uidNumber = runEnableScript(uid, password)
+      if (!uidNumber) {
         error = true
-        log.error("enableUser - Error when enabling uid<${uid}> in KDC and/or AFS! Error: " + e.message)
-        log.error("           - posixAccount attributes will not be written to SUKAT!")
       }
     }
 
@@ -81,23 +108,60 @@ class EnrollmentServiceUtils {
     if (!error) {
       log.debug("enableUser - Perlscript success for uid<${uid}>")
       log.debug("enableUser - Writing posixAccount attributes to sukat for uid<${uid}>")
-      person.objectClass.add("posixAccount")
-      person.loginShell = "/usr/local/bin/bash"
-      person.homeDirectory = "/afs/su.se/home/" + uid.charAt(0) + "/" + uid.charAt(1) + "/" + uid
-      person.uidNumber = uidNumber
-      person.gidNumber = "1200"
 
-      if (person instanceof SuInitPerson) {
-        SuPersonQuery.saveSuInitPerson((SuInitPerson) person)
-      } else if (person instanceof SuEnrollPerson) {
-        SuPersonQuery.saveSuEnrollPerson((SuEnrollPerson) person)
-      } else {
-        log.error("enableUser - Could not figure out wich objectClass to use. Sukat posix attributes write failed")
-        error = true
-      }
+      person.objectClass.add("posixAccount")
+      person.loginShell = SHELL_PATH
+      person.homeDirectory = getHomeDirectoryPath(uid)
+      person.uidNumber = uidNumber
+      person.gidNumber = DEFAULT_USER_GID
+      person.save()
     }
 
     return !error
+  }
+
+  /**
+   * Run the script that enables the user in AFS & KDC
+   *
+   * @param uid the uid to enable
+   * @param password the password
+   * @return the uid of the enabled user, null if the operation fails.
+   */
+  public static String runEnableScript(String uid, String password) {
+    String uidNumber = null
+
+    def perlScript = [
+            "--user", SCRIPT_USER,
+            ENABLE_SCRIPT,
+            "--uid", uid,
+            "--password", password,
+            "--gidnumber", DEFAULT_USER_GID ]
+
+    try {
+      log.debug("enableUser - Running perlscript to create user in KDC and AFS for uid<${uid}>")
+      def res = ExecUtils.exec(TOKEN_SCRIPT, perlScript.toArray(new String[perlScript.size()]))
+      Pattern p = Pattern.compile("OK \\(uidnumber:(\\d+)\\)")
+      Matcher m = p.matcher(res.trim())
+      if (m.matches()) {
+        uidNumber = m.group(1)
+      }
+    } catch (ex) {
+      log.error("enableUser - Error when enabling uid<${uid}> in KDC and/or AFS! Error: " + ex.message)
+      log.error("           - posixAccount attributes will not be written to SUKAT!")
+    }
+
+    return uidNumber
+  }
+
+  /**
+   * Generate a homeDirectory path string from uid
+   *
+   * @param uid the uid to base the home directory on.
+   * @return homeDirectory absolute path or null if uid is null or empty
+   */
+  public static String getHomeDirectoryPath(String uid) {
+    def invalid = LdapAttributeValidator.validateAttributes(uid: uid)
+    invalid ? null : AFS_HOME_DIR_BASE + uid.charAt(0) + "/" + uid.charAt(1) + "/" + uid
   }
 
   /**

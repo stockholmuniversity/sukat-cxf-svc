@@ -29,39 +29,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package se.su.it.svc.util
+package se.su.it.svc.query
 
-class GeneralUtils {
+import org.junit.After
+import se.su.it.svc.ldap.SuCard
+import spock.lang.Specification
 
-  public static final String SU_SE_SCOPE = "@su.se"
+class SuCardQuerySpec extends Specification {
 
-  /**
-   * Transform any 12 char pnr to 10 char for use in finding by socialSecurityNumber
-   *
-   * @param pnr
-   * @return
-   */
-  public static String pnrToSsn(String pnr) {
-    return (pnr?.length() == 12) ? pnr[2..11] : pnr
+  @After
+  def tearDown(){
+    SuCard.metaClass = null
   }
 
-  /**
-   * Convert a uid to a principal string
-   *
-   * @param uid the uid to convert
-   * @return <uid>@<SCOPE>
-   */
-  public static String uidToPrincipal(uid) {
-    return uid == null ? null : uid + SU_SE_SCOPE
+  def "findAllCardsBySuPersonDnAndOnlyActiveOrNot should handle exception"() {
+    given:
+    SuCard.metaClass.static.findAll = { String a, String b, Closure c ->
+      throw new Exception()
+    }
+
+    when:
+    SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(null, null, true)
+
+    then:
+    noExceptionThrown()
   }
 
-  /**
-   * Transform uid of syntax 'uid.service' to uid/service
-   *
-   * @param uid the uid to transform
-   * @return the transformed uid
-   */
-  public static String uidToKrb5Principal(String uid) {
-    return uid?.replaceFirst("\\.", "/")
+  def "findCardBySuCardUUID should handle exception"() {
+    given:
+    SuCard.metaClass.static.find = { String a, String b, Closure c ->
+      throw new Exception()
+    }
+
+    when:
+    SuCardQuery.findCardBySuCardUUID(null, null)
+
+    then:
+    noExceptionThrown()
+  }
+
+  def "saveSuCard should save the card"() {
+    given:
+    boolean saved = false
+    SuCard suCard = new SuCard()
+    suCard.metaClass.save = { saved = true }
+
+    when:
+    SuCardQuery.saveSuCard(suCard)
+
+    then:
+    saved
   }
 }

@@ -185,11 +185,11 @@ class EnrollmentServiceImplTest extends Specification {
     EnrollmentServiceUtils.metaClass.static.findEnrollPerson = { String nin -> new SuEnrollPerson() }
 
     EnrollmentServiceUtils.metaClass.static.handleExistingUser = { String nin,
-                                         SuEnrollPerson suEnrollPerson,
-                                         SvcUidPwd svcUidPwd,
-                                         String eduPersonPrimaryAffiliation,
-                                         String domain,
-                                         String mailRoutingAddress ->
+                                                                   SuEnrollPerson suEnrollPerson,
+                                                                   SvcUidPwd svcUidPwd,
+                                                                   String eduPersonPrimaryAffiliation,
+                                                                   String domain,
+                                                                   String mailRoutingAddress ->
       svcUidPwd.uid = "foo"
       existingCalled = true
     }
@@ -306,7 +306,7 @@ class EnrollmentServiceImplTest extends Specification {
     def enrollmentServiceImpl = new EnrollmentServiceImpl()
 
     when:
-    enrollmentServiceImpl.enrollUser("student.su.se","test","testsson","other","100000", new SvcAudit())
+    enrollmentServiceImpl.enrollUser("student.su.se","test","testsson","other","10000", new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -315,60 +315,33 @@ class EnrollmentServiceImplTest extends Specification {
   @Test
   def "Test enrollUser search with 10 - digit"() {
     setup:
-    boolean beenThere = false
-    SuEnrollPerson.metaClass.parent = "stuts"
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory, String uid -> return null}
-    SuPersonQuery.metaClass.static.getSuEnrollPersonFromSsn = {String directory,String nin -> beenThere = true; return null }
-    SuPersonQuery.metaClass.static.initSuEnrollPerson = {String directory, SuEnrollPerson person -> return person}
-    SuPersonQuery.metaClass.static.saveSuEnrollPerson = {SuEnrollPerson person -> return null}
-    EnrollmentServiceUtils.metaClass.static.enableUser = {String uid, String password, Object o -> return true}
-
-    def enrollmentServiceImpl = new EnrollmentServiceImpl()
+    GroovyMock(EnrollmentServiceImpl, global: true)
+    def nin = '1' * 10
 
     when:
-    enrollmentServiceImpl.enrollUser("student.su.se","test","testsson","other","1000000000", new SvcAudit())
+    service.enrollUser("student.su.se","test","testsson","other",nin, new SvcAudit())
 
     then:
-    beenThere == true
+    1 * EnrollmentServiceImpl.findEnrollPerson(nin) >> { new SuEnrollPerson() }
   }
 
   @Test
   def "Test enrollUser search with 12 - digit"() {
     setup:
-    boolean beenThere1 = false
-    boolean beenThere2 = false
-    SuEnrollPerson.metaClass.parent = "stuts"
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory, String uid -> return null}
-    SuPersonQuery.metaClass.static.initSuEnrollPerson = {String directory, SuEnrollPerson person -> return person}
-    SuPersonQuery.metaClass.static.saveSuEnrollPerson = {SuEnrollPerson person -> return null}
-    EnrollmentServiceUtils.metaClass.static.enableUser = {String uid, String password, Object o -> return true}
-    SuPersonQuery.metaClass.static.getSuEnrollPersonFromNin = {String directory,String nin -> beenThere1 = true; return null }
-    SuPersonQuery.metaClass.static.getSuEnrollPersonFromSsn = {String directory,String nin -> beenThere2 = true; return null }
-
-    def enrollmentServiceImpl = new EnrollmentServiceImpl()
+    GroovyMock(EnrollmentServiceImpl, global: true)
+    def nin = '1' * 12
 
     when:
-    enrollmentServiceImpl.enrollUser("student.su.se","test","testsson","other","100000000000", new SvcAudit())
+    service.enrollUser("student.su.se","test","testsson","other",nin, new SvcAudit())
 
     then:
-    beenThere1 == true
-    beenThere2 == true
+    1 * EnrollmentServiceImpl.findEnrollPerson(nin) >> { new SuEnrollPerson() }
   }
 
   @Test
   def "Test enrollUser scripts fail"() {
     setup:
-
-    se.su.it.svc.manager.Properties.metaClass.static.getInstance = {
-      def properties1 = new se.su.it.svc.manager.Properties()
-      ConfigObject co = new ConfigObject()
-      co.put('enrollUser.skipCreate', false)
-      properties1.props = co
-      return properties1
-    }
-
+    Properties.instance.props.enrollment.skipCreate = "false"
 
     SuEnrollPerson suEnrollPerson = new SuEnrollPerson(uid: "testuid")
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
@@ -451,7 +424,7 @@ class EnrollmentServiceImplTest extends Specification {
 
     then:
     ret.uid == "testuid"
-    ret.password == pass
+    ret.password == "hacker"
     p1 == 10
     p2 == 10
   }

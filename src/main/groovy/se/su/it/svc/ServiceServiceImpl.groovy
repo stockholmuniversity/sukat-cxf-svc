@@ -147,7 +147,7 @@ public class ServiceServiceImpl implements ServiceService {
         subAcc.objectClass = ["top", "account"]
         if(serviceType.equalsIgnoreCase("urn:x-su:service:type:jabber")) {
           subAcc.objectClass.add("jabberUser")
-          subAcc.jabberID = uid + "@su.se"
+          subAcc.jabberID = GeneralUtils.uidToPrincipal(uid)
         }
         SuSubAccountQuery.createSubAccount(GldapoManager.LDAP_RW, subAcc)
         def subAccountPwd = Kadmin.newInstance().resetOrCreatePrincipal(GeneralUtils.uidToKrb5Principal(subUid))
