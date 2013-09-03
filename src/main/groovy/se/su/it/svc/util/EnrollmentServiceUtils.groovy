@@ -100,6 +100,14 @@ class EnrollmentServiceUtils {
     return !error
   }
 
+  /**
+   * Find SuEnrollPerson by nin
+   *
+   * BEWARE!! Searching for ssn too!
+   *
+   * @param nin the nin to search for
+   * @return SuEnrollPerson for the nin, or null if not found
+   */
   static SuEnrollPerson findEnrollPerson(String nin) {
     SuEnrollPerson suEnrollPerson
     if (nin.length() == 10) {
@@ -113,6 +121,12 @@ class EnrollmentServiceUtils {
     return suEnrollPerson
   }
 
+  /**
+   * Set nin & and objectClass 'norEduPerson' on SuEnrollPerson
+   *
+   * @param nin the nin to use
+   * @param suEnrollPerson the SuEnrollPerson
+   */
   static void setNin(String nin, SuEnrollPerson suEnrollPerson) {
     if (nin?.length() == 12) {
       suEnrollPerson.objectClass.add("norEduPerson")
@@ -121,6 +135,12 @@ class EnrollmentServiceUtils {
     suEnrollPerson.socialSecurityNumber = GeneralUtils.pnrToSsn(nin)
   }
 
+  /**
+   * Sets primary affiliation
+   *
+   * @param eduPersonPrimaryAffiliation the affiliation
+   * @param suEnrollPerson the SuEnrollPerson
+   */
   static void setPrimaryAffiliation(String eduPersonPrimaryAffiliation, SuEnrollPerson suEnrollPerson) {
     suEnrollPerson.eduPersonPrimaryAffiliation = eduPersonPrimaryAffiliation
 
@@ -133,6 +153,12 @@ class EnrollmentServiceUtils {
     }
   }
 
+  /**
+   * Sets mail attributes & objectClass 'inetLocalMailRecipient' on SuEnrollPerson
+   *
+   * @param suEnrollPerson the SuEnrollPerson to set attributes on
+   * @param domain the mail domain
+   */
   static void setMailAttributes(SuEnrollPerson suEnrollPerson, String domain) {
     String myMail = suEnrollPerson.uid + "@" + domain
 
@@ -149,6 +175,16 @@ class EnrollmentServiceUtils {
     }
   }
 
+  /**
+   * Enroll an existing user
+   *
+   * @param nin the users nin
+   * @param suEnrollPerson person to enroll
+   * @param svcUidPwd user & password
+   * @param eduPersonPrimaryAffiliation the primary affiliation to set
+   * @param domain the domain
+   * @param mailRoutingAddress the mailRoutingAddress
+   */
   static void handleExistingUser(String nin,
                                  SuEnrollPerson suEnrollPerson,
                                  SvcUidPwd svcUidPwd,
@@ -179,6 +215,17 @@ class EnrollmentServiceUtils {
     log.info("enrollUser - User with uid <${suEnrollPerson.uid}> now enabled.")
   }
 
+  /**
+   * Enroll a new user
+   *
+   * @param nin
+   * @param givenName
+   * @param sn
+   * @param svcUidPwd
+   * @param eduPersonPrimaryAffiliation
+   * @param domain
+   * @param mailRoutingAddress
+   */
   static void handleNewUser(String nin,
                             String givenName,
                             String sn,
@@ -202,6 +249,13 @@ class EnrollmentServiceUtils {
     }
   }
 
+  /**
+   * Generate a uid based on the given name and surname
+   *
+   * @param givenName the given name
+   * @param sn the surname
+   * @return a uid
+   */
   static String generateUid(String givenName, String sn) {
     def logger = log
     String uid = PrincipalUtils.suniqueUID(givenName, sn, new Predicate() {
@@ -219,6 +273,18 @@ class EnrollmentServiceUtils {
     return uid
   }
 
+  /**
+   * Set up a new SuEnrollPerson based on the incoming attributes.
+   *
+   * @param svcUidPwd
+   * @param givenName
+   * @param sn
+   * @param eduPersonPrimaryAffiliation
+   * @param domain
+   * @param nin
+   * @param mailRoutingAddress
+   * @return
+   */
   static SuEnrollPerson setupEnrollPerson(SvcUidPwd svcUidPwd,
                                           String givenName,
                                           String sn,
