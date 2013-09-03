@@ -40,12 +40,10 @@ import se.su.it.commons.PasswordUtils
 import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcSuPersonVO
-import se.su.it.svc.ldap.SuInitPerson
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.manager.GldapoManager
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.util.AccountServiceUtils
-import se.su.it.svc.util.EnrollmentServiceUtils
 import se.su.it.svc.util.GeneralUtils
 
 import javax.jws.WebParam
@@ -178,44 +176,31 @@ public class AccountServiceImpl implements AccountService {
             svcsuperson: person,
             audit: audit ])
   })
-  @Ensures({ result && result instanceof String && result.size() == 10 })
-  public String createSuPerson(String uid, String domain, String ssn, String givenName, String sn, SvcSuPersonVO person, boolean fullAccount, SvcAudit audit) {
+  public void createSuPerson(String uid, String domain, String ssn, String givenName, String sn, SvcSuPersonVO person, SvcAudit audit) {
+
     if(SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid))
       throw new IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
 
     //Begin init entry in sukat
     log.debug("createSuPerson - Creating initial sukat record from function arguments for uid<${uid}>")
-    SuInitPerson suInitPerson = new SuInitPerson(
+    SuPerson suPerson = new SuPerson(
             uid: uid,
             cn: givenName + " " + sn,
             sn: sn,
             givenName: givenName,
             socialSecurityNumber: ssn,
-            eduPersonPrincipalName: GeneralUtils.uidToPrincipal(uid),
+            //TODO: Remove unnecessary objectClasses
             objectClass: ["suPerson","sSNObject","eduPerson","inetLocalMailRecipient","inetOrgPerson","organizationalPerson","person","top"],
     )
-    suInitPerson.parent = AccountServiceUtils.domainToDN(domain)
+    suPerson.parent = AccountServiceUtils.domainToDN(domain)
 
-    log.debug("createSuPerson - Writing initial sukat record to sukat for uid<${uid}>")
-    SuPersonQuery.initSuPerson(GldapoManager.LDAP_RW, suInitPerson)
+    log.debug "createSuPerson - Writing initial sukat record to sukat for uid<${uid}>"
+    SuPersonQuery.initSuPerson(GldapoManager.LDAP_RW, suPerson)
     //End init entry in sukat
 
-    //Begin call Perlscript to init user in kdc, afs and unixshell
-    //Maybe we want to replace this with a call to the message bus in the future
-    String password = PasswordUtils.genRandomPassword(10, 10)
-    if (fullAccount) {
-      EnrollmentServiceUtils.enableUser(uid, password, suInitPerson)
-    } else {
-      log.warn("createSuPerson - FullAccount attribute not set. PosixAccount entries will not be set and no AFS or KDC entries will be generated.")
-      log.warn("createSuPerson - Password returned will be fake/dummy")
-    }
-    //End call Perlscript to init user in kdc, afs and unixshell
-
-    log.debug("createSuPerson - Updating standard attributes according to function argument object for uid<${uid}>")
+    log.debug "createSuPerson - Updating standard attributes according to function argument object for uid<${uid}>"
     updateSuPerson(uid,person,audit)
-    log.info("createSuPerson - Uid<${uid}> created")
-    log.debug("createSuPerson - Returning password for uid<${uid}>")
-    return password
+    log.info "createSuPerson - Uid<${uid}> created"
   }
 
   /**

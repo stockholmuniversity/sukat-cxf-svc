@@ -33,7 +33,6 @@ package se.su.it.svc.query
 
 import groovy.util.logging.Slf4j
 import se.su.it.svc.ldap.SuEnrollPerson
-import se.su.it.svc.ldap.SuInitPerson
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.manager.EhCacheManager
 import se.su.it.svc.manager.GldapoManager
@@ -182,16 +181,15 @@ public class SuPersonQuery {
   /**
    * Init SuPerson entry in sukat
    *
-   *
    * @param directory which directory to use, see GldapoManager.
    * @param suInitPerson a SuInitPerson object to be saved in SUKAT.
    * @return void.
    * @see se.su.it.svc.ldap.SuInitPerson
    * @see se.su.it.svc.manager.GldapoManager
    */
-  static void initSuPerson(String directory, SuInitPerson suInitPerson) {
-    suInitPerson.directory = directory
-    suInitPerson.save()
+  static void initSuPerson(String directory, SuPerson suPerson) {
+    suPerson.directory = directory
+    suPerson.save()
   }
 
   /**

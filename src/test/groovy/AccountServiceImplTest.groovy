@@ -31,6 +31,7 @@
 
 
 
+
 import gldapo.GldapoSchemaRegistry
 import org.apache.commons.lang.NotImplementedException
 import org.gcontracts.PostconditionViolation
@@ -43,12 +44,9 @@ import se.su.it.commons.PasswordUtils
 import se.su.it.svc.AccountServiceImpl
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcSuPersonVO
-import se.su.it.svc.ldap.PosixAccount
 import se.su.it.svc.ldap.SuInitPerson
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.query.SuPersonQuery
-import se.su.it.svc.util.EnrollmentServiceUtils
-import se.su.it.svc.util.GeneralUtils
 
 /**
  * Created with IntelliJ IDEA.
@@ -276,7 +274,7 @@ class AccountServiceImplTest extends spock.lang.Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson(null,"it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), false, new SvcAudit())
+    accountServiceImpl.createSuPerson(null,"it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -289,7 +287,7 @@ class AccountServiceImplTest extends spock.lang.Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se","6601010357","Test","Testsson",new SvcSuPersonVO(), false, new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","it.su.se","6601010357","Test","Testsson",new SvcSuPersonVO(), new SvcAudit())
 
     then:
     thrown(IllegalArgumentException)
@@ -301,7 +299,7 @@ class AccountServiceImplTest extends spock.lang.Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest",null,"196601010357","Test","Testsson",new SvcSuPersonVO(), false, new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest",null,"196601010357","Test","Testsson",new SvcSuPersonVO(), new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -313,7 +311,7 @@ class AccountServiceImplTest extends spock.lang.Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se",null,"Test","Testsson",new SvcSuPersonVO(), false, new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","it.su.se",null,"Test","Testsson",new SvcSuPersonVO(), new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -325,7 +323,7 @@ class AccountServiceImplTest extends spock.lang.Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se","20001128-5764","Test","Testsson",new SvcSuPersonVO(), false, new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","it.su.se","20001128-5764","Test","Testsson",new SvcSuPersonVO(), new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -337,7 +335,7 @@ class AccountServiceImplTest extends spock.lang.Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357",null,"Testsson",new SvcSuPersonVO(), false, new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357",null,"Testsson",new SvcSuPersonVO(), new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -349,7 +347,7 @@ class AccountServiceImplTest extends spock.lang.Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test",null,new SvcSuPersonVO(), false, new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test",null,new SvcSuPersonVO(), new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -361,7 +359,7 @@ class AccountServiceImplTest extends spock.lang.Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",null, false, new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",null, new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -373,42 +371,10 @@ class AccountServiceImplTest extends spock.lang.Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), false, null)
+    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), null)
 
     then:
     thrown(PreconditionViolation)
-  }
-
-  @Test
-  def "Test createSuPerson generates correct password"() {
-  setup:
-    def pass = '*' *10
-
-
-    SuInitPerson.metaClass.parent = "_"
-    GroovyMock(EnrollmentServiceUtils, global: true)
-    GroovyMock(PasswordUtils, global: true)
-    GroovyMock(SuPersonQuery, global: true)
-    def spy = Spy(AccountServiceImpl) {
-      updateSuPerson(_, _, _) >> {}
-    }
-
-    SuPersonQuery.getSuPersonFromUID(*_) >> null
-
-    when:
-    def pwd = spy.createSuPerson(
-            "testtest",
-            "it.su.se",
-            "6601010357",
-            "Test",
-            "Testsson",
-            new SvcSuPersonVO(),
-            false,
-            new SvcAudit())
-
-    then:
-    1 * PasswordUtils.genRandomPassword(*_) >> pass
-    pwd.size() == 10
   }
 
   @Test
@@ -420,19 +386,14 @@ class AccountServiceImplTest extends spock.lang.Specification {
     def givenName = 'Test'
     def sn = 'Testsson'
     def person = new SvcSuPersonVO()
-    boolean fullAccount = true
-    def initPersson = null
+    SuPerson suPersson = null
     boolean updateOk = false
 
-    SuInitPerson.metaClass.parent = "_"
-    GroovyMock(EnrollmentServiceUtils, global: true)
-    GroovyMock(PasswordUtils, global: true)
+    SuPerson.metaClass.parent = "_"
+
     GroovyMock(SuPersonQuery, global: true)
-
-    EnrollmentServiceUtils.enableUser(*_) >> { String uid_, String pass, PosixAccount posixAccount -> initPersson = posixAccount }
-
+    SuPersonQuery.initSuPerson(*_) >> { a, b -> suPersson = b }
     SuPersonQuery.getSuPersonFromUID(*_) >> null
-    PasswordUtils.genRandomPassword(*_) >> '*' * 10
 
     def spy = Spy(AccountServiceImpl) {
       1* updateSuPerson(uid, person, _) >> { updateOk = true }
@@ -446,19 +407,17 @@ class AccountServiceImplTest extends spock.lang.Specification {
             givenName,
             sn,
             person,
-            fullAccount,
             new SvcAudit())
 
     then:
     updateOk
-    initPersson.uid == uid
-    initPersson.cn == givenName + ' ' + sn
-    initPersson.sn == sn
-    initPersson.givenName == givenName
-    initPersson.socialSecurityNumber == ssn
-    initPersson.eduPersonPrincipalName == uid + GeneralUtils.SU_SE_SCOPE
-    initPersson.objectClass.containsAll(["suPerson","sSNObject","eduPerson","inetOrgPerson","organizationalPerson","person","top"])
-    initPersson.parent == "dc=it,dc=su,dc=se"
+    suPersson.uid == uid
+    suPersson.cn == givenName + ' ' + sn
+    suPersson.sn == sn
+    suPersson.givenName == givenName
+    suPersson.socialSecurityNumber == ssn
+    suPersson.objectClass.containsAll(["suPerson","sSNObject","eduPerson","inetOrgPerson","organizationalPerson","person","top"])
+    suPersson.parent == "dc=it,dc=su,dc=se"
   }
 
   @Test
