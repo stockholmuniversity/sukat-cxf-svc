@@ -152,14 +152,10 @@ public class AccountServiceImpl implements AccountService {
    * This method creates a SuPerson in sukat.
    *
    * @param uid of the SuPerson to be created.
-   * @param domain domain for the SuPerson.
    * @param ssn 6-10 digit social security number for the SuPerson.
    * @param givenName given name for the SuPerson.
    * @param sn surname of the SuPerson.
-   * @param person pre-populated SvcSuPersonVO object. This will be used to populate standard attributes for the SuPerson.
-   * @param  boolean fullAccount if true will try to create AFS and KDC entries else the posix part will be missing.
    * @param audit Audit object initilized with audit data about the client and user.
-   * @return String with newly created password for the SuPerson.
    * @throws IllegalArgumentException if a user with the supplied uid already exists
    * @see se.su.it.svc.ldap.SuPerson
    * @see se.su.it.svc.ldap.SuInitPerson
