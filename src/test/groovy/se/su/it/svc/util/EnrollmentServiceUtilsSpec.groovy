@@ -127,7 +127,7 @@ class EnrollmentServiceUtilsSpec extends Specification {
   @Test
   def "setPrimaryAffiliation: Test adding new primary affiliation"() {
     given:
-    def person = new SuPerson()
+    def person = new SuPerson(objectClass: [])
     def affiliation = 'kaka'
     person.eduPersonPrimaryAffiliation = affiliation
     person.eduPersonAffiliation = new TreeSet()
@@ -145,7 +145,7 @@ class EnrollmentServiceUtilsSpec extends Specification {
   @Test
   def "setPrimaryAffiliation: when no affiliations exists"() {
     given:
-    def person = new SuPerson()
+    def person = new SuPerson(objectClass: [])
     String newPrimaryAffiliation = 'foo'
 
     when:
@@ -154,6 +154,19 @@ class EnrollmentServiceUtilsSpec extends Specification {
     then:
     person.eduPersonPrimaryAffiliation == newPrimaryAffiliation
     person.eduPersonAffiliation.contains(newPrimaryAffiliation)
+  }
+
+  @Test
+  def "setPrimaryAffiliation: should set objectClass"() {
+    given:
+    def person = new SuPerson(objectClass: [])
+    String newPrimaryAffiliation = 'foo'
+
+    when:
+    EnrollmentServiceUtils.setPrimaryAffiliation(newPrimaryAffiliation, person)
+
+    then:
+    person.objectClass.contains('eduPerson')
   }
 
   @Test

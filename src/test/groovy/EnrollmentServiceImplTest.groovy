@@ -173,7 +173,7 @@ class EnrollmentServiceImplTest extends Specification {
   @Test
   def "enrollUserWithMailRoutingAddress: test when attributes are invalid, should throw IllegalArgumentException"() {
     when:
-    service.enrollUser("uid", "domain", "affiliation", "mailRoutingAddress", new SvcAudit())
+    service.enrollUser("uid", "domain", "affiliation", new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -192,7 +192,6 @@ class EnrollmentServiceImplTest extends Specification {
             "uid",
             "student.su.se",
             "other",
-            "a@b.com",
             new SvcAudit())
 
     then:
@@ -208,7 +207,7 @@ class EnrollmentServiceImplTest extends Specification {
     SuPersonQuery.getSuPersonFromUID(_,_) >> { null }
 
     when:
-    service.enrollUser('uid', "student.su.se", "other", "a@b.com", new SvcAudit())
+    service.enrollUser('uid', "student.su.se", "other", new SvcAudit())
 
     then:
     thrown(IllegalArgumentException)
@@ -220,7 +219,7 @@ class EnrollmentServiceImplTest extends Specification {
     def enrollmentServiceImpl = new EnrollmentServiceImpl()
 
     when:
-    enrollmentServiceImpl.enrollUser('uid', null, "other", "a@b.com", new SvcAudit())
+    enrollmentServiceImpl.enrollUser('uid', null, "other", new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -232,7 +231,7 @@ class EnrollmentServiceImplTest extends Specification {
     def enrollmentServiceImpl = new EnrollmentServiceImpl()
 
     when:
-    enrollmentServiceImpl.enrollUser('uid', "student.su.se", null, "a@b.com", new SvcAudit())
+    enrollmentServiceImpl.enrollUser('uid', "student.su.se", null, new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -244,7 +243,7 @@ class EnrollmentServiceImplTest extends Specification {
     def enrollmentServiceImpl = new EnrollmentServiceImpl()
 
     when:
-    enrollmentServiceImpl.enrollUser('uid', "student.su.se", "other", "a@b.com", null)
+    enrollmentServiceImpl.enrollUser('uid', "student.su.se", "other", null)
 
     then:
     thrown(PreconditionViolation)
@@ -268,7 +267,7 @@ class EnrollmentServiceImplTest extends Specification {
     def enrollmentServiceImpl = new EnrollmentServiceImpl()
 
     when:
-    enrollmentServiceImpl.enrollUser('uid', "student.su.se", "other", 'a@b.com', new SvcAudit())
+    enrollmentServiceImpl.enrollUser('uid', "student.su.se", "other", new SvcAudit())
 
     then:
     thrown(Exception)
@@ -287,7 +286,7 @@ class EnrollmentServiceImplTest extends Specification {
     GroovyMock(PasswordUtils, global: true)
 
     when:
-    SvcUidPwd ret = service.enrollUser(uid, "student.su.se", "other", 'a@b.com', new SvcAudit())
+    SvcUidPwd ret = service.enrollUser(uid, "student.su.se", "other", new SvcAudit())
 
     then:
     ret.uid == uid
