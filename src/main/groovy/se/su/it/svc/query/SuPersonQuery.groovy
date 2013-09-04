@@ -32,24 +32,13 @@
 package se.su.it.svc.query
 
 import groovy.util.logging.Slf4j
-import se.su.it.svc.ldap.SuEnrollPerson
 import se.su.it.svc.ldap.SuPerson
-import se.su.it.svc.manager.EhCacheManager
-import se.su.it.svc.manager.GldapoManager
 
 /**
  * This class is a helper class for doing GLDAPO queries on the SuPerson GLDAPO schema.
  */
 @Slf4j
 public class SuPersonQuery {
-
-  /**
-   * the CacheManager provides an instance of EhCache and some overridden methods (get/put/remove)
-   * !important: when getting an object from LDAP which is to be changed, we always need to get it from the master,
-   *             ie: using the props.ldap.serverrw (readWrite, to ensure that we are changing the up-to-date value)
-   *             and NOT fetching the object from the cache.
-   */
-  def static cacheManager = EhCacheManager.getInstance()
 
   /**
    * Returns a SuPerson object, specified by the parameter uid.
@@ -78,25 +67,6 @@ public class SuPersonQuery {
   }
 
   /**
-   * Returns a SuPerson object, specified by the parameter uid.
-   *
-   *
-   * @param directory which directory to use, see GldapoManager.
-   * @param uid  the uid (user id) for the user that you want to find.
-   * @return an <code><SuPerson></code> or null.
-   * @see se.su.it.svc.ldap.SuPerson
-   * @see se.su.it.svc.manager.GldapoManager
-   */
-  static SuPerson getSuPersonFromNin(String directory, String nin) {
-    return SuPerson.find(directory: directory, base: "") {
-      and {
-        eq("norEduPersonNIN", nin)
-        eq("objectclass", "suPerson")
-      }
-    }
-  }
-
-  /**
    * Finds all SuPerson objects, specified by the parameter ssn.
    *
    * @param directory which directory to use, see GldapoManager.
@@ -112,58 +82,6 @@ public class SuPersonQuery {
         eq("objectclass", "person")
       }
     }
-  }
-
-  /**
-   * Returns a SuEnrollPerson object, specified by the parameter nin.
-   *
-   *
-   * @param directory which directory to use, see GldapoManager.
-   * @param nin  the nin (12 digit social security number) for the user that you want to find.
-   * @return an <code><SuPerson></code> or null.
-   * @see se.su.it.svc.ldap.SuInitPerson
-   * @see se.su.it.svc.manager.GldapoManager
-   */
-  static SuEnrollPerson getSuEnrollPersonFromNin(String directory, String nin) {
-    def query = { qDirectory, qNin ->
-      SuEnrollPerson.find(directory: qDirectory, base: "") {
-        and {
-          eq("norEduPersonNIN", qNin)
-          eq("objectclass", "person")
-        }
-      }
-    }
-
-    def params = [key: ":getSuEnrollPersonFromNin:${nin}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
-    def suEnrollPerson = (SuEnrollPerson) cacheManager.get(params, { query(directory, nin) })
-
-    return suEnrollPerson
-  }
-
-  /**
-   * Returns a SuEnrollPerson object, specified by the parameter ssn.
-   *
-   *
-   * @param directory which directory to use, see GldapoManager.
-   * @param ssn  the ssn (social security number) for the user that you want to find.
-   * @return an <code><SuPerson></code> or null.
-   * @see se.su.it.svc.ldap.SuInitPerson
-   * @see se.su.it.svc.manager.GldapoManager
-   */
-  static SuEnrollPerson getSuEnrollPersonFromSsn(String directory, String ssn) {
-    def query = { qDirectory, qSsn ->
-      SuEnrollPerson.find(directory: qDirectory, base: "") {
-        and {
-          eq("socialSecurityNumber", qSsn)
-          eq("objectclass", "person")
-        }
-      }
-    }
-
-    def params = [key: ":getSuEnrollPersonFromSsn:${ssn}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
-    def suEnrollPerson = (SuEnrollPerson) cacheManager.get(params, { query(directory, ssn) })
-
-    return suEnrollPerson
   }
 
   /**
@@ -191,31 +109,4 @@ public class SuPersonQuery {
     suPerson.directory = directory
     suPerson.save()
   }
-
-  /**
-   * Init SuEnrollPerson entry in sukat
-   *
-   *
-   * @param directory which directory to use, see GldapoManager.
-   * @param suInitPerson a SuInitPerson object to be saved in SUKAT.
-   * @return void.
-   * @see se.su.it.svc.ldap.SuEnrollPerson
-   * @see se.su.it.svc.manager.GldapoManager
-   */
-  static void initSuEnrollPerson(String directory, SuEnrollPerson suEnrollPerson) {
-    suEnrollPerson.directory = directory
-    suEnrollPerson.save()
-  }
-
-  /**
-   * Save a SuEnrollPerson object to ldap.
-   *
-   * @return void.
-   * @see se.su.it.svc.ldap.SuInitPerson
-   * @see se.su.it.svc.manager.GldapoManager
-   */
-  static void saveSuEnrollPerson(SuEnrollPerson person) {
-    person.save()
-  }
-
 }
