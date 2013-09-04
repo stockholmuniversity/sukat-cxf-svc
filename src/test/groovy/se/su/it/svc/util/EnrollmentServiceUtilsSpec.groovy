@@ -183,21 +183,4 @@ class EnrollmentServiceUtilsSpec extends Specification {
     then:
     person.mailLocalAddress.contains('foo@kaka.se')
   }
-
-  @Test @Unroll
-  def "setNin when nin => #nin"() {
-    given:
-    def person = new SuEnrollPerson()
-    person.objectClass = []
-
-    when:
-    EnrollmentServiceUtils.setNin(nin, person)
-
-    then: '01 gets cut from case 2, the others are untouched.'
-    person.socialSecurityNumber == expected
-
-    where:
-    nin << ['abc', '0123456789AB', '0123456789ABC']
-    expected << ['abc', '23456789AB', '0123456789ABC']
-  }
 }

@@ -162,20 +162,6 @@ class EnrollmentServiceUtils {
   }
 
   /**
-   * Set nin & and objectClass 'norEduPerson' on SuEnrollPerson
-   *
-   * @param nin the nin to use
-   * @param suEnrollPerson the SuEnrollPerson
-   */
-  static void setNin(String nin, SuEnrollPerson suEnrollPerson) {
-    if (nin?.length() == 12) {
-      suEnrollPerson.objectClass.add("norEduPerson")
-      suEnrollPerson.norEduPersonNIN = nin
-    }
-    suEnrollPerson.socialSecurityNumber = GeneralUtils.pnrToSsn(nin)
-  }
-
-  /**
    * Sets primary affiliation
    *
    * @param eduPersonPrimaryAffiliation the affiliation
