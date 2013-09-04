@@ -34,7 +34,6 @@ package se.su.it.svc
 import se.su.it.svc.annotations.SuCxfSvcSpocpRole
 import se.su.it.svc.audit.AuditAspectMethodDetails
 import se.su.it.svc.commons.SvcAudit
-import se.su.it.svc.commons.SvcUidPwd
 
 /**
  * Created by: Jack Enqvist (jaen4109)
@@ -44,5 +43,4 @@ import se.su.it.svc.commons.SvcUidPwd
 public interface EnrollmentService {
   @AuditAspectMethodDetails(details = "resetOrCreatePrincipal,setPasswordExpiry")
   String resetAndExpirePwd(String uid, SvcAudit audit)
-  SvcUidPwd enrollUser(String uid, String domain, String eduPersonPrimaryAffiliation, SvcAudit audit)
 }

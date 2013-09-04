@@ -32,19 +32,16 @@
 
 
 
+
 import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PreconditionViolation
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import se.su.it.commons.Kadmin
-import se.su.it.commons.PasswordUtils
 import se.su.it.svc.EnrollmentServiceImpl
 import se.su.it.svc.commons.SvcAudit
-import se.su.it.svc.commons.SvcUidPwd
-import se.su.it.svc.ldap.SuEnrollPerson
 import se.su.it.svc.ldap.SuPerson
-import se.su.it.svc.manager.Config
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.util.EnrollmentServiceUtils
 import spock.lang.Shared
@@ -168,129 +165,5 @@ class EnrollmentServiceImplTest extends Specification {
 
     then:
     thrown(IllegalArgumentException)
-  }
-
-  @Test
-  def "enrollUserWithMailRoutingAddress: test when attributes are invalid, should throw IllegalArgumentException"() {
-    when:
-    service.enrollUser("uid", "domain", "affiliation", new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  @Test
-  def "enrollUserWithMailRoutingAddress: test when user exists in LDAP, should handle user and return new password"() {
-    given:
-    GroovyMock(SuPersonQuery, global: true)
-    SuPersonQuery.getSuPersonFromUID(_,_) >> { new SuPerson() }
-
-    GroovyMock(EnrollmentServiceUtils, global: true)
-
-    when:
-    def svcUidPwd = service.enrollUser(
-            "uid",
-            "student.su.se",
-            "other",
-            new SvcAudit())
-
-    then:
-    1 * EnrollmentServiceUtils.handleExistingUser(*_)
-    svcUidPwd.uid == 'uid'
-    svcUidPwd.password.size() == 10
-  }
-
-  @Test
-  def "enrollUser: test when user doesn't exist in LDAP, should throw exception"() {
-    given:
-    GroovyMock(SuPersonQuery, global: true)
-    SuPersonQuery.getSuPersonFromUID(_,_) >> { null }
-
-    when:
-    service.enrollUser('uid', "student.su.se", "other", new SvcAudit())
-
-    then:
-    thrown(IllegalArgumentException)
-  }
-
-  @Test
-  def "Test enrollUser without null domain argument"() {
-    setup:
-    def enrollmentServiceImpl = new EnrollmentServiceImpl()
-
-    when:
-    enrollmentServiceImpl.enrollUser('uid', null, "other", new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  @Test
-  def "Test enrollUser without null eduPersonAffiliation argument"() {
-    setup:
-    def enrollmentServiceImpl = new EnrollmentServiceImpl()
-
-    when:
-    enrollmentServiceImpl.enrollUser('uid', "student.su.se", null, new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  @Test
-  def "Test enrollUser without null SvcAudit argument"() {
-    setup:
-    def enrollmentServiceImpl = new EnrollmentServiceImpl()
-
-    when:
-    enrollmentServiceImpl.enrollUser('uid', "student.su.se", "other", null)
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  @Test
-  def "Test enrollUser scripts fail"() {
-    setup:
-    Config.instance.props.enrollment.skipCreate = "false"
-
-    SuEnrollPerson suEnrollPerson = new SuEnrollPerson(uid: "testuid")
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
-    SuPersonQuery.metaClass.static.getSuEnrollPersonFromSsn = {String directory,String nin -> return suEnrollPerson }
-    EnrollmentServiceUtils.metaClass.static.enableUser = {String uid, String password, Object o -> return false}
-    SuEnrollPerson.metaClass.parent = "stuts"
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory, String uid -> return null}
-    SuPersonQuery.metaClass.static.initSuEnrollPerson = {String directory, SuEnrollPerson person -> return person}
-    SuPersonQuery.metaClass.static.saveSuEnrollPerson = {SuEnrollPerson person -> return null}
-
-
-    def enrollmentServiceImpl = new EnrollmentServiceImpl()
-
-    when:
-    enrollmentServiceImpl.enrollUser('uid', "student.su.se", "other", new SvcAudit())
-
-    then:
-    thrown(Exception)
-  }
-
-  @Test
-  def "Test enrollUser Happy Path"() {
-    setup:
-    def uid = "testuid"
-    def password = "*" * 10
-
-    GroovyMock(SuPersonQuery, global: true)
-    SuPersonQuery.getSuPersonFromUID(_,_) >> { new SuPerson() }
-
-    GroovyMock(EnrollmentServiceUtils, global: true)
-    GroovyMock(PasswordUtils, global: true)
-
-    when:
-    SvcUidPwd ret = service.enrollUser(uid, "student.su.se", "other", new SvcAudit())
-
-    then:
-    ret.uid == uid
-    ret.password == password
-    1 * PasswordUtils.genRandomPassword(10, 10) >> password
   }
 }

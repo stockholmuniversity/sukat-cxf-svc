@@ -34,14 +34,10 @@ package se.su.it.svc
 import org.gcontracts.annotations.Ensures
 import org.gcontracts.annotations.Requires
 import se.su.it.commons.Kadmin
-import se.su.it.commons.PasswordUtils
-import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcAudit
-import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.manager.GldapoManager
 import se.su.it.svc.query.SuPersonQuery
-import se.su.it.svc.util.EnrollmentServiceUtils
 import se.su.it.svc.util.GeneralUtils
 
 import javax.jws.WebService
@@ -75,46 +71,6 @@ class EnrollmentServiceImpl implements EnrollmentService {
       return pwd
     } else {
       throw new IllegalArgumentException("resetAndExpirePwd - no such uid found: "+uid)
-    }
-  }
-
-  /**
-   * This method enrolls a user in sukat, kerberos and afs.
-   *
-   * @param uid                         uid of the user to activate
-   * @param domain                      domain of user in sukat. This is used to set the DN if user will be created.
-   * @param eduPersonPrimaryAffiliation the primary affiliation to set.
-   * @param audit                       Audit object initilized with audit data about the client and user.
-   * @return SvcUidPwd                  object with the uid and password.
-   * @throws IllegalArgumentException if a user with the supplied uid can't be found
-   * @see se.su.it.svc.commons.SvcAudit
-   */
-  @Requires({
-    ! LdapAttributeValidator.validateAttributes([
-            uid: uid,
-            domain: domain,
-            eduPersonPrimaryAffiliation: eduPersonPrimaryAffiliation,
-            audit: audit])
-  })
-  @Ensures({ result && result.uid && result.password && result.password.size() == 10 })
-  public SvcUidPwd enrollUser(
-          String uid,
-          String domain,
-          String eduPersonPrimaryAffiliation,
-          SvcAudit audit) {
-
-    SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
-
-    if (suPerson) {
-      SvcUidPwd svcUidPwd = new SvcUidPwd(uid: uid)
-      svcUidPwd.password = PasswordUtils.genRandomPassword(10, 10)
-
-      EnrollmentServiceUtils.handleExistingUser(suPerson, svcUidPwd, eduPersonPrimaryAffiliation, domain)
-
-      return svcUidPwd
-    }
-    else {
-      throw new IllegalArgumentException("enrollUser - no such uid found: " + uid)
     }
   }
 }
