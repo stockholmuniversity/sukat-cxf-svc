@@ -223,7 +223,7 @@ public class AccountServiceImpl implements AccountService {
       SvcUidPwd svcUidPwd = new SvcUidPwd(uid: uid)
       svcUidPwd.password = PasswordUtils.genRandomPassword(10, 10)
 
-      EnrollmentServiceUtils.handleExistingUser(suPerson, svcUidPwd, eduPersonPrimaryAffiliation, domain)
+      EnrollmentServiceUtils.activateUser(suPerson, svcUidPwd, eduPersonPrimaryAffiliation, domain)
 
       return svcUidPwd
     }

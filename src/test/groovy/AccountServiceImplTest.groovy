@@ -725,7 +725,7 @@ class AccountServiceImplTest extends Specification {
             new SvcAudit())
 
     then:
-    1 * EnrollmentServiceUtils.handleExistingUser(*_)
+    1 * EnrollmentServiceUtils.activateUser(*_)
     svcUidPwd.uid == 'uid'
     svcUidPwd.password.size() == 10
   }

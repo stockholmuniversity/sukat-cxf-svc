@@ -213,7 +213,7 @@ class EnrollmentServiceUtils {
    * @param domain the domain
    * @param mailRoutingAddress the mailRoutingAddress
    */
-  static void handleExistingUser(
+  static void activateUser(
           SuPerson suPerson,
           SvcUidPwd svcUidPwd,
           String eduPersonPrimaryAffiliation,
