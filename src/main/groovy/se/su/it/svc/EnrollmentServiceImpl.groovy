@@ -81,14 +81,11 @@ class EnrollmentServiceImpl implements EnrollmentService {
   /**
    * This method enrolls a user in sukat, kerberos and afs.
    *
-   * @param domain              domain of user in sukat. This is used to set the DN if user will be created.
-   * @param givenName           givenName of the user. This is used to set the givenName (förnamn) if user will be created.
-   * @param sn                  sn of the user. This is used to set the sn (efternamn) if user will be created.
-   * @param sn                  affiliation of the user. This is used to set the affiliation if user will be created.
-   * @param ssn                 ssn of the person. This can be a 6 or 10 digit social security number.
-   * @param mailRoutingAddress  The mail routing address of the user.
-   * @param audit               Audit object initilized with audit data about the client and user.
-   * @return SvcUidPwd          object with the uid and password.
+   * @param uid                         uid of the user to activate
+   * @param domain                      domain of user in sukat. This is used to set the DN if user will be created.
+   * @param eduPersonPrimaryAffiliation the primary affiliation to set.
+   * @param audit                       Audit object initilized with audit data about the client and user.
+   * @return SvcUidPwd                  object with the uid and password.
    * @throws IllegalArgumentException if a user with the supplied uid can't be found
    * @see se.su.it.svc.commons.SvcAudit
    */
