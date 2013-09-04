@@ -41,8 +41,8 @@ import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.manager.Config
 import se.su.it.svc.manager.GldapoManager
-import se.su.it.svc.manager.Properties
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.util.GeneralUtils
 
@@ -184,7 +184,7 @@ public class AccountServiceImpl implements AccountService {
             socialSecurityNumber: ssn,
             objectClass: ["suPerson", "sSNObject", "person", "top"],
     )
-    suPerson.parent = Properties.instance.props.ldap.accounts.default.parent
+    suPerson.parent = Config.instance.props.ldap.accounts.default.parent
 
     log.debug "createSuPerson - Writing initial sukat record to sukat for uid<${uid}>"
     SuPersonQuery.initSuPerson(GldapoManager.LDAP_RW, suPerson)

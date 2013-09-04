@@ -44,7 +44,7 @@ import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuEnrollPerson
 import se.su.it.svc.ldap.SuPerson
-import se.su.it.svc.manager.Properties
+import se.su.it.svc.manager.Config
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.util.EnrollmentServiceUtils
 import spock.lang.Shared
@@ -253,7 +253,7 @@ class EnrollmentServiceImplTest extends Specification {
   @Test
   def "Test enrollUser scripts fail"() {
     setup:
-    Properties.instance.props.enrollment.skipCreate = "false"
+    Config.instance.props.enrollment.skipCreate = "false"
 
     SuEnrollPerson suEnrollPerson = new SuEnrollPerson(uid: "testuid")
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }

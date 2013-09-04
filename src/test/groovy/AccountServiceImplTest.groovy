@@ -47,7 +47,7 @@ import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.ldap.SuInitPerson
 import se.su.it.svc.ldap.SuPerson
-import se.su.it.svc.manager.Properties
+import se.su.it.svc.manager.Config
 import se.su.it.svc.query.SuPersonQuery
 
 /**
@@ -397,7 +397,7 @@ class AccountServiceImplTest extends spock.lang.Specification {
     suPersson.givenName == givenName
     suPersson.socialSecurityNumber == ssn
     suPersson.objectClass.containsAll(["suPerson","sSNObject","person","top"])
-    suPersson.parent == Properties.instance.props.ldap.accounts.default.parent
+    suPersson.parent == Config.instance.props.ldap.accounts.default.parent
   }
 
   @Test

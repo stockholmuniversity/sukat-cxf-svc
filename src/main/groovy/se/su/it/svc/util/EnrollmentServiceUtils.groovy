@@ -40,8 +40,8 @@ import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.PosixAccount
 import se.su.it.svc.ldap.SuEnrollPerson
 import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.manager.Config
 import se.su.it.svc.manager.GldapoManager
-import se.su.it.svc.manager.Properties
 import se.su.it.svc.query.SuPersonQuery
 
 import java.util.regex.Matcher
@@ -92,7 +92,7 @@ class EnrollmentServiceUtils {
     boolean error = false
     String uidNumber
 
-    boolean skipCreate = Properties.instance.props.enrollment.skipCreate == "true"
+    boolean skipCreate = Config.instance.props.enrollment.skipCreate == "true"
 
     if (skipCreate) {
       log.warn "Skipping enable user since skipCreate is set to $skipCreate"

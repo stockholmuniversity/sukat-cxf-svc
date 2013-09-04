@@ -41,20 +41,20 @@ import org.apache.log4j.Logger
  * the properties can then be accessed from the singleton objects field props.
  *
  * example:
- * def props = Properties.getInstance().props
+ * def props = Config.getInstance().props
  *
  * def databaseUser     = props.database.user
  * def databasePassword = props.database.password
  * def databaseServer   = props.database.serverURL
  *
  */
-class Properties {
-  private static final Logger logger = Logger.getLogger(se.su.it.svc.manager.Properties.class)
-  private static final Properties INSTANCE = new Properties()
+class Config {
+  private static final Logger logger = Logger.getLogger(Config.class)
+  private static final Config INSTANCE = new Config()
 
   public ConfigObject props
 
-  private Properties() {
+  private Config() {
     loadProperties()
   }
 
@@ -71,7 +71,7 @@ class Properties {
    * populates the public member field props with a groovy.util.ConfigObject containing the properties
    */
   private loadProperties() {
-    def props = new java.util.Properties()
+    def props = new Properties()
     String definedConfigFileName = System.getProperty("config.properties")
 
     if (definedConfigFileName != null) {

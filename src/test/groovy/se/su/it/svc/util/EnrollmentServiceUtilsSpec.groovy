@@ -6,7 +6,7 @@ import org.junit.Test
 import se.su.it.commons.ExecUtils
 import se.su.it.svc.ldap.SuEnrollPerson
 import se.su.it.svc.ldap.SuPerson
-import se.su.it.svc.manager.Properties
+import se.su.it.svc.manager.Config
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -80,7 +80,7 @@ class EnrollmentServiceUtilsSpec extends Specification {
     given:
     def posixAccoount = new SuEnrollPerson(objectClass: [])
     posixAccoount.metaClass.save = {}
-    Properties.instance.props.enrollment.skipCreate = "true"
+    Config.instance.props.enrollment.skipCreate = "true"
 
     when:
     util.enableUser("", "", posixAccoount)
@@ -96,7 +96,7 @@ class EnrollmentServiceUtilsSpec extends Specification {
     EnrollmentServiceUtils.getHomeDirectoryPath(_) >> "uid"
     def posixAccoount = new SuEnrollPerson(objectClass: [])
     posixAccoount.metaClass.save = {}
-    Properties.instance.props.enrollment.skipCreate = "false"
+    Config.instance.props.enrollment.skipCreate = "false"
 
     when:
     def ret = util.enableUser("", "", posixAccoount)

@@ -47,7 +47,7 @@ public class GldapoManager {
 
   public GldapoManager() {
     logger.info("Gldapo Init")
-    def props = Properties.getInstance().props
+    def props = Config.getInstance().props
 
     Gldapo.initialize(
       directories: [(this.LDAP_RO):
