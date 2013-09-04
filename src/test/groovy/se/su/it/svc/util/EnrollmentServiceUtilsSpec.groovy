@@ -4,9 +4,11 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import se.su.it.commons.ExecUtils
+import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuEnrollPerson
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.manager.Config
+import se.su.it.svc.query.SuPersonQuery
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -182,5 +184,75 @@ class EnrollmentServiceUtilsSpec extends Specification {
 
     then:
     person.mailLocalAddress.contains('foo@kaka.se')
+  }
+
+  def "activateUser should move the suPerson to the supplied domain"() {
+    given:
+    GroovyMock(EnrollmentServiceUtils, global: true)
+    EnrollmentServiceUtils.enableUser(*_) >> true
+    GroovyMock(SuPersonQuery, global: true)
+
+    SuPerson suPerson = new SuPerson()
+
+    when:
+    util.activateUser(suPerson, new SvcUidPwd(), "", "it.su.se")
+
+    then:
+    1 * SuPersonQuery.moveSuPerson(suPerson, 'dc=it,dc=su,dc=se')
+  }
+
+  def "activateUser should save the suPerson"() {
+    given:
+    GroovyMock(EnrollmentServiceUtils, global: true)
+    EnrollmentServiceUtils.enableUser(*_) >> true
+    GroovyMock(SuPersonQuery, global: true)
+
+    SuPerson suPerson = new SuPerson()
+
+    when:
+    util.activateUser(suPerson, new SvcUidPwd(), "", "it.su.se")
+
+    then:
+    1 * SuPersonQuery.saveSuPerson(suPerson)
+  }
+
+  def "activateUser should set affiliation"() {
+    given:
+    GroovyMock(EnrollmentServiceUtils, global: true)
+    EnrollmentServiceUtils.enableUser(*_) >> true
+
+    SuPerson suPerson = new SuPerson()
+
+    when:
+    util.activateUser(suPerson, new SvcUidPwd(), "affiliation", "it.su.se")
+
+    then:
+    1 * EnrollmentServiceUtils.setPrimaryAffiliation('affiliation', suPerson)
+  }
+
+  def "activateUser should set mail attributes"() {
+    given:
+    GroovyMock(EnrollmentServiceUtils, global: true)
+    EnrollmentServiceUtils.enableUser(*_) >> true
+
+    SuPerson suPerson = new SuPerson()
+
+    when:
+    util.activateUser(suPerson, new SvcUidPwd(), "", "it.su.se")
+
+    then:
+    1 * EnrollmentServiceUtils.setMailAttributes(suPerson, 'it.su.se')
+  }
+
+  def "activateUser throw exception if enable fails"() {
+    given:
+    GroovyMock(EnrollmentServiceUtils, global: true)
+    EnrollmentServiceUtils.enableUser(*_) >> false
+
+    when:
+    util.activateUser(new SuPerson(), new SvcUidPwd(), "", "it.su.se")
+
+    then:
+    thrown(RuntimeException)
   }
 }

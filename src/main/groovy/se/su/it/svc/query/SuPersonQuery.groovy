@@ -109,4 +109,16 @@ public class SuPersonQuery {
     suPerson.directory = directory
     suPerson.save()
   }
+
+  /**
+   * Move a SuPerson object to a new location.
+   *
+   * @return void.
+   * @see se.su.it.svc.ldap.SuPerson
+   */
+  static void moveSuPerson(SuPerson person, String parentDn) {
+    if (parentDn && person?.uid) {
+      person?.move("uid=${person.uid},${parentDn}")
+    }
+  }
 }

@@ -36,7 +36,6 @@ import se.su.it.commons.ExecUtils
 import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.PosixAccount
-import se.su.it.svc.ldap.SuEnrollPerson
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.manager.Config
 import se.su.it.svc.query.SuPersonQuery
@@ -184,34 +183,32 @@ class EnrollmentServiceUtils {
   /**
    * Sets mail attributes & objectClass 'inetLocalMailRecipient' on SuEnrollPerson
    *
-   * @param suEnrollPerson the SuEnrollPerson to set attributes on
+   * @param suPerson the SuEnrollPerson to set attributes on
    * @param domain the mail domain
    */
-  static void setMailAttributes(SuEnrollPerson suEnrollPerson, String domain) {
-    String myMail = suEnrollPerson.uid + "@" + domain
+  static void setMailAttributes(SuPerson suPerson, String domain) {
+    String myMail = suPerson.uid + "@" + domain
 
-    suEnrollPerson.mail = [myMail]
+    suPerson.mail = [myMail]
 
-    if (suEnrollPerson.mailLocalAddress) {
-      if (!suEnrollPerson.mailLocalAddress.contains(myMail)) {
-        suEnrollPerson.mailLocalAddress.add(myMail)
+    if (suPerson.mailLocalAddress) {
+      if (!suPerson.mailLocalAddress.contains(myMail)) {
+        suPerson.mailLocalAddress.add(myMail)
       }
     } else {
-      suEnrollPerson.mailLocalAddress = [myMail]
+      suPerson.mailLocalAddress = [myMail]
 
-      suEnrollPerson.objectClass.add("inetLocalMailRecipient")
+      suPerson.objectClass.add("inetLocalMailRecipient")
     }
   }
 
   /**
-   * Enroll an existing user
+   * Activate an existing user
    *
-   * @param nin the users nin
    * @param suEnrollPerson person to enroll
    * @param svcUidPwd user & password
    * @param eduPersonPrimaryAffiliation the primary affiliation to set
    * @param domain the domain
-   * @param mailRoutingAddress the mailRoutingAddress
    */
   static void activateUser(
           SuPerson suPerson,
@@ -220,18 +217,17 @@ class EnrollmentServiceUtils {
           String domain) {
     log.debug("enrollUser - Now enabling uid <${suPerson.uid}>.")
 
-    suPerson = new SuEnrollPerson(suPerson.properties)
-
     boolean enabledUser = enableUser(suPerson.uid, svcUidPwd.password, suPerson)
 
     if (!enabledUser) {
       log.error("enrollUser - enroll failed while excecuting perl scripts for uid <${suPerson.uid}>")
-      throw new Exception("enrollUser - enroll failed in scripts.")
+      throw new RuntimeException("enrollUser - enroll failed in scripts.")
     }
 
     setPrimaryAffiliation(eduPersonPrimaryAffiliation, suPerson)
     setMailAttributes(suPerson, domain)
 
+    SuPersonQuery.moveSuPerson(suPerson, AccountServiceUtils.domainToDN(domain))
     SuPersonQuery.saveSuPerson(suPerson)
     log.info("enrollUser - User with uid <${suPerson.uid}> now enabled.")
   }
