@@ -213,7 +213,7 @@ class EnrollmentServiceUtilsSpec extends Specification {
     util.activateUser(suPerson, new SvcUidPwd(), "", "it.su.se")
 
     then:
-    1 * SuPersonQuery.saveSuPerson(suPerson)
+    1 * SuPersonQuery.updateSuPerson(suPerson)
   }
 
   def "activateUser should set affiliation"() {

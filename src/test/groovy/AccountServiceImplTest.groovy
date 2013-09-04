@@ -45,8 +45,8 @@ import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuEnrollPerson
-import se.su.it.svc.ldap.SuInitPerson
 import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.ldap.SuPersonStub
 import se.su.it.svc.manager.Config
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.util.EnrollmentServiceUtils
@@ -68,7 +68,7 @@ class AccountServiceImplTest extends Specification {
     this.service = null
     Kadmin.metaClass = null
     GldapoSchemaRegistry.metaClass = null
-    SuInitPerson.metaClass = null
+    SuPersonStub.metaClass = null
     SuPersonQuery.metaClass = null
     PasswordUtils.metaClass = null
     ExecUtils.metaClass = null
@@ -128,7 +128,7 @@ class AccountServiceImplTest extends Specification {
     String myaffiliation = null
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> new SuPerson(eduPersonPrimaryAffiliation: "kalle") }
-    SuPersonQuery.metaClass.static.saveSuPerson = {SuPerson person -> myaffiliation = person.eduPersonPrimaryAffiliation}
+    SuPersonQuery.metaClass.static.updateSuPerson = {SuPerson person -> myaffiliation = person.eduPersonPrimaryAffiliation}
     def accountServiceImpl = new AccountServiceImpl()
     when:
     accountServiceImpl.updatePrimaryAffiliation("testuid", "employee", new SvcAudit())
@@ -266,7 +266,7 @@ class AccountServiceImplTest extends Specification {
     String listEntry0 = null
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> new SuPerson(title: ["systemdeveloper"], eduPersonAffiliation: ["employee"]) }
-    SuPersonQuery.metaClass.static.saveSuPerson = {SuPerson person -> title = person.title;listEntry0=person.eduPersonAffiliation.iterator().next()}
+    SuPersonQuery.metaClass.static.updateSuPerson = {SuPerson person -> title = person.title;listEntry0=person.eduPersonAffiliation.iterator().next()}
     def accountServiceImpl = new AccountServiceImpl()
     when:
     accountServiceImpl.updateSuPerson("testuid",suPerson, new SvcAudit())
@@ -379,9 +379,9 @@ class AccountServiceImplTest extends Specification {
     def ssn = '0000000000'
     def givenName = 'Test'
     def sn = 'Testsson'
-    SuPerson suPersson = null
+    SuPersonStub suPersson = null
 
-    SuPerson.metaClass.parent = "_"
+    SuPersonStub.metaClass.parent = "_"
 
     GroovyMock(SuPersonQuery, global: true)
     SuPersonQuery.initSuPerson(*_) >> { a, b -> suPersson = b }
@@ -574,7 +574,7 @@ class AccountServiceImplTest extends Specification {
     SuPerson suPerson = new SuPerson(mailRoutingAddress: "kalle")
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return suPerson }
-    SuPersonQuery.metaClass.static.saveSuPerson = {SuPerson tmpp -> suPerson.mailRoutingAddress = tmpp.mailRoutingAddress}
+    SuPersonQuery.metaClass.static.updateSuPerson = {SuPerson tmpp -> suPerson.mailRoutingAddress = tmpp.mailRoutingAddress}
     def accountServiceImpl = new AccountServiceImpl()
     when:
     accountServiceImpl.setMailRoutingAddress("testuid", "mail@test.su.se", new SvcAudit())

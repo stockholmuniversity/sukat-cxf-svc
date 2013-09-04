@@ -36,7 +36,7 @@ import gldapo.schema.annotation.GldapoNamingAttribute
 /**
  * GLDAPO schema class for init SuEnrollPerson.
  */
-class SuEnrollPerson extends SuPerson implements PosixAccount, Serializable {
+class SuEnrollPerson extends SuPerson implements Serializable {
 
   static final long serialVersionUID = -687088492884005033L;
 

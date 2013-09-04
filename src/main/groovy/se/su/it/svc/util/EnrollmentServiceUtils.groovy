@@ -35,7 +35,6 @@ import groovy.util.logging.Slf4j
 import se.su.it.commons.ExecUtils
 import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcUidPwd
-import se.su.it.svc.ldap.PosixAccount
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.manager.Config
 import se.su.it.svc.query.SuPersonQuery
@@ -84,7 +83,7 @@ class EnrollmentServiceUtils {
    * @param person a object to set attributes on.
    * @return true the operation succeeds, false if it fails.
    */
-  public static boolean enableUser(String uid, String password, PosixAccount person) {
+  public static boolean enableUser(String uid, String password, SuPerson person) {
     boolean error = false
     String uidNumber
 
@@ -110,7 +109,7 @@ class EnrollmentServiceUtils {
       person.homeDirectory = getHomeDirectoryPath(uid)
       person.uidNumber = uidNumber
       person.gidNumber = DEFAULT_USER_GID
-      person.save()
+      SuPersonQuery.updateSuPerson(person)
     }
 
     return !error
@@ -228,7 +227,7 @@ class EnrollmentServiceUtils {
     setMailAttributes(suPerson, domain)
 
     SuPersonQuery.moveSuPerson(suPerson, AccountServiceUtils.domainToDN(domain))
-    SuPersonQuery.saveSuPerson(suPerson)
+    SuPersonQuery.updateSuPerson(suPerson)
     log.info("enrollUser - User with uid <${suPerson.uid}> now enabled.")
   }
 }
