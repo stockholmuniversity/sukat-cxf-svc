@@ -169,19 +169,16 @@ public class AccountServiceImpl implements AccountService {
   @Requires({
     ! LdapAttributeValidator.validateAttributes([
             uid: uid,
-            domain: domain,
             ssn: ssn,
             givenName: givenName,
             sn: sn,
-            svcsuperson: person,
             audit: audit ])
   })
-  public void createSuPerson(String uid, String ssn, String givenName, String sn, SvcSuPersonVO person, SvcAudit audit) {
+  public void createSuPerson(String uid, String ssn, String givenName, String sn, SvcAudit audit) {
 
     if(SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid))
       throw new IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
 
-    //Begin init entry in sukat
     log.debug("createSuPerson - Creating initial sukat record from function arguments for uid<${uid}>")
     SuPerson suPerson = new SuPerson(
             uid: uid,
@@ -195,11 +192,6 @@ public class AccountServiceImpl implements AccountService {
 
     log.debug "createSuPerson - Writing initial sukat record to sukat for uid<${uid}>"
     SuPersonQuery.initSuPerson(GldapoManager.LDAP_RW, suPerson)
-    //End init entry in sukat
-
-    log.debug "createSuPerson - Updating standard attributes according to function argument object for uid<${uid}>"
-    updateSuPerson(uid,person,audit)
-    log.info "createSuPerson - Uid<${uid}> created"
   }
 
   /**

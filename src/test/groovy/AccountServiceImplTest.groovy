@@ -32,6 +32,7 @@
 
 
 
+
 import gldapo.GldapoSchemaRegistry
 import org.apache.commons.lang.NotImplementedException
 import org.gcontracts.PostconditionViolation
@@ -46,6 +47,7 @@ import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.ldap.SuInitPerson
 import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.manager.Properties
 import se.su.it.svc.query.SuPersonQuery
 
 /**
@@ -274,7 +276,7 @@ class AccountServiceImplTest extends spock.lang.Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson(null,"it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.createSuPerson(null,"196601010357","Test","Testsson", new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -287,43 +289,31 @@ class AccountServiceImplTest extends spock.lang.Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se","6601010357","Test","Testsson",new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","6601010357","Test","Testsson", new SvcAudit())
 
     then:
     thrown(IllegalArgumentException)
   }
 
   @Test
-  def "Test createSuPerson with null domain argument"() {
+  def "Test createSuPerson with null ssn argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest",null,"196601010357","Test","Testsson",new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest",null,"Test","Testsson", new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
   }
 
   @Test
-  def "Test createSuPerson with null nin argument"() {
+  def "Test createSuPerson with wrong ssn argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se",null,"Test","Testsson",new SvcSuPersonVO(), new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  @Test
-  def "Test createSuPerson with wrong nin argument"() {
-    setup:
-    def accountServiceImpl = new AccountServiceImpl()
-
-    when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se","20001128-5764","Test","Testsson",new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","20001128-5764","Test","Testsson", new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -335,7 +325,7 @@ class AccountServiceImplTest extends spock.lang.Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357",null,"Testsson",new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","196601010357",null,"Testsson", new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -347,7 +337,7 @@ class AccountServiceImplTest extends spock.lang.Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test",null,new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","196601010357","Test",null, new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -359,7 +349,7 @@ class AccountServiceImplTest extends spock.lang.Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",null, new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","196601010357","Test","Testsson", new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -371,7 +361,7 @@ class AccountServiceImplTest extends spock.lang.Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","it.su.se","196601010357","Test","Testsson",new SvcSuPersonVO(), null)
+    accountServiceImpl.createSuPerson("testtest","196601010357","Test","Testsson", null)
 
     then:
     thrown(PreconditionViolation)
@@ -381,13 +371,10 @@ class AccountServiceImplTest extends spock.lang.Specification {
   def "Test createSuPerson true flow"() {
     setup:
     def uid = 'uid'
-    def domain = 'it.su.se'
     def ssn = '0000000000'
     def givenName = 'Test'
     def sn = 'Testsson'
-    def person = new SvcSuPersonVO()
     SuPerson suPersson = null
-    boolean updateOk = false
 
     SuPerson.metaClass.parent = "_"
 
@@ -395,29 +382,22 @@ class AccountServiceImplTest extends spock.lang.Specification {
     SuPersonQuery.initSuPerson(*_) >> { a, b -> suPersson = b }
     SuPersonQuery.getSuPersonFromUID(*_) >> null
 
-    def spy = Spy(AccountServiceImpl) {
-      1* updateSuPerson(uid, person, _) >> { updateOk = true }
-    }
-
     when:
-    spy.createSuPerson(
+    new AccountServiceImpl().createSuPerson(
             uid,
-            domain,
             ssn,
             givenName,
             sn,
-            person,
             new SvcAudit())
 
     then:
-    updateOk
     suPersson.uid == uid
     suPersson.cn == givenName + ' ' + sn
     suPersson.sn == sn
     suPersson.givenName == givenName
     suPersson.socialSecurityNumber == ssn
-    suPersson.objectClass.containsAll(["suPerson","sSNObject","eduPerson","inetOrgPerson","organizationalPerson","person","top"])
-    suPersson.parent == "dc=it,dc=su,dc=se"
+    suPersson.objectClass.containsAll(["suPerson","sSNObject","person","top"])
+    suPersson.parent == Properties.instance.props.ldap.accounts.default.parent
   }
 
   @Test
