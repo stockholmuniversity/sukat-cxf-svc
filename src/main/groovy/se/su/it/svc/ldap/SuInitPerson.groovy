@@ -43,7 +43,6 @@ class SuInitPerson implements PosixAccount, Serializable {
   @GldapoNamingAttribute
   String uid
   Set<String> objectClass
-  String norEduPersonNIN
   String socialSecurityNumber
   String eduPersonPrincipalName
   String loginShell

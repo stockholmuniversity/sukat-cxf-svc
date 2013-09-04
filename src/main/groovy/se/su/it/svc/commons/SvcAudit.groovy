@@ -31,6 +31,9 @@
 
 package se.su.it.svc.commons
 
+import javax.xml.bind.annotation.XmlAccessType
+import javax.xml.bind.annotation.XmlAccessorType
+
 /**
  *  Audit class for all webservice requests.<br />
  *  This object is used by the Spring AOP Aspect enabled class AuditAspect.<br />
@@ -38,10 +41,8 @@ package se.su.it.svc.commons
  * <b>ipAddress</b> ip of Application Server.<br />
  * <b>client</b> ip of Client invoker.<br />
  */
-import javax.xml.bind.annotation.XmlAccessType
-import javax.xml.bind.annotation.XmlAccessorType
-import javax.xml.bind.annotation.XmlRootElement
 import javax.xml.bind.annotation.XmlAttribute
+import javax.xml.bind.annotation.XmlRootElement
 
 @XmlAccessorType( XmlAccessType.NONE )
 @XmlRootElement

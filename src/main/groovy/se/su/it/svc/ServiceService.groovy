@@ -32,10 +32,10 @@
 package se.su.it.svc
 
 import se.su.it.svc.annotations.SuCxfSvcSpocpRole
+import se.su.it.svc.audit.AuditAspectMethodDetails
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuService
 import se.su.it.svc.ldap.SuServiceDescription
-import se.su.it.svc.audit.AuditAspectMethodDetails
 
 @SuCxfSvcSpocpRole(role = "sukat-service-admin")
 public interface ServiceService {

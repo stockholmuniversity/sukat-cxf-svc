@@ -31,8 +31,8 @@
 
 package se.su.it.svc.ldap
 
-import gldapo.schema.annotation.GldapoSchemaFilter
 import gldapo.schema.annotation.GldapoNamingAttribute
+import gldapo.schema.annotation.GldapoSchemaFilter
 
 class SuSubAccount implements Serializable {
 

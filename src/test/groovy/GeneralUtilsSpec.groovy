@@ -49,6 +49,24 @@ class GeneralUtilsSpec extends Specification {
     '++' + '_'*11 | '++' + '_'*11 // 13 chars, nothing happens.
   }
 
+  @Test
+  @Unroll
+  void "uidToKrb5Principal: When given uid: \'#uid\' we expect '\'#expected\'"() {
+    expect:
+    GeneralUtils.uidToKrb5Principal(uid) == expected
+
+    where:
+    uid              | expected
+    null             | null
+    ''               | ''
+    '****'           | '****'
+    '****.****'      | '****/****'
+    '****.'          | '****/'
+    '.****'          | '/****'
+    '****.****/****' | '****/****/****'
+    '****.****.****' | '****/****.****'
+  }
+
   @Unroll
   def "uidToPrincipal: When given uid: '#uid' expect '#principal'"() {
     expect: GeneralUtils.uidToPrincipal(uid) == principal

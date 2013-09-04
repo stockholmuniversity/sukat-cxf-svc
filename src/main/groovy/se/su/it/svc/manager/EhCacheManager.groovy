@@ -31,15 +31,15 @@
 
 package se.su.it.svc.manager
 
+import net.sf.ehcache.Cache
 import net.sf.ehcache.CacheManager
 import net.sf.ehcache.Ehcache
-import net.sf.ehcache.Cache
-import net.sf.ehcache.config.CacheConfiguration
 import net.sf.ehcache.Element
-import net.sf.ehcache.config.PersistenceConfiguration
-import org.apache.log4j.Logger
+import net.sf.ehcache.config.CacheConfiguration
+import net.sf.ehcache.config.SearchAttribute
 import net.sf.ehcache.config.Searchable
-import net.sf.ehcache.config.SearchAttribute;
+import org.apache.log4j.Logger
+
 /**
  * Created by: Jack Enqvist (jaen4109)
  * Date: 2012-08-30 ~ 11:22
@@ -50,7 +50,7 @@ class EhCacheManager {
   private static final Logger logger = Logger.getLogger(EhCacheManager.class)
   def final Object NULL = "NULL"
   def final int DEFAULT_TTL = (60 * 10)
-  private props = Properties.getInstance().props
+  private props = Config.getInstance().props
 
 
   def final static EhCacheManager INSTANCE = new EhCacheManager()

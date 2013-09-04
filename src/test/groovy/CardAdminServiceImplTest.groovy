@@ -29,17 +29,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import se.su.it.svc.query.SuCardOrderQuery
-import spock.lang.*
-import org.junit.Test
-import se.su.it.svc.CardInfoServiceImpl
-import se.su.it.svc.commons.SvcAudit
-import se.su.it.svc.ldap.SuPerson
-import se.su.it.svc.ldap.SuCard
+
 import gldapo.GldapoSchemaRegistry
-import se.su.it.svc.query.SuPersonQuery
-import se.su.it.svc.query.SuCardQuery
+import org.junit.Test
 import se.su.it.svc.CardAdminServiceImpl
+import se.su.it.svc.commons.SvcAudit
+import se.su.it.svc.ldap.SuCard
+import se.su.it.svc.query.SuCardOrderQuery
+import se.su.it.svc.query.SuCardQuery
 
 class CardAdminServiceImplTest extends spock.lang.Specification{
   @Test

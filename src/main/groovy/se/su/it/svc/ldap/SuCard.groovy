@@ -33,10 +33,12 @@ package se.su.it.svc.ldap
 
 import gldapo.schema.annotation.GldapoNamingAttribute
 import gldapo.schema.annotation.GldapoSchemaFilter
-import javax.xml.bind.annotation.XmlAccessorType
+
 import javax.xml.bind.annotation.XmlAccessType
-import javax.xml.bind.annotation.XmlRootElement
+import javax.xml.bind.annotation.XmlAccessorType
 import javax.xml.bind.annotation.XmlAttribute
+import javax.xml.bind.annotation.XmlRootElement
+
 /**
  * GLDAPO schema class for SU University Cards also used by web service.
  */

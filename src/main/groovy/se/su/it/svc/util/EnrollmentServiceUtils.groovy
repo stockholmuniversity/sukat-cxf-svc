@@ -34,8 +34,11 @@ package se.su.it.svc.util
 import groovy.util.logging.Slf4j
 import se.su.it.commons.ExecUtils
 import se.su.it.svc.commons.LdapAttributeValidator
+import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.PosixAccount
-import se.su.it.svc.manager.Properties
+import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.manager.Config
+import se.su.it.svc.query.SuPersonQuery
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -85,7 +88,7 @@ class EnrollmentServiceUtils {
     boolean error = false
     String uidNumber
 
-    boolean skipCreate = Properties.instance.props.enrollment.skipCreate == "true"
+    boolean skipCreate = Config.instance.props.enrollment.skipCreate == "true"
 
     if (skipCreate) {
       log.warn "Skipping enable user since skipCreate is set to $skipCreate"
@@ -155,5 +158,77 @@ class EnrollmentServiceUtils {
   public static String getHomeDirectoryPath(String uid) {
     def invalid = LdapAttributeValidator.validateAttributes(uid: uid)
     invalid ? null : AFS_HOME_DIR_BASE + uid.charAt(0) + "/" + uid.charAt(1) + "/" + uid
+  }
+
+  /**
+   * Sets primary affiliation
+   *
+   * @param eduPersonPrimaryAffiliation the affiliation
+   * @param suEnrollPerson the SuEnrollPerson
+   */
+  static void setPrimaryAffiliation(String eduPersonPrimaryAffiliation, SuPerson suPerson) {
+    suPerson.eduPersonPrimaryAffiliation = eduPersonPrimaryAffiliation
+
+    suPerson.objectClass.add("eduPerson")
+
+    if (suPerson.eduPersonAffiliation != null) {
+      if (!suPerson.eduPersonAffiliation.contains(eduPersonPrimaryAffiliation)) {
+        suPerson.eduPersonAffiliation.add(eduPersonPrimaryAffiliation)
+      }
+    } else {
+      suPerson.eduPersonAffiliation = [eduPersonPrimaryAffiliation]
+    }
+  }
+
+  /**
+   * Sets mail attributes & objectClass 'inetLocalMailRecipient' on SuEnrollPerson
+   *
+   * @param suPerson the SuEnrollPerson to set attributes on
+   * @param domain the mail domain
+   */
+  static void setMailAttributes(SuPerson suPerson, String domain) {
+    String myMail = suPerson.uid + "@" + domain
+
+    suPerson.mail = [myMail]
+
+    if (suPerson.mailLocalAddress) {
+      if (!suPerson.mailLocalAddress.contains(myMail)) {
+        suPerson.mailLocalAddress.add(myMail)
+      }
+    } else {
+      suPerson.mailLocalAddress = [myMail]
+
+      suPerson.objectClass.add("inetLocalMailRecipient")
+    }
+  }
+
+  /**
+   * Activate an existing user
+   *
+   * @param suEnrollPerson person to enroll
+   * @param svcUidPwd user & password
+   * @param eduPersonPrimaryAffiliation the primary affiliation to set
+   * @param domain the domain
+   */
+  static void activateUser(
+          SuPerson suPerson,
+          SvcUidPwd svcUidPwd,
+          String eduPersonPrimaryAffiliation,
+          String domain) {
+    log.debug("enrollUser - Now enabling uid <${suPerson.uid}>.")
+
+    boolean enabledUser = enableUser(suPerson.uid, svcUidPwd.password, suPerson)
+
+    if (!enabledUser) {
+      log.error("enrollUser - enroll failed while excecuting perl scripts for uid <${suPerson.uid}>")
+      throw new RuntimeException("enrollUser - enroll failed in scripts.")
+    }
+
+    setPrimaryAffiliation(eduPersonPrimaryAffiliation, suPerson)
+    setMailAttributes(suPerson, domain)
+
+    SuPersonQuery.moveSuPerson(suPerson, AccountServiceUtils.domainToDN(domain))
+    SuPersonQuery.saveSuPerson(suPerson)
+    log.info("enrollUser - User with uid <${suPerson.uid}> now enabled.")
   }
 }

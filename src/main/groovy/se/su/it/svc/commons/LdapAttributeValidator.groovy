@@ -31,40 +31,40 @@
 
 package se.su.it.svc.commons
 
-import org.apache.log4j.Logger
+import groovy.util.logging.Slf4j
 
-/**
- * Created with IntelliJ IDEA.
- * User: jqvar
- * Date: 2013-02-26
- * Time: 11:22
- * To change this template use File | Settings | File Templates.
- */
+@Slf4j
 public class LdapAttributeValidator {
-  private static final Logger logger = Logger.getLogger(LdapAttributeValidator.class)
+
   private static final String validateAttributesString = "validateAttributes"
   private static final List<String> affiliations = ["student","member","employee","alumni","other"]
 
   public static String validateAttributes(Map<String, Object> map) {
     String error = null
-    map.each {String attributeName, Object val ->
-      if (error)
-        return
-      switch (attributeName.toLowerCase()) {
-        case "audit"                        : try {validateAudit(val)}                        catch (Exception x) {error = x.message};break
-        case "uid"                          : try {validateUid(val)}                          catch (Exception x) {error = x.message};break
-        case "edupersonprimaryaffiliation"  : try {validateEduPersonPrimaryAffiliation(val)}  catch (Exception x) {error = x.message};break
-        case "domain"                       : try {validateDomain(val)}                       catch (Exception x) {error = x.message};break
-        case "nin"                          : try {validateNin(val)}                          catch (Exception x) {error = x.message};break
-        case "ssn"                          : try {validateSsn(val)}                          catch (Exception x) {error = x.message};break
-        case "ssnornin"                     : try {validateSsnOrNin(val)}                     catch (Exception x) {error = x.message};break
-        case "givenname"                    : try {validategivenName(val)}                    catch (Exception x) {error = x.message};break
-        case "sn"                           : try {validateSn(val)}                           catch (Exception x) {error = x.message};break
-        case "svcsuperson"                  : try {validateSvcSuPersonVO(val)}                catch (Exception x) {error = x.message};break
-        case "mailroutingaddress"           : try {validateMailRoutingAddress(val)}           catch (Exception x) {error = x.message};break
-        default: logger.debug("${validateAttributesString} - Attribute <${attributeName}> dont have a validation role!");break
+
+    try {
+      map.each { String attributeName, Object val ->
+        switch (attributeName.toLowerCase()) {
+          case "audit"                       : validateAudit(val); break
+          case "uid"                         : validateUid(val); break
+          case "edupersonprimaryaffiliation" : validateEduPersonPrimaryAffiliation(val); break
+          case "domain"                      : validateDomain(val); break
+          case "nin"                         : validateNin(val); break
+          case "ssn"                         : validateSsn(val); break
+          case "ssnornin"                    : validateSsnOrNin(val); break
+          case "givenname"                   : validategivenName(val); break
+          case "sn"                          : validateSn(val); break
+          case "svcsuperson"                 : validateSvcSuPersonVO(val); break
+          case "mailroutingaddress"          : validateMailRoutingAddress(val); break
+          default:
+            log.debug("${validateAttributesString} - Attribute <${attributeName}> dont have a validation role!")
+            break
+        }
       }
+    } catch (x) {
+      error = x.message
     }
+
     return error
   }
 
@@ -193,7 +193,6 @@ public class LdapAttributeValidator {
     if (!svcPerson instanceof SvcSuPersonVO){
       throwMe(validateAttributesString,"Attribute validation failed for SvcSuPersonVO object <${svcPerson}>. SvcSuPersonVO object need to be of class SvcSuPersonVO.")
     }
-    SvcSuPersonVO tmpSP = (SvcSuPersonVO)svcPerson
   }
 
   private static void validateMailRoutingAddress(Object mailRoutingAddress) {

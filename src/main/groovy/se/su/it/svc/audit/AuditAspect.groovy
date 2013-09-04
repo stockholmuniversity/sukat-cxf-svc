@@ -32,6 +32,8 @@
 package se.su.it.svc.audit
 
 import groovy.util.logging.Slf4j
+import org.aopalliance.intercept.MethodInterceptor
+import org.aopalliance.intercept.MethodInvocation
 
 /**
  * Created with IntelliJ IDEA.
@@ -40,14 +42,11 @@ import groovy.util.logging.Slf4j
  * Time: 12:59
  * To change this template use File | Settings | File Templates.
  */
-
-import org.aopalliance.intercept.MethodInterceptor
-import org.aopalliance.intercept.MethodInvocation
+import se.su.it.svc.commons.SvcAudit
 
 import java.lang.annotation.Annotation
 import java.lang.reflect.Method
 import java.sql.Timestamp
-import se.su.it.svc.commons.SvcAudit
 
 @Slf4j
 public class AuditAspect implements MethodInterceptor {
