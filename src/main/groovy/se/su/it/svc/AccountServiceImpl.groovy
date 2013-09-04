@@ -42,8 +42,8 @@ import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.manager.GldapoManager
+import se.su.it.svc.manager.Properties
 import se.su.it.svc.query.SuPersonQuery
-import se.su.it.svc.util.AccountServiceUtils
 import se.su.it.svc.util.GeneralUtils
 
 import javax.jws.WebParam
@@ -176,7 +176,7 @@ public class AccountServiceImpl implements AccountService {
             svcsuperson: person,
             audit: audit ])
   })
-  public void createSuPerson(String uid, String domain, String ssn, String givenName, String sn, SvcSuPersonVO person, SvcAudit audit) {
+  public void createSuPerson(String uid, String ssn, String givenName, String sn, SvcSuPersonVO person, SvcAudit audit) {
 
     if(SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid))
       throw new IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
@@ -192,7 +192,7 @@ public class AccountServiceImpl implements AccountService {
             //TODO: Remove unnecessary objectClasses
             objectClass: ["suPerson","sSNObject","eduPerson","inetLocalMailRecipient","inetOrgPerson","organizationalPerson","person","top"],
     )
-    suPerson.parent = AccountServiceUtils.domainToDN(domain)
+    suPerson.parent = Properties.instance.props.ldap.accounts.default.parent
 
     log.debug "createSuPerson - Writing initial sukat record to sukat for uid<${uid}>"
     SuPersonQuery.initSuPerson(GldapoManager.LDAP_RW, suPerson)

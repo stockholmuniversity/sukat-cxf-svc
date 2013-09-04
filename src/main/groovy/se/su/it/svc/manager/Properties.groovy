@@ -105,16 +105,20 @@ class Properties {
       //Ldap
       props.put("ldap.serverro", "ldap://ldap-test.su.se")
       props.put("ldap.serverrw", "ldap://sukat-test-ldaprw02.it.su.se")
+      props.put("ldap.accounts.default.parent", "dc=student,dc=su,dc=se")
+
       //Ssl
       props.put("http.port", 443)
       props.put("ssl.enabled", true);
       props.put("ssl.keystore", "cxf-svc-server.keystore")
       props.put("ssl.password", "changeit")
+
       //Spnego
       props.put("spnego.conf","/etc/spnego.conf");
       props.put("spnego.properties", "spnego.properties")
       props.put("spnego.realm", "SU.SE")
       props.put("spnego.kdc", "kerberos.su.se")
+
       //Ehcache
       props.put("ehcache.maxElementsInMemory", 10000)
       props.put("ehcache.eternal", false)
