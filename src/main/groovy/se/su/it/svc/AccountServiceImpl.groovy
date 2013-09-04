@@ -42,6 +42,7 @@ import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.ldap.SuPersonStub
 import se.su.it.svc.manager.Config
 import se.su.it.svc.manager.GldapoManager
 import se.su.it.svc.query.SuPersonQuery
@@ -85,7 +86,7 @@ public class AccountServiceImpl implements AccountService {
     person.eduPersonPrimaryAffiliation = affiliation
 
     log.debug("updatePrimaryAffiliation - Replacing affiliation=<${person?.eduPersonPrimaryAffiliation}> with affiliation=<${affiliation}> for uid=<${uid}>")
-    SuPersonQuery.saveSuPerson(person)
+    SuPersonQuery.updateSuPerson(person)
     log.info("updatePrimaryAffiliation - Updated affiliation for uid=<${uid}> with affiliation=<${person.eduPersonPrimaryAffiliation}>")
   }
 
@@ -146,7 +147,7 @@ public class AccountServiceImpl implements AccountService {
     originalPerson.applySuPersonDifference(person)
     log.debug("updateSuPerson - Trying to update SuPerson uid<${originalPerson.uid}>")
 
-    SuPersonQuery.saveSuPerson(originalPerson)
+    SuPersonQuery.updateSuPerson(originalPerson)
     log.info("updateSuPerson - Updated SuPerson uid<${originalPerson.uid}>")
   }
 
@@ -160,7 +161,7 @@ public class AccountServiceImpl implements AccountService {
    * @param audit Audit object initilized with audit data about the client and user.
    * @throws IllegalArgumentException if a user with the supplied uid already exists
    * @see se.su.it.svc.ldap.SuPerson
-   * @see se.su.it.svc.ldap.SuInitPerson
+   * @see se.su.it.svc.ldap.SuPersonStub
    * @see se.su.it.svc.commons.SvcSuPersonVO
    * @see se.su.it.svc.commons.SvcAudit
    */
@@ -178,7 +179,7 @@ public class AccountServiceImpl implements AccountService {
       throw new IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
 
     log.debug("createSuPerson - Creating initial sukat record from function arguments for uid<${uid}>")
-    SuPerson suPerson = new SuPerson(
+    SuPersonStub suPerson = new SuPersonStub(
             uid: uid,
             cn: givenName + " " + sn,
             sn: sn,
@@ -207,14 +208,14 @@ public class AccountServiceImpl implements AccountService {
     ! LdapAttributeValidator.validateAttributes([
             uid: uid,
             domain: domain,
-            eduPersonPrimaryAffiliation: eduPersonPrimaryAffiliation,
+            affiliation: affiliations,
             audit: audit])
   })
   @Ensures({ result && result.uid && result.password && result.password.size() == 10 })
   public SvcUidPwd activateSuPerson(
           String uid,
           String domain,
-          String eduPersonPrimaryAffiliation,
+          String[] affiliations,
           SvcAudit audit) {
 
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
@@ -223,7 +224,7 @@ public class AccountServiceImpl implements AccountService {
       SvcUidPwd svcUidPwd = new SvcUidPwd(uid: uid)
       svcUidPwd.password = PasswordUtils.genRandomPassword(10, 10)
 
-      EnrollmentServiceUtils.activateUser(suPerson, svcUidPwd, eduPersonPrimaryAffiliation, domain)
+      EnrollmentServiceUtils.activateUser(suPerson, svcUidPwd, affiliations, domain)
 
       return svcUidPwd
     }
@@ -256,7 +257,7 @@ public class AccountServiceImpl implements AccountService {
       //TODO: terminatePerson.eduPersonAffiliation ["other"]
       //TODO: terminatePerson.eduPersonPrimaryAffiliation = "other"
       //TODO: log.debug("terminateSuPerson - Trying to terminate SuPerson uid<${terminatePerson.uid}>")
-      //TODO: SuPersonQuery.saveSuPerson(terminatePerson)
+      //TODO: SuPersonQuery.updateSuPerson(terminatePerson)
       //TODO: Kadmin kadmin = Kadmin.newInstance()
       //TODO: kadmin.resetOrCreatePrincipal(uid);
       //TODO: log.info("terminateSuPerson - Terminated SuPerson uid<${terminatePerson.uid}>")
@@ -313,12 +314,12 @@ public class AccountServiceImpl implements AccountService {
     }
 
     suPerson.mailRoutingAddress = mailRoutingAddress
-    SuPersonQuery.saveSuPerson(suPerson)
+    SuPersonQuery.updateSuPerson(suPerson)
     log.debug("setMailRoutingAddress - Changed mailroutingaddress to <${mailRoutingAddress}> for uid <${uid}>")
   }
 
   /**
-   * Finds all accounts in ldap based on socialSecurityNumber
+   * Finds all SuPersons in ldap based on socialSecurityNumber
    *
    * @param ssn in 10 numbers (YYMMDDXXXX)
    * @param audit Audit object initilized with audit data about the client and user.

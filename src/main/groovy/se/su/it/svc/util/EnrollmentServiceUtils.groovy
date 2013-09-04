@@ -35,7 +35,6 @@ import groovy.util.logging.Slf4j
 import se.su.it.commons.ExecUtils
 import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcUidPwd
-import se.su.it.svc.ldap.PosixAccount
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.manager.Config
 import se.su.it.svc.query.SuPersonQuery
@@ -84,7 +83,7 @@ class EnrollmentServiceUtils {
    * @param person a object to set attributes on.
    * @return true the operation succeeds, false if it fails.
    */
-  public static boolean enableUser(String uid, String password, PosixAccount person) {
+  public static boolean enableUser(String uid, String password, SuPerson person) {
     boolean error = false
     String uidNumber
 
@@ -110,7 +109,7 @@ class EnrollmentServiceUtils {
       person.homeDirectory = getHomeDirectoryPath(uid)
       person.uidNumber = uidNumber
       person.gidNumber = DEFAULT_USER_GID
-      person.save()
+      SuPersonQuery.updateSuPerson(person)
     }
 
     return !error
@@ -166,17 +165,15 @@ class EnrollmentServiceUtils {
    * @param eduPersonPrimaryAffiliation the affiliation
    * @param suEnrollPerson the SuEnrollPerson
    */
-  static void setPrimaryAffiliation(String eduPersonPrimaryAffiliation, SuPerson suPerson) {
-    suPerson.eduPersonPrimaryAffiliation = eduPersonPrimaryAffiliation
+  static void setAffiliation(String[] affiliations, SuPerson suPerson) {
+    if (affiliations != null) {
+      suPerson.objectClass.add("eduPerson")
 
-    suPerson.objectClass.add("eduPerson")
+      suPerson.eduPersonAffiliation = affiliations
 
-    if (suPerson.eduPersonAffiliation != null) {
-      if (!suPerson.eduPersonAffiliation.contains(eduPersonPrimaryAffiliation)) {
-        suPerson.eduPersonAffiliation.add(eduPersonPrimaryAffiliation)
-      }
-    } else {
-      suPerson.eduPersonAffiliation = [eduPersonPrimaryAffiliation]
+      String primary = affiliations.sort { SuPerson.AFFILIATIONS.indexOf(it) }.first()
+
+      suPerson.eduPersonPrimaryAffiliation = primary
     }
   }
 
@@ -213,7 +210,7 @@ class EnrollmentServiceUtils {
   static void activateUser(
           SuPerson suPerson,
           SvcUidPwd svcUidPwd,
-          String eduPersonPrimaryAffiliation,
+          String[] affiliations,
           String domain) {
     log.debug("enrollUser - Now enabling uid <${suPerson.uid}>.")
 
@@ -224,11 +221,11 @@ class EnrollmentServiceUtils {
       throw new RuntimeException("enrollUser - enroll failed in scripts.")
     }
 
-    setPrimaryAffiliation(eduPersonPrimaryAffiliation, suPerson)
+    setAffiliation(affiliations, suPerson)
     setMailAttributes(suPerson, domain)
 
     SuPersonQuery.moveSuPerson(suPerson, AccountServiceUtils.domainToDN(domain))
-    SuPersonQuery.saveSuPerson(suPerson)
+    SuPersonQuery.updateSuPerson(suPerson)
     log.info("enrollUser - User with uid <${suPerson.uid}> now enabled.")
   }
 }

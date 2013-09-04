@@ -32,12 +32,12 @@
 package se.su.it.svc.commons
 
 import groovy.util.logging.Slf4j
+import se.su.it.svc.ldap.SuPerson
 
 @Slf4j
 public class LdapAttributeValidator {
 
   private static final String validateAttributesString = "validateAttributes"
-  private static final List<String> affiliations = ["student","member","employee","alumni","other"]
 
   public static String validateAttributes(Map<String, Object> map) {
     String error = null
@@ -47,6 +47,7 @@ public class LdapAttributeValidator {
         switch (attributeName.toLowerCase()) {
           case "audit"                       : validateAudit(val); break
           case "uid"                         : validateUid(val); break
+          case "affiliation"                 : validateAffiliations(val); break
           case "edupersonprimaryaffiliation" : validateEduPersonPrimaryAffiliation(val); break
           case "domain"                      : validateDomain(val); break
           case "nin"                         : validateNin(val); break
@@ -87,14 +88,30 @@ public class LdapAttributeValidator {
       throwMe(validateAttributesString,"Attribute validation failed for uid <${tmpUid}>. uid need to be at least min 2 and max 8 chars in length.")
   }
 
+  private static void validateAffiliations(Object affiliations) {
+    if (affiliations == null) {
+      throwMe(validateAttributesString,"Attribute validation failed for affiliations <${affiliations}>. affiliations can not be null.")
+    }
+
+    if (!affiliations instanceof String[]) {
+      throwMe(validateAttributesString,"Attribute validation failed for affiliations <${affiliations}>. affiliations need to be a String object.")
+    }
+
+    ((String[])affiliations).each { affiliation ->
+      if (!SuPerson.AFFILIATIONS.contains(affiliation.toLowerCase())) {
+        throwMe(validateAttributesString,"Attribute validation failed for affiliations <${tmpEduPersonPrimaryAffiliation}>. affiliations need to be one of [${SuPerson.AFFILIATIONS.join(",")}].")
+      }
+    }
+  }
+
   private static void validateEduPersonPrimaryAffiliation(Object eduPersonPrimaryAffiliation) {
     if (eduPersonPrimaryAffiliation == null)
       throwMe(validateAttributesString,"Attribute validation failed for eduPersonPrimaryAffiliation <${eduPersonPrimaryAffiliation}>. eduPersonPrimaryAffiliation can not be null.")
     if (!eduPersonPrimaryAffiliation instanceof String)
       throwMe(validateAttributesString,"Attribute validation failed for eduPersonPrimaryAffiliation <${eduPersonPrimaryAffiliation}>. eduPersonPrimaryAffiliation need to be a String object.")
     String tmpEduPersonPrimaryAffiliation = (String)eduPersonPrimaryAffiliation
-    if (!affiliations.contains(tmpEduPersonPrimaryAffiliation.toLowerCase()))
-      throwMe(validateAttributesString,"Attribute validation failed for eduPersonPrimaryAffiliation <${tmpEduPersonPrimaryAffiliation}>. eduPersonPrimaryAffiliation need to be one of [${affiliations.join(",")}].")
+    if (!SuPerson.AFFILIATIONS.contains(tmpEduPersonPrimaryAffiliation.toLowerCase()))
+      throwMe(validateAttributesString,"Attribute validation failed for eduPersonPrimaryAffiliation <${tmpEduPersonPrimaryAffiliation}>. eduPersonPrimaryAffiliation need to be one of [${SuPerson.AFFILIATIONS.join(",")}].")
   }
 
   private static void validateDomain(Object domain) {
