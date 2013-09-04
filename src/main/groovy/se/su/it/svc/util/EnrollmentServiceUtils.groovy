@@ -32,16 +32,13 @@
 package se.su.it.svc.util
 
 import groovy.util.logging.Slf4j
-import org.apache.commons.collections.Predicate
 import se.su.it.commons.ExecUtils
-import se.su.it.commons.PrincipalUtils
 import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.PosixAccount
 import se.su.it.svc.ldap.SuEnrollPerson
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.manager.Config
-import se.su.it.svc.manager.GldapoManager
 import se.su.it.svc.query.SuPersonQuery
 
 import java.util.regex.Matcher
@@ -251,29 +248,5 @@ class EnrollmentServiceUtils {
 
     SuPersonQuery.saveSuPerson(suPerson)
     log.info("enrollUser - User with uid <${suPerson.uid}> now enabled.")
-  }
-
-  /**
-   * Generate a uid based on the given name and surname
-   *
-   * @param givenName the given name
-   * @param sn the surname
-   * @return a uid
-   */
-  static String generateUid(String givenName, String sn) {
-    def logger = log
-    String uid = PrincipalUtils.suniqueUID(givenName, sn, new Predicate() {
-      public boolean evaluate(Object object) {
-        try {
-          return SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, (String) object) == null;
-        } catch (ex) {
-          logger.error "Failed when getting SuPerson from GID", ex
-          return false;
-        }
-      }
-    })
-
-    log.debug "Returning $uid for user with name $givenName $sn"
-    return uid
   }
 }
