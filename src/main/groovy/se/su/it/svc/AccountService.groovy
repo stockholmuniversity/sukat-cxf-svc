@@ -44,7 +44,7 @@ public interface AccountService {
   String resetPassword(String uid, SvcAudit audit)
   void createSuPerson(String uid, String ssn, String givenName, String sn, SvcAudit audit)
   void updateSuPerson(String uid, SvcSuPersonVO person, SvcAudit audit)
-  SvcUidPwd activateSuPerson(String uid, String domain, String eduPersonPrimaryAffiliation, SvcAudit audit)
+  SvcUidPwd activateSuPerson(String uid, String domain, String[] affiliations, SvcAudit audit)
   void terminateSuPerson(String uid, SvcAudit audit)
   String getMailRoutingAddress(String uid, SvcAudit audit)
   void setMailRoutingAddress(String uid, String mail, SvcAudit audit)

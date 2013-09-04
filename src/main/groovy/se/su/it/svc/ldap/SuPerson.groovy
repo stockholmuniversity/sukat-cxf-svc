@@ -42,6 +42,8 @@ class SuPerson implements Serializable {
 
   static final long serialVersionUID = -687991492884005033L;
 
+  static final List<String> AFFILIATIONS = ['employee', 'student', 'alumni', 'member', 'other']
+
   @GldapoSchemaFilter("(objectClass=suPerson)")
   @GldapoNamingAttribute
   String uid

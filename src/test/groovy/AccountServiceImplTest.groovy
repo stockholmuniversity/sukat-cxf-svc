@@ -701,9 +701,9 @@ class AccountServiceImplTest extends Specification {
   }
 
   @Test
-  def "activateSuPersonWithMailRoutingAddress: test when attributes are invalid, should throw IllegalArgumentException"() {
+  def "activateSuPersonWithMailRoutingAddress: test when attributes are invalid, should throw Exception"() {
     when:
-    service.activateSuPerson("uid", "domain", "affiliation", new SvcAudit())
+    service.activateSuPerson("uid", "domain", ['affiliation'] as String[], new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -721,7 +721,7 @@ class AccountServiceImplTest extends Specification {
     def svcUidPwd = service.activateSuPerson(
             "uid",
             "student.su.se",
-            "other",
+            ['other'] as String[],
             new SvcAudit())
 
     then:
@@ -737,7 +737,7 @@ class AccountServiceImplTest extends Specification {
     SuPersonQuery.getSuPersonFromUID(_,_) >> { null }
 
     when:
-    service.activateSuPerson('uid', "student.su.se", "other", new SvcAudit())
+    service.activateSuPerson('uid', "student.su.se", ["other"] as String[], new SvcAudit())
 
     then:
     thrown(IllegalArgumentException)
@@ -746,7 +746,7 @@ class AccountServiceImplTest extends Specification {
   @Test
   def "Test activateSuPerson without null domain argument"() {
     when:
-    service.activateSuPerson('uid', null, "other", new SvcAudit())
+    service.activateSuPerson('uid', null, ["other"] as String[], new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -764,7 +764,7 @@ class AccountServiceImplTest extends Specification {
   @Test
   def "Test activateSuPerson without null SvcAudit argument"() {
     when:
-    service.activateSuPerson('uid', "student.su.se", "other", null)
+    service.activateSuPerson('uid', "student.su.se", ["other"] as String[], null)
 
     then:
     thrown(PreconditionViolation)
@@ -788,7 +788,7 @@ class AccountServiceImplTest extends Specification {
     def enrollmentServiceImpl = new EnrollmentServiceImpl()
 
     when:
-    enrollmentServiceImpl.activateSuPerson('uid', "student.su.se", "other", new SvcAudit())
+    enrollmentServiceImpl.activateSuPerson('uid', "student.su.se", ["other"] as String[], new SvcAudit())
 
     then:
     thrown(Exception)
@@ -807,7 +807,7 @@ class AccountServiceImplTest extends Specification {
     GroovyMock(PasswordUtils, global: true)
 
     when:
-    SvcUidPwd ret = service.activateSuPerson(uid, "student.su.se", "other", new SvcAudit())
+    SvcUidPwd ret = service.activateSuPerson(uid, "student.su.se", ["other"] as String[], new SvcAudit())
 
     then:
     ret.uid == uid

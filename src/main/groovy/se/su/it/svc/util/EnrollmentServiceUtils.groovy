@@ -165,17 +165,15 @@ class EnrollmentServiceUtils {
    * @param eduPersonPrimaryAffiliation the affiliation
    * @param suEnrollPerson the SuEnrollPerson
    */
-  static void setPrimaryAffiliation(String eduPersonPrimaryAffiliation, SuPerson suPerson) {
-    suPerson.eduPersonPrimaryAffiliation = eduPersonPrimaryAffiliation
+  static void setAffiliation(String[] affiliations, SuPerson suPerson) {
+    if (affiliations != null) {
+      suPerson.objectClass.add("eduPerson")
 
-    suPerson.objectClass.add("eduPerson")
+      suPerson.eduPersonAffiliation = affiliations
 
-    if (suPerson.eduPersonAffiliation != null) {
-      if (!suPerson.eduPersonAffiliation.contains(eduPersonPrimaryAffiliation)) {
-        suPerson.eduPersonAffiliation.add(eduPersonPrimaryAffiliation)
-      }
-    } else {
-      suPerson.eduPersonAffiliation = [eduPersonPrimaryAffiliation]
+      String primary = affiliations.sort { SuPerson.AFFILIATIONS.indexOf(it) }.first()
+
+      suPerson.eduPersonPrimaryAffiliation = primary
     }
   }
 
@@ -212,7 +210,7 @@ class EnrollmentServiceUtils {
   static void activateUser(
           SuPerson suPerson,
           SvcUidPwd svcUidPwd,
-          String eduPersonPrimaryAffiliation,
+          String[] affiliations,
           String domain) {
     log.debug("enrollUser - Now enabling uid <${suPerson.uid}>.")
 
@@ -223,7 +221,7 @@ class EnrollmentServiceUtils {
       throw new RuntimeException("enrollUser - enroll failed in scripts.")
     }
 
-    setPrimaryAffiliation(eduPersonPrimaryAffiliation, suPerson)
+    setAffiliation(affiliations, suPerson)
     setMailAttributes(suPerson, domain)
 
     SuPersonQuery.moveSuPerson(suPerson, AccountServiceUtils.domainToDN(domain))

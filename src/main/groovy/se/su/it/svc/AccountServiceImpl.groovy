@@ -208,14 +208,14 @@ public class AccountServiceImpl implements AccountService {
     ! LdapAttributeValidator.validateAttributes([
             uid: uid,
             domain: domain,
-            eduPersonPrimaryAffiliation: eduPersonPrimaryAffiliation,
+            affiliation: affiliations,
             audit: audit])
   })
   @Ensures({ result && result.uid && result.password && result.password.size() == 10 })
   public SvcUidPwd activateSuPerson(
           String uid,
           String domain,
-          String eduPersonPrimaryAffiliation,
+          String[] affiliations,
           SvcAudit audit) {
 
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
@@ -224,7 +224,7 @@ public class AccountServiceImpl implements AccountService {
       SvcUidPwd svcUidPwd = new SvcUidPwd(uid: uid)
       svcUidPwd.password = PasswordUtils.genRandomPassword(10, 10)
 
-      EnrollmentServiceUtils.activateUser(suPerson, svcUidPwd, eduPersonPrimaryAffiliation, domain)
+      EnrollmentServiceUtils.activateUser(suPerson, svcUidPwd, affiliations, domain)
 
       return svcUidPwd
     }
