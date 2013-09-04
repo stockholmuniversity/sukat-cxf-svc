@@ -189,8 +189,7 @@ public class AccountServiceImpl implements AccountService {
             sn: sn,
             givenName: givenName,
             socialSecurityNumber: ssn,
-            //TODO: Remove unnecessary objectClasses
-            objectClass: ["suPerson","sSNObject","eduPerson","inetLocalMailRecipient","inetOrgPerson","organizationalPerson","person","top"],
+            objectClass: ["suPerson", "sSNObject", "person", "top"],
     )
     suPerson.parent = Properties.instance.props.ldap.accounts.default.parent
 
