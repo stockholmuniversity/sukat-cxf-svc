@@ -31,8 +31,9 @@
 
 package se.su.it.svc.manager
 
-import gldapo.*
+import gldapo.Gldapo
 import org.apache.log4j.Logger
+
 /**
  * This class specifies the ldap integration<br />
  * We have 2 directories that use different sukat servers.<br />
@@ -46,7 +47,7 @@ public class GldapoManager {
 
   public GldapoManager() {
     logger.info("Gldapo Init")
-    def props = Properties.getInstance().props
+    def props = Config.getInstance().props
 
     Gldapo.initialize(
       directories: [(this.LDAP_RO):

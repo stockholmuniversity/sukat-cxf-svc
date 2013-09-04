@@ -32,15 +32,14 @@
 package se.su.it.svc
 
 import groovy.util.logging.Slf4j
-import se.su.it.svc.query.SuCardOrderQuery
-
-import javax.jws.WebService
-import javax.jws.WebParam
-import se.su.it.svc.ldap.SuCard
-import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.commons.SvcAudit
-import se.su.it.svc.query.SuCardQuery
+import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.manager.GldapoManager
+import se.su.it.svc.query.SuCardOrderQuery
+import se.su.it.svc.query.SuCardQuery
+
+import javax.jws.WebParam
+import javax.jws.WebService
 
 /**
  * Implementing class for CardAdminService CXF Web Service.

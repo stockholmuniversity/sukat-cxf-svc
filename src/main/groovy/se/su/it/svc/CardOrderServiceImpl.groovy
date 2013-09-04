@@ -31,14 +31,14 @@
 
 package se.su.it.svc
 
-import org.gcontracts.annotations.Ensures
-
-import javax.jws.WebService
 import groovy.util.logging.Slf4j
+import org.gcontracts.annotations.Ensures
 import org.gcontracts.annotations.Requires
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcCardOrderVO
 import se.su.it.svc.util.CardOrderServiceUtils
+
+import javax.jws.WebService
 
 @WebService @Slf4j
 class CardOrderServiceImpl implements CardOrderService {

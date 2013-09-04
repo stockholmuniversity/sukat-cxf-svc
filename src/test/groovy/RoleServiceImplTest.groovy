@@ -29,15 +29,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 import gldapo.GldapoSchemaRegistry
 import org.junit.Test
-import se.su.it.svc.commons.SvcAudit
-import se.su.it.svc.query.SuPersonQuery
-import se.su.it.svc.RoleServiceImpl
-import se.su.it.svc.query.SuRoleQuery
 import org.springframework.ldap.core.DistinguishedName
+import se.su.it.svc.RoleServiceImpl
+import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuRole
+import se.su.it.svc.query.SuPersonQuery
+import se.su.it.svc.query.SuRoleQuery
 
 class RoleServiceImplTest extends spock.lang.Specification{
   @Test

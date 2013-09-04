@@ -38,7 +38,7 @@ import se.su.it.svc.commons.SvcSuPersonVO
 /**
  * GLDAPO schema class for SU employees and students also used by web service.
  */
-class SuPerson implements Serializable {
+class SuPerson implements PosixAccount, Serializable {
 
   static final long serialVersionUID = -687991492884005033L;
 
@@ -76,6 +76,10 @@ class SuPerson implements Serializable {
   String homePostalCode
   String description
   String sukatComment
+  String loginShell
+  String homeDirectory
+  String gidNumber
+  String uidNumber
 
   public void applySuPersonDifference(SvcSuPersonVO person) {
     if(this.eduPersonPrimaryAffiliation != person.eduPersonPrimaryAffiliation) this.eduPersonPrimaryAffiliation = person.eduPersonPrimaryAffiliation
@@ -109,6 +113,23 @@ class SuPerson implements Serializable {
     if(this.description != person.description) this.description = person.description
     if(this.sukatComment != person.sukatComment) this.sukatComment = person.sukatComment
     checkAndCorrectEmptyValues()
+  }
+
+  public SvcSuPersonVO getSvcSuPersonVO(){
+    SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO(
+      uid:                   uid,
+      socialSecurityNumber:  socialSecurityNumber,
+      givenName:             givenName,
+      sn:                    sn,
+      displayName:           displayName,
+      registeredAddress:     registeredAddress,
+      mail:  new LinkedHashSet(mail),
+
+      /** The user has an account in SUKAT that is not a stub.*/
+      accountIsActive:  (objectClass?.contains('posixAccount')) ?: false
+    )
+
+    return svcSuPersonVO
   }
 
   private boolean isEqualSets(Set<String> org, Set<String> mod) {

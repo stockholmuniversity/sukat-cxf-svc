@@ -31,15 +31,12 @@
 
 package se.su.it.svc
 
-import javax.jws.WebService
-import javax.jws.WebParam
-import se.su.it.svc.annotations.*
-import se.su.it.svc.domains.*
-import se.su.it.svc.manager.ApplicationContextProvider
-import se.su.it.svc.ldap.SuPerson
 import org.springframework.core.io.Resource
 import se.su.it.svc.commons.SvcStatus
-import se.su.it.svc.commons.SvcAudit
+import se.su.it.svc.manager.ApplicationContextProvider
+
+import javax.jws.WebService
+
 /**
  * Implementing class for Status CXF Web Service.
  * This Class handles all Status information for this web service application.

@@ -29,12 +29,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.junit.Test
-import se.su.it.svc.commons.SvcAudit
-import se.su.it.svc.EntitlementServiceImpl
+
 import gldapo.GldapoSchemaRegistry
-import se.su.it.svc.query.SuPersonQuery
+import org.junit.Test
+import se.su.it.svc.EntitlementServiceImpl
+import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.query.SuPersonQuery
 
 /**
  * Created with IntelliJ IDEA.

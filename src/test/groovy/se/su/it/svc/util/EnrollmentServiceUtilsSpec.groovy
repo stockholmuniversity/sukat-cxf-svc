@@ -2,9 +2,13 @@ package se.su.it.svc.util
 
 import org.junit.After
 import org.junit.Before
+import org.junit.Test
 import se.su.it.commons.ExecUtils
+import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuEnrollPerson
-import se.su.it.svc.manager.Properties
+import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.manager.Config
+import se.su.it.svc.query.SuPersonQuery
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -78,7 +82,7 @@ class EnrollmentServiceUtilsSpec extends Specification {
     given:
     def posixAccoount = new SuEnrollPerson(objectClass: [])
     posixAccoount.metaClass.save = {}
-    Properties.instance.props.enrollment.skipCreate = "true"
+    Config.instance.props.enrollment.skipCreate = "true"
 
     when:
     util.enableUser("", "", posixAccoount)
@@ -94,7 +98,7 @@ class EnrollmentServiceUtilsSpec extends Specification {
     EnrollmentServiceUtils.getHomeDirectoryPath(_) >> "uid"
     def posixAccoount = new SuEnrollPerson(objectClass: [])
     posixAccoount.metaClass.save = {}
-    Properties.instance.props.enrollment.skipCreate = "false"
+    Config.instance.props.enrollment.skipCreate = "false"
 
     when:
     def ret = util.enableUser("", "", posixAccoount)
@@ -120,5 +124,135 @@ class EnrollmentServiceUtilsSpec extends Specification {
 
     then:
     !ret
+  }
+
+  @Test
+  def "setPrimaryAffiliation: Test adding new primary affiliation"() {
+    given:
+    def person = new SuPerson(objectClass: [])
+    def affiliation = 'kaka'
+    person.eduPersonPrimaryAffiliation = affiliation
+    person.eduPersonAffiliation = new TreeSet()
+    person.eduPersonAffiliation.add(affiliation)
+    String newPrimaryAffiliation = 'foo'
+
+    when:
+    EnrollmentServiceUtils.setPrimaryAffiliation(newPrimaryAffiliation, person)
+
+    then:
+    person.eduPersonPrimaryAffiliation == newPrimaryAffiliation
+    person.eduPersonAffiliation.contains(newPrimaryAffiliation)
+  }
+
+  @Test
+  def "setPrimaryAffiliation: when no affiliations exists"() {
+    given:
+    def person = new SuPerson(objectClass: [])
+    String newPrimaryAffiliation = 'foo'
+
+    when:
+    EnrollmentServiceUtils.setPrimaryAffiliation(newPrimaryAffiliation, person)
+
+    then:
+    person.eduPersonPrimaryAffiliation == newPrimaryAffiliation
+    person.eduPersonAffiliation.contains(newPrimaryAffiliation)
+  }
+
+  @Test
+  def "setPrimaryAffiliation: should set objectClass"() {
+    given:
+    def person = new SuPerson(objectClass: [])
+    String newPrimaryAffiliation = 'foo'
+
+    when:
+    EnrollmentServiceUtils.setPrimaryAffiliation(newPrimaryAffiliation, person)
+
+    then:
+    person.objectClass.contains('eduPerson')
+  }
+
+  @Test
+  def "setMailAttributes: When adding a second mailLocalAddress"() {
+    given:
+    def person = new SuEnrollPerson()
+    person.mailLocalAddress = new TreeSet()
+    person.mailLocalAddress.add('kaka@kaka.se')
+    person.uid = 'foo'
+
+    when:
+    EnrollmentServiceUtils.setMailAttributes(person, 'kaka.se')
+
+    then:
+    person.mailLocalAddress.contains('foo@kaka.se')
+  }
+
+  def "activateUser should move the suPerson to the supplied domain"() {
+    given:
+    GroovyMock(EnrollmentServiceUtils, global: true)
+    EnrollmentServiceUtils.enableUser(*_) >> true
+    GroovyMock(SuPersonQuery, global: true)
+
+    SuPerson suPerson = new SuPerson()
+
+    when:
+    util.activateUser(suPerson, new SvcUidPwd(), "", "it.su.se")
+
+    then:
+    1 * SuPersonQuery.moveSuPerson(suPerson, 'dc=it,dc=su,dc=se')
+  }
+
+  def "activateUser should save the suPerson"() {
+    given:
+    GroovyMock(EnrollmentServiceUtils, global: true)
+    EnrollmentServiceUtils.enableUser(*_) >> true
+    GroovyMock(SuPersonQuery, global: true)
+
+    SuPerson suPerson = new SuPerson()
+
+    when:
+    util.activateUser(suPerson, new SvcUidPwd(), "", "it.su.se")
+
+    then:
+    1 * SuPersonQuery.saveSuPerson(suPerson)
+  }
+
+  def "activateUser should set affiliation"() {
+    given:
+    GroovyMock(EnrollmentServiceUtils, global: true)
+    EnrollmentServiceUtils.enableUser(*_) >> true
+
+    SuPerson suPerson = new SuPerson()
+
+    when:
+    util.activateUser(suPerson, new SvcUidPwd(), "affiliation", "it.su.se")
+
+    then:
+    1 * EnrollmentServiceUtils.setPrimaryAffiliation('affiliation', suPerson)
+  }
+
+  def "activateUser should set mail attributes"() {
+    given:
+    GroovyMock(EnrollmentServiceUtils, global: true)
+    EnrollmentServiceUtils.enableUser(*_) >> true
+
+    SuPerson suPerson = new SuPerson()
+
+    when:
+    util.activateUser(suPerson, new SvcUidPwd(), "", "it.su.se")
+
+    then:
+    1 * EnrollmentServiceUtils.setMailAttributes(suPerson, 'it.su.se')
+  }
+
+  def "activateUser throw exception if enable fails"() {
+    given:
+    GroovyMock(EnrollmentServiceUtils, global: true)
+    EnrollmentServiceUtils.enableUser(*_) >> false
+
+    when:
+    util.activateUser(new SuPerson(), new SvcUidPwd(), "", "it.su.se")
+
+    then:
+    thrown(RuntimeException)
   }
 }

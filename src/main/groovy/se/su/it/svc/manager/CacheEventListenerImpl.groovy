@@ -31,15 +31,12 @@
 
 package se.su.it.svc.manager
 
-import net.sf.ehcache.event.CacheEventListener
+import gldapo.schema.annotation.GldapoNamingAttribute
 import net.sf.ehcache.Ehcache
 import net.sf.ehcache.Element
+import net.sf.ehcache.event.CacheEventListener
 import net.sf.ehcache.search.Attribute
-import se.su.it.svc.ldap.SuPerson
 import net.sf.ehcache.search.Results
-import net.sf.ehcache.search.Query
-import net.sf.ehcache.search.expression.Or
-import gldapo.schema.annotation.GldapoNamingAttribute
 
 /**
  * Created with IntelliJ IDEA.

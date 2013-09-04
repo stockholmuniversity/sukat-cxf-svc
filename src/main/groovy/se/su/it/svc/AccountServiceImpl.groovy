@@ -40,11 +40,11 @@ import se.su.it.commons.PasswordUtils
 import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcSuPersonVO
-import se.su.it.svc.ldap.SuInitPerson
+import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.manager.Config
 import se.su.it.svc.manager.GldapoManager
 import se.su.it.svc.query.SuPersonQuery
-import se.su.it.svc.util.AccountServiceUtils
 import se.su.it.svc.util.EnrollmentServiceUtils
 import se.su.it.svc.util.GeneralUtils
 
@@ -103,7 +103,7 @@ public class AccountServiceImpl implements AccountService {
   })
   @Ensures({ result && result instanceof String && result.size() == 10 })
   public String resetPassword(String uid, SvcAudit audit) {
-    String trueUid = uid.replaceFirst("\\.", "/")
+    String trueUid = GeneralUtils.uidToKrb5Principal(uid)
 
     def kadmin = Kadmin.newInstance()
 
@@ -154,14 +154,10 @@ public class AccountServiceImpl implements AccountService {
    * This method creates a SuPerson in sukat.
    *
    * @param uid of the SuPerson to be created.
-   * @param domain domain for the SuPerson.
-   * @param nin 12-digit social security number for the SuPerson.
+   * @param ssn 6-10 digit social security number for the SuPerson.
    * @param givenName given name for the SuPerson.
    * @param sn surname of the SuPerson.
-   * @param person pre-populated SvcSuPersonVO object. This will be used to populate standard attributes for the SuPerson.
-   * @param  boolean fullAccount if true will try to create AFS and KDC entries else the posix part will be missing.
    * @param audit Audit object initilized with audit data about the client and user.
-   * @return String with newly created password for the SuPerson.
    * @throws IllegalArgumentException if a user with the supplied uid already exists
    * @see se.su.it.svc.ldap.SuPerson
    * @see se.su.it.svc.ldap.SuInitPerson
@@ -171,51 +167,69 @@ public class AccountServiceImpl implements AccountService {
   @Requires({
     ! LdapAttributeValidator.validateAttributes([
             uid: uid,
-            domain: domain,
-            nin: nin,
+            ssn: ssn,
             givenName: givenName,
             sn: sn,
-            svcsuperson: person,
             audit: audit ])
   })
-  @Ensures({ result && result instanceof String && result.size() == 10 })
-  public String createSuPerson(String uid, String domain, String nin, String givenName, String sn, SvcSuPersonVO person, boolean fullAccount, SvcAudit audit) {
+  public void createSuPerson(String uid, String ssn, String givenName, String sn, SvcAudit audit) {
+
     if(SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid))
       throw new IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
 
-    //Begin init entry in sukat
     log.debug("createSuPerson - Creating initial sukat record from function arguments for uid<${uid}>")
-    SuInitPerson suInitPerson = new SuInitPerson(
+    SuPerson suPerson = new SuPerson(
             uid: uid,
             cn: givenName + " " + sn,
             sn: sn,
             givenName: givenName,
-            norEduPersonNIN: nin,
-            eduPersonPrincipalName: GeneralUtils.uidToPrincipal(uid),
-            objectClass: ["suPerson","sSNObject","norEduPerson","eduPerson","inetLocalMailRecipient","inetOrgPerson","organizationalPerson","person","top"],
+            socialSecurityNumber: ssn,
+            objectClass: ["suPerson", "sSNObject", "person", "top"]
     )
-    suInitPerson.parent = AccountServiceUtils.domainToDN(domain)
+    suPerson.parent = Config.instance.props.ldap.accounts.default.parent
 
-    log.debug("createSuPerson - Writing initial sukat record to sukat for uid<${uid}>")
-    SuPersonQuery.initSuPerson(GldapoManager.LDAP_RW, suInitPerson)
-    //End init entry in sukat
+    log.debug "createSuPerson - Writing initial sukat record to sukat for uid<${uid}>"
+    SuPersonQuery.initSuPerson(GldapoManager.LDAP_RW, suPerson)
+  }
 
-    //Begin call Perlscript to init user in kdc, afs and unixshell
-    //Maybe we want to replace this with a call to the message bus in the future
-    String password = PasswordUtils.genRandomPassword(10, 10)
-    if (fullAccount) {
-      EnrollmentServiceUtils.enableUser(uid, password, suInitPerson)
-    } else {
-      log.warn("createSuPerson - FullAccount attribute not set. PosixAccount entries will not be set and no AFS or KDC entries will be generated.")
-      log.warn("createSuPerson - Password returned will be fake/dummy")
+  /**
+   * This method enrolls a user in sukat, kerberos and afs.
+   *
+   * @param uid                         uid of the user to activate
+   * @param domain                      domain of user in sukat. This is used to set the DN if user will be created.
+   * @param eduPersonPrimaryAffiliation the primary affiliation to set.
+   * @param audit                       Audit object initilized with audit data about the client and user.
+   * @return SvcUidPwd                  object with the uid and password.
+   * @throws IllegalArgumentException if a user with the supplied uid can't be found
+   * @see se.su.it.svc.commons.SvcAudit
+   */
+  @Requires({
+    ! LdapAttributeValidator.validateAttributes([
+            uid: uid,
+            domain: domain,
+            eduPersonPrimaryAffiliation: eduPersonPrimaryAffiliation,
+            audit: audit])
+  })
+  @Ensures({ result && result.uid && result.password && result.password.size() == 10 })
+  public SvcUidPwd activateSuPerson(
+          String uid,
+          String domain,
+          String eduPersonPrimaryAffiliation,
+          SvcAudit audit) {
+
+    SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+
+    if (suPerson) {
+      SvcUidPwd svcUidPwd = new SvcUidPwd(uid: uid)
+      svcUidPwd.password = PasswordUtils.genRandomPassword(10, 10)
+
+      EnrollmentServiceUtils.activateUser(suPerson, svcUidPwd, eduPersonPrimaryAffiliation, domain)
+
+      return svcUidPwd
     }
-    //End call Perlscript to init user in kdc, afs and unixshell
-
-    log.debug("createSuPerson - Updating standard attributes according to function argument object for uid<${uid}>")
-    updateSuPerson(uid,person,audit)
-    log.info("createSuPerson - Uid<${uid}> created")
-    log.debug("createSuPerson - Returning password for uid<${uid}>")
-    return password
+    else {
+      throw new IllegalArgumentException("enrollUser - no such uid found: " + uid)
+    }
   }
 
   /**
@@ -304,62 +318,22 @@ public class AccountServiceImpl implements AccountService {
   }
 
   /**
-   * Finds a SuPerson in ldap based on norEduPersonNin
-   *
-   * @param nin in 12 numbers (ex. YYYYMMDDXXXX)
-   * @param audit Audit object initilized with audit data about the client and user.
-   * @return SvcSuPersonVO instance if found.
-   * @throws IllegalArgumentException if the uid can't be found
-   */
-  @Requires({
-    ! LdapAttributeValidator.validateAttributes([
-            nin: nin,
-            audit: audit ])
-  })
-  @Ensures({ result && result instanceof SvcSuPersonVO })
-  public SvcSuPersonVO findSuPersonByNorEduPersonNIN(@WebParam(name = "norEduPersonNIN") String nin, SvcAudit audit) {
-    SuPerson suPerson = SuPersonQuery.getSuPersonFromNin(GldapoManager.LDAP_RW, nin)
-
-    if (!suPerson) {
-      throw new IllegalArgumentException("findSuPersonByNorEduPersonNIN - No suPerson with the supplied nin was found: " + nin)
-    }
-
-    return new SvcSuPersonVO(uid:suPerson.uid)
-  }
-
-  /**
-   * Finds a SuPerson in ldap based on socialSecurityNumber
+   * Finds all accounts in ldap based on socialSecurityNumber
    *
    * @param ssn in 10 numbers (YYMMDDXXXX)
    * @param audit Audit object initilized with audit data about the client and user.
-   * @return SvcSuPersonVO instance if found.
-   * @throws IllegalArgumentException if no user can be found.
+   * @return an array of SvcSuPersonVO, one for each account found
    */
   @Requires({
     ! LdapAttributeValidator.validateAttributes([
             ssn: ssn,
             audit: audit ])
   })
-  @Ensures({ result && result instanceof SvcSuPersonVO })
-  public SvcSuPersonVO findSuPersonBySocialSecurityNumber(@WebParam(name = "socialSecurityNumber") String ssn, SvcAudit audit) {
-    SuPerson suPerson = SuPersonQuery.getSuPersonFromSsn(GldapoManager.LDAP_RW, ssn)
-    if (!suPerson) {
-      throw new IllegalArgumentException("findSuPersonBySocialSecurityNumber - No suPerson with the supplied ssn: " + ssn)
-    }
+  @Ensures({ result != null && result instanceof SvcSuPersonVO[] })
+  public SvcSuPersonVO[] findAllSuPersonsBySocialSecurityNumber(@WebParam(name = "socialSecurityNumber") String ssn, SvcAudit audit) {
+    SuPerson[] suPersons = SuPersonQuery.getSuPersonFromSsn(GldapoManager.LDAP_RW, ssn)
 
-    SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO(
-      uid:                  suPerson.uid,
-      socialSecurityNumber: suPerson.socialSecurityNumber,
-      givenName:            suPerson.givenName,
-      sn:                   suPerson.sn,
-      displayName:          suPerson.displayName,
-      registeredAddress:    suPerson.registeredAddress,
-      mail:                 new LinkedHashSet(suPerson.mail),
-
-      /** The user has an account in SUKAT that is not a stub.*/
-      accountIsActive:      (suPerson?.objectClass?.contains('posixAccount')) ?: false
-    )
-    return svcSuPersonVO
+    return suPersons*.svcSuPersonVO
   }
 
   /**
@@ -382,19 +356,6 @@ public class AccountServiceImpl implements AccountService {
       throw new IllegalArgumentException("findSuPersonByUid - No suPerson with the supplied uid: " + uid)
     }
 
-    SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO(
-    uid:                   suPerson.uid,
-    socialSecurityNumber:  suPerson.socialSecurityNumber,
-    givenName:             suPerson.givenName,
-    sn:                    suPerson.sn,
-    displayName:           suPerson.displayName,
-    registeredAddress:     suPerson.registeredAddress,
-    mail:  new LinkedHashSet(suPerson.mail),
-
-    /** The user has an account in SUKAT that is not a stub.*/
-    accountIsActive:  (suPerson?.objectClass?.contains('posixAccount'))?:false
-    )
-
-    return svcSuPersonVO
+    return suPerson.svcSuPersonVO
   }
 }

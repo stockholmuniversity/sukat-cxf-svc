@@ -31,15 +31,14 @@
 
 package se.su.it.svc
 
-import se.su.it.svc.commons.SvcAudit
-import javax.jws.WebService
-import javax.jws.WebParam
-import se.su.it.svc.ldap.SuPerson
-import se.su.it.svc.query.SuPersonQuery
-import se.su.it.svc.manager.GldapoManager
-import se.su.it.svc.query.SuCardQuery
 import org.apache.log4j.Logger
-import se.su.it.svc.ldap.SuSubAccount
+import se.su.it.svc.commons.SvcAudit
+import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.manager.GldapoManager
+import se.su.it.svc.query.SuPersonQuery
+
+import javax.jws.WebParam
+import javax.jws.WebService
 
 /**
  * Implementing class for EntitlementService CXF Web Service.

@@ -37,6 +37,7 @@ class GeneralUtils {
 
   /**
    * Transform any 12 char pnr to 10 char for use in finding by socialSecurityNumber
+   *
    * @param pnr
    * @return
    */
@@ -52,5 +53,15 @@ class GeneralUtils {
    */
   public static String uidToPrincipal(uid) {
     return uid == null ? null : uid + SU_SE_SCOPE
+  }
+
+  /**
+   * Transform uid of syntax 'uid.service' to uid/service
+   *
+   * @param uid the uid to transform
+   * @return the transformed uid
+   */
+  public static String uidToKrb5Principal(String uid) {
+    return uid?.replaceFirst("\\.", "/")
   }
 }

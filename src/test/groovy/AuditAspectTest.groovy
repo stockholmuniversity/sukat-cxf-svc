@@ -29,11 +29,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 import org.aopalliance.intercept.MethodInvocation
 import se.su.it.svc.audit.AuditAspect
 import se.su.it.svc.audit.AuditEntity
 import se.su.it.svc.commons.SvcAudit
-import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 import java.lang.reflect.Method

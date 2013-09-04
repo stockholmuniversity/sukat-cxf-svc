@@ -32,16 +32,16 @@
 package se.su.it.svc
 
 import org.apache.log4j.Logger
-import se.su.it.svc.ldap.SuRole
-import se.su.it.svc.query.SuRoleQuery
 import org.springframework.ldap.core.DistinguishedName
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.ldap.SuRole
 import se.su.it.svc.manager.GldapoManager
 import se.su.it.svc.query.SuPersonQuery
+import se.su.it.svc.query.SuRoleQuery
+
 import javax.jws.WebParam
 import javax.jws.WebService
-import se.su.it.svc.query.SuRoleQuery
 
 /**
  * Implementing class for RoleService CXF Web Service.
