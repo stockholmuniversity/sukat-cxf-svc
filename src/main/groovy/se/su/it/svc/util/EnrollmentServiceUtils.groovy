@@ -187,6 +187,8 @@ class EnrollmentServiceUtils {
   static void setPrimaryAffiliation(String eduPersonPrimaryAffiliation, SuPerson suPerson) {
     suPerson.eduPersonPrimaryAffiliation = eduPersonPrimaryAffiliation
 
+    suPerson.objectClass.add("eduPerson")
+
     if (suPerson.eduPersonAffiliation != null) {
       if (!suPerson.eduPersonAffiliation.contains(eduPersonPrimaryAffiliation)) {
         suPerson.eduPersonAffiliation.add(eduPersonPrimaryAffiliation)
@@ -232,8 +234,7 @@ class EnrollmentServiceUtils {
           SuPerson suPerson,
           SvcUidPwd svcUidPwd,
           String eduPersonPrimaryAffiliation,
-          String domain,
-          String mailRoutingAddress) {
+          String domain) {
     log.debug("enrollUser - Now enabling uid <${suPerson.uid}>.")
 
     suPerson = new SuEnrollPerson(suPerson.properties)
@@ -247,12 +248,6 @@ class EnrollmentServiceUtils {
 
     setPrimaryAffiliation(eduPersonPrimaryAffiliation, suPerson)
     setMailAttributes(suPerson, domain)
-
-    if (mailRoutingAddress) {
-      suPerson.mailRoutingAddress = mailRoutingAddress
-
-      suPerson.objectClass.add("inetLocalMailRecipient")
-    }
 
     SuPersonQuery.saveSuPerson(suPerson)
     log.info("enrollUser - User with uid <${suPerson.uid}> now enabled.")

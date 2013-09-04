@@ -104,7 +104,6 @@ class EnrollmentServiceImpl implements EnrollmentService {
           String uid,
           String domain,
           String eduPersonPrimaryAffiliation,
-          String mailRoutingAddress,
           SvcAudit audit) {
 
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
@@ -113,7 +112,7 @@ class EnrollmentServiceImpl implements EnrollmentService {
       SvcUidPwd svcUidPwd = new SvcUidPwd(uid: uid)
       svcUidPwd.password = PasswordUtils.genRandomPassword(10, 10)
 
-      EnrollmentServiceUtils.handleExistingUser(suPerson, svcUidPwd, eduPersonPrimaryAffiliation, domain, mailRoutingAddress)
+      EnrollmentServiceUtils.handleExistingUser(suPerson, svcUidPwd, eduPersonPrimaryAffiliation, domain)
 
       return svcUidPwd
     }
