@@ -110,7 +110,7 @@ class EntitlementServiceImplTest extends spock.lang.Specification{
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPerson person = new SuPerson()
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return person }
-    SuPersonQuery.metaClass.static.saveSuPerson = {SuPerson arg1 -> return void}
+    SuPersonQuery.metaClass.static.updateSuPerson = {SuPerson arg1 -> return void}
     def entitlementServiceImpl = new EntitlementServiceImpl()
     when:
     def ret = entitlementServiceImpl.addEntitlement("testuid","urn:mace:swami.se:gmai:test:test",new SvcAudit())
@@ -184,7 +184,7 @@ class EntitlementServiceImplTest extends spock.lang.Specification{
     tmpSet.add("urn:mace:swami.se:gmai:test:test")
     person.eduPersonEntitlement = tmpSet
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return person }
-    SuPersonQuery.metaClass.static.saveSuPerson = {SuPerson arg1 -> return void}
+    SuPersonQuery.metaClass.static.updateSuPerson = {SuPerson arg1 -> return void}
     def entitlementServiceImpl = new EntitlementServiceImpl()
     when:
     def ret = entitlementServiceImpl.removeEntitlement("testuid","urn:mace:swami.se:gmai:test:imnotthere",new SvcAudit())
@@ -201,7 +201,7 @@ class EntitlementServiceImplTest extends spock.lang.Specification{
     tmpSet.add("urn:mace:swami.se:gmai:test:test")
     person.eduPersonEntitlement = tmpSet
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return person }
-    SuPersonQuery.metaClass.static.saveSuPerson = {SuPerson arg1 -> return void}
+    SuPersonQuery.metaClass.static.updateSuPerson = {SuPerson arg1 -> return void}
     def entitlementServiceImpl = new EntitlementServiceImpl()
     when:
     def ret = entitlementServiceImpl.removeEntitlement("testuid","urn:mace:swami.se:gmai:test:test",new SvcAudit())

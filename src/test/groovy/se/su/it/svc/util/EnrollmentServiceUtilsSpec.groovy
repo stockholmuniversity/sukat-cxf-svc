@@ -81,7 +81,7 @@ class EnrollmentServiceUtilsSpec extends Specification {
   def "enableUser should set uidNumber=-1 if skipCreate"() {
     given:
     def posixAccoount = new SuEnrollPerson(objectClass: [])
-    posixAccoount.metaClass.save = {}
+    posixAccoount.metaClass.update = {}
     Config.instance.props.enrollment.skipCreate = "true"
 
     when:
@@ -97,7 +97,7 @@ class EnrollmentServiceUtilsSpec extends Specification {
     EnrollmentServiceUtils.runEnableScript(*_) >> "1234"
     EnrollmentServiceUtils.getHomeDirectoryPath(_) >> "uid"
     def posixAccoount = new SuEnrollPerson(objectClass: [])
-    posixAccoount.metaClass.save = {}
+    posixAccoount.metaClass.update = {}
     Config.instance.props.enrollment.skipCreate = "false"
 
     when:
@@ -134,41 +134,62 @@ class EnrollmentServiceUtilsSpec extends Specification {
     person.eduPersonPrimaryAffiliation = affiliation
     person.eduPersonAffiliation = new TreeSet()
     person.eduPersonAffiliation.add(affiliation)
-    String newPrimaryAffiliation = 'foo'
+    String[] newPrimaryAffiliation = ['foo']
 
     when:
-    EnrollmentServiceUtils.setPrimaryAffiliation(newPrimaryAffiliation, person)
+    EnrollmentServiceUtils.setAffiliation(newPrimaryAffiliation, person)
 
     then:
-    person.eduPersonPrimaryAffiliation == newPrimaryAffiliation
-    person.eduPersonAffiliation.contains(newPrimaryAffiliation)
+    person.eduPersonPrimaryAffiliation == newPrimaryAffiliation.first()
+    person.eduPersonAffiliation.contains(newPrimaryAffiliation.first())
   }
 
   @Test
   def "setPrimaryAffiliation: when no affiliations exists"() {
     given:
     def person = new SuPerson(objectClass: [])
-    String newPrimaryAffiliation = 'foo'
+    String[] newPrimaryAffiliation = ['foo']
 
     when:
-    EnrollmentServiceUtils.setPrimaryAffiliation(newPrimaryAffiliation, person)
+    EnrollmentServiceUtils.setAffiliation(newPrimaryAffiliation, person)
 
     then:
-    person.eduPersonPrimaryAffiliation == newPrimaryAffiliation
-    person.eduPersonAffiliation.contains(newPrimaryAffiliation)
+    person.eduPersonPrimaryAffiliation == newPrimaryAffiliation.first()
+    person.eduPersonAffiliation.contains(newPrimaryAffiliation.first())
   }
 
   @Test
   def "setPrimaryAffiliation: should set objectClass"() {
     given:
     def person = new SuPerson(objectClass: [])
-    String newPrimaryAffiliation = 'foo'
+    String[] newPrimaryAffiliation = ['foo']
 
     when:
-    EnrollmentServiceUtils.setPrimaryAffiliation(newPrimaryAffiliation, person)
+    EnrollmentServiceUtils.setAffiliation(newPrimaryAffiliation, person)
 
     then:
     person.objectClass.contains('eduPerson')
+  }
+
+  @Test
+  @Unroll
+  def "setPrimaryAffiliation: sets #expected as primary for #affiliations"() {
+    given:
+    def person = new SuPerson(objectClass: [])
+
+    when:
+    EnrollmentServiceUtils.setAffiliation(affiliations as String[], person)
+
+    then:
+    person.eduPersonPrimaryAffiliation == expected
+
+    where:
+    expected   | affiliations
+    'employee' | ['employee', 'student', 'alumni', 'member', 'other']
+    'student'  | ['student', 'alumni', 'member', 'other']
+    'alumni'   | ['alumni', 'member', 'other']
+    'member'   | ['member', 'other']
+    'other'    | ['other']
   }
 
   @Test
@@ -195,7 +216,7 @@ class EnrollmentServiceUtilsSpec extends Specification {
     SuPerson suPerson = new SuPerson()
 
     when:
-    util.activateUser(suPerson, new SvcUidPwd(), "", "it.su.se")
+    util.activateUser(suPerson, new SvcUidPwd(), [""] as String[], "it.su.se")
 
     then:
     1 * SuPersonQuery.moveSuPerson(suPerson, 'dc=it,dc=su,dc=se')
@@ -210,10 +231,10 @@ class EnrollmentServiceUtilsSpec extends Specification {
     SuPerson suPerson = new SuPerson()
 
     when:
-    util.activateUser(suPerson, new SvcUidPwd(), "", "it.su.se")
+    util.activateUser(suPerson, new SvcUidPwd(), [""] as String[], "it.su.se")
 
     then:
-    1 * SuPersonQuery.saveSuPerson(suPerson)
+    1 * SuPersonQuery.updateSuPerson(suPerson)
   }
 
   def "activateUser should set affiliation"() {
@@ -221,13 +242,15 @@ class EnrollmentServiceUtilsSpec extends Specification {
     GroovyMock(EnrollmentServiceUtils, global: true)
     EnrollmentServiceUtils.enableUser(*_) >> true
 
+    GroovyMock(SuPersonQuery, global: true)
+
     SuPerson suPerson = new SuPerson()
 
     when:
-    util.activateUser(suPerson, new SvcUidPwd(), "affiliation", "it.su.se")
+    util.activateUser(suPerson, new SvcUidPwd(), ["affiliation"] as String[], "it.su.se")
 
     then:
-    1 * EnrollmentServiceUtils.setPrimaryAffiliation('affiliation', suPerson)
+    1 * EnrollmentServiceUtils.setAffiliation(['affiliation'] as String[], suPerson)
   }
 
   def "activateUser should set mail attributes"() {
@@ -235,10 +258,12 @@ class EnrollmentServiceUtilsSpec extends Specification {
     GroovyMock(EnrollmentServiceUtils, global: true)
     EnrollmentServiceUtils.enableUser(*_) >> true
 
+    GroovyMock(SuPersonQuery, global: true)
+
     SuPerson suPerson = new SuPerson()
 
     when:
-    util.activateUser(suPerson, new SvcUidPwd(), "", "it.su.se")
+    util.activateUser(suPerson, new SvcUidPwd(), [""] as String[], "it.su.se")
 
     then:
     1 * EnrollmentServiceUtils.setMailAttributes(suPerson, 'it.su.se')
@@ -250,7 +275,7 @@ class EnrollmentServiceUtilsSpec extends Specification {
     EnrollmentServiceUtils.enableUser(*_) >> false
 
     when:
-    util.activateUser(new SuPerson(), new SvcUidPwd(), "", "it.su.se")
+    util.activateUser(new SuPerson(), new SvcUidPwd(), [""] as String[], "it.su.se")
 
     then:
     thrown(RuntimeException)

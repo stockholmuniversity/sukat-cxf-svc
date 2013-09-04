@@ -69,12 +69,12 @@ public class EntitlementServiceImpl implements EntitlementService {
         if(person.eduPersonEntitlement.find {it.equalsIgnoreCase(entitlement)})
           throw new java.lang.IllegalArgumentException("Entitlement ${entitlement} already exist")
         person.eduPersonEntitlement.add(entitlement)
-        SuPersonQuery.saveSuPerson(person)
+        SuPersonQuery.updateSuPerson(person)
       } else {
         def tmpSet = new java.util.LinkedHashSet<String>()
         tmpSet.add(entitlement)
         person.eduPersonEntitlement = tmpSet
-        SuPersonQuery.saveSuPerson(person)
+        SuPersonQuery.updateSuPerson(person)
       }
     } else {
       logger.info("addEntitlement: Could not find uid<${uid}>")
@@ -101,7 +101,7 @@ public class EntitlementServiceImpl implements EntitlementService {
     if(person) {
       if(person.eduPersonEntitlement != null) {
         if(person.eduPersonEntitlement.remove(entitlement)) {
-          SuPersonQuery.saveSuPerson(person)
+          SuPersonQuery.updateSuPerson(person)
         } else {
           throw new IllegalArgumentException("removeEntitlement entitlement not found: "+entitlement)
         }

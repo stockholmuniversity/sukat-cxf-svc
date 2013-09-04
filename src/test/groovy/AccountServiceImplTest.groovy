@@ -45,8 +45,8 @@ import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuEnrollPerson
-import se.su.it.svc.ldap.SuInitPerson
 import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.ldap.SuPersonStub
 import se.su.it.svc.manager.Config
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.util.EnrollmentServiceUtils
@@ -68,7 +68,7 @@ class AccountServiceImplTest extends Specification {
     this.service = null
     Kadmin.metaClass = null
     GldapoSchemaRegistry.metaClass = null
-    SuInitPerson.metaClass = null
+    SuPersonStub.metaClass = null
     SuPersonQuery.metaClass = null
     PasswordUtils.metaClass = null
     ExecUtils.metaClass = null
@@ -128,7 +128,7 @@ class AccountServiceImplTest extends Specification {
     String myaffiliation = null
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> new SuPerson(eduPersonPrimaryAffiliation: "kalle") }
-    SuPersonQuery.metaClass.static.saveSuPerson = {SuPerson person -> myaffiliation = person.eduPersonPrimaryAffiliation}
+    SuPersonQuery.metaClass.static.updateSuPerson = {SuPerson person -> myaffiliation = person.eduPersonPrimaryAffiliation}
     def accountServiceImpl = new AccountServiceImpl()
     when:
     accountServiceImpl.updatePrimaryAffiliation("testuid", "employee", new SvcAudit())
@@ -266,7 +266,7 @@ class AccountServiceImplTest extends Specification {
     String listEntry0 = null
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> new SuPerson(title: ["systemdeveloper"], eduPersonAffiliation: ["employee"]) }
-    SuPersonQuery.metaClass.static.saveSuPerson = {SuPerson person -> title = person.title;listEntry0=person.eduPersonAffiliation.iterator().next()}
+    SuPersonQuery.metaClass.static.updateSuPerson = {SuPerson person -> title = person.title;listEntry0=person.eduPersonAffiliation.iterator().next()}
     def accountServiceImpl = new AccountServiceImpl()
     when:
     accountServiceImpl.updateSuPerson("testuid",suPerson, new SvcAudit())
@@ -379,9 +379,9 @@ class AccountServiceImplTest extends Specification {
     def ssn = '0000000000'
     def givenName = 'Test'
     def sn = 'Testsson'
-    SuPerson suPersson = null
+    SuPersonStub suPersson = null
 
-    SuPerson.metaClass.parent = "_"
+    SuPersonStub.metaClass.parent = "_"
 
     GroovyMock(SuPersonQuery, global: true)
     SuPersonQuery.initSuPerson(*_) >> { a, b -> suPersson = b }
@@ -574,7 +574,7 @@ class AccountServiceImplTest extends Specification {
     SuPerson suPerson = new SuPerson(mailRoutingAddress: "kalle")
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return suPerson }
-    SuPersonQuery.metaClass.static.saveSuPerson = {SuPerson tmpp -> suPerson.mailRoutingAddress = tmpp.mailRoutingAddress}
+    SuPersonQuery.metaClass.static.updateSuPerson = {SuPerson tmpp -> suPerson.mailRoutingAddress = tmpp.mailRoutingAddress}
     def accountServiceImpl = new AccountServiceImpl()
     when:
     accountServiceImpl.setMailRoutingAddress("testuid", "mail@test.su.se", new SvcAudit())
@@ -701,9 +701,9 @@ class AccountServiceImplTest extends Specification {
   }
 
   @Test
-  def "activateSuPersonWithMailRoutingAddress: test when attributes are invalid, should throw IllegalArgumentException"() {
+  def "activateSuPersonWithMailRoutingAddress: test when attributes are invalid, should throw Exception"() {
     when:
-    service.activateSuPerson("uid", "domain", "affiliation", new SvcAudit())
+    service.activateSuPerson("uid", "domain", ['affiliation'] as String[], new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -721,7 +721,7 @@ class AccountServiceImplTest extends Specification {
     def svcUidPwd = service.activateSuPerson(
             "uid",
             "student.su.se",
-            "other",
+            ['other'] as String[],
             new SvcAudit())
 
     then:
@@ -737,7 +737,7 @@ class AccountServiceImplTest extends Specification {
     SuPersonQuery.getSuPersonFromUID(_,_) >> { null }
 
     when:
-    service.activateSuPerson('uid', "student.su.se", "other", new SvcAudit())
+    service.activateSuPerson('uid', "student.su.se", ["other"] as String[], new SvcAudit())
 
     then:
     thrown(IllegalArgumentException)
@@ -746,7 +746,7 @@ class AccountServiceImplTest extends Specification {
   @Test
   def "Test activateSuPerson without null domain argument"() {
     when:
-    service.activateSuPerson('uid', null, "other", new SvcAudit())
+    service.activateSuPerson('uid', null, ["other"] as String[], new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
@@ -764,7 +764,7 @@ class AccountServiceImplTest extends Specification {
   @Test
   def "Test activateSuPerson without null SvcAudit argument"() {
     when:
-    service.activateSuPerson('uid', "student.su.se", "other", null)
+    service.activateSuPerson('uid', "student.su.se", ["other"] as String[], null)
 
     then:
     thrown(PreconditionViolation)
@@ -788,7 +788,7 @@ class AccountServiceImplTest extends Specification {
     def enrollmentServiceImpl = new EnrollmentServiceImpl()
 
     when:
-    enrollmentServiceImpl.activateSuPerson('uid', "student.su.se", "other", new SvcAudit())
+    enrollmentServiceImpl.activateSuPerson('uid', "student.su.se", ["other"] as String[], new SvcAudit())
 
     then:
     thrown(Exception)
@@ -807,7 +807,7 @@ class AccountServiceImplTest extends Specification {
     GroovyMock(PasswordUtils, global: true)
 
     when:
-    SvcUidPwd ret = service.activateSuPerson(uid, "student.su.se", "other", new SvcAudit())
+    SvcUidPwd ret = service.activateSuPerson(uid, "student.su.se", ["other"] as String[], new SvcAudit())
 
     then:
     ret.uid == uid

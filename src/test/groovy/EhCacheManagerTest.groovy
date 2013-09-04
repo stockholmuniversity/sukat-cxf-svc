@@ -70,7 +70,7 @@ class EhCacheManagerTest extends Specification {
     assert cache.getCacheConfiguration().memoryStoreEvictionPolicy == MemoryStoreEvictionPolicy.LRU
 
     and:
-    assert cache.getSearchAttribute("se.su.it.svc.ldap.SuInitPerson")
+    assert cache.getSearchAttribute("se.su.it.svc.ldap.SuPersonStub")
     assert cache.getSearchAttribute("se.su.it.svc.ldap.SuCard")
     assert cache.getSearchAttribute("se.su.it.svc.ldap.SuPerson")
     assert cache.getSearchAttribute("se.su.it.svc.ldap.SuRole")

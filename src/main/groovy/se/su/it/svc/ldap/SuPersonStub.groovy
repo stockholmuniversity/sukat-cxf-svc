@@ -36,19 +36,14 @@ import gldapo.schema.annotation.GldapoNamingAttribute
 /**
  * GLDAPO schema class for init superson.
  */
-class SuInitPerson implements PosixAccount, Serializable {
+class SuPersonStub implements Serializable {
 
-  static final long serialVersionUID = -687091492884005033L;
+  static final long serialVersionUID = - 3513815096227848907L
 
   @GldapoNamingAttribute
-  String uid
   Set<String> objectClass
+  String uid
   String socialSecurityNumber
-  String eduPersonPrincipalName
-  String loginShell
-  String homeDirectory
-  String gidNumber
-  String uidNumber
   String cn
   String sn
   String givenName
