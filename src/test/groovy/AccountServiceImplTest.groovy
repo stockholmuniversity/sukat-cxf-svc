@@ -29,10 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-
-
 import gldapo.GldapoSchemaRegistry
 import org.apache.commons.lang.NotImplementedException
 import org.gcontracts.PostconditionViolation
