@@ -5,7 +5,6 @@ import org.junit.Before
 import org.junit.Test
 import se.su.it.commons.ExecUtils
 import se.su.it.svc.commons.SvcUidPwd
-import se.su.it.svc.ldap.SuEnrollPerson
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.manager.Config
 import se.su.it.svc.query.SuPersonQuery
@@ -80,7 +79,7 @@ class EnrollmentServiceUtilsSpec extends Specification {
 
   def "enableUser should set uidNumber=-1 if skipCreate"() {
     given:
-    def posixAccoount = new SuEnrollPerson(objectClass: [])
+    def posixAccoount = new SuPerson(objectClass: [])
     posixAccoount.metaClass.update = {}
     Config.instance.props.enrollment.skipCreate = "true"
 
@@ -96,7 +95,7 @@ class EnrollmentServiceUtilsSpec extends Specification {
     GroovyMock(EnrollmentServiceUtils, global: true)
     EnrollmentServiceUtils.runEnableScript(*_) >> "1234"
     EnrollmentServiceUtils.getHomeDirectoryPath(_) >> "uid"
-    def posixAccoount = new SuEnrollPerson(objectClass: [])
+    def posixAccoount = new SuPerson(objectClass: [])
     posixAccoount.metaClass.update = {}
     Config.instance.props.enrollment.skipCreate = "false"
 
@@ -195,7 +194,7 @@ class EnrollmentServiceUtilsSpec extends Specification {
   @Test
   def "setMailAttributes: When adding a second mailLocalAddress"() {
     given:
-    def person = new SuEnrollPerson()
+    def person = new SuPerson()
     person.mailLocalAddress = new TreeSet()
     person.mailLocalAddress.add('kaka@kaka.se')
     person.uid = 'foo'

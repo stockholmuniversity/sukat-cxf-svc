@@ -84,7 +84,6 @@ public class GldapoManager {
         ]
       ],
       schemas: [SuPersonStub,
-                se.su.it.svc.ldap.SuEnrollPerson,
                 se.su.it.svc.ldap.SuPerson,
                 se.su.it.svc.ldap.SuRole,
                 se.su.it.svc.ldap.SuCard,

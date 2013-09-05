@@ -41,8 +41,8 @@ class SuPersonStub implements Serializable {
   static final long serialVersionUID = - 3513815096227848907L
 
   @GldapoNamingAttribute
-  Set<String> objectClass
   String uid
+  Set<String> objectClass
   String socialSecurityNumber
   String cn
   String sn

@@ -44,7 +44,6 @@ import se.su.it.svc.EnrollmentServiceImpl
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
-import se.su.it.svc.ldap.SuEnrollPerson
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuPersonStub
 import se.su.it.svc.manager.Config
@@ -775,14 +774,14 @@ class AccountServiceImplTest extends Specification {
     setup:
     Config.instance.props.enrollment.skipCreate = "false"
 
-    SuEnrollPerson suEnrollPerson = new SuEnrollPerson(uid: "testuid")
+    SuPerson suEnrollPerson = new SuPerson(uid: "testuid")
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuEnrollPersonFromSsn = {String directory,String nin -> return suEnrollPerson }
     EnrollmentServiceUtils.metaClass.static.enableUser = {String uid, String password, Object o -> return false}
-    SuEnrollPerson.metaClass.parent = "stuts"
+    SuPerson.metaClass.parent = "stuts"
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory, String uid -> return null}
-    SuPersonQuery.metaClass.static.initSuEnrollPerson = {String directory, SuEnrollPerson person -> return person}
-    SuPersonQuery.metaClass.static.saveSuEnrollPerson = {SuEnrollPerson person -> return null}
+    SuPersonQuery.metaClass.static.initSuEnrollPerson = {String directory, SuPerson person -> return person}
+    SuPersonQuery.metaClass.static.saveSuEnrollPerson = {SuPerson person -> return null}
 
 
     def enrollmentServiceImpl = new EnrollmentServiceImpl()
