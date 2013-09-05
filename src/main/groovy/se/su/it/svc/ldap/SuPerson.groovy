@@ -40,7 +40,7 @@ import se.su.it.svc.commons.SvcSuPersonVO
  */
 class SuPerson implements Serializable {
 
-  static final long serialVersionUID = -687991492884005033L;
+  static final long serialVersionUID = -687991492884005033L
 
   static final List<String> AFFILIATIONS = ['employee', 'student', 'alumni', 'member', 'other']
 
