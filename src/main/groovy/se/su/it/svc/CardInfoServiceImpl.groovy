@@ -41,6 +41,7 @@ import se.su.it.svc.manager.GldapoManager
 import se.su.it.svc.query.SuCardQuery
 import se.su.it.svc.query.SuPersonQuery
 
+import javax.jws.WebParam
 import javax.jws.WebService
 
 /**
@@ -64,7 +65,11 @@ public class CardInfoServiceImpl implements CardInfoService {
   @Override
   @Requires({ uid && audit && onlyActive != null })
   @Ensures({ result != null && result instanceof SuCard[] })
-  public SuCard[] getAllCards(String uid, boolean onlyActive, SvcAudit audit) {
+  public SuCard[] getAllCards(
+          @WebParam(name = 'uid') String uid,
+          @WebParam(name = 'onlyActive') boolean onlyActive,
+          @WebParam(name = 'audit') SvcAudit audit
+  ) {
     def cards = new SuCard[0]
     def person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
 
@@ -91,7 +96,10 @@ public class CardInfoServiceImpl implements CardInfoService {
   @Override
   @Requires({ suCardUUID && audit })
   @Ensures({ result && result instanceof SuCard })
-  public SuCard getCardByUUID(String suCardUUID, SvcAudit audit) {
+  public SuCard getCardByUUID(
+          @WebParam(name = 'suCardUUID') String suCardUUID,
+          @WebParam(name = 'audit') SvcAudit audit
+  ) {
     return SuCardQuery.findCardBySuCardUUID(GldapoManager.LDAP_RO, suCardUUID)
   }
 }
