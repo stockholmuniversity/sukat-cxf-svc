@@ -47,4 +47,5 @@ class SuPersonStub implements Serializable {
   String cn
   String sn
   String givenName
+  String displayName
 }

@@ -201,8 +201,9 @@ public class AccountServiceImpl implements AccountService {
             cn: givenName + " " + sn,
             sn: sn,
             givenName: givenName,
+            displayName: givenName + " " + sn,
             socialSecurityNumber: ssn,
-            objectClass: ["suPerson", "sSNObject", "person", "top"]
+            objectClass: ['suPerson', 'sSNObject', 'top', 'person', 'organizationalPerson', 'inetOrgPerson']
     )
     suPerson.parent = Config.instance.props.ldap.accounts.default.parent
 
