@@ -66,7 +66,7 @@ public class SvcSuPersonVO implements Serializable{
   @XmlAttribute
   String labeledURI //hemsida
   @XmlElement(name="mail")
-  Set<String> mail
+  String mail
   @XmlElement(name="mailLocalAddress")
   Set<String> mailLocalAddress
   @XmlAttribute

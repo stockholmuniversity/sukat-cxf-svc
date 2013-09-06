@@ -76,7 +76,11 @@ public class AccountServiceImpl implements AccountService {
             eduPersonPrimaryAffiliation: affiliation,
             audit: audit ])
   })
-  public void updatePrimaryAffiliation(String uid, String affiliation, SvcAudit audit) {
+  public void updatePrimaryAffiliation(
+          @WebParam(name = 'uid') String uid,
+          @WebParam(name = 'affiliation') String affiliation,
+          @WebParam(name = 'audit') SvcAudit audit
+  ) {
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
 
     if(!person) {
@@ -103,7 +107,10 @@ public class AccountServiceImpl implements AccountService {
     uid && audit
   })
   @Ensures({ result && result instanceof String && result.size() == 10 })
-  public String resetPassword(String uid, SvcAudit audit) {
+  public String resetPassword(
+          @WebParam(name = 'uid') String uid,
+          @WebParam(name = 'audit') SvcAudit audit
+  ) {
     String trueUid = GeneralUtils.uidToKrb5Principal(uid)
 
     def kadmin = Kadmin.newInstance()
@@ -137,7 +144,11 @@ public class AccountServiceImpl implements AccountService {
             svcsuperson: person,
             audit: audit ])
   })
-  public void updateSuPerson(String uid, SvcSuPersonVO person, SvcAudit audit){
+  public void updateSuPerson(
+          @WebParam(name = 'uid') String uid,
+          @WebParam(name = 'person') SvcSuPersonVO person,
+          @WebParam(name = 'audit') SvcAudit audit
+  ){
     SuPerson originalPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
 
     if(!originalPerson) {
@@ -173,7 +184,13 @@ public class AccountServiceImpl implements AccountService {
             sn: sn,
             audit: audit ])
   })
-  public void createSuPerson(String uid, String ssn, String givenName, String sn, SvcAudit audit) {
+  public void createSuPerson(
+          @WebParam(name = 'uid') String uid,
+          @WebParam(name = 'ssn') String ssn,
+          @WebParam(name = 'givenName') String givenName,
+          @WebParam(name = 'sn') String sn,
+          @WebParam(name = 'audit') SvcAudit audit
+  ) {
 
     if(SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid))
       throw new IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
@@ -184,8 +201,9 @@ public class AccountServiceImpl implements AccountService {
             cn: givenName + " " + sn,
             sn: sn,
             givenName: givenName,
+            displayName: givenName + " " + sn,
             socialSecurityNumber: ssn,
-            objectClass: ["suPerson", "sSNObject", "person", "top"]
+            objectClass: ['suPerson', 'sSNObject', 'inetOrgPerson']
     )
     suPerson.parent = Config.instance.props.ldap.accounts.default.parent
 
@@ -213,11 +231,11 @@ public class AccountServiceImpl implements AccountService {
   })
   @Ensures({ result && result.uid && result.password && result.password.size() == 10 })
   public SvcUidPwd activateSuPerson(
-          String uid,
-          String domain,
-          String[] affiliations,
-          SvcAudit audit) {
-
+          @WebParam(name = 'uid') String uid,
+          @WebParam(name = 'domain') String domain,
+          @WebParam(name = 'affiliations') String[] affiliations,
+          @WebParam(name = 'audit') SvcAudit audit
+  ) {
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
 
     if (suPerson) {
@@ -246,7 +264,9 @@ public class AccountServiceImpl implements AccountService {
             uid: uid,
             audit: audit ])
   })
-  public void terminateSuPerson(String uid, SvcAudit audit) {
+  public void terminateSuPerson(
+          @WebParam(name = 'uid') String uid,
+          @WebParam(name = 'audit') SvcAudit audit) {
     SuPerson terminatePerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
 
     if(terminatePerson) {
@@ -281,7 +301,10 @@ public class AccountServiceImpl implements AccountService {
             audit: audit ])
   })
   @Ensures({ result == null || result instanceof String})
-  public String getMailRoutingAddress(String uid, SvcAudit audit) {
+  public String getMailRoutingAddress(
+          @WebParam(name = 'uid') String uid,
+          @WebParam(name = 'audit') SvcAudit audit
+  ) {
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
 
     if(!suPerson) {
@@ -306,7 +329,11 @@ public class AccountServiceImpl implements AccountService {
             mailroutingaddress: mailRoutingAddress,
             audit: audit ])
   })
-  public void setMailRoutingAddress(String uid, String mailRoutingAddress, SvcAudit audit) {
+  public void setMailRoutingAddress(
+          @WebParam(name = 'uid') String uid,
+          @WebParam(name = 'mailRoutingAddress') String mailRoutingAddress,
+          @WebParam(name = 'audit') SvcAudit audit
+  ) {
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
 
     if(!suPerson) {
@@ -331,7 +358,10 @@ public class AccountServiceImpl implements AccountService {
             audit: audit ])
   })
   @Ensures({ result != null && result instanceof SvcSuPersonVO[] })
-  public SvcSuPersonVO[] findAllSuPersonsBySocialSecurityNumber(@WebParam(name = "socialSecurityNumber") String ssn, SvcAudit audit) {
+  public SvcSuPersonVO[] findAllSuPersonsBySocialSecurityNumber(
+          @WebParam(name = "socialSecurityNumber") String ssn,
+          @WebParam(name = "audit") SvcAudit audit
+  ) {
     SuPerson[] suPersons = SuPersonQuery.getSuPersonFromSsn(GldapoManager.LDAP_RW, ssn)
 
     return suPersons*.svcSuPersonVO
@@ -350,7 +380,10 @@ public class AccountServiceImpl implements AccountService {
             audit: audit ])
   })
   @Ensures({ result && result instanceof SvcSuPersonVO })
-  public SvcSuPersonVO findSuPersonByUid(String uid, SvcAudit audit) {
+  public SvcSuPersonVO findSuPersonByUid(
+          @WebParam(name = 'uid') String uid,
+          @WebParam(name = 'audit') SvcAudit audit
+  ) {
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
 
     if (!suPerson) {

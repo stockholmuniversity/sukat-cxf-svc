@@ -38,6 +38,7 @@ import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcCardOrderVO
 import se.su.it.svc.util.CardOrderServiceUtils
 
+import javax.jws.WebParam
 import javax.jws.WebService
 
 @WebService @Slf4j
@@ -55,7 +56,10 @@ class CardOrderServiceImpl implements CardOrderService {
   @Override
   @Requires({ uid && audit })
   @Ensures({ result instanceof SvcCardOrderVO[] })
-  public SvcCardOrderVO[] findAllCardOrdersForUid(String uid, SvcAudit audit) {
+  public SvcCardOrderVO[] findAllCardOrdersForUid(
+          @WebParam(name = 'uid') String uid,
+          @WebParam(name = 'audit') SvcAudit audit
+  ) {
     def cardOrders = suCardOrderQuery.findAllCardOrdersForUid(uid) ?: []
 
     return (SvcCardOrderVO[]) cardOrders.toArray()
@@ -70,7 +74,10 @@ class CardOrderServiceImpl implements CardOrderService {
   @Override
   @Requires({ cardOrderVO && audit })
   @Ensures({ result?.size() == 36 })
-  public String orderCard(SvcCardOrderVO cardOrderVO, SvcAudit audit) {
+  public String orderCard(
+          @WebParam(name = 'cardOrderVO') SvcCardOrderVO cardOrderVO,
+          @WebParam(name = 'audit') SvcAudit audit
+  ) {
 
     def result = CardOrderServiceUtils.validateCardOrderVO(cardOrderVO)
 
