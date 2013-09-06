@@ -186,17 +186,7 @@ class EnrollmentServiceUtils {
   static void setMailAttributes(SuPerson suPerson, String domain) {
     String myMail = suPerson.uid + "@" + domain
 
-    suPerson.mail = [myMail]
-
-    if (suPerson.mailLocalAddress) {
-      if (!suPerson.mailLocalAddress.contains(myMail)) {
-        suPerson.mailLocalAddress.add(myMail)
-      }
-    } else {
-      suPerson.mailLocalAddress = [myMail]
-
-      suPerson.objectClass.add("inetLocalMailRecipient")
-    }
+    suPerson.mail = myMail
   }
 
   /**
