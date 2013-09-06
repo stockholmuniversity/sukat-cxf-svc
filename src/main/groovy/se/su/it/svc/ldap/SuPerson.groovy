@@ -42,6 +42,7 @@ class SuPerson implements Serializable {
 
   static final long serialVersionUID = -687991492884005033L
 
+  /** Available affiliation ordered by priority. DON'T CHANGE! */
   static final List<String> AFFILIATIONS = ['employee', 'student', 'alumni', 'member', 'other']
 
   @GldapoSchemaFilter("(objectClass=suPerson)")
@@ -62,7 +63,7 @@ class SuPerson implements Serializable {
   String mobile
   Set<String> sukatPULAttributes //Adress (hem),Fax (hem),Hemsida (privat/hem),Mail (privat/hem),Mobil,Mobil (privat/hem),Stad (hem),Telefon (privat/hem)
   String labeledURI //hemsida
-  Set<String> mail
+  String mail
   Set<String> mailLocalAddress
   String sukatLOAFromDate //Tjänstledighet börjar
   String sukatLOAToDate   //Tjänstledighet slutar
@@ -83,6 +84,7 @@ class SuPerson implements Serializable {
   String gidNumber
   String uidNumber
 
+  //TODO: Try to understand what this is & do something about it
   public void applySuPersonDifference(SvcSuPersonVO person) {
     if(this.eduPersonPrimaryAffiliation != person.eduPersonPrimaryAffiliation) this.eduPersonPrimaryAffiliation = person.eduPersonPrimaryAffiliation
     if(!isEqualSets(this.eduPersonAffiliation, person.eduPersonAffiliation)) this.eduPersonAffiliation = person.eduPersonAffiliation
@@ -125,13 +127,44 @@ class SuPerson implements Serializable {
       sn:                    sn,
       displayName:           displayName,
       registeredAddress:     registeredAddress,
-      mail:  new LinkedHashSet(mail),
+      mail:                  mail,
 
       /** The user has an account in SUKAT that is not a stub.*/
       accountIsActive:  (objectClass?.contains('posixAccount')) ?: false
     )
 
     return svcSuPersonVO
+  }
+
+  /**
+   * Set new mail, update mailLocalAddress
+   *
+   * @param mail the new mail addresses
+   */
+  public void setMail(String mail) {
+    if (mail) {
+      if (this.mailLocalAddress) {
+        this.mailLocalAddress?.add(mail)
+      }
+      else{
+        this.mailLocalAddress = [mail]
+      }
+    }
+
+    this.mail = mail
+  }
+
+  /**
+   * Set the mailLocalAddress & add 'inetLocalMailRecipient' objectClass
+   *
+   * @param mailLocalAddress the new mailLocalAddress
+   */
+  public void setMailLocalAddress(Set<String> mailLocalAddress) {
+    this.mailLocalAddress = mailLocalAddress
+
+    if (this.mailLocalAddress) {
+      this.objectClass?.add("inetLocalMailRecipient")
+    }
   }
 
   private boolean isEqualSets(Set<String> org, Set<String> mod) {
@@ -141,6 +174,7 @@ class SuPerson implements Serializable {
     return org.equals(mod)
   }
 
+  //TODO: Try to understand what this is & do something about it
   private void checkAndCorrectEmptyValues() {
     this.eduPersonPrimaryAffiliation = stringCheck(this.eduPersonPrimaryAffiliation)
     this.eduPersonAffiliation = setCheck(this.eduPersonAffiliation)
@@ -156,7 +190,7 @@ class SuPerson implements Serializable {
     this.mobile = stringCheck(this.mobile)
     this.sukatPULAttributes = setCheck(this.sukatPULAttributes)
     this.labeledURI = stringCheck(this.labeledURI)
-    this.mail = setCheck(this.mail)
+    this.mail = stringCheck(this.mail)
     this.mailLocalAddress = setCheck(this.mailLocalAddress)
     this.sukatLOAFromDate = stringCheck(this.sukatLOAFromDate)
     this.sukatLOAToDate = stringCheck(this.sukatLOAToDate)

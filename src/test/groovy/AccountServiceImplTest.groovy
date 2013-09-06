@@ -400,7 +400,7 @@ class AccountServiceImplTest extends Specification {
     suPersson.sn == sn
     suPersson.givenName == givenName
     suPersson.socialSecurityNumber == ssn
-    suPersson.objectClass.containsAll(["suPerson","sSNObject","person","top"])
+    suPersson.objectClass.containsAll(["suPerson","sSNObject","inetOrgPerson"])
     suPersson.parent == Config.instance.props.ldap.accounts.default.parent
   }
 
@@ -619,7 +619,7 @@ class AccountServiceImplTest extends Specification {
           sn:'sn',
           displayName:'displayName',
           registeredAddress: 'registeredAddress',
-          mail:['email1@su.se', 'email2@su.se'],
+          mail: 'email1@su.se',
           objectClass: []
       )
     }
@@ -636,8 +636,7 @@ class AccountServiceImplTest extends Specification {
     resp.first().sn == 'sn'
     resp.first().displayName == 'displayName'
     resp.first().registeredAddress == 'registeredAddress'
-    (resp.first().mail as Set).contains('email1@su.se')
-    (resp.first().mail as Set).contains('email2@su.se')
+    resp.first().mail == 'email1@su.se'
     !resp.first().accountIsActive
   }
 
@@ -677,7 +676,7 @@ class AccountServiceImplTest extends Specification {
           sn:'sn',
           displayName:'displayName',
           registeredAddress: 'registeredAddress',
-          mail:['email1@su.se', 'email2@su.se'],
+          mail: 'email1@su.se',
           objectClass: ['posixAccount']
       )
     }
@@ -694,8 +693,7 @@ class AccountServiceImplTest extends Specification {
     resp.sn == 'sn'
     resp.displayName == 'displayName'
     resp.registeredAddress == 'registeredAddress'
-    (resp.mail as Set).contains('email1@su.se')
-    (resp.mail as Set).contains('email2@su.se')
+    resp.mail == 'email1@su.se'
     resp.accountIsActive
   }
 

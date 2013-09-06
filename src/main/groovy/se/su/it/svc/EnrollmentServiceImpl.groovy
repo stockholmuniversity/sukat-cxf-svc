@@ -40,6 +40,7 @@ import se.su.it.svc.manager.GldapoManager
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.util.GeneralUtils
 
+import javax.jws.WebParam
 import javax.jws.WebService
 
 /**
@@ -61,7 +62,10 @@ class EnrollmentServiceImpl implements EnrollmentService {
    */
   @Requires({ uid && audit })
   @Ensures({ result })
-  public String resetAndExpirePwd(String uid, SvcAudit audit) {
+  public String resetAndExpirePwd(
+          @WebParam(name = 'uid') String uid,
+          @WebParam(name = 'audit') SvcAudit audit
+  ) {
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
 
     if(person) {
