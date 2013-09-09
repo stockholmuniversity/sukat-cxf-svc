@@ -1,6 +1,7 @@
 package se.su.it.svc.ldap
 
 import org.junit.Test
+import spock.lang.IgnoreRest
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -70,7 +71,7 @@ class SuPersonSpec extends Specification {
     person.eduPersonPrimaryAffiliation = affiliation
     person.eduPersonAffiliation = new TreeSet()
     person.eduPersonAffiliation.add(affiliation)
-    String[] newPrimaryAffiliation = ['foo']
+    String[] newPrimaryAffiliation = [ SuPerson.Affilation.OTHER.value ]
 
     when:
     person.setAffiliations(newPrimaryAffiliation)
@@ -84,7 +85,7 @@ class SuPersonSpec extends Specification {
   def "setPrimaryAffiliation: when no affiliations exists"() {
     given:
     def person = new SuPerson(objectClass: [])
-    String[] newPrimaryAffiliation = ['foo']
+    String[] newPrimaryAffiliation = ['other']
 
     when:
     person.setAffiliations(newPrimaryAffiliation)
@@ -95,7 +96,7 @@ class SuPersonSpec extends Specification {
   }
 
   @Test
-  def "setPrimaryAffiliation: should set objectClass"() {
+  def "setPrimaryAffiliation: when no valid affiliation is provided"() {
     given:
     def person = new SuPerson(objectClass: [])
     String[] newPrimaryAffiliation = ['foo']
@@ -104,7 +105,34 @@ class SuPersonSpec extends Specification {
     person.setAffiliations(newPrimaryAffiliation)
 
     then:
+    thrown(IllegalArgumentException)
+  }
+
+
+  @Test
+  def "setPrimaryAffiliation: should set objectClass"() {
+    given:
+    def person = new SuPerson(objectClass: [])
+    String[] newPrimaryAffiliation = ['other']
+
+    when:
+    person.setAffiliations(newPrimaryAffiliation)
+
+    then:
     person.objectClass.contains('eduPerson')
+  }
+
+  @Test
+  def "setPrimaryAffiliation: sending null as affiliations"() {
+    given:
+    def person = new SuPerson(objectClass: [])
+    String[] affiliations = null
+
+    when:
+    person.setAffiliations(affiliations)
+
+    then:
+    thrown(IllegalArgumentException)
   }
 
   @Test
@@ -126,5 +154,15 @@ class SuPersonSpec extends Specification {
     'alumni'   | ['alumni', 'member', 'other']
     'member'   | ['member', 'other']
     'other'    | ['other']
+  }
+
+  @Test @Unroll
+  def "testAffiliations: Given affiliation #affiliation expecting value #expected"() {
+    expect: 'we test the order and value of the affiliations'
+    (affiliation as SuPerson.Affilation).value == expected
+
+    where:
+    affiliation << SuPerson.Affilation.enumConstants
+    expected << ['employee', 'student', 'alumni', 'member', 'other']
   }
 }
