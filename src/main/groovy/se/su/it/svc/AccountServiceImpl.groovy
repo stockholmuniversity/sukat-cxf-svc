@@ -155,7 +155,7 @@ public class AccountServiceImpl implements AccountService {
       throw new IllegalArgumentException("updateSuPerson - No such uid found: "+uid)
     }
 
-    originalPerson.applySuPersonDifference(person)
+    originalPerson.updateFromSvcSuPersonVO(person)
     log.debug("updateSuPerson - Trying to update SuPerson uid<${originalPerson.uid}>")
 
     SuPersonQuery.updateSuPerson(originalPerson)
@@ -364,7 +364,7 @@ public class AccountServiceImpl implements AccountService {
   ) {
     SuPerson[] suPersons = SuPersonQuery.getSuPersonFromSsn(GldapoManager.LDAP_RW, ssn)
 
-    return suPersons*.svcSuPersonVO
+    return suPersons*.createSvcSuPersonVO()
   }
 
   /**
@@ -390,6 +390,6 @@ public class AccountServiceImpl implements AccountService {
       throw new IllegalArgumentException("findSuPersonByUid - No suPerson with the supplied uid: " + uid)
     }
 
-    return suPerson.svcSuPersonVO
+    return suPerson.createSvcSuPersonVO()
   }
 }
