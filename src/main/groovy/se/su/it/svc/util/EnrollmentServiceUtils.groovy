@@ -160,24 +160,6 @@ class EnrollmentServiceUtils {
   }
 
   /**
-   * Sets primary affiliation
-   *
-   * @param eduPersonPrimaryAffiliation the affiliation
-   * @param suEnrollPerson the SuEnrollPerson
-   */
-  static void setAffiliation(String[] affiliations, SuPerson suPerson) {
-    if (affiliations != null) {
-      suPerson.objectClass.add("eduPerson")
-
-      suPerson.eduPersonAffiliation = affiliations
-
-      String primary = affiliations.sort { SuPerson.AFFILIATIONS.indexOf(it) }.first()
-
-      suPerson.eduPersonPrimaryAffiliation = primary
-    }
-  }
-
-  /**
    * Sets mail attributes & objectClass 'inetLocalMailRecipient' on SuEnrollPerson
    *
    * @param suPerson the SuEnrollPerson to set attributes on
@@ -211,7 +193,7 @@ class EnrollmentServiceUtils {
       throw new RuntimeException("enrollUser - enroll failed in scripts.")
     }
 
-    setAffiliation(affiliations, suPerson)
+    suPerson.updateAffiliations(affiliations)
     setMailAttributes(suPerson, domain)
 
     SuPersonQuery.moveSuPerson(suPerson, AccountServiceUtils.domainToDN(domain))

@@ -31,6 +31,7 @@
 
 package se.su.it.svc.query
 
+import gldapo.Gldapo
 import org.junit.After
 import se.su.it.svc.ldap.SuCard
 import spock.lang.Specification
@@ -72,6 +73,7 @@ class SuCardQuerySpec extends Specification {
     given:
     boolean saved = false
     SuCard suCard = new SuCard()
+    Gldapo.initialize()
     suCard.metaClass.save = { saved = true }
 
     when:

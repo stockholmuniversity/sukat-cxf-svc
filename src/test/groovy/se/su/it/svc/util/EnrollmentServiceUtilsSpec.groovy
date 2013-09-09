@@ -126,72 +126,6 @@ class EnrollmentServiceUtilsSpec extends Specification {
   }
 
   @Test
-  def "setPrimaryAffiliation: Test adding new primary affiliation"() {
-    given:
-    def person = new SuPerson(objectClass: [])
-    def affiliation = 'kaka'
-    person.eduPersonPrimaryAffiliation = affiliation
-    person.eduPersonAffiliation = new TreeSet()
-    person.eduPersonAffiliation.add(affiliation)
-    String[] newPrimaryAffiliation = ['foo']
-
-    when:
-    EnrollmentServiceUtils.setAffiliation(newPrimaryAffiliation, person)
-
-    then:
-    person.eduPersonPrimaryAffiliation == newPrimaryAffiliation.first()
-    person.eduPersonAffiliation.contains(newPrimaryAffiliation.first())
-  }
-
-  @Test
-  def "setPrimaryAffiliation: when no affiliations exists"() {
-    given:
-    def person = new SuPerson(objectClass: [])
-    String[] newPrimaryAffiliation = ['foo']
-
-    when:
-    EnrollmentServiceUtils.setAffiliation(newPrimaryAffiliation, person)
-
-    then:
-    person.eduPersonPrimaryAffiliation == newPrimaryAffiliation.first()
-    person.eduPersonAffiliation.contains(newPrimaryAffiliation.first())
-  }
-
-  @Test
-  def "setPrimaryAffiliation: should set objectClass"() {
-    given:
-    def person = new SuPerson(objectClass: [])
-    String[] newPrimaryAffiliation = ['foo']
-
-    when:
-    EnrollmentServiceUtils.setAffiliation(newPrimaryAffiliation, person)
-
-    then:
-    person.objectClass.contains('eduPerson')
-  }
-
-  @Test
-  @Unroll
-  def "setPrimaryAffiliation: sets #expected as primary for #affiliations"() {
-    given:
-    def person = new SuPerson(objectClass: [])
-
-    when:
-    EnrollmentServiceUtils.setAffiliation(affiliations as String[], person)
-
-    then:
-    person.eduPersonPrimaryAffiliation == expected
-
-    where:
-    expected   | affiliations
-    'employee' | ['employee', 'student', 'alumni', 'member', 'other']
-    'student'  | ['student', 'alumni', 'member', 'other']
-    'alumni'   | ['alumni', 'member', 'other']
-    'member'   | ['member', 'other']
-    'other'    | ['other']
-  }
-
-  @Test
   def "setMailAttributes: When adding a second mailLocalAddress"() {
     given:
     def person = new SuPerson()
@@ -212,10 +146,10 @@ class EnrollmentServiceUtilsSpec extends Specification {
     EnrollmentServiceUtils.enableUser(*_) >> true
     GroovyMock(SuPersonQuery, global: true)
 
-    SuPerson suPerson = new SuPerson()
+    SuPerson suPerson = new SuPerson(objectClass: [])
 
     when:
-    util.activateUser(suPerson, new SvcUidPwd(), [""] as String[], "it.su.se")
+    util.activateUser(suPerson, new SvcUidPwd(), [SuPerson.Affilation.EMPLOYEE.value] as String[], "it.su.se")
 
     then:
     1 * SuPersonQuery.moveSuPerson(suPerson, 'dc=it,dc=su,dc=se')
@@ -227,10 +161,10 @@ class EnrollmentServiceUtilsSpec extends Specification {
     EnrollmentServiceUtils.enableUser(*_) >> true
     GroovyMock(SuPersonQuery, global: true)
 
-    SuPerson suPerson = new SuPerson()
+    SuPerson suPerson = new SuPerson(objectClass: [])
 
     when:
-    util.activateUser(suPerson, new SvcUidPwd(), [""] as String[], "it.su.se")
+    util.activateUser(suPerson, new SvcUidPwd(), [SuPerson.Affilation.EMPLOYEE.value] as String[], "it.su.se")
 
     then:
     1 * SuPersonQuery.updateSuPerson(suPerson)
@@ -243,13 +177,13 @@ class EnrollmentServiceUtilsSpec extends Specification {
 
     GroovyMock(SuPersonQuery, global: true)
 
-    SuPerson suPerson = new SuPerson()
+    SuPerson suPerson = Mock(SuPerson)
 
     when:
-    util.activateUser(suPerson, new SvcUidPwd(), ["affiliation"] as String[], "it.su.se")
+    util.activateUser(suPerson, new SvcUidPwd(), [SuPerson.Affilation.EMPLOYEE.value] as String[], "it.su.se")
 
     then:
-    1 * EnrollmentServiceUtils.setAffiliation(['affiliation'] as String[], suPerson)
+    1 * suPerson.updateAffiliations([SuPerson.Affilation.EMPLOYEE.value] as String[])
   }
 
   def "activateUser should set mail attributes"() {
@@ -259,10 +193,10 @@ class EnrollmentServiceUtilsSpec extends Specification {
 
     GroovyMock(SuPersonQuery, global: true)
 
-    SuPerson suPerson = new SuPerson()
+    SuPerson suPerson = new SuPerson(objectClass: [])
 
     when:
-    util.activateUser(suPerson, new SvcUidPwd(), [""] as String[], "it.su.se")
+    util.activateUser(suPerson, new SvcUidPwd(), [SuPerson.Affilation.EMPLOYEE.value] as String[], "it.su.se")
 
     then:
     1 * EnrollmentServiceUtils.setMailAttributes(suPerson, 'it.su.se')
