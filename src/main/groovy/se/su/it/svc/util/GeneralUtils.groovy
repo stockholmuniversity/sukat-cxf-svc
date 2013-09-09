@@ -31,6 +31,8 @@
 
 package se.su.it.svc.util
 
+import java.lang.reflect.Modifier
+
 class GeneralUtils {
 
   public static final String SU_SE_SCOPE = "@su.se"
@@ -63,5 +65,20 @@ class GeneralUtils {
    */
   public static String uidToKrb5Principal(String uid) {
     return uid?.replaceFirst("\\.", "/")
+  }
+
+  /**
+   * Copy properties from one object to another
+   *
+   * @param source the source object
+   * @param target the target object
+   */
+  public static void copyProperties(GroovyObject source, GroovyObject target) {
+    source.metaClass.properties.each { MetaProperty prop ->
+      if (target.hasProperty(prop.name) && !(prop.name in ['class', 'metaClass']) &&
+              !Modifier.isStatic(prop.modifiers)) {
+        target.setProperty(prop.name, source.getProperty(prop.name))
+      }
+    }
   }
 }
