@@ -1,5 +1,6 @@
 package se.su.it.svc.ldap
 
+import org.junit.Test
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -59,5 +60,71 @@ class SuPersonSpec extends Specification {
     ['a@b.c']   | null                       | null
     ['a@b.c']   | ['foo']                    | ['foo','inetLocalMailRecipient']
     ['a@b.c']   | ['inetLocalMailRecipient'] | ['inetLocalMailRecipient']
+  }
+
+  @Test
+  def "setPrimaryAffiliation: Test adding new primary affiliation"() {
+    given:
+    def person = new SuPerson(objectClass: [])
+    def affiliation = 'kaka'
+    person.eduPersonPrimaryAffiliation = affiliation
+    person.eduPersonAffiliation = new TreeSet()
+    person.eduPersonAffiliation.add(affiliation)
+    String[] newPrimaryAffiliation = ['foo']
+
+    when:
+    person.setAffiliations(newPrimaryAffiliation)
+
+    then:
+    person.eduPersonPrimaryAffiliation == newPrimaryAffiliation.first()
+    person.eduPersonAffiliation.contains(newPrimaryAffiliation.first())
+  }
+
+  @Test
+  def "setPrimaryAffiliation: when no affiliations exists"() {
+    given:
+    def person = new SuPerson(objectClass: [])
+    String[] newPrimaryAffiliation = ['foo']
+
+    when:
+    person.setAffiliations(newPrimaryAffiliation)
+
+    then:
+    person.eduPersonPrimaryAffiliation == newPrimaryAffiliation.first()
+    person.eduPersonAffiliation.contains(newPrimaryAffiliation.first())
+  }
+
+  @Test
+  def "setPrimaryAffiliation: should set objectClass"() {
+    given:
+    def person = new SuPerson(objectClass: [])
+    String[] newPrimaryAffiliation = ['foo']
+
+    when:
+    person.setAffiliations(newPrimaryAffiliation)
+
+    then:
+    person.objectClass.contains('eduPerson')
+  }
+
+  @Test
+  @Unroll
+  def "setPrimaryAffiliation: sets #expected as primary for #affiliations"() {
+    given:
+    def person = new SuPerson(objectClass: [])
+
+    when:
+    person.setAffiliations(affiliations as String[])
+
+    then:
+    person.eduPersonPrimaryAffiliation == expected
+
+    where:
+    expected   | affiliations
+    'employee' | ['employee', 'student', 'alumni', 'member', 'other']
+    'student'  | ['student', 'alumni', 'member', 'other']
+    'alumni'   | ['alumni', 'member', 'other']
+    'member'   | ['member', 'other']
+    'other'    | ['other']
   }
 }

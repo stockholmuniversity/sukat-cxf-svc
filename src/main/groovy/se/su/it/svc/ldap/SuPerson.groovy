@@ -227,4 +227,21 @@ class SuPerson implements Serializable {
     }
     return aSet
   }
+
+  /**
+   * Sets primary affiliation
+   *
+   * @param eduPersonPrimaryAffiliation the affiliation
+   * @param suEnrollPerson the SuEnrollPerson
+   */
+  public void setAffiliations(String[] affiliations) {
+    if (affiliations == null) {
+      return
+    }
+
+    objectClass.add("eduPerson")
+    eduPersonAffiliation = affiliations
+    String primary = affiliations.sort { AFFILIATIONS.indexOf(it) }.first()
+    eduPersonPrimaryAffiliation = primary
+  }
 }
