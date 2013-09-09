@@ -30,6 +30,7 @@
  */
 
 
+
 import org.aopalliance.intercept.MethodInvocation
 import se.su.it.svc.audit.AuditAspect
 import se.su.it.svc.audit.AuditEntity
@@ -52,6 +53,7 @@ class AuditAspectTest extends Specification {
     AuditAspect.STATE_SUCCESS    == "SUCCESS"
     AuditAspect.STATE_EXCEPTION  == "EXCEPTION"
     AuditAspect.UNKNOWN          == "<unknown>"
+    AuditAspect.HIDDEN_VALUE     == "******"
   }
 
   def "invoke: Happy path without auditref"()  {
