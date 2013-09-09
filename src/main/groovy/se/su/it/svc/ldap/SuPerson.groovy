@@ -33,17 +33,37 @@ package se.su.it.svc.ldap
 
 import gldapo.schema.annotation.GldapoNamingAttribute
 import gldapo.schema.annotation.GldapoSchemaFilter
+import groovy.util.logging.Slf4j
 import se.su.it.svc.commons.SvcSuPersonVO
 
-/**
- * GLDAPO schema class for SU employees and students also used by web service.
- */
+/** GLDAPO schema class for SU employees and students also used by web service. */
+
+@Slf4j
 class SuPerson implements Serializable {
 
   static final long serialVersionUID = -687991492884005033L
 
-  /** Available affiliation ordered by priority. DON'T CHANGE! */
-  static final List<String> AFFILIATIONS = ['employee', 'student', 'alumni', 'member', 'other']
+  public enum Affilation {
+    EMPLOYEE('employee', 40),
+    STUDENT('student', 30),
+    ALUMNI('alumni', 20),
+    MEMBER('member', 10),
+    OTHER('other', 0)
+
+    private final String value
+    private final int rank
+
+    public Affilation(value, rank) {
+      this.value = value
+      this.rank = rank
+    }
+
+    public getValue() {
+      return value
+    }
+  }
+
+  // static final List<String> AFFILIATIONS = ['employee', 'student', 'alumni', 'member', 'other']
 
   @GldapoSchemaFilter("(objectClass=suPerson)")
   @GldapoNamingAttribute
@@ -226,5 +246,47 @@ class SuPerson implements Serializable {
       }
     }
     return aSet
+  }
+
+  /**
+   * Sets primary affiliation
+   *
+   * @param eduPersonPrimaryAffiliation the affiliation
+   * @param suEnrollPerson the SuEnrollPerson
+   */
+  public void setAffiliations(String[] affiliations) throws IllegalArgumentException {
+    log.debug "setAffiliations: Received affiliations ${affiliations?.join(', ')}"
+
+    if (affiliations == null) {
+      // TODO: See if we should be able to reset
+      throw new IllegalArgumentException("Affiliations can't be null.")
+    }
+
+    def validAffiliations = Affilation*.value
+
+    /* If an invalid affiliation is supplied we throw an IllegalArgumentException */
+    if (!validAffiliations.containsAll(affiliations)) {
+      affiliations.every { affiliation ->
+        if (!validAffiliations.contains(affiliation)) {
+          throw new IllegalArgumentException("Supplied affiliation $affiliation is invalid.")
+        }
+      }
+    }
+
+    objectClass.add("eduPerson")
+    log.debug "setAffiliations: affiliations set to ${affiliations?.join(', ')}"
+    eduPersonAffiliation = affiliations
+
+    String primary = null
+
+    for (targetAffiliation in Affilation.enumConstants) {
+      if (affiliations.contains(targetAffiliation.value)) {
+        primary = targetAffiliation.value
+        break
+      }
+    }
+
+    log.debug "setAffiliations: Primary affiliation set to $primary"
+    eduPersonPrimaryAffiliation = primary
   }
 }
