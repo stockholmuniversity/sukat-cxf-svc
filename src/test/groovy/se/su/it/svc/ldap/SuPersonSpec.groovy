@@ -1,5 +1,7 @@
 package se.su.it.svc.ldap
 
+import se.su.it.svc.commons.SvcSuPersonVO
+import se.su.it.svc.util.GeneralUtils
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -59,5 +61,19 @@ class SuPersonSpec extends Specification {
     ['a@b.c']   | null                       | null
     ['a@b.c']   | ['foo']                    | ['foo','inetLocalMailRecipient']
     ['a@b.c']   | ['inetLocalMailRecipient'] | ['inetLocalMailRecipient']
+  }
+
+  def "updateFromSvcSuPersonVO - should copy properties"() {
+    given:
+    def suPerson = new SuPerson()
+    def svcSuPerson = new SvcSuPersonVO(uid: 'foo')
+
+    GroovyMock(GeneralUtils, global: true)
+
+    when:
+    suPerson.updateFromSvcSuPersonVO(svcSuPerson)
+
+    then:
+    1 * GeneralUtils.copyProperties(svcSuPerson, suPerson)
   }
 }

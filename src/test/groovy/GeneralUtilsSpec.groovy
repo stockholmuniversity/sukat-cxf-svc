@@ -30,6 +30,9 @@
  */
 
 import org.junit.Test
+import se.su.it.svc.commons.SvcSuPersonVO
+import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.ldap.SuPersonStub
 import se.su.it.svc.util.GeneralUtils
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -76,5 +79,37 @@ class GeneralUtilsSpec extends Specification {
     null   | null
     ''     | '' + GeneralUtils.SU_SE_SCOPE
     'test' | 'test' + GeneralUtils.SU_SE_SCOPE
+  }
+
+  def "copyProperties: should copy property values from one object to another"() {
+    given:
+    def source = new SuPerson(
+            uid: 'foo',
+            cn: 'bar')
+    def target = new SuPerson()
+
+    when: GeneralUtils.copyProperties(source, target)
+
+    then:
+    target.uid == source.uid
+    target.cn == source.cn
+  }
+
+  def "copyProperties: should not copy class, metaClass or serialVersionUID"() {
+    given:
+    def source = new SuPersonStub(
+            uid: 'foo',
+            cn: 'bar')
+    def target = new SvcSuPersonVO()
+
+    when: GeneralUtils.copyProperties(source, target)
+
+    then:
+    target.uid == source.uid
+
+    and:
+    target.class != source.class
+    target.metaClass != source.metaClass
+    target.serialVersionUID != source.serialVersionUID
   }
 }

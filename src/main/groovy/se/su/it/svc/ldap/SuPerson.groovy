@@ -34,6 +34,7 @@ package se.su.it.svc.ldap
 import gldapo.schema.annotation.GldapoNamingAttribute
 import gldapo.schema.annotation.GldapoSchemaFilter
 import se.su.it.svc.commons.SvcSuPersonVO
+import se.su.it.svc.util.GeneralUtils
 
 /**
  * GLDAPO schema class for SU employees and students also used by web service.
@@ -85,23 +86,15 @@ class SuPerson implements Serializable {
   String uidNumber
 
   /**
-   * Get a SvcSuPersonVO filled with property values from this SuPerson
+   * Create a SvcSuPersonVO filled with property values from this SuPerson
    *
    * @return a new SvcSuPersonVO
    */
-  public SvcSuPersonVO getSvcSuPersonVO(){
-    SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO(
-      uid:                   uid,
-      socialSecurityNumber:  socialSecurityNumber,
-      givenName:             givenName,
-      sn:                    sn,
-      displayName:           displayName,
-      registeredAddress:     registeredAddress,
-      mail:                  mail,
+  public SvcSuPersonVO createSvcSuPersonVO() {
+    SvcSuPersonVO svcSuPersonVO = new SvcSuPersonVO()
+    GeneralUtils.copyProperties(this, svcSuPersonVO)
 
-      /** The user has an account in SUKAT that is not a stub.*/
-      accountIsActive:  (objectClass?.contains('posixAccount')) ?: false
-    )
+    svcSuPersonVO.accountIsActive = (objectClass?.contains('posixAccount')) ?: false
 
     return svcSuPersonVO
   }
@@ -111,12 +104,8 @@ class SuPerson implements Serializable {
    *
    * @param svcSuPersonVO the VO containing the properties
    */
-  public void updateFromSvcSuPersonVO(SvcSuPersonVO svcSuPersonVO){
-    svcSuPersonVO.properties.each { String key, value ->
-      if (this.hasProperty(key) && !(key in ['class', 'metaClass', 'serialVersionUID'])) {
-        this.setProperty(key, value)
-      }
-    }
+  public void updateFromSvcSuPersonVO(SvcSuPersonVO svcSuPersonVO) {
+    GeneralUtils.copyProperties(svcSuPersonVO, this)
   }
 
   /**
