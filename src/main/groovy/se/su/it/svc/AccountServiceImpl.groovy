@@ -46,7 +46,6 @@ import se.su.it.svc.ldap.SuPersonStub
 import se.su.it.svc.manager.Config
 import se.su.it.svc.manager.GldapoManager
 import se.su.it.svc.query.SuPersonQuery
-import se.su.it.svc.util.EnrollmentServiceUtils
 import se.su.it.svc.util.GeneralUtils
 
 import javax.jws.WebParam
@@ -238,15 +237,14 @@ public class AccountServiceImpl implements AccountService {
   ) {
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
 
-    if (suPerson) {
+    if (suPerson != null) {
       SvcUidPwd svcUidPwd = new SvcUidPwd(uid: uid)
       svcUidPwd.password = PasswordUtils.genRandomPassword(10, 10)
 
-      EnrollmentServiceUtils.activateUser(suPerson, svcUidPwd, affiliations, domain)
+      suPerson.activate(svcUidPwd, affiliations, domain)
 
       return svcUidPwd
-    }
-    else {
+    } else {
       throw new IllegalArgumentException("enrollUser - no such uid found: " + uid)
     }
   }
