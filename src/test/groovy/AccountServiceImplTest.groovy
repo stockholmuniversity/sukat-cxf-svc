@@ -47,7 +47,7 @@ import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuPersonStub
 import se.su.it.svc.manager.Config
 import se.su.it.svc.query.SuPersonQuery
-import se.su.it.svc.util.EnrollmentServiceUtils
+import spock.lang.IgnoreRest
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -472,6 +472,7 @@ class AccountServiceImplTest extends Specification {
   @Test
   def "Test getMailRoutingAddress with person not found"() {
     setup:
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def accountServiceImpl = new AccountServiceImpl()
 
@@ -486,6 +487,7 @@ class AccountServiceImplTest extends Specification {
   def "Test getMailRoutingAddress Happy Path"() {
     setup:
     SuPerson suPerson = new SuPerson(mailRoutingAddress: "kalle")
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return suPerson }
     def accountServiceImpl = new AccountServiceImpl()
     when:
@@ -545,6 +547,7 @@ class AccountServiceImplTest extends Specification {
   @Test
   def "Test setMailRoutingAddress with person not found"() {
     setup:
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def accountServiceImpl = new AccountServiceImpl()
 
@@ -559,6 +562,7 @@ class AccountServiceImplTest extends Specification {
   def "Test setMailRoutingAddress Happy Path"() {
     setup:
     SuPerson suPerson = new SuPerson(mailRoutingAddress: "kalle")
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return suPerson }
     SuPersonQuery.metaClass.static.updateSuPerson = {SuPerson tmpp -> suPerson.mailRoutingAddress = tmpp.mailRoutingAddress}
     def accountServiceImpl = new AccountServiceImpl()
@@ -697,9 +701,9 @@ class AccountServiceImplTest extends Specification {
   def "activateSuPerson: test when user exists in LDAP, should handle user and return new password"() {
     given:
     GroovyMock(SuPersonQuery, global: true)
-    SuPersonQuery.getSuPersonFromUID(_,_) >> { new SuPerson() }
-
-    GroovyMock(EnrollmentServiceUtils, global: true)
+    SuPersonQuery.getSuPersonFromUID(_,_) >> {
+      return GroovyMock(SuPerson)
+    }
 
     when:
     def svcUidPwd = service.activateSuPerson(
@@ -709,7 +713,6 @@ class AccountServiceImplTest extends Specification {
             new SvcAudit())
 
     then:
-    1 * EnrollmentServiceUtils.activateUser(*_)
     svcUidPwd.uid == 'uid'
     svcUidPwd.password.size() == 10
   }
