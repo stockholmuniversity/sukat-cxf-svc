@@ -42,7 +42,6 @@ import se.su.it.svc.EnrollmentServiceImpl
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.query.SuPersonQuery
-import se.su.it.svc.util.EnrollmentServiceUtils
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -65,7 +64,6 @@ class EnrollmentServiceImplTest extends Specification {
   def cleanup() {
     this.service = null
     EnrollmentServiceImpl.metaClass = null
-    EnrollmentServiceUtils.metaClass = null
   }
 
   @Test
