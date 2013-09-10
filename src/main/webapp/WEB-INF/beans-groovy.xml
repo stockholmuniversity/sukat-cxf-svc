@@ -7,9 +7,9 @@
 	to you under the Apache License, Version 2.0 (the
 	"License"); you may not use this file except in compliance
 	with the License. You may obtain a copy of the License at
-	
+
 	http://www.apache.org/licenses/LICENSE-2.0
-	
+
 	Unless required by applicable law or agreed to in writing,
 	software distributed under the License is distributed on an
 	"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -126,13 +126,6 @@
     implementorClass="se.su.it.svc.AccountServiceImpl"
     implementor="#accountserviceEndpoint"
     address="/AccountService" />
-
-  <bean id="enrollmentserviceEndpoint" class="se.su.it.svc.EnrollmentServiceImpl" />
-  <jaxws:endpoint
-    id="enrollmentservice"
-    implementorClass="se.su.it.svc.EnrollmentServiceImpl"
-    implementor="#enrollmentserviceEndpoint"
-    address="/EnrollmentService" />
 
   <bean id="roleserviceEndpoint" class="se.su.it.svc.RoleServiceImpl" />
   <jaxws:endpoint
