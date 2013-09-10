@@ -1,12 +1,17 @@
 package se.su.it.svc.ldap
 
+import gldapo.GldapoSchemaRegistry
+import org.junit.Test
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.util.GeneralUtils
-import org.junit.Test
 import spock.lang.Specification
 import spock.lang.Unroll
 
 class SuPersonSpec extends Specification {
+
+  def setup() {
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> }
+  }
 
   @Unroll
   def "setMail - should update mailLocalAddress for #input"() {

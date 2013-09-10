@@ -1,9 +1,14 @@
 package se.su.it.svc.util
 
+import gldapo.GldapoSchemaRegistry
 import spock.lang.Specification
 import spock.lang.Unroll
 
 class AccountServiceUtilsSpec extends Specification {
+
+  def setup() {
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> }
+  }
 
   @Unroll
   def "domainToDN returns dn='#dn' for domain='#domain'"() {

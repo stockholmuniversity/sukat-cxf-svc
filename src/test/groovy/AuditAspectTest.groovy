@@ -31,6 +31,9 @@
 
 
 
+
+
+import gldapo.GldapoSchemaRegistry
 import org.aopalliance.intercept.MethodInvocation
 import se.su.it.svc.audit.AuditAspect
 import se.su.it.svc.audit.AuditEntity
@@ -40,10 +43,13 @@ import spock.lang.Specification
 import java.lang.reflect.Method
 
 class AuditAspectTest extends Specification {
+
   def setup() {
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> }
     AuditAspect.metaClass = null
   }
-  def teardown() {
+
+  def cleanup() {
     AuditAspect.metaClass = null
   }
 

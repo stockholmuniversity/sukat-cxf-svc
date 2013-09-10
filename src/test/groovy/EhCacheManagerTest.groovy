@@ -29,10 +29,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+
+
+import gldapo.GldapoSchemaRegistry
 import net.sf.ehcache.Cache
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy
 import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import se.su.it.svc.manager.EhCacheManager
 import spock.lang.Shared
@@ -43,8 +45,8 @@ class EhCacheManagerTest extends Specification {
   @Shared
   def cacheManager
 
-  @Before
   void setup() {
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> }
     cacheManager = EhCacheManager.getInstance()
   }
 

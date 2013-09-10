@@ -29,6 +29,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+
+
+import gldapo.GldapoSchemaRegistry
 import org.junit.Test
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.ldap.SuPerson
@@ -38,6 +41,10 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 class GeneralUtilsSpec extends Specification {
+
+  def setup() {
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> }
+  }
 
   @Test
   @Unroll

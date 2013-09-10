@@ -29,10 +29,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+
+
+import gldapo.GldapoSchemaRegistry
 import se.su.it.svc.audit.AuditEntity
 import spock.lang.Specification
 
 class AuditEntityTest extends Specification {
+
+  def setup() {
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> }
+  }
+
   def "Constructor: Test constructor"() {
     when: 'Constructor should never be called directly, thus private.'
     AuditEntity auditEntity = new AuditEntity()
