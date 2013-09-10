@@ -31,15 +31,17 @@
 
 package se.su.it.svc.query
 
-import gldapo.Gldapo
-import org.junit.After
+import gldapo.GldapoSchemaRegistry
 import se.su.it.svc.ldap.SuCard
 import spock.lang.Specification
 
 class SuCardQuerySpec extends Specification {
 
-  @After
-  def tearDown(){
+  def setup(){
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> }
+  }
+
+  def cleanup(){
     SuCard.metaClass = null
   }
 
@@ -67,19 +69,5 @@ class SuCardQuerySpec extends Specification {
 
     then:
     noExceptionThrown()
-  }
-
-  def "saveSuCard should save the card"() {
-    given:
-    boolean saved = false
-    SuCard suCard = new SuCard()
-    Gldapo.initialize()
-    suCard.metaClass.save = { saved = true }
-
-    when:
-    SuCardQuery.saveSuCard(suCard)
-
-    then:
-    saved
   }
 }

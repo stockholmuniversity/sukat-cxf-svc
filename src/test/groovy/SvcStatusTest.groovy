@@ -29,10 +29,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+
+
+import gldapo.GldapoSchemaRegistry
 import se.su.it.svc.commons.SvcStatus
 import spock.lang.Specification
 
 class SvcStatusTest extends Specification {
+
+  def setup() {
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> }
+  }
+
   def "Test attributes"() {
     expect:
     new SvcStatus().properties.keySet().containsAll(

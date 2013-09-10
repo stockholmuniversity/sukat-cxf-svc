@@ -30,6 +30,7 @@
  */
 
 
+
 import gldapo.GldapoSchemaRegistry
 import org.junit.Test
 import se.su.it.svc.CardAdminServiceImpl
@@ -37,8 +38,14 @@ import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.query.SuCardOrderQuery
 import se.su.it.svc.query.SuCardQuery
+import spock.lang.Specification
 
-class CardAdminServiceImplTest extends spock.lang.Specification{
+class CardAdminServiceImplTest extends Specification {
+
+  def setup() {
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> }
+  }
+
   @Test
   def "Test revokeCard with null suCardUUID argument"() {
     setup:
@@ -62,10 +69,9 @@ class CardAdminServiceImplTest extends spock.lang.Specification{
   @Test
   def "Test revokeCard sets state to revoked"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     def suCard = new SuCard()
+    suCard.metaClass.save = { }
     SuCardQuery.metaClass.static.findCardBySuCardUUID = {String arg1, String arg2 -> return suCard}
-    SuCardQuery.metaClass.static.saveSuCard = {SuCard arg1 -> return void}
 
     def cardAdminServiceImpl = new CardAdminServiceImpl()
     when:
@@ -77,10 +83,9 @@ class CardAdminServiceImplTest extends spock.lang.Specification{
   @Test
   def "Test revokeCard when updating SuCardDb fails"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     def suCard = new SuCard()
+    suCard.metaClass.save = { }
     SuCardQuery.metaClass.static.findCardBySuCardUUID = {String arg1, String arg2 -> return suCard}
-    SuCardQuery.metaClass.static.saveSuCard = {SuCard arg1 -> return void}
     def cardAdminServiceImpl = new CardAdminServiceImpl()
 
     SuCardOrderQuery.metaClass.markCardAsDiscarded = { String arg1, String arg2 ->
@@ -97,7 +102,6 @@ class CardAdminServiceImplTest extends spock.lang.Specification{
   @Test
   def "Test revokeCard throws IllegalArgumentException when no card was found"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuCardQuery.metaClass.static.findCardBySuCardUUID = {String arg1, String arg2 -> return null}
 
     def cardAdminServiceImpl = new CardAdminServiceImpl()
@@ -140,10 +144,9 @@ class CardAdminServiceImplTest extends spock.lang.Specification{
   @Test
   def "Test setCardPIN sets pin"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     def suCard = new SuCard()
+    suCard.metaClass.save = { }
     SuCardQuery.metaClass.static.findCardBySuCardUUID = {String arg1, String arg2 -> return suCard}
-    SuCardQuery.metaClass.static.saveSuCard = {SuCard arg1 -> return void}
 
     def cardAdminServiceImpl = new CardAdminServiceImpl()
     when:
@@ -155,7 +158,6 @@ class CardAdminServiceImplTest extends spock.lang.Specification{
   @Test
   def "Test setCardPIN returns false when no card was found"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuCardQuery.metaClass.static.findCardBySuCardUUID = {String arg1, String arg2 -> return null}
 
     def cardAdminServiceImpl = new CardAdminServiceImpl()

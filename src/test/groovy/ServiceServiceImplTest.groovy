@@ -30,6 +30,7 @@
  */
 
 
+
 import gldapo.GldapoSchemaRegistry
 import org.junit.Test
 import se.su.it.commons.Kadmin
@@ -43,6 +44,7 @@ import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuServiceDescriptionQuery
 import se.su.it.svc.query.SuServiceQuery
 import se.su.it.svc.query.SuSubAccountQuery
+import spock.lang.Specification
 
 /**
  * Created with IntelliJ IDEA.
@@ -51,7 +53,12 @@ import se.su.it.svc.query.SuSubAccountQuery
  * Time: 11:26
  * To change this template use File | Settings | File Templates.
  */
-class ServiceServiceImplTest extends spock.lang.Specification{
+class ServiceServiceImplTest extends Specification {
+
+  def setup() {
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> }
+  }
+
   @Test
   def "Test getServices with null uid argument"() {
     setup:
@@ -79,7 +86,6 @@ class ServiceServiceImplTest extends spock.lang.Specification{
   @Test
   def "Test getServices returns list of SuCard when person exists"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     def person = new SuPerson()
     def suServices = [new SuService()]
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return person }
@@ -96,7 +102,6 @@ class ServiceServiceImplTest extends spock.lang.Specification{
   @Test
   def "Test getServices returns empty list of SuCard when person exists"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     def person = new SuPerson()
     def suServices = []
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return person }
@@ -112,7 +117,6 @@ class ServiceServiceImplTest extends spock.lang.Specification{
   @Test
   def "Test getServices returns exception when person dont exists"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def serviceServiceImpl = new ServiceServiceImpl()
     when:
@@ -196,7 +200,6 @@ class ServiceServiceImplTest extends spock.lang.Specification{
   @Test
   def "Test enableServiceFully returns exception when person dont exists"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def serviceServiceImpl = new ServiceServiceImpl()
     when:
@@ -208,7 +211,6 @@ class ServiceServiceImplTest extends spock.lang.Specification{
   @Test
   def "Test enableServiceFully with qualifier" () {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return new SuPerson(uid: "testuid") }
     SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
     SuSubAccountQuery.metaClass.static.getSuSubAccounts = {String directory, org.springframework.ldap.core.DistinguishedName dn -> return [new SuSubAccount(uid: "test2uid.jabber"),new SuSubAccount(uid: "testuid.jabber")]}
@@ -228,7 +230,6 @@ class ServiceServiceImplTest extends spock.lang.Specification{
   @Test
   def "Test enableServiceFully with blocked service status" () {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return new SuPerson(uid: "testuid") }
     SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
     SuSubAccountQuery.metaClass.static.getSuSubAccounts = {String directory, org.springframework.ldap.core.DistinguishedName dn -> return [new SuSubAccount(uid: "test2uid.jabber"),new SuSubAccount(uid: "testuid.jabber")]}
@@ -249,7 +250,6 @@ class ServiceServiceImplTest extends spock.lang.Specification{
   @Test
   def "Test enableServiceFully with locked service status" () {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return new SuPerson(uid: "testuid") }
     SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
     SuSubAccountQuery.metaClass.static.getSuSubAccounts = {String directory, org.springframework.ldap.core.DistinguishedName dn -> return [new SuSubAccount(uid: "test2uid.jabber"),new SuSubAccount(uid: "testuid.jabber")]}

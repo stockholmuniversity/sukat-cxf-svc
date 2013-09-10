@@ -33,10 +33,9 @@
 
 
 
+
 import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PreconditionViolation
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import se.su.it.commons.Kadmin
 import se.su.it.svc.EnrollmentServiceImpl
@@ -58,12 +57,11 @@ class EnrollmentServiceImplTest extends Specification {
   @Shared
   EnrollmentServiceImpl service
 
-  @Before
   def setup() {
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> }
     this.service = new EnrollmentServiceImpl()
   }
 
-  @After
   def cleanup() {
     this.service = null
     EnrollmentServiceImpl.metaClass = null
@@ -93,7 +91,6 @@ class EnrollmentServiceImplTest extends Specification {
   @Test
   def "Test resetAndExpirePwd without person exist"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def enrollmentServiceImpl = new EnrollmentServiceImpl()
     when:

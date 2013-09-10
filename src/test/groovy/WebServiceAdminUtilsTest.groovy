@@ -29,8 +29,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+
+
+import gldapo.GldapoSchemaRegistry
 import org.apache.log4j.Level
 import se.su.it.svc.util.WebServiceAdminUtils
+import spock.lang.Specification
 
 /**
  * Created with IntelliJ IDEA.
@@ -39,7 +43,11 @@ import se.su.it.svc.util.WebServiceAdminUtils
  * Time: 12:03
  * To change this template use File | Settings | File Templates.
  */
-class WebServiceAdminUtilsTest extends spock.lang.Specification {
+class WebServiceAdminUtilsTest extends Specification {
+
+  def setup() {
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> }
+  }
 
   def "getLogLevelFromString: Happy Path log levels supplied level is #level results in #expected" () {
     when:
@@ -62,6 +70,7 @@ class WebServiceAdminUtilsTest extends spock.lang.Specification {
     null    | 'INFO'
     ''      | 'INFO'
   }
+
   def "getFunctionByteFromLoggerAndString: Happy Path log levels supplied level is #loggerString in #level results in #expected" () {
     when:
     byte result = WebServiceAdminUtils.getFunctionByteFromLoggerAndString(loggerString,level)

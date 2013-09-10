@@ -29,6 +29,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+
+
+import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PostconditionViolation
 import org.gcontracts.PreconditionViolation
 import org.junit.Test
@@ -42,6 +45,11 @@ import se.su.it.svc.query.SuPersonQuery
 import spock.lang.Specification
 
 class CardInfoServiceImplTest extends Specification {
+
+  def setup() {
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> }
+  }
+
   @Test
   def "Test getAllCards with null uid argument"() {
     setup:

@@ -30,6 +30,7 @@
  */
 
 
+
 import gldapo.GldapoSchemaRegistry
 import org.junit.Test
 import org.springframework.ldap.core.DistinguishedName
@@ -39,8 +40,14 @@ import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuRole
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuRoleQuery
+import spock.lang.Specification
 
-class RoleServiceImplTest extends spock.lang.Specification{
+class RoleServiceImplTest extends Specification {
+
+  def setup() {
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> }
+  }
+
   @Test
   def "Test addUidToRoles with null uid argument"() {
     setup:
@@ -86,7 +93,6 @@ class RoleServiceImplTest extends spock.lang.Specification{
     setup:
     def myRoles = ["cn=Test1,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE",
       "cn=Test2,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE"]
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def roleServiceImpl = new RoleServiceImpl()
     when:
@@ -108,7 +114,6 @@ class RoleServiceImplTest extends spock.lang.Specification{
     suRole2.roleOccupant = ["uid=dummy,dc=it,dc=su,dc=se","uid=testuid, dc=it, dc=su, dc=se"]
     def myRoles = ["cn=Test1,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE",
       "cn=Test2,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE"]
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     person.metaClass.getDn = {new DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return person }
     SuRoleQuery.metaClass.static.getSuRoleFromDN = {String directory, String roleDN -> if(roleDN.startsWith("cn=Test1")) return suRole; if(roleDN.startsWith("cn=Test2")) return suRole2;}
@@ -167,7 +172,6 @@ class RoleServiceImplTest extends spock.lang.Specification{
     setup:
     def myRoles = ["cn=Test1,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE",
       "cn=Test2,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE"]
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def roleServiceImpl = new RoleServiceImpl()
     when:
@@ -189,7 +193,6 @@ class RoleServiceImplTest extends spock.lang.Specification{
     suRole2.roleOccupant = ["uid=dummy,dc=it,dc=su,dc=se","uid=testuid, dc=it, dc=su, dc=se"]
     def myRoles = ["cn=Test1,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE",
       "cn=Test2,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE"]
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     person.metaClass.getDn = {new DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return person }
     SuRoleQuery.metaClass.static.getSuRoleFromDN = {String directory, String roleDN -> if(roleDN.startsWith("cn=Test1")) return suRole; if(roleDN.startsWith("cn=Test2")) return suRole2;}

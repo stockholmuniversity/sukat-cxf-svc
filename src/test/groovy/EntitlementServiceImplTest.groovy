@@ -30,12 +30,14 @@
  */
 
 
+
 import gldapo.GldapoSchemaRegistry
 import org.junit.Test
 import se.su.it.svc.EntitlementServiceImpl
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.query.SuPersonQuery
+import spock.lang.Specification
 
 /**
  * Created with IntelliJ IDEA.
@@ -44,7 +46,12 @@ import se.su.it.svc.query.SuPersonQuery
  * Time: 08:34
  * To change this template use File | Settings | File Templates.
  */
-class EntitlementServiceImplTest extends spock.lang.Specification{
+class EntitlementServiceImplTest extends Specification {
+
+  def setup() {
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> }
+  }
+
   @Test
   def "Test addEntitlement with null uid argument"() {
     setup:
@@ -78,7 +85,6 @@ class EntitlementServiceImplTest extends spock.lang.Specification{
   @Test
   def "Test addEntitlement when person dont exists"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def entitlementServiceImpl = new EntitlementServiceImpl()
     when:
@@ -90,7 +96,6 @@ class EntitlementServiceImplTest extends spock.lang.Specification{
   @Test
   def "Test addEntitlement whith duplicate entitlement"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPerson person = new SuPerson()
     def tmpSet = new java.util.LinkedHashSet<String>()
     tmpSet.add("urn:mace:swami.se:gmai:test:test")
@@ -107,7 +112,6 @@ class EntitlementServiceImplTest extends spock.lang.Specification{
   @Test
   def "Test addEntitlement"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPerson person = new SuPerson()
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return person }
     SuPersonQuery.metaClass.static.updateSuPerson = {SuPerson arg1 -> return void}
@@ -151,7 +155,6 @@ class EntitlementServiceImplTest extends spock.lang.Specification{
   @Test
   def "Test removeEntitlement when person dont exists"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def entitlementServiceImpl = new EntitlementServiceImpl()
     when:
@@ -163,7 +166,6 @@ class EntitlementServiceImplTest extends spock.lang.Specification{
   @Test
   def "Test removeEntitlement with no eduPersonEntitlement list in person object"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPerson person = new SuPerson()
     person.eduPersonEntitlement = null
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return person }
@@ -178,7 +180,6 @@ class EntitlementServiceImplTest extends spock.lang.Specification{
   @Test
   def "Test removeEntitlement with no same entitlement in list"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPerson person = new SuPerson()
     def tmpSet = new java.util.LinkedHashSet<String>()
     tmpSet.add("urn:mace:swami.se:gmai:test:test")
@@ -195,7 +196,6 @@ class EntitlementServiceImplTest extends spock.lang.Specification{
   @Test
   def "Test removeEntitlement"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPerson person = new SuPerson()
     def tmpSet = new java.util.LinkedHashSet<String>()
     tmpSet.add("urn:mace:swami.se:gmai:test:test")

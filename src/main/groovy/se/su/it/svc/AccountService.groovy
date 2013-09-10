@@ -33,6 +33,7 @@ package se.su.it.svc
 
 import se.su.it.svc.annotations.SuCxfSvcSpocpRole
 import se.su.it.svc.audit.AuditAspectMethodDetails
+import se.su.it.svc.audit.AuditHideReturnValue
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
@@ -40,10 +41,12 @@ import se.su.it.svc.commons.SvcUidPwd
 @SuCxfSvcSpocpRole(role = "sukat-account-admin")
 public interface AccountService {
   void updatePrimaryAffiliation(String uid, String affiliation, SvcAudit audit)
+  @AuditHideReturnValue
   @AuditAspectMethodDetails(details = "setPassword")
   String resetPassword(String uid, SvcAudit audit)
   void createSuPerson(String uid, String ssn, String givenName, String sn, SvcAudit audit)
   void updateSuPerson(String uid, SvcSuPersonVO person, SvcAudit audit)
+  @AuditHideReturnValue
   SvcUidPwd activateSuPerson(String uid, String domain, String[] affiliations, SvcAudit audit)
   void terminateSuPerson(String uid, SvcAudit audit)
   String getMailRoutingAddress(String uid, SvcAudit audit)

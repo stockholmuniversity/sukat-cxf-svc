@@ -31,14 +31,17 @@
 
 package se.su.it.svc.query
 
-import org.junit.After
+import gldapo.GldapoSchemaRegistry
 import se.su.it.svc.ldap.SuPerson
 import spock.lang.Specification
 
 class SuPersonQuerySpec extends Specification {
 
-  @After
-  def tearDown(){
+  def setup() {
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> }
+  }
+
+  def cleanup(){
     SuPerson.metaClass = null
   }
 
