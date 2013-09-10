@@ -39,7 +39,7 @@ import se.su.it.commons.ExecUtils
 import se.su.it.commons.Kadmin
 import se.su.it.commons.PasswordUtils
 import se.su.it.svc.AccountServiceImpl
-import se.su.it.svc.EnrollmentServiceImpl
+
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
@@ -47,7 +47,6 @@ import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuPersonStub
 import se.su.it.svc.manager.Config
 import se.su.it.svc.query.SuPersonQuery
-import spock.lang.IgnoreRest
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -758,38 +757,15 @@ class AccountServiceImplTest extends Specification {
   }
 
   @Test
-  def "Test activateSuPerson scripts fail"() {
-    setup:
-    Config.instance.props.enrollment.skipCreate = "false"
-
-    SuPerson suEnrollPerson = new SuPerson(uid: "testuid")
-    SuPersonQuery.metaClass.static.getSuEnrollPersonFromSsn = {String directory,String nin -> return suEnrollPerson }
-    EnrollmentServiceUtils.metaClass.static.enableUser = {String uid, String password, Object o -> return false}
-    SuPerson.metaClass.parent = "stuts"
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory, String uid -> return null}
-    SuPersonQuery.metaClass.static.initSuEnrollPerson = {String directory, SuPerson person -> return person}
-    SuPersonQuery.metaClass.static.saveSuEnrollPerson = {SuPerson person -> return null}
-
-
-    def enrollmentServiceImpl = new EnrollmentServiceImpl()
-
-    when:
-    enrollmentServiceImpl.activateSuPerson('uid', "student.su.se", ["other"] as String[], new SvcAudit())
-
-    then:
-    thrown(Exception)
-  }
-
-  @Test
   def "Test activateSuPerson Happy Path"() {
     setup:
     def uid = "testuid"
     def password = "*" * 10
 
+    SuPerson suPerson = Mock(SuPerson)
     GroovyMock(SuPersonQuery, global: true)
-    SuPersonQuery.getSuPersonFromUID(_,_) >> { new SuPerson() }
+    SuPersonQuery.getSuPersonFromUID(_,_) >> { suPerson }
 
-    GroovyMock(EnrollmentServiceUtils, global: true)
     GroovyMock(PasswordUtils, global: true)
 
     when:
