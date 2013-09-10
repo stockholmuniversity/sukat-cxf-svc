@@ -37,7 +37,6 @@ import groovy.sql.Sql
 import org.apache.commons.dbcp.BasicDataSource
 import org.junit.Test
 import se.su.it.svc.commons.SvcCardOrderVO
-import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -54,6 +53,7 @@ public class SuCardOrderQueryTest extends Specification {
 
   void cleanup() {
     service = null
+    SuCardOrderQuery.metaClass = null
     Sql.metaClass = null
   }
 
@@ -362,30 +362,34 @@ public class SuCardOrderQueryTest extends Specification {
     resp
   }
 
-  @Test @Ignore //TODO: Fix this test, works in IDE but no when running mvn test.
+  @Test
   def "markCardAsDiscarded"(){
     given:
-    Sql.metaClass.withTransaction = { Closure closure ->
-      return true
+    SuCardOrderQuery spy = GroovySpy(SuCardOrderQuery) {
+      doMarkCardAsDiscarded(*_) >> {}
+      withConnection(_) >> { Closure query -> query.call() }
     }
+
     when:
-    def resp = service.markCardAsDiscarded('uuid', 'uid')
+    def resp = spy.markCardAsDiscarded('uuid', 'uid')
 
     then:
-    resp == true
+    !resp
   }
 
-  @Test @Ignore //TODO: Fix this test, works in IDE but no when running mvn test.
+  @Test
   def "markCardAsDiscarded fails"(){
     given:
-    Sql.metaClass.withTransaction = { Closure closure ->
-      throw new RuntimeException('foo')
+    SuCardOrderQuery spy = GroovySpy(SuCardOrderQuery) {
+      doMarkCardAsDiscarded(*_) >> { throw new RuntimeException('foo') }
+      withConnection(_) >> { Closure query -> query.call() }
     }
+
     when:
-    def resp = service.markCardAsDiscarded('uuid', 'uid')
+    def resp = spy.markCardAsDiscarded('uuid', 'uid')
 
     then:
-    resp == false
+    !resp
   }
 
 }
