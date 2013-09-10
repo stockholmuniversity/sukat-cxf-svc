@@ -91,17 +91,4 @@ public class SuCardQuery {
 
     return card
   }
-
-  /**
-   * Save a SuCard object to ldap.
-   * and putting the changed object in the cache so that the objects returned by this svc is always up-to-date.
-   *
-   *
-   * @return void.
-   * @see se.su.it.svc.ldap.SuCard
-   * @see se.su.it.svc.manager.GldapoManager
-   */
-  static void saveSuCard(SuCard suCard) {
-    suCard.save()
-  }
 }
