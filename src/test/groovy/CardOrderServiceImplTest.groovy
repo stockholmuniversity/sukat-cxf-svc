@@ -31,10 +31,9 @@
 
 
 
+import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PostconditionViolation
 import org.gcontracts.PreconditionViolation
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import se.su.it.svc.CardOrderServiceImpl
 import se.su.it.svc.commons.SvcAudit
@@ -49,8 +48,8 @@ class CardOrderServiceImplTest extends Specification {
   @Shared
   CardOrderServiceImpl service
 
-  @Before
-  void setup() {
+  def setup() {
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> }
     service = new CardOrderServiceImpl()
   }
 
@@ -68,7 +67,6 @@ class CardOrderServiceImplTest extends Specification {
         zipcode: '12345')
   }
 
-  @After
   void cleanup() {
     service = null
   }

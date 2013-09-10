@@ -29,12 +29,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 import gldapo.GldapoSchemaRegistry
 import org.apache.commons.lang.NotImplementedException
 import org.gcontracts.PostconditionViolation
 import org.gcontracts.PreconditionViolation
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import se.su.it.commons.ExecUtils
 import se.su.it.commons.Kadmin
@@ -57,16 +56,14 @@ class AccountServiceImplTest extends Specification {
   @Shared
   AccountServiceImpl service
 
-  @Before
   def setup() {
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> }
     this.service = new AccountServiceImpl()
   }
 
-  @After
-  def tearDown() {
+  def cleanup() {
     this.service = null
     Kadmin.metaClass = null
-    GldapoSchemaRegistry.metaClass = null
     SuPersonStub.metaClass = null
     SuPersonQuery.metaClass = null
     PasswordUtils.metaClass = null
@@ -112,7 +109,6 @@ class AccountServiceImplTest extends Specification {
   @Test
   def "Test updatePrimaryAffiliation without person exist"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def accountServiceImpl = new AccountServiceImpl()
     when:
@@ -125,7 +121,6 @@ class AccountServiceImplTest extends Specification {
   def "Test updatePrimaryAffiliation when person exist"() {
     setup:
     String myaffiliation = null
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> new SuPerson(eduPersonPrimaryAffiliation: "kalle") }
     SuPersonQuery.metaClass.static.updateSuPerson = {SuPerson person -> myaffiliation = person.eduPersonPrimaryAffiliation}
     def accountServiceImpl = new AccountServiceImpl()
@@ -244,7 +239,6 @@ class AccountServiceImplTest extends Specification {
   @Test
   def "Test updateSuPerson without person exist"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def accountServiceImpl = new AccountServiceImpl()
 
@@ -263,7 +257,6 @@ class AccountServiceImplTest extends Specification {
     suPerson.eduPersonAffiliation = ["other"]
     def title = []
     String listEntry0 = null
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> new SuPerson(title: ["systemdeveloper"], eduPersonAffiliation: ["employee"]) }
     SuPersonQuery.metaClass.static.updateSuPerson = {SuPerson person -> title = person.title;listEntry0=person.eduPersonAffiliation.iterator().next()}
     def accountServiceImpl = new AccountServiceImpl()
@@ -289,7 +282,7 @@ class AccountServiceImplTest extends Specification {
   @Test
   def "Test createSuPerson with already exist uid argument"() {
     setup:
-    SuPersonQuery.metaClass.static.getSuPersonFromUIDNoCache = {String directory,String uid -> new SuPerson() }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> new SuPerson() }
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
@@ -431,7 +424,6 @@ class AccountServiceImplTest extends Specification {
   @Test
   def "Test terminateSuPerson without person exist"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def accountServiceImpl = new AccountServiceImpl()
 
@@ -445,7 +437,6 @@ class AccountServiceImplTest extends Specification {
   @Test
   def "Test terminateSuPerson when person exist"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> new SuPerson() }
     def accountServiceImpl = new AccountServiceImpl()
     when:
@@ -481,7 +472,6 @@ class AccountServiceImplTest extends Specification {
   @Test
   def "Test getMailRoutingAddress with person not found"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def accountServiceImpl = new AccountServiceImpl()
 
@@ -496,7 +486,6 @@ class AccountServiceImplTest extends Specification {
   def "Test getMailRoutingAddress Happy Path"() {
     setup:
     SuPerson suPerson = new SuPerson(mailRoutingAddress: "kalle")
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return suPerson }
     def accountServiceImpl = new AccountServiceImpl()
     when:
@@ -556,7 +545,6 @@ class AccountServiceImplTest extends Specification {
   @Test
   def "Test setMailRoutingAddress with person not found"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def accountServiceImpl = new AccountServiceImpl()
 
@@ -571,7 +559,6 @@ class AccountServiceImplTest extends Specification {
   def "Test setMailRoutingAddress Happy Path"() {
     setup:
     SuPerson suPerson = new SuPerson(mailRoutingAddress: "kalle")
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return suPerson }
     SuPersonQuery.metaClass.static.updateSuPerson = {SuPerson tmpp -> suPerson.mailRoutingAddress = tmpp.mailRoutingAddress}
     def accountServiceImpl = new AccountServiceImpl()
@@ -773,7 +760,6 @@ class AccountServiceImplTest extends Specification {
     Config.instance.props.enrollment.skipCreate = "false"
 
     SuPerson suEnrollPerson = new SuPerson(uid: "testuid")
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuEnrollPersonFromSsn = {String directory,String nin -> return suEnrollPerson }
     EnrollmentServiceUtils.metaClass.static.enableUser = {String uid, String password, Object o -> return false}
     SuPerson.metaClass.parent = "stuts"

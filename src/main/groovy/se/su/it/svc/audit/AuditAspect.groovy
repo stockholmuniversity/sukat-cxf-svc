@@ -34,6 +34,7 @@ package se.su.it.svc.audit
 import groovy.util.logging.Slf4j
 import org.aopalliance.intercept.MethodInterceptor
 import org.aopalliance.intercept.MethodInvocation
+import se.su.it.svc.commons.SvcAudit
 
 /**
  * Created with IntelliJ IDEA.
@@ -42,8 +43,6 @@ import org.aopalliance.intercept.MethodInvocation
  * Time: 12:59
  * To change this template use File | Settings | File Templates.
  */
-import se.su.it.svc.commons.SvcAudit
-
 import java.lang.annotation.Annotation
 import java.lang.reflect.Method
 import java.sql.Timestamp
@@ -54,6 +53,7 @@ public class AuditAspect implements MethodInterceptor {
   private static final String STATE_SUCCESS = "SUCCESS"
   private static final String STATE_EXCEPTION = "EXCEPTION"
   private static final String UNKNOWN = "<unknown>"
+  private static final String HIDDEN_VALUE = "******"
 
   public Object invoke(MethodInvocation invocation) throws Throwable {
 
@@ -81,7 +81,12 @@ public class AuditAspect implements MethodInterceptor {
 
     // Add the return value to the audit log entry
     if (auditRef != null) {
-      logAfter(auditRef, rval)
+      if (invocation.method?.isAnnotationPresent(AuditHideReturnValue)) {
+        logAfter(auditRef, HIDDEN_VALUE)
+      }
+      else {
+        logAfter(auditRef, rval)
+      }
     }
     // Return the method return value to the caller
     return rval

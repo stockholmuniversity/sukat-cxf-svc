@@ -1,7 +1,6 @@
 package se.su.it.svc.util
 
-import org.junit.After
-import org.junit.Before
+import gldapo.GldapoSchemaRegistry
 import org.junit.Test
 import se.su.it.commons.ExecUtils
 import se.su.it.svc.commons.SvcUidPwd
@@ -17,12 +16,11 @@ class EnrollmentServiceUtilsSpec extends Specification {
   @Shared
   EnrollmentServiceUtils util
 
-  @Before
   def setup() {
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> }
     this.util = new EnrollmentServiceUtils()
   }
 
-  @After
   def cleanup() {
     this.util = null
   }

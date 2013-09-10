@@ -31,11 +31,10 @@
 
 package se.su.it.svc.query
 
+import gldapo.GldapoSchemaRegistry
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
 import org.apache.commons.dbcp.BasicDataSource
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import se.su.it.svc.commons.SvcCardOrderVO
 import spock.lang.Ignore
@@ -47,13 +46,12 @@ public class SuCardOrderQueryTest extends Specification {
   @Shared
   SuCardOrderQuery service
 
-  @Before
   void setup() {
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> }
     service = new SuCardOrderQuery()
     service.suCardDataSource = Mock(BasicDataSource)
   }
 
-  @After
   void cleanup() {
     service = null
     Sql.metaClass = null

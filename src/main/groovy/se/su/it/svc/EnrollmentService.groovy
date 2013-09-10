@@ -33,6 +33,7 @@ package se.su.it.svc
 
 import se.su.it.svc.annotations.SuCxfSvcSpocpRole
 import se.su.it.svc.audit.AuditAspectMethodDetails
+import se.su.it.svc.audit.AuditHideReturnValue
 import se.su.it.svc.commons.SvcAudit
 
 /**
@@ -41,6 +42,7 @@ import se.su.it.svc.commons.SvcAudit
  */
 @SuCxfSvcSpocpRole(role = "sukat-user-admin")
 public interface EnrollmentService {
+  @AuditHideReturnValue
   @AuditAspectMethodDetails(details = "resetOrCreatePrincipal,setPasswordExpiry")
   String resetAndExpirePwd(String uid, SvcAudit audit)
 }
