@@ -1,3 +1,4 @@
+package se.su.it.svc.commons
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.
@@ -29,14 +30,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package se.su.it.svc.audit
 
-import java.lang.annotation.*
 
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-@Inherited
-public @interface AuditAspectMethodDetails {
-  public String details();
+import gldapo.GldapoSchemaRegistry
+import se.su.it.svc.commons.SvcStatus
+import spock.lang.Specification
+
+class SvcStatusTest extends Specification {
+
+  def setup() {
+    GldapoSchemaRegistry.metaClass.add = { Object registration -> }
+  }
+
+  def "Test attributes"() {
+    expect:
+    new SvcStatus().properties.keySet().containsAll(
+        ['sname', 'class', 'buildtime', 'sbuildtime', 'version', 'serialVersionUID', 'metaClass', 'name', 'sversion']
+    )
+  }
 }
-

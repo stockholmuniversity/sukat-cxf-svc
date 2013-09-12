@@ -29,20 +29,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+package se.su.it.svc.aspect
 
+import java.lang.annotation.*
 
-import gldapo.GldapoSchemaRegistry
-import se.su.it.svc.commons.SvcAudit
-import spock.lang.Specification
-
-class SvcAuditTest extends Specification {
-
-  def setup() {
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> }
-  }
-
-  def "Test attributes"() {
-    expect:
-    new SvcAudit().properties.keySet().containsAll(['class', 'uid', 'client', 'ipAddress', 'serialVersionUID', 'metaClass'])
-  }
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
+public @interface AuditAspectMethodDetails {
+  public String details();
 }
+

@@ -1,3 +1,4 @@
+package se.su.it.svc.util
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.

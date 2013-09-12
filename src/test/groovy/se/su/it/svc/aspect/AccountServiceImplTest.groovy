@@ -1,3 +1,4 @@
+package se.su.it.svc.aspect
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.
@@ -560,15 +561,20 @@ class AccountServiceImplTest extends Specification {
   @Test
   def "Test setMailRoutingAddress Happy Path"() {
     setup:
-    SuPerson suPerson = new SuPerson(mailRoutingAddress: "kalle")
+    SuPerson suPerson = new SuPerson(mailRoutingAddress: "kalle", objectClass: [])
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return suPerson }
     SuPersonQuery.metaClass.static.updateSuPerson = {SuPerson tmpp -> suPerson.mailRoutingAddress = tmpp.mailRoutingAddress}
     def accountServiceImpl = new AccountServiceImpl()
+
     when:
     accountServiceImpl.setMailRoutingAddress("testuid", "mail@test.su.se", new SvcAudit())
+
     then:
     suPerson.mailRoutingAddress == "mail@test.su.se"
+
+    and:
+    suPerson.objectClass.contains("inetLocalMailRecipient")
   }
 
   @Test
