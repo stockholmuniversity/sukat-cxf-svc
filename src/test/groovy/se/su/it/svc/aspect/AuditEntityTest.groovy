@@ -82,6 +82,6 @@ class AuditEntityTest extends Specification {
     AuditEntity auditEntity = AuditEntity.getInstance('1','2','3','4','5','6','7','8','9','10',['11','12'])
 
     expect:
-    auditEntity.toString() == "se.su.it.svc.audit.AuditEntity(created:1, ip_address:2, uid:3, client:4, operation:5, text_args:6, text_return:8, state:10, methodDetails:[11, 12])"
+    auditEntity.toString() == "se.su.it.svc.aspect.AuditEntity(created:1, ip_address:2, uid:3, client:4, operation:5, text_args:6, text_return:8, state:10, methodDetails:[11, 12])"
   }
 }
