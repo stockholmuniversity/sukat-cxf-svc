@@ -1,4 +1,7 @@
 package se.su.it.svc.util
+
+import gldapo.GldapoSchemaRegistry
+
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.
@@ -30,14 +33,9 @@ package se.su.it.svc.util
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-import gldapo.GldapoSchemaRegistry
 import org.junit.Test
 import se.su.it.svc.commons.SvcSuPersonVO
-import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuPersonStub
-import se.su.it.svc.util.GeneralUtils
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -91,16 +89,16 @@ class GeneralUtilsSpec extends Specification {
 
   def "copyProperties: should copy property values from one object to another"() {
     given:
-    def source = new SuPerson(
+    def source = new SvcSuPersonVO(
             uid: 'foo',
-            cn: 'bar')
-    def target = new SuPerson()
+            description: 'bar')
+    def target = new SvcSuPersonVO()
 
     when: GeneralUtils.copyProperties(source, target)
 
     then:
     target.uid == source.uid
-    target.cn == source.cn
+    target.description == source.description
   }
 
   def "copyProperties: should not copy class, metaClass or serialVersionUID"() {
