@@ -35,8 +35,8 @@
 
 import gldapo.GldapoSchemaRegistry
 import org.aopalliance.intercept.MethodInvocation
-import se.su.it.svc.audit.AuditAspect
-import se.su.it.svc.audit.AuditEntity
+import se.su.it.svc.aspect.AuditAspect
+import se.su.it.svc.aspect.AuditEntity
 import se.su.it.svc.commons.SvcAudit
 import spock.lang.Specification
 

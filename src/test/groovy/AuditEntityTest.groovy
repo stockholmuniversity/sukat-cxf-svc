@@ -32,7 +32,7 @@
 
 
 import gldapo.GldapoSchemaRegistry
-import se.su.it.svc.audit.AuditEntity
+import se.su.it.svc.aspect.AuditEntity
 import spock.lang.Specification
 
 class AuditEntityTest extends Specification {
