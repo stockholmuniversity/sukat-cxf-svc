@@ -222,7 +222,7 @@ class SuCardOrderQuery {
       requestArgs['address'] = addressId
       log.debug "Sending: $requestQuery with arguments $requestArgs"
       sql?.executeInsert(requestQuery, requestArgs)
-      String comment = "Created by " + requestArgs?.owner + " while activating account"
+      String comment = "Card order created by " + requestArgs?.owner
 
       def statusResponse = sql?.executeInsert(statusQuery,
           [status:DEFAULT_ORDER_STATUS,
