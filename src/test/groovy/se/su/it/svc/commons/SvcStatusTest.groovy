@@ -1,3 +1,4 @@
+package se.su.it.svc.commons
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.
@@ -32,10 +33,10 @@
 
 
 import gldapo.GldapoSchemaRegistry
-import se.su.it.svc.commons.SvcAudit
+import se.su.it.svc.commons.SvcStatus
 import spock.lang.Specification
 
-class SvcAuditTest extends Specification {
+class SvcStatusTest extends Specification {
 
   def setup() {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
@@ -43,6 +44,8 @@ class SvcAuditTest extends Specification {
 
   def "Test attributes"() {
     expect:
-    new SvcAudit().properties.keySet().containsAll(['class', 'uid', 'client', 'ipAddress', 'serialVersionUID', 'metaClass'])
+    new SvcStatus().properties.keySet().containsAll(
+        ['sname', 'class', 'buildtime', 'sbuildtime', 'version', 'serialVersionUID', 'metaClass', 'name', 'sversion']
+    )
   }
 }
