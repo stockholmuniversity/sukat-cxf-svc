@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package se.su.it.svc.audit
+package se.su.it.svc.aspect
 
 import groovy.util.logging.Slf4j
 import org.aopalliance.intercept.MethodInterceptor
@@ -59,7 +59,7 @@ public class AuditAspect implements MethodInterceptor {
 
     Object rval
 
-    // Log the invocation attempt, keep a reference to the opaque audit object
+    // Log the invocation attempt, keep a reference to the opaque aspect object
     Object auditRef = null
     try {
       auditRef = logBefore(invocation.getMethod(), invocation.getArguments())
@@ -79,7 +79,7 @@ public class AuditAspect implements MethodInterceptor {
       throw e
     }
 
-    // Add the return value to the audit log entry
+    // Add the return value to the aspect log entry
     if (auditRef != null) {
       if (invocation.method?.isAnnotationPresent(AuditHideReturnValue)) {
         logAfter(auditRef, HIDDEN_VALUE)
@@ -93,7 +93,7 @@ public class AuditAspect implements MethodInterceptor {
   }
 
   protected Object logBefore(Method mi, Object[] args) throws Exception {
-    // Surround the audit logging with a global try/catch so that we can do softFail in a single catch block
+    // Surround the aspect logging with a global try/catch so that we can do softFail in a single catch block
     try {
       log.info("Invoked " + mi.getName() + " with " + args.length + " params")
 
@@ -121,7 +121,7 @@ public class AuditAspect implements MethodInterceptor {
       outArgs.writeObject(args)
       outArgs.close()
 
-      // Determine uid and ip to use in the audit entry
+      // Determine uid and ip to use in the aspect entry
       String auditIp
       String auditUid
       String auditClient
@@ -164,7 +164,7 @@ public class AuditAspect implements MethodInterceptor {
           methodDetails
       )
 
-      //TODO: Call RabbitMQ here to transmit the "audit before data"
+      //TODO: Call RabbitMQ here to transmit the "aspect before data"
       log.info("Audit before -\r\n" + ae)
       // Return a reference to the ae for reuse in success/exception logs
       return ae
@@ -188,12 +188,12 @@ public class AuditAspect implements MethodInterceptor {
       outRet.writeObject(ret)
       outRet.close()
 
-      // Append return value to the audit entity
+      // Append return value to the aspect entity
       ae.text_return = objectToString(ret)
       ae.raw_return = bsRet.toByteArray().toString()
       ae.state = STATE_SUCCESS
 
-      //TODO: Call RabbitMQ here to transmit the "audit after data"
+      //TODO: Call RabbitMQ here to transmit the "aspect after data"
       log.info("Audit after -\r\n" + ae)
 
     } catch (Exception e) {
@@ -209,11 +209,11 @@ public class AuditAspect implements MethodInterceptor {
       // TBD: Check for cast exception and nullity of ref
       //log.info("Decorating ae " + ae + " with exception " + t.getClass().getCanonicalName())
 
-      // Append return value to the audit entity
+      // Append return value to the aspect entity
       ae.text_return = t.toString()
       ae.state = STATE_EXCEPTION
 
-      //TODO: Call RabbitMQ here to transmit the "audit after data"
+      //TODO: Call RabbitMQ here to transmit the "aspect after data"
       log.info("Audit exception occured -\r\n" + ae)
 
     } catch (Exception e) {

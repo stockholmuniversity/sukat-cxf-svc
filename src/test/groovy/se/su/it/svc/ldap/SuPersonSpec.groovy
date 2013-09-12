@@ -133,7 +133,6 @@ class SuPersonSpec extends Specification {
     !ret.accountIsActive
   }
 
-  @Test
   def "setPrimaryAffiliation: Test adding new primary affiliation"() {
     given:
     def person = new SuPerson(objectClass: [])
@@ -151,7 +150,6 @@ class SuPersonSpec extends Specification {
     person.eduPersonAffiliation.contains(newPrimaryAffiliation.first())
   }
 
-  @Test
   def "setPrimaryAffiliation: when no affiliations exists"() {
     given:
     def person = new SuPerson(objectClass: [])
@@ -165,7 +163,6 @@ class SuPersonSpec extends Specification {
     person.eduPersonAffiliation.contains(newPrimaryAffiliation.first())
   }
 
-  @Test
   def "setPrimaryAffiliation: when no valid affiliation is provided"() {
     given:
     def person = new SuPerson(objectClass: [])
@@ -178,8 +175,6 @@ class SuPersonSpec extends Specification {
     thrown(IllegalArgumentException)
   }
 
-
-  @Test
   def "setPrimaryAffiliation: should set objectClass"() {
     given:
     def person = new SuPerson(objectClass: [])
@@ -192,7 +187,6 @@ class SuPersonSpec extends Specification {
     person.objectClass.contains('eduPerson')
   }
 
-  @Test
   def "setPrimaryAffiliation: sending null as affiliations"() {
     given:
     def person = new SuPerson(objectClass: [])
@@ -205,7 +199,6 @@ class SuPersonSpec extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   @Unroll
   def "setPrimaryAffiliation: sets #expected as primary for #affiliations"() {
     given:
@@ -226,7 +219,7 @@ class SuPersonSpec extends Specification {
     'other'    | ['other']
   }
 
-  @Test @Unroll
+  @Unroll
   def "testAffiliations: Given affiliation #affiliation expecting value #expected"() {
     expect: 'we test the order and value of the affiliations'
     (affiliation as SuPerson.Affilation).value == expected
@@ -371,5 +364,21 @@ class SuPersonSpec extends Specification {
 
     then:
     suPerson.eduPersonPrimaryAffiliation == SuPerson.Affilation.EMPLOYEE.value
+  }
+  @Unroll
+  def "setMailRoutingAddress: sets inetLocalMailRecipient if supplied mailRoutingAddress is \'#mailRoutingAddress\' => #expected"() {
+    given:
+    SuPerson suPerson = new SuPerson(objectClass: [])
+
+    when:
+    suPerson.setMailRoutingAddress(mailRoutingAddress)
+
+    then:
+    expected == suPerson.objectClass.contains('inetLocalMailRecipient')
+
+    where:
+    mailRoutingAddress << ["", "mail@su.se"]
+    expected << [false, true]
+
   }
 }

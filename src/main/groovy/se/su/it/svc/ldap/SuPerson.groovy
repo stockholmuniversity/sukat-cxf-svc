@@ -186,6 +186,19 @@ class SuPerson implements Serializable {
   }
 
   /**
+   * Set the mailRoutingAddress & add 'inetLocalMailRecipient' objectClass
+   *
+   * @param mailRoutingAddress the new mailRoutingAddress
+   */
+  public void setMailRoutingAddress(String mailRoutingAddress) {
+    this.mailRoutingAddress = mailRoutingAddress
+
+    if (this.mailRoutingAddress) {
+      this.objectClass?.add("inetLocalMailRecipient")
+    }
+  }
+
+  /**
    * Sets affiliations & calculates primary affiliation
    *
    * @param affiliations the new affiliations

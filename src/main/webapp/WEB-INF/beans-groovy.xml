@@ -146,14 +146,38 @@
     implementor="se.su.it.svc.Status"
 	  address="/Status" />
 
-  <bean id="auditAspect" class="se.su.it.svc.audit.AuditAspect" />
+  <bean id="sanitizerAspect" class="se.su.it.svc.aspect.SanitizeWebParametersAspect"/>
+
+  <bean id="sanitizerPointcut" class="org.springframework.aop.support.JdkRegexpMethodPointcut">
+    <property name="pattern" value=".*" />
+  </bean>
+
+  <bean id="sanitizerAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
+    <property name="advice" ref="sanitizerAspect" />
+    <property name="pointcut" ref="sanitizerPointcut" />
+  </bean>
+
+  <bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+    <property name="beanNames"><value>*Endpoint</value></property>
+    <property name="interceptorNames">
+      <list>
+        <value>sanitizerAdvisor</value>
+      </list>
+    </property>
+  </bean>
+
+  <!-- Audit aspect -->
+  <bean id="auditAspect" class="se.su.it.svc.aspect.AuditAspect" />
+
   <bean id="auditPointcut" class="org.springframework.aop.support.JdkRegexpMethodPointcut">
     <property name="pattern" value=".*" />
   </bean>
+
   <bean id="auditAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
     <property name="advice" ref="auditAspect" />
     <property name="pointcut" ref="auditPointcut" />
   </bean>
+
   <bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
     <property name="beanNames"><value>*Endpoint</value></property>
     <property name="interceptorNames">
