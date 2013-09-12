@@ -252,6 +252,11 @@
     <sonar.cobertura.reportPath>target/site/cobertura/coverage.xml</sonar.cobertura.reportPath>
   </properties>
 
+  <scm>
+    <connection>scm:git:git://github.com/stockholmuniversity/sukat-cxf-svc.git</connection>
+    <developerConnection>scm:git:ssh://github.com/stockholmuniversity/sukat-cxf-svc.git</developerConnection>
+  </scm>
+
   <reporting>
     <plugins>
       <plugin>
@@ -274,6 +279,13 @@
       <layout>default</layout>
     </repository>
   </repositories>
+
+  <distributionManagement>
+    <repository>
+      <id>ssh-repository</id>
+      <url>scpexe://git.it.su.se/afs/su.se/services/maven/it.su.se/maven2</url>
+    </repository>
+  </distributionManagement>
 
   <prerequisites>
     <maven>3.0.0</maven>
