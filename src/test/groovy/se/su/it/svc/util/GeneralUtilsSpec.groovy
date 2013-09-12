@@ -1,7 +1,3 @@
-package se.su.it.svc.util
-
-import gldapo.GldapoSchemaRegistry
-
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.
@@ -33,6 +29,9 @@ import gldapo.GldapoSchemaRegistry
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+package se.su.it.svc.util
+
+import gldapo.GldapoSchemaRegistry
 import org.junit.Test
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.ldap.SuPersonStub
