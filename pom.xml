@@ -253,8 +253,9 @@
   </properties>
 
   <scm>
-    <connection>scm:git:git://github.com/stockholmuniversity/sukat-cxf-svc.git</connection>
-    <developerConnection>scm:git:ssh://github.com/stockholmuniversity/sukat-cxf-svc.git</developerConnection>
+    <connection>scm:git:git@github.com:stockholmuniversity/sukat-cxf-svc.git</connection>
+    <url>scm:git:git@github.com:stockholmuniversity/sukat-cxf-svc.git</url>
+    <developerConnection>scm:git:git@github.com:stockholmuniversity/sukat-cxf-svc.git</developerConnection>
   </scm>
 
   <reporting>
