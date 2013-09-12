@@ -15,34 +15,28 @@ class SanitizeWebParametersAspect implements MethodInterceptor {
     Object response = null
 
     Method method = methodInvocation.getMethod()
-    String methodName = method.name
     Object[] args = methodInvocation.getArguments()
-    Object[] washedArgs = []
 
     try {
-      for (arg in args) {
-        if (arg instanceof String) {
-          String washedArg = washAttribute(arg)
-          washedArgs << washedArgs
-
-          if (log.debugEnabled) {
-            log.debug("($methodName): sanitized \'$arg\' => \'$washedArg\'")
-          }
-
-        } else {
-          washedArgs << arg
-        }
-      }
-
+      Object[] washedArgs = washArgs(args)
       response = invokeMethod(method.name, washedArgs)
     } catch (ex) {
-      log.error "Failed to sanitize arguments for method $methodName, attributes supplied were: ${args.join(", ")}", ex
+      log.error "Failed to sanitize arguments for method ${method.name}, attributes supplied were: ${args.join(", ")}", ex
     }
 
     return response
   }
 
-  private static String washAttribute(String arg) {
-    return arg?.trim()
+  private static Object[] washArgs(Object[] args) {
+    List washedArgs = []
+
+    for (arg in args) {
+      if (arg instanceof String) {
+        washedArgs << arg?.trim()
+      } else {
+        washedArgs << arg
+      }
+    }
+    return washedArgs.toArray()
   }
 }
