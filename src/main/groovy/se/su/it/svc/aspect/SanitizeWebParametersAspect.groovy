@@ -14,12 +14,14 @@ class SanitizeWebParametersAspect implements MethodInterceptor {
 
     Object response = null
 
+
     Method method = methodInvocation.getMethod()
     Object[] args = methodInvocation.getArguments()
+    Object caller = methodInvocation.getThis()
 
     try {
       Object[] washedArgs = washArgs(args)
-      response = invokeMethod(method.name, washedArgs)
+      response = caller.invokeMethod(method.name, washedArgs)
     } catch (ex) {
       log.error "Failed to sanitize arguments for method ${method.name}, attributes supplied were: ${args.join(", ")}", ex
     }
