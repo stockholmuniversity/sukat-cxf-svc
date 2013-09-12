@@ -16,7 +16,6 @@ class SanitizeWebParametersAspectSpec extends Specification {
     SanitizeWebParametersAspect wspa = GroovySpy(SanitizeWebParametersAspect)
     MethodInvocation methodInvocation = GroovyMock(MethodInvocation) {
       1 * getMethod(*_) >> {
-        Method
         return GroovyMock(Method) {
           getName() >> "superiorMethod"
         }
