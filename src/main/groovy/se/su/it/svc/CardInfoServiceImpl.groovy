@@ -59,6 +59,8 @@ public class CardInfoServiceImpl implements CardInfoService {
    * @param onlyActive  if only active cards should be returned in the result.
    * @param audit Audit object initilized with audit data about the client and user.
    * @return an <code>ArrayList<SuCard></code> of SuCard objects or an empty array if no card was found.
+   * @throws IllegalArgumentException if no user can be found for the supplied uid
+   * @throws Exception if something goes wrong while fetching cards
    * @see se.su.it.svc.ldap.SuCard
    * @see se.su.it.svc.commons.SvcAudit
    */
@@ -70,16 +72,15 @@ public class CardInfoServiceImpl implements CardInfoService {
           @WebParam(name = 'onlyActive') boolean onlyActive,
           @WebParam(name = 'audit') SvcAudit audit
   ) {
-    def cards = null
     def person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
 
-    if (person) {
-      String directory = GldapoManager.LDAP_RO
-      DistinguishedName dn = person.getDn()
-      cards = SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(directory, dn, onlyActive)
-    } else {
-      log.warn("getAllCards: no such uid found: " + uid)
+    if (!person) {
+      throw new IllegalArgumentException("getAllCards - No such uid found: " + uid)
     }
+
+    String directory = GldapoManager.LDAP_RO
+    DistinguishedName dn = person.getDn()
+    def cards = SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(directory, dn, onlyActive)
 
     return cards ?: new SuCard[0]
   }
