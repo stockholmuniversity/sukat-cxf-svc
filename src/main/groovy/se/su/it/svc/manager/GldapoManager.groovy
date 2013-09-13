@@ -33,7 +33,7 @@ package se.su.it.svc.manager
 
 import gldapo.Gldapo
 import org.apache.log4j.Logger
-import se.su.it.svc.ldap.SuPersonStub
+import se.su.it.svc.ldap.*
 
 /**
  * This class specifies the ldap integration<br />
@@ -84,12 +84,12 @@ public class GldapoManager {
         ]
       ],
       schemas: [SuPersonStub,
-                se.su.it.svc.ldap.SuPerson,
-                se.su.it.svc.ldap.SuRole,
-                se.su.it.svc.ldap.SuCard,
-                se.su.it.svc.ldap.SuServiceDescription,
-                se.su.it.svc.ldap.SuService,
-                se.su.it.svc.ldap.SuSubAccount]
+                SuPerson,
+                SuRole,
+                SuCard,
+                SuServiceDescription,
+                SuService,
+                SuSubAccount]
     )
   }
 }
