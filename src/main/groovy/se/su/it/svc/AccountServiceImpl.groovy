@@ -254,7 +254,7 @@ public class AccountServiceImpl implements AccountService {
    *
    * @param uid  uid of the user.
    * @param audit Audit object initilized with audit data about the client and user.
-   * @throws IllegalArgumentException if the uid can't be found
+   * @throws NotImplementedException
    * @see se.su.it.svc.commons.SvcAudit
    */
   @Requires({
@@ -265,23 +265,7 @@ public class AccountServiceImpl implements AccountService {
   public void terminateSuPerson(
           @WebParam(name = 'uid') String uid,
           @WebParam(name = 'audit') SvcAudit audit) {
-    SuPerson terminatePerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
-
-    if(terminatePerson) {
-      //TODO: This serves as a stubfunction right now. We need input on how a terminate should work
-      //TODO: Below is some code that might do the trick, but what about mail address and stuff
-      //TODO: For now we cast exception to notify clients.
-      throw new NotImplementedException("terminateSuPerson - This function is not yet implemented!")
-      //TODO: terminatePerson.eduPersonAffiliation ["other"]
-      //TODO: terminatePerson.eduPersonPrimaryAffiliation = "other"
-      //TODO: log.debug("terminateSuPerson - Trying to terminate SuPerson uid<${terminatePerson.uid}>")
-      //TODO: SuPersonQuery.updateSuPerson(terminatePerson)
-      //TODO: Kadmin kadmin = Kadmin.newInstance()
-      //TODO: kadmin.resetOrCreatePrincipal(uid);
-      //TODO: log.info("terminateSuPerson - Terminated SuPerson uid<${terminatePerson.uid}>")
-    } else {
-      throw new IllegalArgumentException("terminateSuPerson - No such uid found: "+uid)
-    }
+    throw new NotImplementedException()
   }
 
   /**
@@ -348,7 +332,7 @@ public class AccountServiceImpl implements AccountService {
    *
    * @param ssn in 10 numbers (YYMMDDXXXX)
    * @param audit Audit object initilized with audit data about the client and user.
-   * @return an array of SvcSuPersonVO, one for each account found
+   * @return an array of SvcSuPersonVO, one for each account found or an empty list
    */
   @Requires({
     ! LdapAttributeValidator.validateAttributes([
@@ -362,7 +346,7 @@ public class AccountServiceImpl implements AccountService {
   ) {
     SuPerson[] suPersons = SuPersonQuery.getSuPersonFromSsn(GldapoManager.LDAP_RW, ssn)
 
-    return suPersons*.createSvcSuPersonVO()
+    return suPersons ? suPersons*.createSvcSuPersonVO() : []
   }
 
   /**
@@ -370,24 +354,20 @@ public class AccountServiceImpl implements AccountService {
    *
    * @param uid without (@domain)
    * @param audit Audit object initilized with audit data about the client and user.
-   * @return SvcSuPersonVO instance if found.
+   * @return SvcSuPersonVO instance if found otherwise returns null.
    */
   @Requires({
     ! LdapAttributeValidator.validateAttributes([
             uid: uid,
             audit: audit ])
   })
-  @Ensures({ result && result instanceof SvcSuPersonVO })
+  @Ensures({ result == null || result instanceof SvcSuPersonVO })
   public SvcSuPersonVO findSuPersonByUid(
           @WebParam(name = 'uid') String uid,
           @WebParam(name = 'audit') SvcAudit audit
   ) {
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
 
-    if (!suPerson) {
-      throw new IllegalArgumentException("findSuPersonByUid - No suPerson with the supplied uid: " + uid)
-    }
-
-    return suPerson.createSvcSuPersonVO()
+    return suPerson ? suPerson?.createSvcSuPersonVO() : null
   }
 }

@@ -398,49 +398,10 @@ class AccountServiceImplTest extends Specification {
   }
 
   @Test
-  def "Test terminateSuPerson with null uid argument"() {
-    setup:
-    def accountServiceImpl = new AccountServiceImpl()
-
+  def "Test terminateSuPerson"() {
     when:
-    accountServiceImpl.terminateSuPerson(null, new SvcAudit())
+    new AccountServiceImpl().terminateSuPerson("testuid", new SvcAudit())
 
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  @Test
-  def "Test terminateSuPerson with null SvcAudit argument"() {
-    setup:
-    def accountServiceImpl = new AccountServiceImpl()
-
-    when:
-    accountServiceImpl.terminateSuPerson("testuid", null)
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  @Test
-  def "Test terminateSuPerson without person exist"() {
-    setup:
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
-    def accountServiceImpl = new AccountServiceImpl()
-
-    when:
-    accountServiceImpl.terminateSuPerson("testuid", new SvcAudit())
-
-    then:
-    thrown(IllegalArgumentException)
-  }
-
-  @Test
-  def "Test terminateSuPerson when person exist"() {
-    setup:
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> new SuPerson() }
-    def accountServiceImpl = new AccountServiceImpl()
-    when:
-    accountServiceImpl.terminateSuPerson("testuid", new SvcAudit())
     then:
     thrown(NotImplementedException)
   }
@@ -655,10 +616,10 @@ class AccountServiceImplTest extends Specification {
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
 
     when:
-    accountServiceImpl.findSuPersonByUid('foo', new SvcAudit())
+    def resp = accountServiceImpl.findSuPersonByUid('foo', new SvcAudit())
 
     then:
-    thrown IllegalArgumentException
+    resp == null
   }
 
   @Test

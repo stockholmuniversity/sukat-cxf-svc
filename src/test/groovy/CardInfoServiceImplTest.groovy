@@ -118,10 +118,10 @@ class CardInfoServiceImplTest extends Specification {
     1 * SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(*_) >> null
 
     when:
-    new CardInfoServiceImpl().getAllCards("testuid",true,new SvcAudit())
+    def resp = new CardInfoServiceImpl().getAllCards("testuid",true,new SvcAudit())
 
     then:
-    thrown(PostconditionViolation)
+    resp instanceof SuCard[]
   }
 
   @Test
@@ -149,7 +149,7 @@ class CardInfoServiceImplTest extends Specification {
   }
 
   @Test
-  def "Test getCardByUUID when card doesn't exist, should throw IllegalArgumentException"() {
+  def "Test getCardByUUID when card doesn't exist"() {
     given:
     def cardInfoServiceImpl = new CardInfoServiceImpl()
 
@@ -158,10 +158,10 @@ class CardInfoServiceImplTest extends Specification {
     }
 
     when:
-    cardInfoServiceImpl.getCardByUUID("testCardUUID", new SvcAudit())
+    def resp = cardInfoServiceImpl.getCardByUUID("testCardUUID", new SvcAudit())
 
     then:
-    thrown(PostconditionViolation)
+    resp == null
   }
 
   @Test
