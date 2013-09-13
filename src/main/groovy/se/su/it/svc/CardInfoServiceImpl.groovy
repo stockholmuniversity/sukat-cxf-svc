@@ -70,7 +70,7 @@ public class CardInfoServiceImpl implements CardInfoService {
           @WebParam(name = 'onlyActive') boolean onlyActive,
           @WebParam(name = 'audit') SvcAudit audit
   ) {
-    def cards = new SuCard[0]
+    def cards = null
     def person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
 
     if (person) {
@@ -81,7 +81,7 @@ public class CardInfoServiceImpl implements CardInfoService {
       log.warn("getAllCards: no such uid found: " + uid)
     }
 
-    return cards
+    return cards ?: new SuCard[0]
   }
 
   /**
@@ -95,11 +95,12 @@ public class CardInfoServiceImpl implements CardInfoService {
    */
   @Override
   @Requires({ suCardUUID && audit })
-  @Ensures({ result && result instanceof SuCard })
+  @Ensures({ result == null || result instanceof SuCard })
   public SuCard getCardByUUID(
           @WebParam(name = 'suCardUUID') String suCardUUID,
           @WebParam(name = 'audit') SvcAudit audit
   ) {
+
     return SuCardQuery.findCardBySuCardUUID(GldapoManager.LDAP_RO, suCardUUID)
   }
 }
