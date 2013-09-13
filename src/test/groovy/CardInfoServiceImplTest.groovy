@@ -31,8 +31,8 @@
 
 
 
+
 import gldapo.GldapoSchemaRegistry
-import org.gcontracts.PostconditionViolation
 import org.gcontracts.PreconditionViolation
 import org.junit.Test
 import org.springframework.ldap.core.DistinguishedName
@@ -94,16 +94,16 @@ class CardInfoServiceImplTest extends Specification {
   }
 
   @Test
-  def "Test getAllCards returns empty array if person doesn't exist"() {
+  def "Test getAllCards throws exception if person doesn't exist"() {
     setup:
     GroovyMock(SuPersonQuery, global: true)
     SuPersonQuery.getSuPersonFromUID(*_) >> { String directory, String uid -> return null }
 
     when:
-    def ret = new CardInfoServiceImpl().getAllCards("testuid",true,new SvcAudit())
+    new CardInfoServiceImpl().getAllCards("testuid",true,new SvcAudit())
 
     then:
-    ret.size() == 0
+    thrown(IllegalArgumentException)
   }
 
   @Test

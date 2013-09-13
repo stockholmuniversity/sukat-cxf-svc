@@ -44,9 +44,9 @@ import javax.xml.bind.annotation.XmlRootElement
  */
 @XmlAccessorType( XmlAccessType.NONE )
 @XmlRootElement
-class SuCard implements Serializable{
+@GldapoSchemaFilter("(objectClass=suCardOwner)")
+class SuCard implements Serializable {
   static final long serialVersionUID = -687991492884005073L
-  @GldapoSchemaFilter("(objectClass=suCardOwner)")
 
   @GldapoNamingAttribute
   @XmlAttribute
