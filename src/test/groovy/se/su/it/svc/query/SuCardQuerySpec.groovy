@@ -45,9 +45,9 @@ class SuCardQuerySpec extends Specification {
     SuCard.metaClass = null
   }
 
-  def "findAllCardsBySuPersonDnAndOnlyActiveOrNot should handle exception"() {
+  def "findAllCardsBySuPersonDnAndOnlyActiveOrNot should pass exception forward"() {
     given:
-    SuCard.metaClass.static.findAll = { String a, String b, Closure c ->
+    SuCard.metaClass.static.findAll = { LinkedHashMap a, Closure c ->
       throw new Exception()
     }
 
@@ -55,12 +55,45 @@ class SuCardQuerySpec extends Specification {
     SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(null, null, true)
 
     then:
-    noExceptionThrown()
+    thrown(Exception)
   }
 
-  def "findCardBySuCardUUID should handle exception"() {
+  def "findAllCardsBySuPersonDnAndOnlyActiveOrNot - happy path"() {
     given:
-    SuCard.metaClass.static.find = { String a, String b, Closure c ->
+    SuCard.metaClass.static.findAll = { LinkedHashMap a, Closure c ->
+      [new SuCard()]
+    }
+
+    when:
+    def ret = SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(null, null, true)
+
+    then:
+    ret.size() == 1
+    ret.first() instanceof SuCard
+  }
+
+  def "findAllCardsBySuPersonDnAndOnlyActiveOrNot - checks for active cards"() {
+    given:
+    boolean searchForActive = false
+    SuCardQuery.metaClass.static.eq = { String a, String b ->
+      if (a == 'suCardState' && b == "urn:x-su:su-card:state:active")
+        searchForActive = true
+    }
+    SuCard.metaClass.static.findAll = { LinkedHashMap a, Closure c ->
+      c.call()
+      return new SuCard[0]
+    }
+
+    when:
+    SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(null, null, true)
+
+    then:
+    searchForActive
+  }
+
+  def "findCardBySuCardUUID should forward exception"() {
+    given:
+    SuCard.metaClass.static.find = { LinkedHashMap a, Closure c ->
       throw new Exception()
     }
 
@@ -68,6 +101,19 @@ class SuCardQuerySpec extends Specification {
     SuCardQuery.findCardBySuCardUUID(null, null)
 
     then:
-    noExceptionThrown()
+    thrown(Exception)
+  }
+
+  def "findCardBySuCardUUID - happy path"() {
+    given:
+    SuCard.metaClass.static.find = { LinkedHashMap a, Closure c ->
+      new SuCard()
+    }
+
+    when:
+    def ret = SuCardQuery.findCardBySuCardUUID(null, null)
+
+    then:
+    ret instanceof SuCard
   }
 }

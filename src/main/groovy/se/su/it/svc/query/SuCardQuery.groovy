@@ -49,21 +49,22 @@ public class SuCardQuery {
    * @param dn  the DistinguishedName for the user that you want to find cards for.
    * @param onlyActive  if only active cards should be returned in the result.
    * @return an <code>ArrayList<SuCard></code> of SuCard objects or an empty array if no card was found.
+   * @throws Throwable if ldap search goes wrong
    * @see se.su.it.svc.ldap.SuCard
    * @see se.su.it.svc.manager.GldapoManager
    */
   static SuCard[] findAllCardsBySuPersonDnAndOnlyActiveOrNot(String directory, DistinguishedName dn, boolean onlyActiveCards) {
-    SuCard[] suCards = null
+    SuCard[] suCards
 
     try {
-      SuCard.findAll(directory: directory, base: dn) {
-        eq("objectClass", "suCardOwner")
+      suCards = SuCard.findAll(directory: directory, base: dn) {
         if (onlyActiveCards) {
           eq("suCardState", "urn:x-su:su-card:state:active")
         }
       }
     } catch (ex) {
       log.error "Failed finding all ${onlyActiveCards?'':'in'}active SuCards for user dn=$dn", ex
+      throw ex
     }
 
     return suCards
@@ -75,18 +76,19 @@ public class SuCardQuery {
    * @param directory which directory to use.
    * @param suCardUUID  the card uuid for the card.
    * @return an SuCard object or null if no card was found.
+   * @throws Throwable if ldap search goes wrong
    * @see se.su.it.svc.ldap.SuCard
    */
   static SuCard findCardBySuCardUUID(String directory, String suCardUUID) {
-    SuCard card = null
+    SuCard card
 
     try {
       card = SuCard.find(directory: directory, base: '') {
-        eq("objectClass", "suCardOwner")
         eq("suCardUUID", suCardUUID)
       }
     } catch (ex) {
       log.error "Failed finding suCardOwner for suCardUUID: $suCardUUID", ex
+      throw ex
     }
 
     return card

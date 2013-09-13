@@ -33,7 +33,7 @@ package se.su.it.svc.manager
 
 import gldapo.Gldapo
 import org.apache.log4j.Logger
-import se.su.it.svc.ldap.SuPersonStub
+import se.su.it.svc.ldap.*
 
 /**
  * This class specifies the ldap integration<br />
@@ -51,7 +51,7 @@ public class GldapoManager {
     def props = Config.getInstance().props
 
     Gldapo.initialize(
-      directories: [(this.LDAP_RO):
+      directories: [(LDAP_RO):
       [url: props.ldap.serverro,
         base: "",
         userDn: "",
@@ -66,7 +66,7 @@ public class GldapoManager {
           timeLimit: 120000,
           searchScope: "subtree"
         ]
-      ],(this.LDAP_RW):
+      ],(LDAP_RW):
         [url: props.ldap.serverrw,
           base: "",
           userDn: "",
@@ -84,12 +84,12 @@ public class GldapoManager {
         ]
       ],
       schemas: [SuPersonStub,
-                se.su.it.svc.ldap.SuPerson,
-                se.su.it.svc.ldap.SuRole,
-                se.su.it.svc.ldap.SuCard,
-                se.su.it.svc.ldap.SuServiceDescription,
-                se.su.it.svc.ldap.SuService,
-                se.su.it.svc.ldap.SuSubAccount]
+                SuPerson,
+                SuRole,
+                SuCard,
+                SuServiceDescription,
+                SuService,
+                SuSubAccount]
     )
   }
 }
