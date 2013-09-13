@@ -46,6 +46,10 @@ class CardAdminServiceImplTest extends Specification {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
   }
 
+  def cleanup() {
+    SuCardQuery.metaClass = null
+  }
+
   @Test
   def "Test revokeCard with null suCardUUID argument"() {
     setup:

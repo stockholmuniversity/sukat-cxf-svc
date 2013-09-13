@@ -50,6 +50,10 @@ class CardInfoServiceImplTest extends Specification {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
   }
 
+  def cleanup() {
+    SuCardQuery.metaClass = null
+  }
+
   @Test
   def "Test getAllCards with null uid argument"() {
     setup:
@@ -151,11 +155,8 @@ class CardInfoServiceImplTest extends Specification {
   @Test
   def "Test getCardByUUID when card doesn't exist"() {
     given:
+    SuCardQuery.metaClass.static.findCardBySuCardUUID = {String directory,String uid -> return null }
     def cardInfoServiceImpl = new CardInfoServiceImpl()
-
-    GroovySpy(SuCardQuery, global:true) {
-      findCardBySuCardUUID('ldapreadonly', 'testCardUUID') >> null
-    }
 
     when:
     def resp = cardInfoServiceImpl.getCardByUUID("testCardUUID", new SvcAudit())
