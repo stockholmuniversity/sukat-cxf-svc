@@ -51,7 +51,7 @@ public class GldapoManager {
     def props = Config.getInstance().props
 
     Gldapo.initialize(
-      directories: [(this.LDAP_RO):
+      directories: [(LDAP_RO):
       [url: props.ldap.serverro,
         base: "",
         userDn: "",
@@ -66,7 +66,7 @@ public class GldapoManager {
           timeLimit: 120000,
           searchScope: "subtree"
         ]
-      ],(this.LDAP_RW):
+      ],(LDAP_RW):
         [url: props.ldap.serverrw,
           base: "",
           userDn: "",
