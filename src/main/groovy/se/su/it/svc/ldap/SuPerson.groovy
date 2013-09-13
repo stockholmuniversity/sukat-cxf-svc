@@ -49,6 +49,7 @@ import java.util.regex.Pattern
 /** GLDAPO schema class for SU employees and students also used by web service. */
 
 @Slf4j
+@GldapoSchemaFilter("(objectClass=suPerson)")
 class SuPerson implements Serializable {
 
   static final long serialVersionUID = -687991492884005033L
@@ -93,7 +94,6 @@ class SuPerson implements Serializable {
 
   static final List<String> AFFILIATIONS = Affilation.enumConstants*.value
 
-  @GldapoSchemaFilter("(objectClass=suPerson)")
   @GldapoNamingAttribute
   String uid
   Set<String> objectClass
