@@ -1,3 +1,7 @@
+package se.su.it.svc
+
+import gldapo.GldapoSchemaRegistry
+
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.
@@ -29,14 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-
-
-import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PreconditionViolation
 import org.springframework.ldap.core.DistinguishedName
-import se.su.it.svc.CardInfoServiceImpl
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.ldap.SuPerson
@@ -44,7 +42,7 @@ import se.su.it.svc.query.SuCardQuery
 import se.su.it.svc.query.SuPersonQuery
 import spock.lang.Specification
 
-class CardInfoServiceImplTest extends Specification {
+class CardInfoServiceImplSpec extends Specification {
 
   def setup() {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }

@@ -1,3 +1,7 @@
+package se.su.it.svc
+
+import gldapo.GldapoSchemaRegistry
+
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.
@@ -29,18 +33,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-
-import gldapo.GldapoSchemaRegistry
-import se.su.it.svc.CardAdminServiceImpl
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.query.SuCardOrderQuery
 import se.su.it.svc.query.SuCardQuery
 import spock.lang.Specification
 
-class CardAdminServiceImplTest extends Specification {
+class CardAdminServiceImplSpec extends Specification {
 
   def setup() {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }

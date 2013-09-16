@@ -1,3 +1,7 @@
+package se.su.it.svc
+
+import gldapo.GldapoSchemaRegistry
+
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.
@@ -29,12 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-
-import gldapo.GldapoSchemaRegistry
 import org.springframework.ldap.core.DistinguishedName
-import se.su.it.svc.RoleServiceImpl
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuRole
@@ -42,7 +41,7 @@ import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuRoleQuery
 import spock.lang.Specification
 
-class RoleServiceImplTest extends Specification {
+class RoleServiceImplSpec extends Specification {
 
   def setup() {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }

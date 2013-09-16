@@ -1,6 +1,7 @@
 package se.su.it.svc.aspect
 
 import gldapo.GldapoSchemaRegistry
+import org.aopalliance.intercept.MethodInvocation
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -33,13 +34,12 @@ import gldapo.GldapoSchemaRegistry
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.aopalliance.intercept.MethodInvocation
 import se.su.it.svc.commons.SvcAudit
 import spock.lang.Specification
 
 import java.lang.reflect.Method
 
-class AuditAspectTest extends Specification {
+class AuditAspectSpec extends Specification {
 
   def setup() {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }

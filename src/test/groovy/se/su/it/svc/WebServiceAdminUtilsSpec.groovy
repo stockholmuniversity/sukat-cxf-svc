@@ -1,3 +1,4 @@
+package se.su.it.svc
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.
@@ -43,7 +44,7 @@ import spock.lang.Specification
  * Time: 12:03
  * To change this template use File | Settings | File Templates.
  */
-class WebServiceAdminUtilsTest extends Specification {
+class WebServiceAdminUtilsSpec extends Specification {
 
   def setup() {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }

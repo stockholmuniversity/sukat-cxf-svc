@@ -3,6 +3,7 @@ package se.su.it.svc.manager
 import gldapo.GldapoSchemaRegistry
 import net.sf.ehcache.Cache
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy
+import spock.lang.Shared
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -35,10 +36,9 @@ import net.sf.ehcache.store.MemoryStoreEvictionPolicy
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import spock.lang.Shared
 import spock.lang.Specification
 
-class EhCacheManagerTest extends Specification {
+class EhCacheManagerSpec extends Specification {
 
   @Shared
   def cacheManager

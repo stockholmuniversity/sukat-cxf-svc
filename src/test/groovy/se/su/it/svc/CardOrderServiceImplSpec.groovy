@@ -1,3 +1,7 @@
+package se.su.it.svc
+
+import gldapo.GldapoSchemaRegistry
+
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.
@@ -29,13 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-
-import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PostconditionViolation
 import org.gcontracts.PreconditionViolation
-import se.su.it.svc.CardOrderServiceImpl
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcCardOrderVO
 import se.su.it.svc.query.SuCardOrderQuery
@@ -44,7 +43,7 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class CardOrderServiceImplTest extends Specification {
+class CardOrderServiceImplSpec extends Specification {
   @Shared
   CardOrderServiceImpl service
 

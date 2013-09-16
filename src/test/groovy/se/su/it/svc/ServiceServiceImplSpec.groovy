@@ -1,3 +1,7 @@
+package se.su.it.svc
+
+import gldapo.GldapoSchemaRegistry
+
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.
@@ -29,12 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-
-import gldapo.GldapoSchemaRegistry
 import se.su.it.commons.Kadmin
-import se.su.it.svc.ServiceServiceImpl
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuService
@@ -53,7 +52,7 @@ import spock.lang.Specification
  * Time: 11:26
  * To change this template use File | Settings | File Templates.
  */
-class ServiceServiceImplTest extends Specification {
+class ServiceServiceImplSpec extends Specification {
 
   def setup() {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }

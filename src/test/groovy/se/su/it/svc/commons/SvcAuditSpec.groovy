@@ -1,6 +1,7 @@
 package se.su.it.svc.commons
 
 import gldapo.GldapoSchemaRegistry
+import spock.lang.Specification
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -32,10 +33,7 @@ import gldapo.GldapoSchemaRegistry
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-import spock.lang.Specification
-
-class SvcAuditTest extends Specification {
+class SvcAuditSpec extends Specification {
 
   def setup() {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }

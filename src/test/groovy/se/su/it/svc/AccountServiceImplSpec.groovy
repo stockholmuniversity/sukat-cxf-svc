@@ -1,8 +1,9 @@
-package se.su.it.svc.aspect
+package se.su.it.svc
 
 import gldapo.GldapoSchemaRegistry
 import org.apache.commons.lang.NotImplementedException
 import org.gcontracts.PostconditionViolation
+import org.gcontracts.PreconditionViolation
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -35,10 +36,8 @@ import org.gcontracts.PostconditionViolation
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.gcontracts.PreconditionViolation
 import se.su.it.commons.Kadmin
 import se.su.it.commons.PasswordUtils
-import se.su.it.svc.AccountServiceImpl
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
@@ -49,7 +48,7 @@ import se.su.it.svc.query.SuPersonQuery
 import spock.lang.Shared
 import spock.lang.Specification
 
-class AccountServiceImplTest extends Specification {
+class AccountServiceImplSpec extends Specification {
 
   @Shared
   AccountServiceImpl service

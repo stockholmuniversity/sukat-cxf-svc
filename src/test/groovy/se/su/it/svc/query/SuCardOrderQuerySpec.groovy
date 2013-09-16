@@ -39,7 +39,7 @@ import se.su.it.svc.commons.SvcCardOrderVO
 import spock.lang.Shared
 import spock.lang.Specification
 
-public class SuCardOrderQueryTest extends Specification {
+public class SuCardOrderQuerySpec extends Specification {
 
   @Shared
   SuCardOrderQuery service
