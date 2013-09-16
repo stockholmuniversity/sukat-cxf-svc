@@ -41,9 +41,9 @@ import javax.xml.bind.annotation.*
  */
 @XmlAccessorType( XmlAccessType.NONE )
 @XmlRootElement
+@GldapoSchemaFilter("(objectClass=suRole)")
 class SuRole implements Serializable{
   static final long serialVersionUID = -687991493314005073L
-  @GldapoSchemaFilter("(objectClass=suRole)")
 
   @GldapoNamingAttribute
   @XmlAttribute

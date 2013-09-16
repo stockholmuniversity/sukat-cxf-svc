@@ -34,11 +34,10 @@ package se.su.it.svc.ldap
 import gldapo.schema.annotation.GldapoNamingAttribute
 import gldapo.schema.annotation.GldapoSchemaFilter
 
+@GldapoSchemaFilter("(&(objectClass=top)(objectClass=account))")
 class SuSubAccount implements Serializable {
 
   static final long serialVersionUID = -687001492884005033L;
-
-  @GldapoSchemaFilter("(objectClass=top)(objectClass=account)")
 
   @GldapoNamingAttribute
   String uid
