@@ -42,11 +42,10 @@ import javax.xml.bind.annotation.*
  */
 @XmlAccessorType( XmlAccessType.NONE )
 @XmlRootElement
+@GldapoSchemaFilter("(objectClass=suServiceObject)")
 class SuService implements Serializable {
 
   static final long serialVersionUID = -687991492884005133L;
-
-  @GldapoSchemaFilter("(objectClass=suServiceObject)")
 
   @GldapoNamingAttribute
   @XmlAttribute
