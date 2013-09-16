@@ -31,7 +31,10 @@
 
 package se.su.it.svc
 
+import groovy.util.logging.Slf4j
 import org.apache.log4j.Logger
+import org.gcontracts.annotations.Requires
+import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.manager.GldapoManager
@@ -44,9 +47,8 @@ import javax.jws.WebService
  * Implementing class for EntitlementService CXF Web Service.
  * This Class handles all Entitlement admin activities in SUKAT.
  */
-@WebService
+@WebService @Slf4j
 public class EntitlementServiceImpl implements EntitlementService {
-  private static final Logger logger = Logger.getLogger(EntitlementServiceImpl.class)
 
   /**
    * This method adds entitlement to the specified uid.
@@ -59,26 +61,27 @@ public class EntitlementServiceImpl implements EntitlementService {
    * @see se.su.it.svc.ldap.SuPerson
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public void addEntitlement(@WebParam(name = "uid") String uid, @WebParam(name = "entitlement") String entitlement, @WebParam(name = "audit") SvcAudit audit) {
-    if(uid == null || entitlement == null || audit == null)
-      throw new java.lang.IllegalArgumentException("addEntitlement - Null argument values not allowed in this function")
+  @Requires({ uid && entitlement && audit &&
+      !LdapAttributeValidator.validateAttributes([uid:uid, entitlement:entitlement, audit:audit])})
+  public void addEntitlement(
+      @WebParam(name = "uid") String uid,
+      @WebParam(name = "entitlement") String entitlement,
+      @WebParam(name = "audit") SvcAudit audit) {
 
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
-    if(person) {
-      if(person.eduPersonEntitlement != null) {
-        if(person.eduPersonEntitlement.find {it.equalsIgnoreCase(entitlement)})
-          throw new java.lang.IllegalArgumentException("Entitlement ${entitlement} already exist")
-        person.eduPersonEntitlement.add(entitlement)
-        SuPersonQuery.updateSuPerson(person)
-      } else {
-        def tmpSet = new java.util.LinkedHashSet<String>()
-        tmpSet.add(entitlement)
-        person.eduPersonEntitlement = tmpSet
-        SuPersonQuery.updateSuPerson(person)
+
+    if (person.eduPersonEntitlement != null) {
+      if (person.eduPersonEntitlement.find { it.equalsIgnoreCase(entitlement) }) {
+        throw new IllegalArgumentException("Entitlement ${entitlement} already exist")
       }
+
+      person.eduPersonEntitlement.add(entitlement)
+      SuPersonQuery.updateSuPerson(person)
     } else {
-      logger.info("addEntitlement: Could not find uid<${uid}>")
-      throw new IllegalArgumentException("addEntitlement no such uid found: "+uid)
+      def tmpSet = new LinkedHashSet<String>()
+      tmpSet.add(entitlement)
+      person.eduPersonEntitlement = tmpSet
+      SuPersonQuery.updateSuPerson(person)
     }
   }
 
@@ -93,24 +96,24 @@ public class EntitlementServiceImpl implements EntitlementService {
    * @see se.su.it.svc.ldap.SuPerson
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public void removeEntitlement(@WebParam(name = "uid") String uid, @WebParam(name = "entitlement") String entitlement, @WebParam(name = "audit") SvcAudit audit) {
-    if(uid == null || entitlement == null || audit == null)
-      throw new java.lang.IllegalArgumentException("removeEntitlement - Null argument values not allowed in this function")
+
+  @Requires({ uid && entitlement && audit &&
+      !LdapAttributeValidator.validateAttributes([uid:uid, entitlement:entitlement, audit:audit])})
+  public void removeEntitlement(
+      @WebParam(name = "uid") String uid,
+      @WebParam(name = "entitlement") String entitlement,
+      @WebParam(name = "audit") SvcAudit audit) {
 
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
-    if(person) {
-      if(person.eduPersonEntitlement != null) {
-        if(person.eduPersonEntitlement.remove(entitlement)) {
-          SuPersonQuery.updateSuPerson(person)
-        } else {
-          throw new IllegalArgumentException("removeEntitlement entitlement not found: "+entitlement)
-        }
-      } else {
-        throw new IllegalArgumentException("removeEntitlement entitlement not found: "+entitlement)
-      }
+
+    /* Find the proper cased string of the entitlement on the person to delete. */
+    String matchingEntitlement = person.eduPersonEntitlement.find { it.equalsIgnoreCase(entitlement) }
+
+    if (matchingEntitlement) {
+      person.eduPersonEntitlement.remove(matchingEntitlement)
+      SuPersonQuery.updateSuPerson(person)
     } else {
-      logger.info("removeEntitlement: Could not find uid<${uid}>")
-      throw new IllegalArgumentException("removeEntitlement no such uid found: "+uid)
+      throw new IllegalArgumentException("entitlement $entitlement was not found for person with uid: $uid")
     }
   }
 }

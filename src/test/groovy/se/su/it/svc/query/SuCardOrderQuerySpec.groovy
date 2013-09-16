@@ -233,7 +233,7 @@ public class SuCardOrderQuerySpec extends Specification {
 
   void "orderCard: a failed request"() {
     expect:
-    service.orderCard(null) == null
+    null == service.orderCard(null)
   }
 
   void "orderCard: When there are active orders"() {

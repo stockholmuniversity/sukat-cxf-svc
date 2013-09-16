@@ -53,11 +53,10 @@ public class SuCardQuery {
    * @see se.su.it.svc.ldap.SuCard
    * @see se.su.it.svc.manager.GldapoManager
    */
-  static SuCard[] findAllCardsBySuPersonDnAndOnlyActiveOrNot(String directory, DistinguishedName dn, boolean onlyActiveCards) {
-    SuCard[] suCards
 
+  static SuCard[] findAllCardsBySuPersonDnAndOnlyActiveOrNot(String directory, DistinguishedName dn, boolean onlyActiveCards) {
     try {
-      suCards = SuCard.findAll(directory: directory, base: dn) {
+      return SuCard.findAll(directory: directory, base: dn) {
         if (onlyActiveCards) {
           eq("suCardState", "urn:x-su:su-card:state:active")
         }
@@ -66,8 +65,6 @@ public class SuCardQuery {
       log.error "Failed finding all ${onlyActiveCards?'':'in'}active SuCards for user dn=$dn", ex
       throw ex
     }
-
-    return suCards
   }
 
   /**
@@ -80,17 +77,13 @@ public class SuCardQuery {
    * @see se.su.it.svc.ldap.SuCard
    */
   static SuCard findCardBySuCardUUID(String directory, String suCardUUID) {
-    SuCard card
-
     try {
-      card = SuCard.find(directory: directory, base: '') {
+      return SuCard.find(directory: directory, base: '') {
         eq("suCardUUID", suCardUUID)
       }
     } catch (ex) {
       log.error "Failed finding suCardOwner for suCardUUID: $suCardUUID", ex
       throw ex
     }
-
-    return card
   }
 }

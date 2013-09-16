@@ -96,7 +96,7 @@ class CardInfoServiceImplSpec extends Specification {
   def "Test getAllCards throws exception if person doesn't exist"() {
     setup:
     GroovyMock(SuPersonQuery, global: true)
-    SuPersonQuery.getSuPersonFromUID(*_) >> { String directory, String uid -> return null }
+    SuPersonQuery.getSuPersonFromUID(*_) >> { throw new IllegalArgumentException("foo") }
 
     when:
     new CardInfoServiceImpl().getAllCards("testuid",true,new SvcAudit())

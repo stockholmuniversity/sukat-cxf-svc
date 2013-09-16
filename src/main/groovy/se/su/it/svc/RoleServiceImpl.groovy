@@ -31,8 +31,10 @@
 
 package se.su.it.svc
 
-import org.apache.log4j.Logger
+import groovy.util.logging.Slf4j
+import org.gcontracts.annotations.Requires
 import org.springframework.ldap.core.DistinguishedName
+import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuRole
@@ -48,9 +50,8 @@ import javax.jws.WebService
  * This Class handles all Role activities in SUKAT.
  */
 
-@WebService
+@WebService @Slf4j
 public class RoleServiceImpl implements RoleService {
-  private static final Logger logger = Logger.getLogger(RoleServiceImpl.class)
 
   /**
    * This method adds the specified uid to the roles in the list.
@@ -62,34 +63,42 @@ public class RoleServiceImpl implements RoleService {
    * @return void.
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public void addUidToRoles(@WebParam(name = "uid") String uid, @WebParam(name = "roleDNList") List<String> roleDNList, @WebParam(name = "audit") SvcAudit audit) {
-    if (uid == null || roleDNList == null || audit == null)
-      throw new java.lang.IllegalArgumentException("addUidToRoles - Null argument values not allowed for uid, roleDNList or audit")
-    if(roleDNList.size() <= 0)
-      throw new java.lang.IllegalArgumentException("addUidToRoles - roleDNList cant be empty")
+
+  @Requires({
+    uid &&
+        roleDNList?.size() > 0 &&
+        audit &&
+        !LdapAttributeValidator.validateAttributes([uid:uid, audit:audit])
+  })
+  public void addUidToRoles(
+      @WebParam(name = "uid") String uid,
+      @WebParam(name = "roleDNList") List<String> roleDNList,
+      @WebParam(name = "audit") SvcAudit audit) {
 
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
-    if(person) {
-      roleDNList.each {roleDN ->
-        logger.debug("addUidToRoles - Trying to find role for DN<${roleDN}>")
-        SuRole role = SuRoleQuery.getSuRoleFromDN(GldapoManager.LDAP_RW, roleDN)
-        if (role != null) {
-          logger.debug("addUidToRoles - Role <${role.cn}> found for DN<${roleDN}>")
-          DistinguishedName uidDN = new DistinguishedName(person.getDn())
-          def roList = role.roleOccupant.collect { ro -> new DistinguishedName(ro) }
-          if (!roList.find {roListItem -> if(roListItem.compareTo(uidDN) == 0) return true; return false}) {
-            role.roleOccupant.add(uidDN.toString())
-            SuRoleQuery.saveSuRole(role)
-            logger.info("addUidToRoles - Uid<${person.uid}> added as occupant to role <${role.cn}> ")
-          } else {
-            logger.debug("addUidToRoles - Occupant <${person.uid}> already exist for role <${role.cn}>")
-          }
-        } else {
-          logger.warn("addUidToRoles - Could not add uid <${person.uid}> to role <${roleDN}>, role not found!")
-        }
+
+    DistinguishedName uidDN = new DistinguishedName(person.getDn())
+
+    for (roleDN in roleDNList) {
+      log.debug("addUidToRoles - Trying to find role for DN<${roleDN}>")
+      SuRole role = SuRoleQuery.getSuRoleFromDN(GldapoManager.LDAP_RW, roleDN)
+
+      if (!role) {
+        log.warn("addUidToRoles - Could not add uid <${person.uid}> to role <${roleDN}>, role not found!")
+        continue
       }
-    } else {
-      throw new IllegalArgumentException("addUidToRoles - No such uid found: "+uid)
+
+      log.debug("addUidToRoles - Role <${role.cn}> found for DN<${roleDN}>")
+
+      List roList = role.roleOccupant?.collect { ro -> new DistinguishedName(ro) }
+
+      if (!(uidDN in roList)) {
+        role.roleOccupant.add(uidDN.toString())
+        SuRoleQuery.saveSuRole(role)
+        log.info("addUidToRoles - Uid<${person.uid}> added as occupant to role <${role.cn}> ")
+      } else {
+        log.debug("addUidToRoles - Occupant <${person.uid}> already exist for role <${role.cn}>")
+      }
     }
   }
 
@@ -103,36 +112,41 @@ public class RoleServiceImpl implements RoleService {
    * @return void.
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public void removeUidFromRoles(@WebParam(name = "uid") String uid, @WebParam(name = "roleDNList") List<String> roleDNList, @WebParam(name = "audit") SvcAudit audit) {
-    if (uid == null || roleDNList == null || audit == null)
-      throw new java.lang.IllegalArgumentException("removeUidFromRoles - Null argument values not allowed for uid, roleDNList or audit")
-    if(roleDNList.size() <= 0)
-      throw new java.lang.IllegalArgumentException("addUidToRoles - roleDNList cant be empty")
+  @Requires({
+    uid && roleDNList?.size() > 0 && audit
+  })
+  public void removeUidFromRoles(
+      @WebParam(name = "uid") String uid,
+      @WebParam(name = "roleDNList") List<String> roleDNList,
+      @WebParam(name = "audit") SvcAudit audit) {
 
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
-    if(person) {
-      roleDNList.each {tmpRoleDN ->
-         DistinguishedName roleDN = new DistinguishedName(tmpRoleDN)
-        logger.debug("removeUidFromRoles - Trying to find role for DN<${roleDN.toString()}>")
-        SuRole role = SuRoleQuery.getSuRoleFromDN(GldapoManager.LDAP_RW, roleDN.toString())
-        if (role != null) {
-          logger.debug("removeUidFromRoles - Role <${role.cn}> found for DN<${roleDN.toString()}>")
-          DistinguishedName uidDN = new DistinguishedName(person.getDn())
-          def roList = role.roleOccupant.collect { ro -> new DistinguishedName(ro) }
-          if (roList.find {roListItem -> if(roListItem.compareTo(uidDN) == 0) return true; return false}) {
-            roList.remove(roList.find {roListItem -> if(roListItem.compareTo(uidDN) == 0) return true; return false})
-            role.roleOccupant = new LinkedList<String>(roList.collect {dn -> dn.toString()} )//      roList.toArray(new String[roList.size()]))
-            SuRoleQuery.saveSuRole(role)
-            logger.info("removeUidFromRoles - Uid<${person.uid}> removed as occupant from role <${role.cn}> ")
-          } else {
-            logger.debug("removeUidFromRoles - Occupant <${person.uid}> not found for role <${role.cn}>")
-          }
-        } else {
-          logger.warn("removeUidFromRoles - Could not remove uid <${person.uid}> from role <${roleDN}>, role not found!")
-        }
+    DistinguishedName uidDN = new DistinguishedName(person.getDn())
+
+    for (tmpRoleDN in roleDNList) {
+      DistinguishedName roleDN = new DistinguishedName(tmpRoleDN)
+
+      log.debug("removeUidFromRoles - Trying to find role for DN<${roleDN.toString()}>")
+
+      SuRole role = SuRoleQuery.getSuRoleFromDN(GldapoManager.LDAP_RW, roleDN.toString())
+
+      if (!role) {
+        log.warn("removeUidFromRoles - Could not remove uid <${person.uid}> from role <${roleDN}>, role not found!")
+        continue
       }
-    } else {
-      throw new IllegalArgumentException("removeUidFromRoles - No such uid found: "+uid)
+
+      log.debug("removeUidFromRoles - Role <${role.cn}> found for DN<${roleDN.toString()}>")
+
+      def roList = role.roleOccupant.collect { ro -> new DistinguishedName(ro) }
+
+      if (uidDN in roList) {
+        roList.remove(uidDN)
+        role.roleOccupant = new LinkedList<String>(roList.collect { DistinguishedName dn -> dn.toString() })
+        SuRoleQuery.saveSuRole(role)
+        log.info("removeUidFromRoles - Uid<${person.uid}> removed as occupant from role <${role.cn}> ")
+      } else {
+        log.debug("removeUidFromRoles - Occupant <${person.uid}> not found for role <${role.cn}>")
+      }
     }
   }
 }
