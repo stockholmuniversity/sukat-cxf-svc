@@ -72,11 +72,8 @@ public class CardInfoServiceImpl implements CardInfoService {
           @WebParam(name = 'onlyActive') boolean onlyActive,
           @WebParam(name = 'audit') SvcAudit audit
   ) {
-    def person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
 
-    if (!person) {
-      throw new IllegalArgumentException("getAllCards - No such uid found: " + uid)
-    }
+    def person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
 
     String directory = GldapoManager.LDAP_RO
     DistinguishedName dn = person.getDn()

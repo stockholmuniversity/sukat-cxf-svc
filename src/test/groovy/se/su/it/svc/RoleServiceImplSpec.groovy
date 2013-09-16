@@ -1,6 +1,7 @@
 package se.su.it.svc
 
 import gldapo.GldapoSchemaRegistry
+import org.gcontracts.PreconditionViolation
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -39,6 +40,7 @@ import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuRole
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuRoleQuery
+import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 class RoleServiceImplSpec extends Specification {
@@ -56,47 +58,59 @@ class RoleServiceImplSpec extends Specification {
   def "Test addUidToRoles with null uid argument"() {
     setup:
     def roleServiceImpl = new RoleServiceImpl()
+
     when:
     roleServiceImpl.addUidToRoles(null,["dummyDN"], new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   def "Test addUidToRoles with null roleDNList argument"() {
     setup:
     def roleServiceImpl = new RoleServiceImpl()
+
     when:
     roleServiceImpl.addUidToRoles("testuid",null, new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   def "Test addUidToRoles with empty roleDNList argument"() {
     setup:
     def roleServiceImpl = new RoleServiceImpl()
+
     when:
     roleServiceImpl.addUidToRoles("testuid",[], new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   def "Test addUidToRoles with null SvcAudit argument"() {
     setup:
     def roleServiceImpl = new RoleServiceImpl()
+
     when:
     roleServiceImpl.addUidToRoles("testuid",["dummyDN"], null)
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   def "Test addUidToRoles without person exist"() {
     setup:
     def myRoles = ["cn=Test1,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE",
       "cn=Test2,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE"]
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
+    GroovyMock(SuPersonQuery, global:true)
+
+    SuPersonQuery.getSuPersonFromUID(*_) >> { throw new IllegalArgumentException("foo") }
     def roleServiceImpl = new RoleServiceImpl()
+
     when:
     roleServiceImpl.addUidToRoles("testuid", myRoles, new SvcAudit())
+
     then:
     thrown(IllegalArgumentException)
   }
@@ -111,15 +125,26 @@ class RoleServiceImplSpec extends Specification {
     SuRole suRole2 = new SuRole()
     suRole2.cn = "Test2"
     suRole2.roleOccupant = ["uid=dummy,dc=it,dc=su,dc=se","uid=testuid, dc=it, dc=su, dc=se"]
-    def myRoles = ["cn=Test1,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE",
+
+    def myRoles = [
+        "cn=Test1,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE",
       "cn=Test2,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE"]
-    person.metaClass.getDn = {new DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return person }
-    SuRoleQuery.metaClass.static.getSuRoleFromDN = {String directory, String roleDN -> if(roleDN.startsWith("cn=Test1")) return suRole; if(roleDN.startsWith("cn=Test2")) return suRole2;}
-    SuRoleQuery.metaClass.static.saveSuRole = {SuRole role -> saved = role.cn}
+
+    person.metaClass.getDn = { "uid=testuid,dc=it,dc=su,dc=se" }
+
+    SuRoleQuery.metaClass.static.saveSuRole = { SuRole role -> saved = role.cn }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> return person }
+
+    SuRoleQuery.metaClass.static.getSuRoleFromDN = { String directory, String roleDN ->
+      if (roleDN.startsWith("cn=Test1")) return suRole;
+      if (roleDN.startsWith("cn=Test2")) return suRole2;
+    }
+
     def roleServiceImpl = new RoleServiceImpl()
+
     when:
     roleServiceImpl.addUidToRoles("testuid", myRoles, new SvcAudit())
+
     then:
     saved == "Test1"
     suRole.roleOccupant.size() == 2
@@ -129,47 +154,61 @@ class RoleServiceImplSpec extends Specification {
   def "Test removeUidFromRoles with null uid argument"() {
     setup:
     def roleServiceImpl = new RoleServiceImpl()
+
     when:
     roleServiceImpl.removeUidFromRoles(null,["dummyDN"], new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   def "Test removeUidFromRoles with null roleDNList argument"() {
     setup:
     def roleServiceImpl = new RoleServiceImpl()
+
     when:
     roleServiceImpl.removeUidFromRoles("testuid",null, new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   def "Test removeUidFromRoles with empty roleDNList argument"() {
     setup:
     def roleServiceImpl = new RoleServiceImpl()
+
     when:
     roleServiceImpl.removeUidFromRoles("testuid",[], new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   def "Test removeUidFromRoles with null SvcAudit argument"() {
     setup:
     def roleServiceImpl = new RoleServiceImpl()
+
+
     when:
     roleServiceImpl.removeUidFromRoles("testuid",["dummyDN"], null)
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   def "Test removeUidFromRoles without person exist"() {
     setup:
     def myRoles = ["cn=Test1,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE",
       "cn=Test2,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE"]
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
+
+    GroovyMock(SuPersonQuery, global:true)
+    SuPersonQuery.getSuPersonFromUID(*_) >> { throw new IllegalArgumentException("foo") }
+
     def roleServiceImpl = new RoleServiceImpl()
+
     when:
     roleServiceImpl.removeUidFromRoles("testuid", myRoles, new SvcAudit())
+
     then:
     thrown(IllegalArgumentException)
   }
@@ -191,8 +230,10 @@ class RoleServiceImplSpec extends Specification {
     SuRoleQuery.metaClass.static.getSuRoleFromDN = {String directory, String roleDN -> if(roleDN.startsWith("cn=Test1")) return suRole; if(roleDN.startsWith("cn=Test2")) return suRole2;}
     SuRoleQuery.metaClass.static.saveSuRole = {SuRole role -> saved = role.cn}
     def roleServiceImpl = new RoleServiceImpl()
+
     when:
     roleServiceImpl.removeUidFromRoles("testuid", myRoles, new SvcAudit())
+
     then:
     saved == "Test2"
     suRole.roleOccupant.size() == 1

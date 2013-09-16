@@ -1,6 +1,8 @@
 package se.su.it.svc
 
 import gldapo.GldapoSchemaRegistry
+import org.gcontracts.PreconditionViolation
+import org.springframework.ldap.core.DistinguishedName
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -43,6 +45,7 @@ import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuServiceDescriptionQuery
 import se.su.it.svc.query.SuServiceQuery
 import se.su.it.svc.query.SuSubAccountQuery
+import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 /**
@@ -77,7 +80,7 @@ class ServiceServiceImplSpec extends Specification {
     serviceServiceImpl.getServices(null,new SvcAudit())
 
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   def "Test getServices with null SvcAudit argument"() {
@@ -88,19 +91,24 @@ class ServiceServiceImplSpec extends Specification {
     serviceServiceImpl.getServices("testuid",null)
 
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   def "Test getServices returns list of SuCard when person exists"() {
     setup:
     def person = new SuPerson()
-    def suServices = [new SuService()]
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return person }
-    person.metaClass.getDn = {""}
-    SuServiceQuery.metaClass.static.getSuServices = {String directory,String dn -> return suServices}
+    person.metaClass.getDn = { "" }
+
     def serviceServiceImpl = new ServiceServiceImpl()
+
+    GroovyMock(SuPersonQuery, global:true)
+    GroovyMock(SuServiceQuery, global:true)
+    SuPersonQuery.getSuPersonFromUID(*_) >> { return person }
+    SuServiceQuery.getSuServices(*_) >> { return [new SuService()] }
+
     when:
     def ret = serviceServiceImpl.getServices("testuid",new SvcAudit())
+
     then:
     ret.size() == 1
     ret[0] instanceof SuService
@@ -109,23 +117,31 @@ class ServiceServiceImplSpec extends Specification {
   def "Test getServices returns empty list of SuCard when person exists"() {
     setup:
     def person = new SuPerson()
-    def suServices = []
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return person }
-    person.metaClass.getDn = {""}
-    SuServiceQuery.metaClass.static.getSuServices = {String directory,String dn -> return suServices}
+    person.metaClass.getDn = { "" }
+
     def serviceServiceImpl = new ServiceServiceImpl()
+
+    GroovyMock(SuPersonQuery, global:true)
+    GroovyMock(SuServiceQuery, global:true)
+    SuPersonQuery.getSuPersonFromUID(*_) >> { return person }
+    SuServiceQuery.getSuServices(*_) >> { return [] }
+
     when:
     def ret = serviceServiceImpl.getServices("testuid",new SvcAudit())
+
     then:
     ret.size() == 0
   }
 
   def "Test getServices returns exception when person dont exists"() {
     setup:
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
+    GroovyMock(SuPersonQuery, global:true)
+    SuPersonQuery.getSuPersonFromUID(*_) >> { throw new IllegalArgumentException("foo") }
     def serviceServiceImpl = new ServiceServiceImpl()
+
     when:
     def ret = serviceServiceImpl.getServices("testuid",new SvcAudit())
+
     then:
     thrown(IllegalArgumentException)
   }
@@ -149,7 +165,7 @@ class ServiceServiceImplSpec extends Specification {
     serviceServiceImpl.enableServiceFully(null, "urn:x-su:service:type:jabber", "jabber", "A description", new SvcAudit())
 
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   def "Test enableServiceFully with null serviceType argument"() {
@@ -160,7 +176,7 @@ class ServiceServiceImplSpec extends Specification {
     serviceServiceImpl.enableServiceFully("testuid", null, "jabber", "A description", new SvcAudit())
 
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   def "Test enableServiceFully with null qualifier argument"() {
@@ -171,7 +187,7 @@ class ServiceServiceImplSpec extends Specification {
     serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", null, "A description", new SvcAudit())
 
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   def "Test enableServiceFully with null description argument"() {
@@ -182,7 +198,7 @@ class ServiceServiceImplSpec extends Specification {
     serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", null, new SvcAudit())
 
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   def "Test enableServiceFully with null SvcAudit argument"() {
@@ -193,15 +209,18 @@ class ServiceServiceImplSpec extends Specification {
     serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", "A description",null)
 
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   def "Test enableServiceFully returns exception when person dont exists"() {
     setup:
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
+    GroovyMock(SuPersonQuery, global:true)
+    SuPersonQuery.getSuPersonFromUID(*_) >> { throw new IllegalArgumentException("foo") }
     def serviceServiceImpl = new ServiceServiceImpl()
+
     when:
     def ret = serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", "A description", new SvcAudit())
+
     then:
     thrown(IllegalArgumentException)
   }
@@ -308,7 +327,6 @@ class ServiceServiceImplSpec extends Specification {
     then:
     thrown(IllegalArgumentException)
   }
-
 
   def "Test blockService already blocked"() {
     setup:

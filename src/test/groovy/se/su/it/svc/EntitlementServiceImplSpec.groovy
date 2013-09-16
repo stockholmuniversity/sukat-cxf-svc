@@ -1,6 +1,7 @@
 package se.su.it.svc
 
 import gldapo.GldapoSchemaRegistry
+import org.gcontracts.PreconditionViolation
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -36,6 +37,7 @@ import gldapo.GldapoSchemaRegistry
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.query.SuPersonQuery
+import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 /**
@@ -59,33 +61,39 @@ class EntitlementServiceImplSpec extends Specification {
   def "Test addEntitlement with null uid argument"() {
     setup:
     def entitlementServiceImpl = new EntitlementServiceImpl()
+
     when:
     entitlementServiceImpl.addEntitlement(null,"urn:mace:swami.se:gmai:test:test",new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   def "Test addEntitlement with null entitlement argument"() {
     setup:
     def entitlementServiceImpl = new EntitlementServiceImpl()
+
     when:
     entitlementServiceImpl.addEntitlement("testuid",null,new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   def "Test addEntitlement with null SvcAudit argument"() {
     setup:
     def entitlementServiceImpl = new EntitlementServiceImpl()
+
     when:
     entitlementServiceImpl.addEntitlement("testuid","urn:mace:swami.se:gmai:test:test",null)
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   def "Test addEntitlement when person dont exists"() {
     setup:
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> throw new IllegalArgumentException("foo") }
     def entitlementServiceImpl = new EntitlementServiceImpl()
     when:
     def ret = entitlementServiceImpl.addEntitlement("testuid","urn:mace:swami.se:gmai:test:test",new SvcAudit())
@@ -123,33 +131,41 @@ class EntitlementServiceImplSpec extends Specification {
   def "Test removeEntitlement with null uid argument"() {
     setup:
     def entitlementServiceImpl = new EntitlementServiceImpl()
+
     when:
     entitlementServiceImpl.removeEntitlement(null,"urn:mace:swami.se:gmai:test:test",new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   def "Test removeEntitlement with null entitlement argument"() {
     setup:
     def entitlementServiceImpl = new EntitlementServiceImpl()
+
     when:
     entitlementServiceImpl.removeEntitlement("testuid",null,new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   def "Test removeEntitlement with null SvcAudit argument"() {
     setup:
     def entitlementServiceImpl = new EntitlementServiceImpl()
+
     when:
     entitlementServiceImpl.removeEntitlement("testuid","urn:mace:swami.se:gmai:test:test",null)
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   def "Test removeEntitlement when person dont exists"() {
     setup:
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
+    GroovyMock(SuPersonQuery, global: true)
+    SuPersonQuery.getSuPersonFromUID(*_) >> { throw new IllegalArgumentException("foo") }
+
     def entitlementServiceImpl = new EntitlementServiceImpl()
     when:
     def ret = entitlementServiceImpl.removeEntitlement("testuid","urn:mace:swami.se:gmai:test:test",new SvcAudit())
@@ -161,26 +177,33 @@ class EntitlementServiceImplSpec extends Specification {
     setup:
     SuPerson person = new SuPerson()
     person.eduPersonEntitlement = null
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return person }
-    SuPersonQuery.metaClass.static.saveSuPerson = {SuPerson arg1 -> return void}
+
+    GroovyMock(SuPersonQuery, global: true)
+    SuPersonQuery.getSuPersonFromUID(*_) >> { return person }
+
     def entitlementServiceImpl = new EntitlementServiceImpl()
+
     when:
-    def ret = entitlementServiceImpl.removeEntitlement("testuid","urn:mace:swami.se:gmai:test:test",new SvcAudit())
+    entitlementServiceImpl.removeEntitlement("testuid","urn:mace:swami.se:gmai:test:test",new SvcAudit())
+
     then:
     thrown(IllegalArgumentException)
   }
 
   def "Test removeEntitlement with no same entitlement in list"() {
     setup:
-    SuPerson person = new SuPerson()
-    def tmpSet = new java.util.LinkedHashSet<String>()
-    tmpSet.add("urn:mace:swami.se:gmai:test:test")
-    person.eduPersonEntitlement = tmpSet
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return person }
-    SuPersonQuery.metaClass.static.updateSuPerson = {SuPerson arg1 -> return void}
+
+    SuPerson suPerson = new SuPerson()
+    suPerson.eduPersonEntitlement = new LinkedHashSet<String>(["urn:mace:swami.se:gmai:test:test"])
+
+    GroovyMock(SuPersonQuery, global: true)
+    SuPersonQuery.getSuPersonFromUID(*_) >> { return suPerson }
+
     def entitlementServiceImpl = new EntitlementServiceImpl()
+
     when:
     def ret = entitlementServiceImpl.removeEntitlement("testuid","urn:mace:swami.se:gmai:test:imnotthere",new SvcAudit())
+
     then:
     thrown(IllegalArgumentException)
   }
