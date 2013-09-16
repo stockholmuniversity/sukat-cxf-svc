@@ -1,4 +1,8 @@
 package se.su.it.svc.aspect
+
+import gldapo.GldapoSchemaRegistry
+import spock.lang.Specification
+
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.
@@ -29,17 +33,14 @@ package se.su.it.svc.aspect
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-
-
-import gldapo.GldapoSchemaRegistry
-import se.su.it.svc.aspect.AuditEntity
-import spock.lang.Specification
-
-class AuditEntityTest extends Specification {
+class AuditEntitySpec extends Specification {
 
   def setup() {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
+  }
+
+  def cleanup() {
+    GldapoSchemaRegistry.metaClass = null
   }
 
   def "Constructor: Test constructor"() {

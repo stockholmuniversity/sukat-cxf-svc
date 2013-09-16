@@ -1,3 +1,7 @@
+package se.su.it.svc
+
+import gldapo.GldapoSchemaRegistry
+
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.
@@ -29,11 +33,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-import gldapo.GldapoSchemaRegistry
-import org.junit.Test
-import se.su.it.svc.EntitlementServiceImpl
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.query.SuPersonQuery
@@ -46,13 +45,17 @@ import spock.lang.Specification
  * Time: 08:34
  * To change this template use File | Settings | File Templates.
  */
-class EntitlementServiceImplTest extends Specification {
+class EntitlementServiceImplSpec extends Specification {
 
   def setup() {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
   }
 
-  @Test
+  def cleanup() {
+    SuPersonQuery.metaClass = null
+    GldapoSchemaRegistry.metaClass = null
+  }
+
   def "Test addEntitlement with null uid argument"() {
     setup:
     def entitlementServiceImpl = new EntitlementServiceImpl()
@@ -62,7 +65,6 @@ class EntitlementServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test addEntitlement with null entitlement argument"() {
     setup:
     def entitlementServiceImpl = new EntitlementServiceImpl()
@@ -72,7 +74,6 @@ class EntitlementServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test addEntitlement with null SvcAudit argument"() {
     setup:
     def entitlementServiceImpl = new EntitlementServiceImpl()
@@ -82,7 +83,6 @@ class EntitlementServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test addEntitlement when person dont exists"() {
     setup:
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
@@ -93,7 +93,6 @@ class EntitlementServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test addEntitlement whith duplicate entitlement"() {
     setup:
     SuPerson person = new SuPerson()
@@ -109,7 +108,6 @@ class EntitlementServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test addEntitlement"() {
     setup:
     SuPerson person = new SuPerson()
@@ -122,7 +120,6 @@ class EntitlementServiceImplTest extends Specification {
     person.eduPersonEntitlement.contains("urn:mace:swami.se:gmai:test:test") == true
   }
 
-  @Test
   def "Test removeEntitlement with null uid argument"() {
     setup:
     def entitlementServiceImpl = new EntitlementServiceImpl()
@@ -132,7 +129,6 @@ class EntitlementServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test removeEntitlement with null entitlement argument"() {
     setup:
     def entitlementServiceImpl = new EntitlementServiceImpl()
@@ -142,7 +138,6 @@ class EntitlementServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test removeEntitlement with null SvcAudit argument"() {
     setup:
     def entitlementServiceImpl = new EntitlementServiceImpl()
@@ -152,7 +147,6 @@ class EntitlementServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test removeEntitlement when person dont exists"() {
     setup:
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
@@ -163,7 +157,6 @@ class EntitlementServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test removeEntitlement with no eduPersonEntitlement list in person object"() {
     setup:
     SuPerson person = new SuPerson()
@@ -177,7 +170,6 @@ class EntitlementServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test removeEntitlement with no same entitlement in list"() {
     setup:
     SuPerson person = new SuPerson()
@@ -193,7 +185,6 @@ class EntitlementServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test removeEntitlement"() {
     setup:
     SuPerson person = new SuPerson()

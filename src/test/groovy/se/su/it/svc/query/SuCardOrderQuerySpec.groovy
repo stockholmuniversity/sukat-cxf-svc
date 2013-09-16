@@ -35,12 +35,11 @@ import gldapo.GldapoSchemaRegistry
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
 import org.apache.commons.dbcp.BasicDataSource
-import org.junit.Test
 import se.su.it.svc.commons.SvcCardOrderVO
 import spock.lang.Shared
 import spock.lang.Specification
 
-public class SuCardOrderQueryTest extends Specification {
+public class SuCardOrderQuerySpec extends Specification {
 
   @Shared
   SuCardOrderQuery service
@@ -53,8 +52,8 @@ public class SuCardOrderQueryTest extends Specification {
 
   void cleanup() {
     service = null
-    SuCardOrderQuery.metaClass = null
     Sql.metaClass = null
+    GldapoSchemaRegistry.metaClass = null
   }
 
   private SvcCardOrderVO getCardOrder(){
@@ -71,7 +70,6 @@ public class SuCardOrderQueryTest extends Specification {
         zipcode: '12345')
   }
 
-  @Test
   void "getFindAllCardsQuery"() {
     expect: 'should return'
     service.findAllCardsQuery == "SELECT r.id, serial, owner, printer, createTime, firstname, lastname, streetaddress1," +
@@ -79,7 +77,6 @@ public class SuCardOrderQueryTest extends Specification {
         "ON r.address = a.id JOIN status s ON r.status = s.id WHERE r.owner = :uid"
   }
 
-  @Test
   void "doListQuery"() {
     given:
     def list = ['list', 'of', 'objects']
@@ -95,7 +92,6 @@ public class SuCardOrderQueryTest extends Specification {
     resp == list
   }
 
-  @Test
   void "handleOrderListResult: When creation of objects work"() {
     given:
     def list = []
@@ -112,7 +108,6 @@ public class SuCardOrderQueryTest extends Specification {
     resp.size() == 2
   }
 
-  @Test
   void "handleOrderListResult: Handling single failures"() {
     given:
     def list = []
@@ -130,7 +125,6 @@ public class SuCardOrderQueryTest extends Specification {
     resp.size() == 2
   }
 
-  @Test
   void "findAllCardOrdersForUid: given uid => \'#uid\'"() {
     expect:
     [] == service.findAllCardOrdersForUid(uid)
@@ -139,7 +133,6 @@ public class SuCardOrderQueryTest extends Specification {
     uid << ['', null]
   }
 
-  @Test
   void "findAllCardOrdersForUid"() {
     given:
     def list = [[id:1, owner:'foo'], [id:1, owner:'foo'], [id:1, owner:'foo']]
@@ -156,13 +149,11 @@ public class SuCardOrderQueryTest extends Specification {
     resp.every { it instanceof SvcCardOrderVO }
   }
 
-  @Test
   void "getAddressQuery"() {
     expect:
     service.insertAddressQuery == "INSERT INTO address VALUES(null, :streetaddress1, :streetaddress2, :locality, :zipcode)"
   }
 
-  @Test
   void "getRequestQueryArgs"() {
     given:
     SvcCardOrderVO svcCardOrderVO = new SvcCardOrderVO(
@@ -189,7 +180,6 @@ public class SuCardOrderQueryTest extends Specification {
 
   }
 
-  @Test
   void "getAddressQueryArgs"() {
     given:
     SvcCardOrderVO svcCardOrderVO = new SvcCardOrderVO(streetaddress1: 's1',
@@ -207,7 +197,6 @@ public class SuCardOrderQueryTest extends Specification {
     resp.zipcode == svcCardOrderVO.zipcode
   }
 
-  @Test
   void "findFreeUUID"() {
     given:
     Sql.metaClass.rows = { String arg1, Map arg2 ->
@@ -222,36 +211,31 @@ public class SuCardOrderQueryTest extends Specification {
     resp?.size() == 36
   }
 
-  @Test
   void "getInsertRequestQuery"() {
     expect:
     service.insertRequestQuery == "INSERT INTO request VALUES(:id, :owner, :serial, :printer, :createTime, :address, :status, :firstname, :lastname)"
   }
 
-  @Test
   void "getFindActiveCardOrdersQuery"() {
     expect:
     service.findActiveCardOrdersQuery == "SELECT r.id, serial, owner, printer, createTime, firstname, lastname, streetaddress1, streetaddress2, locality, zipcode, value, description FROM request r JOIN address a ON r.address = a.id JOIN status s ON r.status = s.id WHERE r.owner = :owner AND status in (1,2,3)"
   }
 
-  @Test
   void "getFindFreeUUIDQuery"() {
     expect:
     service.findFreeUUIDQuery == "SELECT id FROM request WHERE id = :uuid"
   }
 
-  @Test
   void "getInsertStatusHistoryQuery"() {
     expect:
     service.insertStatusHistoryQuery == "INSERT INTO status_history VALUES (null, :status, :request, :comment, :createTime)"
   }
 
-  @Test
   void "orderCard: a failed request"() {
     expect:
     service.orderCard(null) == null
   }
-  @Test
+
   void "orderCard: When there are active orders"() {
     given:
     Sql.metaClass.rows = { String arg1, Map arg2 ->
@@ -264,7 +248,6 @@ public class SuCardOrderQueryTest extends Specification {
     null == service.orderCard(cardOrder)
   }
 
-  @Test
   void "orderCard"() {
     given:
     Sql.metaClass.rows = { String arg1, Map arg2 ->
@@ -299,7 +282,6 @@ public class SuCardOrderQueryTest extends Specification {
     resp?.size() == 36
   }
 
-  @Test
   def "doCardOrderInsert (is tested through orderCard but closure removes coverage)."(){
     given:
     Sql.metaClass.withTransaction = { Closure closure -> closure() }
@@ -324,13 +306,11 @@ public class SuCardOrderQueryTest extends Specification {
     )
   }
 
-  @Test
   def "getMarkCardAsDiscardedQuery"() {
     expect:
     service.markCardAsDiscardedQuery == "UPDATE request SET status = :discardedStatus WHERE id = :id"
   }
 
-  @Test
   def "doMarkCardAsDiscarded"(){
     given:
     Sql.metaClass.withTransaction = { Closure closure -> closure() }
@@ -362,7 +342,6 @@ public class SuCardOrderQueryTest extends Specification {
     resp
   }
 
-  @Test
   def "markCardAsDiscarded"(){
     given:
     SuCardOrderQuery spy = GroovySpy(SuCardOrderQuery) {
@@ -377,7 +356,6 @@ public class SuCardOrderQueryTest extends Specification {
     !resp
   }
 
-  @Test
   def "markCardAsDiscarded fails"(){
     given:
     SuCardOrderQuery spy = GroovySpy(SuCardOrderQuery) {
