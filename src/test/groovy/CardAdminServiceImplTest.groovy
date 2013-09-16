@@ -48,6 +48,8 @@ class CardAdminServiceImplTest extends Specification {
 
   def cleanup() {
     SuCardQuery.metaClass = null
+    SuCardOrderQuery.metaClass = null
+    GldapoSchemaRegistry.metaClass = null
   }
 
   @Test

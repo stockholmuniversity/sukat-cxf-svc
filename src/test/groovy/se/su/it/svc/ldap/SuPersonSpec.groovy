@@ -8,7 +8,6 @@ import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.manager.Config
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.util.GeneralUtils
-import org.junit.Test
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -22,6 +21,7 @@ class SuPersonSpec extends Specification {
 
   def cleanup() {
     SuPerson.metaClass = null
+    GldapoSchemaRegistry.metaClass = null
   }
 
   @Unroll

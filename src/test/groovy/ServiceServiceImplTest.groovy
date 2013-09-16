@@ -59,6 +59,17 @@ class ServiceServiceImplTest extends Specification {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
   }
 
+  def cleanup() {
+    SuPerson.metaClass = null
+    SuPersonQuery.metaClass = null
+    SuService.metaClass = null
+    SuServiceQuery.metaClass = null
+    SuServiceDescriptionQuery.metaClass
+    SuSubAccountQuery.metaClass = null
+    Kadmin.metaClass = null
+    GldapoSchemaRegistry.metaClass = null
+  }
+
   @Test
   def "Test getServices with null uid argument"() {
     setup:

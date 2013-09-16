@@ -53,7 +53,12 @@ class CardOrderServiceImplTest extends Specification {
     service = new CardOrderServiceImpl()
   }
 
-  private static SvcCardOrderVO getCardOrder(){
+  void cleanup() {
+    service = null
+    GldapoSchemaRegistry.metaClass = null
+  }
+
+  private static SvcCardOrderVO getCardOrder() {
     return new SvcCardOrderVO(
         id:1,
         owner:'foo',
@@ -67,9 +72,6 @@ class CardOrderServiceImplTest extends Specification {
         zipcode: '12345')
   }
 
-  void cleanup() {
-    service = null
-  }
   @Test @Unroll
   void "findAllCardOrdersForUid: given uid: \'#uid\'"(){
     when:

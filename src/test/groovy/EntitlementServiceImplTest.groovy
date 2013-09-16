@@ -52,6 +52,11 @@ class EntitlementServiceImplTest extends Specification {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
   }
 
+  def cleanup() {
+    SuPersonQuery.metaClass = null
+    GldapoSchemaRegistry.metaClass = null
+  }
+
   @Test
   def "Test addEntitlement with null uid argument"() {
     setup:

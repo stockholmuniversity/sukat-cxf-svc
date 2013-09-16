@@ -44,6 +44,10 @@ class GeneralUtilsSpec extends Specification {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
   }
 
+  def cleanup() {
+    GldapoSchemaRegistry.metaClass = null
+  }
+
   @Test
   @Unroll
   void "pnrToSsn: When given pnr: '#pnr' we expect '#expected'"() {

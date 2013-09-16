@@ -49,6 +49,10 @@ class WebServiceAdminUtilsTest extends Specification {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
   }
 
+  def cleanup() {
+    GldapoSchemaRegistry.metaClass = null
+  }
+
   def "getLogLevelFromString: Happy Path log levels supplied level is #level results in #expected" () {
     when:
     Level result = WebServiceAdminUtils.getLogLevelFromString(level)

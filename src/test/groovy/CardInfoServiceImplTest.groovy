@@ -52,6 +52,7 @@ class CardInfoServiceImplTest extends Specification {
 
   def cleanup() {
     SuCardQuery.metaClass = null
+    GldapoSchemaRegistry.metaClass = null
   }
 
   @Test

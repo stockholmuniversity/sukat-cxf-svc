@@ -48,6 +48,12 @@ class RoleServiceImplTest extends Specification {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
   }
 
+  def cleanup() {
+    SuRoleQuery.metaClass = null
+    SuPersonQuery.metaClass = null
+    GldapoSchemaRegistry.metaClass = null
+  }
+
   @Test
   def "Test addUidToRoles with null uid argument"() {
     setup:

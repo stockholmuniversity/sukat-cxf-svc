@@ -1,4 +1,7 @@
 package se.su.it.svc.aspect
+
+import gldapo.GldapoSchemaRegistry
+
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.
@@ -30,14 +33,7 @@ package se.su.it.svc.aspect
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-
-
-import gldapo.GldapoSchemaRegistry
 import org.aopalliance.intercept.MethodInvocation
-import se.su.it.svc.aspect.AuditAspect
-import se.su.it.svc.aspect.AuditEntity
 import se.su.it.svc.commons.SvcAudit
 import spock.lang.Specification
 
@@ -52,6 +48,7 @@ class AuditAspectTest extends Specification {
 
   def cleanup() {
     AuditAspect.metaClass = null
+    GldapoSchemaRegistry.metaClass = null
   }
 
   def "Constructor"() {

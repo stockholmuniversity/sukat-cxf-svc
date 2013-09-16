@@ -43,6 +43,7 @@ class SuPersonQuerySpec extends Specification {
 
   def cleanup(){
     SuPerson.metaClass = null
+    GldapoSchemaRegistry.metaClass = null
   }
 
   def "getSuPersonFromUID should handle exception"() {

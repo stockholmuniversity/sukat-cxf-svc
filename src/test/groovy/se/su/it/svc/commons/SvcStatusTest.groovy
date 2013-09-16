@@ -1,4 +1,7 @@
 package se.su.it.svc.commons
+
+import gldapo.GldapoSchemaRegistry
+
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.
@@ -30,16 +33,16 @@ package se.su.it.svc.commons
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-import gldapo.GldapoSchemaRegistry
-import se.su.it.svc.commons.SvcStatus
 import spock.lang.Specification
 
 class SvcStatusTest extends Specification {
 
   def setup() {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
+  }
+
+  def cleanup() {
+    GldapoSchemaRegistry.metaClass = null
   }
 
   def "Test attributes"() {

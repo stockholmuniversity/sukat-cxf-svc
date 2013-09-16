@@ -1,4 +1,7 @@
 package se.su.it.svc.aspect
+
+import gldapo.GldapoSchemaRegistry
+
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.
@@ -30,17 +33,13 @@ package se.su.it.svc.aspect
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-import gldapo.GldapoSchemaRegistry
 import org.apache.commons.lang.NotImplementedException
 import org.gcontracts.PostconditionViolation
 import org.gcontracts.PreconditionViolation
 import org.junit.Test
-import se.su.it.commons.ExecUtils
 import se.su.it.commons.Kadmin
 import se.su.it.commons.PasswordUtils
 import se.su.it.svc.AccountServiceImpl
-
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
@@ -66,8 +65,7 @@ class AccountServiceImplTest extends Specification {
     Kadmin.metaClass = null
     SuPersonStub.metaClass = null
     SuPersonQuery.metaClass = null
-    PasswordUtils.metaClass = null
-    ExecUtils.metaClass = null
+    GldapoSchemaRegistry.metaClass = null
   }
 
   @Test
@@ -433,7 +431,6 @@ class AccountServiceImplTest extends Specification {
   @Test
   def "Test getMailRoutingAddress with person not found"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def accountServiceImpl = new AccountServiceImpl()
 
@@ -448,7 +445,6 @@ class AccountServiceImplTest extends Specification {
   def "Test getMailRoutingAddress Happy Path"() {
     setup:
     SuPerson suPerson = new SuPerson(mailRoutingAddress: "kalle")
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return suPerson }
     def accountServiceImpl = new AccountServiceImpl()
     when:
@@ -508,7 +504,6 @@ class AccountServiceImplTest extends Specification {
   @Test
   def "Test setMailRoutingAddress with person not found"() {
     setup:
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def accountServiceImpl = new AccountServiceImpl()
 
@@ -523,7 +518,6 @@ class AccountServiceImplTest extends Specification {
   def "Test setMailRoutingAddress Happy Path"() {
     setup:
     SuPerson suPerson = new SuPerson(mailRoutingAddress: "kalle", objectClass: [])
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return suPerson }
     SuPersonQuery.metaClass.static.updateSuPerson = {SuPerson tmpp -> suPerson.mailRoutingAddress = tmpp.mailRoutingAddress}
     def accountServiceImpl = new AccountServiceImpl()

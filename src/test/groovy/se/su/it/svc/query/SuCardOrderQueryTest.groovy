@@ -53,8 +53,8 @@ public class SuCardOrderQueryTest extends Specification {
 
   void cleanup() {
     service = null
-    SuCardOrderQuery.metaClass = null
     Sql.metaClass = null
+    GldapoSchemaRegistry.metaClass = null
   }
 
   private SvcCardOrderVO getCardOrder(){

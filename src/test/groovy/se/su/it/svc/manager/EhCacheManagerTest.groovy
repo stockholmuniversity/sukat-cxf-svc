@@ -1,4 +1,7 @@
 package se.su.it.svc.manager
+
+import gldapo.GldapoSchemaRegistry
+
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.
@@ -30,14 +33,9 @@ package se.su.it.svc.manager
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-import gldapo.GldapoSchemaRegistry
 import net.sf.ehcache.Cache
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy
-import org.junit.After
 import org.junit.Test
-import se.su.it.svc.manager.EhCacheManager
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -51,8 +49,9 @@ class EhCacheManagerTest extends Specification {
     cacheManager = EhCacheManager.getInstance()
   }
 
-  @After
-  void cleanup() {}
+  void cleanup() {
+    GldapoSchemaRegistry.metaClass = null
+  }
 
   @Test
   def "getCache: get cache with default configuration"() {
