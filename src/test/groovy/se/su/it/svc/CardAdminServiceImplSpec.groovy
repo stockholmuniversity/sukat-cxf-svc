@@ -1,3 +1,7 @@
+package se.su.it.svc
+
+import gldapo.GldapoSchemaRegistry
+
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.
@@ -29,18 +33,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-import gldapo.GldapoSchemaRegistry
-import org.junit.Test
-import se.su.it.svc.CardAdminServiceImpl
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.query.SuCardOrderQuery
 import se.su.it.svc.query.SuCardQuery
 import spock.lang.Specification
 
-class CardAdminServiceImplTest extends Specification {
+class CardAdminServiceImplSpec extends Specification {
 
   def setup() {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
@@ -48,9 +47,10 @@ class CardAdminServiceImplTest extends Specification {
 
   def cleanup() {
     SuCardQuery.metaClass = null
+    SuCardOrderQuery.metaClass = null
+    GldapoSchemaRegistry.metaClass = null
   }
 
-  @Test
   def "Test revokeCard with null suCardUUID argument"() {
     setup:
     def cardAdminServiceImpl = new CardAdminServiceImpl()
@@ -60,7 +60,6 @@ class CardAdminServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test revokeCard with null SvcAudit argument"() {
     setup:
     def cardAdminServiceImpl = new CardAdminServiceImpl()
@@ -70,7 +69,6 @@ class CardAdminServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test revokeCard sets state to revoked"() {
     setup:
     def suCard = new SuCard()
@@ -84,7 +82,6 @@ class CardAdminServiceImplTest extends Specification {
     suCard.suCardState == "urn:x-su:su-card:state:revoked"
   }
 
-  @Test
   def "Test revokeCard when updating SuCardDb fails"() {
     setup:
     def suCard = new SuCard()
@@ -103,7 +100,6 @@ class CardAdminServiceImplTest extends Specification {
     suCard.suCardState == "urn:x-su:su-card:state:revoked"
   }
 
-  @Test
   def "Test revokeCard throws IllegalArgumentException when no card was found"() {
     setup:
     SuCardQuery.metaClass.static.findCardBySuCardUUID = {String arg1, String arg2 -> return null}
@@ -115,8 +111,7 @@ class CardAdminServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
-  def "Test setCardPIN with null suCardUUID argument"() {
+    def "Test setCardPIN with null suCardUUID argument"() {
     setup:
     def cardAdminServiceImpl = new CardAdminServiceImpl()
     when:
@@ -125,7 +120,6 @@ class CardAdminServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test setCardPIN with null pin argument"() {
     setup:
     def cardAdminServiceImpl = new CardAdminServiceImpl()
@@ -135,7 +129,6 @@ class CardAdminServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test setCardPIN with null SvcAudit argument"() {
     setup:
     def cardAdminServiceImpl = new CardAdminServiceImpl()
@@ -145,7 +138,6 @@ class CardAdminServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test setCardPIN sets pin"() {
     setup:
     def suCard = new SuCard()
@@ -159,7 +151,6 @@ class CardAdminServiceImplTest extends Specification {
     suCard.suCardPIN == "1234"
   }
 
-  @Test
   def "Test setCardPIN returns false when no card was found"() {
     setup:
     SuCardQuery.metaClass.static.findCardBySuCardUUID = {String arg1, String arg2 -> return null}

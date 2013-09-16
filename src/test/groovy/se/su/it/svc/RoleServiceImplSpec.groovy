@@ -1,3 +1,7 @@
+package se.su.it.svc
+
+import gldapo.GldapoSchemaRegistry
+
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.
@@ -29,12 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-import gldapo.GldapoSchemaRegistry
-import org.junit.Test
 import org.springframework.ldap.core.DistinguishedName
-import se.su.it.svc.RoleServiceImpl
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuRole
@@ -42,13 +41,18 @@ import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuRoleQuery
 import spock.lang.Specification
 
-class RoleServiceImplTest extends Specification {
+class RoleServiceImplSpec extends Specification {
 
   def setup() {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
   }
 
-  @Test
+  def cleanup() {
+    SuRoleQuery.metaClass = null
+    SuPersonQuery.metaClass = null
+    GldapoSchemaRegistry.metaClass = null
+  }
+
   def "Test addUidToRoles with null uid argument"() {
     setup:
     def roleServiceImpl = new RoleServiceImpl()
@@ -58,7 +62,6 @@ class RoleServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test addUidToRoles with null roleDNList argument"() {
     setup:
     def roleServiceImpl = new RoleServiceImpl()
@@ -68,7 +71,6 @@ class RoleServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test addUidToRoles with empty roleDNList argument"() {
     setup:
     def roleServiceImpl = new RoleServiceImpl()
@@ -78,7 +80,6 @@ class RoleServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test addUidToRoles with null SvcAudit argument"() {
     setup:
     def roleServiceImpl = new RoleServiceImpl()
@@ -88,7 +89,6 @@ class RoleServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test addUidToRoles without person exist"() {
     setup:
     def myRoles = ["cn=Test1,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE",
@@ -101,7 +101,6 @@ class RoleServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test addUidToRoles with person exist"() {
     setup:
     String saved = ""
@@ -127,7 +126,6 @@ class RoleServiceImplTest extends Specification {
     suRole2.roleOccupant.size() == 2
   }
 
-  @Test
   def "Test removeUidFromRoles with null uid argument"() {
     setup:
     def roleServiceImpl = new RoleServiceImpl()
@@ -137,7 +135,6 @@ class RoleServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test removeUidFromRoles with null roleDNList argument"() {
     setup:
     def roleServiceImpl = new RoleServiceImpl()
@@ -147,7 +144,6 @@ class RoleServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test removeUidFromRoles with empty roleDNList argument"() {
     setup:
     def roleServiceImpl = new RoleServiceImpl()
@@ -157,7 +153,6 @@ class RoleServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test removeUidFromRoles with null SvcAudit argument"() {
     setup:
     def roleServiceImpl = new RoleServiceImpl()
@@ -167,7 +162,6 @@ class RoleServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test removeUidFromRoles without person exist"() {
     setup:
     def myRoles = ["cn=Test1,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE",
@@ -180,7 +174,6 @@ class RoleServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test removeUidFromRoles with person exist"() {
     setup:
     String saved = ""

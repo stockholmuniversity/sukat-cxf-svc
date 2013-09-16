@@ -1,3 +1,7 @@
+package se.su.it.svc
+
+import gldapo.GldapoSchemaRegistry
+
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.
@@ -29,12 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-import gldapo.GldapoSchemaRegistry
-import org.junit.Test
 import se.su.it.commons.Kadmin
-import se.su.it.svc.ServiceServiceImpl
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuService
@@ -53,13 +52,23 @@ import spock.lang.Specification
  * Time: 11:26
  * To change this template use File | Settings | File Templates.
  */
-class ServiceServiceImplTest extends Specification {
+class ServiceServiceImplSpec extends Specification {
 
   def setup() {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
   }
 
-  @Test
+  def cleanup() {
+    SuPerson.metaClass = null
+    SuPersonQuery.metaClass = null
+    SuService.metaClass = null
+    SuServiceQuery.metaClass = null
+    SuServiceDescriptionQuery.metaClass
+    SuSubAccountQuery.metaClass = null
+    Kadmin.metaClass = null
+    GldapoSchemaRegistry.metaClass = null
+  }
+
   def "Test getServices with null uid argument"() {
     setup:
     def serviceServiceImpl = new ServiceServiceImpl()
@@ -71,7 +80,6 @@ class ServiceServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test getServices with null SvcAudit argument"() {
     setup:
     def serviceServiceImpl = new ServiceServiceImpl()
@@ -83,7 +91,6 @@ class ServiceServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test getServices returns list of SuCard when person exists"() {
     setup:
     def person = new SuPerson()
@@ -99,7 +106,6 @@ class ServiceServiceImplTest extends Specification {
     ret[0] instanceof SuService
   }
 
-  @Test
   def "Test getServices returns empty list of SuCard when person exists"() {
     setup:
     def person = new SuPerson()
@@ -114,7 +120,6 @@ class ServiceServiceImplTest extends Specification {
     ret.size() == 0
   }
 
-  @Test
   def "Test getServices returns exception when person dont exists"() {
     setup:
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
@@ -125,7 +130,6 @@ class ServiceServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test getServiceTemplates with null SvcAudit argument"() {
     setup:
     def serviceServiceImpl = new ServiceServiceImpl()
@@ -137,7 +141,6 @@ class ServiceServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test enableServiceFully with null uid argument"() {
     setup:
     def serviceServiceImpl = new ServiceServiceImpl()
@@ -149,7 +152,6 @@ class ServiceServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test enableServiceFully with null serviceType argument"() {
     setup:
     def serviceServiceImpl = new ServiceServiceImpl()
@@ -161,7 +163,6 @@ class ServiceServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test enableServiceFully with null qualifier argument"() {
     setup:
     def serviceServiceImpl = new ServiceServiceImpl()
@@ -173,7 +174,6 @@ class ServiceServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test enableServiceFully with null description argument"() {
     setup:
     def serviceServiceImpl = new ServiceServiceImpl()
@@ -185,7 +185,6 @@ class ServiceServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test enableServiceFully with null SvcAudit argument"() {
     setup:
     def serviceServiceImpl = new ServiceServiceImpl()
@@ -197,7 +196,6 @@ class ServiceServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test enableServiceFully returns exception when person dont exists"() {
     setup:
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
@@ -208,7 +206,6 @@ class ServiceServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test enableServiceFully with qualifier" () {
     setup:
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return new SuPerson(uid: "testuid") }
@@ -227,7 +224,6 @@ class ServiceServiceImplTest extends Specification {
     ret.roleOccupant.startsWith("uid=testuid.jabber") == true
   }
 
-  @Test
   def "Test enableServiceFully with blocked service status" () {
     setup:
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return new SuPerson(uid: "testuid") }
@@ -247,7 +243,6 @@ class ServiceServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test enableServiceFully with locked service status" () {
     setup:
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return new SuPerson(uid: "testuid") }
@@ -267,7 +262,6 @@ class ServiceServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test blockService with null uid argument"() {
     setup:
     def serviceServiceImpl = new ServiceServiceImpl()
@@ -279,7 +273,6 @@ class ServiceServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test blockService with null serviceType argument"() {
     setup:
     def serviceServiceImpl = new ServiceServiceImpl()
@@ -291,7 +284,6 @@ class ServiceServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test blockService with null SvcAudit argument"() {
     setup:
     def serviceServiceImpl = new ServiceServiceImpl()
@@ -303,7 +295,6 @@ class ServiceServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test blockService no service found"() {
     setup:
     def serviceServiceImpl = new ServiceServiceImpl()
@@ -319,7 +310,6 @@ class ServiceServiceImplTest extends Specification {
   }
 
 
-  @Test
   def "Test blockService already blocked"() {
     setup:
     def serviceServiceImpl = new ServiceServiceImpl()
@@ -334,7 +324,6 @@ class ServiceServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test blockService"() {
     setup:
     String serviceStatus = null
@@ -354,12 +343,6 @@ class ServiceServiceImplTest extends Specification {
     serviceStatus == "blocked"
   }
 
-
-
-
-
-
-  @Test
   def "Test unblockService with null uid argument"() {
     setup:
     def serviceServiceImpl = new ServiceServiceImpl()
@@ -371,7 +354,6 @@ class ServiceServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test unblockService with null serviceType argument"() {
     setup:
     def serviceServiceImpl = new ServiceServiceImpl()
@@ -383,7 +365,6 @@ class ServiceServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test unblockService with null SvcAudit argument"() {
     setup:
     def serviceServiceImpl = new ServiceServiceImpl()
@@ -395,7 +376,6 @@ class ServiceServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test unblockService no service found"() {
     setup:
     def serviceServiceImpl = new ServiceServiceImpl()
@@ -410,7 +390,6 @@ class ServiceServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test unblockService without opt-in"() {
     setup:
     String serviceStatus = null
@@ -431,7 +410,6 @@ class ServiceServiceImplTest extends Specification {
     serviceStatus == "enabled"
   }
 
-  @Test
   def "Test unblockService with opt-in"() {
     setup:
     String serviceStatus = null

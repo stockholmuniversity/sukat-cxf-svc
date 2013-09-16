@@ -32,7 +32,6 @@
 package se.su.it.svc.util
 
 import gldapo.GldapoSchemaRegistry
-import org.junit.Test
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.ldap.SuPersonStub
 import spock.lang.Specification
@@ -44,7 +43,10 @@ class GeneralUtilsSpec extends Specification {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
   }
 
-  @Test
+  def cleanup() {
+    GldapoSchemaRegistry.metaClass = null
+  }
+
   @Unroll
   void "pnrToSsn: When given pnr: '#pnr' we expect '#expected'"() {
     expect:
@@ -57,7 +59,6 @@ class GeneralUtilsSpec extends Specification {
     '++' + '_'*11 | '++' + '_'*11 // 13 chars, nothing happens.
   }
 
-  @Test
   @Unroll
   void "uidToKrb5Principal: When given uid: \'#uid\' we expect '\'#expected\'"() {
     expect:
