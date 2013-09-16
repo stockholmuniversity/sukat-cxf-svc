@@ -80,9 +80,8 @@ public class CardInfoServiceImpl implements CardInfoService {
 
     String directory = GldapoManager.LDAP_RO
     DistinguishedName dn = person.getDn()
-    def cards = SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(directory, dn, onlyActive)
 
-    return cards ?: new SuCard[0]
+    return SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(directory, dn, onlyActive) ?: new SuCard[0]
   }
 
   /**
