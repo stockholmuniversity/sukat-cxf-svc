@@ -10,6 +10,10 @@ class AccountServiceUtilsSpec extends Specification {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
   }
 
+  def cleanup() {
+    GldapoSchemaRegistry.metaClass = null
+  }
+
   @Unroll
   def "domainToDN returns dn='#dn' for domain='#domain'"() {
     expect: AccountServiceUtils.domainToDN(domain) == dn

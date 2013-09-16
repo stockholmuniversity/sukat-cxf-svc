@@ -1,3 +1,7 @@
+package se.su.it.svc
+
+import gldapo.GldapoSchemaRegistry
+
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.
@@ -29,14 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-
-import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PreconditionViolation
-import org.junit.Test
 import org.springframework.ldap.core.DistinguishedName
-import se.su.it.svc.CardInfoServiceImpl
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.ldap.SuPerson
@@ -44,7 +42,7 @@ import se.su.it.svc.query.SuCardQuery
 import se.su.it.svc.query.SuPersonQuery
 import spock.lang.Specification
 
-class CardInfoServiceImplTest extends Specification {
+class CardInfoServiceImplSpec extends Specification {
 
   def setup() {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
@@ -52,9 +50,9 @@ class CardInfoServiceImplTest extends Specification {
 
   def cleanup() {
     SuCardQuery.metaClass = null
+    GldapoSchemaRegistry.metaClass = null
   }
 
-  @Test
   def "Test getAllCards with null uid argument"() {
     setup:
     def cardInfoServiceImpl = new CardInfoServiceImpl()
@@ -66,7 +64,6 @@ class CardInfoServiceImplTest extends Specification {
     thrown(PreconditionViolation)
   }
 
-  @Test
   def "Test getAllCards with null SvcAudit argument"() {
     setup:
     def cardInfoServiceImpl = new CardInfoServiceImpl()
@@ -78,7 +75,6 @@ class CardInfoServiceImplTest extends Specification {
     thrown(PreconditionViolation)
   }
 
-  @Test
   def "Test getAllCards returns list of SuCard when person exists"() {
     setup:
     def person = new SuPerson()
@@ -97,7 +93,6 @@ class CardInfoServiceImplTest extends Specification {
     ret[0] instanceof SuCard
   }
 
-  @Test
   def "Test getAllCards throws exception if person doesn't exist"() {
     setup:
     GroovyMock(SuPersonQuery, global: true)
@@ -110,7 +105,6 @@ class CardInfoServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test that getAllCards ensures SuCard[]"() {
     setup:
     def person = new SuPerson()
@@ -128,7 +122,6 @@ class CardInfoServiceImplTest extends Specification {
     resp instanceof SuCard[]
   }
 
-  @Test
   def "Test getCardByUUID with null suCardUUID argument, should throw IllegalArgumentException"() {
     setup:
     def cardInfoServiceImpl = new CardInfoServiceImpl()
@@ -140,7 +133,6 @@ class CardInfoServiceImplTest extends Specification {
     thrown(PreconditionViolation)
   }
 
-  @Test
   def "Test getCardByUUID with null SvcAudit argument, should throw IllegalArgumentException"() {
     setup:
     def cardInfoServiceImpl = new CardInfoServiceImpl()
@@ -152,7 +144,6 @@ class CardInfoServiceImplTest extends Specification {
     thrown(PreconditionViolation)
   }
 
-  @Test
   def "Test getCardByUUID when card doesn't exist"() {
     given:
     SuCardQuery.metaClass.static.findCardBySuCardUUID = {String directory,String uid -> return null }
@@ -165,7 +156,6 @@ class CardInfoServiceImplTest extends Specification {
     resp == null
   }
 
-  @Test
   def "Test getCardByUUID default flow"() {
     given:
     SuCardQuery.metaClass.static.findCardBySuCardUUID = {String directory,String uid -> return new SuCard() }

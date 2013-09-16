@@ -43,6 +43,8 @@ class SuCardQuerySpec extends Specification {
 
   def cleanup(){
     SuCard.metaClass = null
+    SuCardQuery.metaClass = null
+    GldapoSchemaRegistry.metaClass = null
   }
 
   def "findAllCardsBySuPersonDnAndOnlyActiveOrNot should pass exception forward"() {
