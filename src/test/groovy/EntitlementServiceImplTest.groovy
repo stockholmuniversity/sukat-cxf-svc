@@ -31,8 +31,8 @@
 
 
 
+
 import gldapo.GldapoSchemaRegistry
-import org.junit.Test
 import se.su.it.svc.EntitlementServiceImpl
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
@@ -57,7 +57,6 @@ class EntitlementServiceImplTest extends Specification {
     GldapoSchemaRegistry.metaClass = null
   }
 
-  @Test
   def "Test addEntitlement with null uid argument"() {
     setup:
     def entitlementServiceImpl = new EntitlementServiceImpl()
@@ -67,7 +66,6 @@ class EntitlementServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test addEntitlement with null entitlement argument"() {
     setup:
     def entitlementServiceImpl = new EntitlementServiceImpl()
@@ -77,7 +75,6 @@ class EntitlementServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test addEntitlement with null SvcAudit argument"() {
     setup:
     def entitlementServiceImpl = new EntitlementServiceImpl()
@@ -87,7 +84,6 @@ class EntitlementServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test addEntitlement when person dont exists"() {
     setup:
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
@@ -98,7 +94,6 @@ class EntitlementServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test addEntitlement whith duplicate entitlement"() {
     setup:
     SuPerson person = new SuPerson()
@@ -114,7 +109,6 @@ class EntitlementServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test addEntitlement"() {
     setup:
     SuPerson person = new SuPerson()
@@ -127,7 +121,6 @@ class EntitlementServiceImplTest extends Specification {
     person.eduPersonEntitlement.contains("urn:mace:swami.se:gmai:test:test") == true
   }
 
-  @Test
   def "Test removeEntitlement with null uid argument"() {
     setup:
     def entitlementServiceImpl = new EntitlementServiceImpl()
@@ -137,7 +130,6 @@ class EntitlementServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test removeEntitlement with null entitlement argument"() {
     setup:
     def entitlementServiceImpl = new EntitlementServiceImpl()
@@ -147,7 +139,6 @@ class EntitlementServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test removeEntitlement with null SvcAudit argument"() {
     setup:
     def entitlementServiceImpl = new EntitlementServiceImpl()
@@ -157,7 +148,6 @@ class EntitlementServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test removeEntitlement when person dont exists"() {
     setup:
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
@@ -168,7 +158,6 @@ class EntitlementServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test removeEntitlement with no eduPersonEntitlement list in person object"() {
     setup:
     SuPerson person = new SuPerson()
@@ -182,7 +171,6 @@ class EntitlementServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test removeEntitlement with no same entitlement in list"() {
     setup:
     SuPerson person = new SuPerson()
@@ -198,7 +186,6 @@ class EntitlementServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test removeEntitlement"() {
     setup:
     SuPerson person = new SuPerson()

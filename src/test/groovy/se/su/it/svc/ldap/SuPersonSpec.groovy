@@ -365,6 +365,7 @@ class SuPersonSpec extends Specification {
     then:
     suPerson.eduPersonPrimaryAffiliation == SuPerson.Affilation.EMPLOYEE.value
   }
+
   @Unroll
   def "setMailRoutingAddress: sets inetLocalMailRecipient if supplied mailRoutingAddress is \'#mailRoutingAddress\' => #expected"() {
     given:

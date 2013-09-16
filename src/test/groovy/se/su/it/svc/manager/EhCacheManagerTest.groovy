@@ -1,6 +1,8 @@
 package se.su.it.svc.manager
 
 import gldapo.GldapoSchemaRegistry
+import net.sf.ehcache.Cache
+import net.sf.ehcache.store.MemoryStoreEvictionPolicy
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -33,9 +35,6 @@ import gldapo.GldapoSchemaRegistry
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import net.sf.ehcache.Cache
-import net.sf.ehcache.store.MemoryStoreEvictionPolicy
-import org.junit.Test
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -53,7 +52,6 @@ class EhCacheManagerTest extends Specification {
     GldapoSchemaRegistry.metaClass = null
   }
 
-  @Test
   def "getCache: get cache with default configuration"() {
     when:
     Cache cache = cacheManager.getCache()
@@ -81,7 +79,6 @@ class EhCacheManagerTest extends Specification {
     assert cache.getSearchAttribute("se.su.it.svc.ldap.SuSubAccount")
   }
 
-  @Test
   def "put: test basic flow, should add element to cache and return value"() {
     given:
     def params = [key: "testKey3"]
@@ -94,7 +91,6 @@ class EhCacheManagerTest extends Specification {
     assert res == "initial function"
   }
 
-  @Test
   def "get: test when key is missing, should throw IllegalArgumentException"() {
     given:
     def params = [key: ""]
@@ -109,7 +105,6 @@ class EhCacheManagerTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "get: test when 'forceRefresh'=true, should put new element in cache and return it"() {
     def params = [key: "testKey1"]
     def testFunction = { "initial function" }
@@ -126,7 +121,6 @@ class EhCacheManagerTest extends Specification {
     assert res == "new function"
   }
 
-  @Test
   def "get: test when 'forceRefresh'=false, should fetch element from cache"() {
     def params = [key: "testKey2"]
     def testFunction = { "initial function" }
@@ -143,7 +137,6 @@ class EhCacheManagerTest extends Specification {
     assert res == "initial function"
   }
 
-  @Test
   def "get: test when element has null value, should return null"() {
     given:
     def params = [key: "testKeyNull"]

@@ -31,10 +31,10 @@
 
 
 
+
 import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PostconditionViolation
 import org.gcontracts.PreconditionViolation
-import org.junit.Test
 import se.su.it.svc.CardOrderServiceImpl
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcCardOrderVO
@@ -72,7 +72,7 @@ class CardOrderServiceImplTest extends Specification {
         zipcode: '12345')
   }
 
-  @Test @Unroll
+  @Unroll
   void "findAllCardOrdersForUid: given uid: \'#uid\'"(){
     when:
     service.findAllCardOrdersForUid(uid, new SvcAudit())
@@ -84,7 +84,6 @@ class CardOrderServiceImplTest extends Specification {
     uid << [null, '']
   }
 
-  @Test
   void "findAllCardOrdersForUid: given no audit"(){
     when:
     service.findAllCardOrdersForUid('uid', null)
@@ -93,7 +92,6 @@ class CardOrderServiceImplTest extends Specification {
     thrown(PreconditionViolation)
   }
 
-  @Test
   void "findAllCardOrdersForUid: with no card orders."() {
     given:
     service.suCardOrderQuery = Mock(SuCardOrderQuery) {
@@ -104,7 +102,6 @@ class CardOrderServiceImplTest extends Specification {
     [] == service.findAllCardOrdersForUid('uid', new SvcAudit())
   }
 
-  @Test
   void "findAllCardOrdersForUid: with card orders."() {
     given:
     service.suCardOrderQuery = Mock(SuCardOrderQuery) {
@@ -119,7 +116,6 @@ class CardOrderServiceImplTest extends Specification {
     resp.every { it instanceof SvcCardOrderVO }
   }
 
-  @Test
   void "orderCard: when given no cardOrder"() {
     when:
     service.orderCard(null, null)
@@ -128,7 +124,6 @@ class CardOrderServiceImplTest extends Specification {
     thrown(PreconditionViolation)
   }
 
-  @Test
   void "orderCard: when given no audit object"() {
     when:
     service.orderCard(new SvcCardOrderVO(id:1), null)
@@ -137,7 +132,6 @@ class CardOrderServiceImplTest extends Specification {
     thrown(PreconditionViolation)
   }
 
-  @Test
   void "orderCard: when vo has errors (id is set)"() {
     given:
 
@@ -148,8 +142,7 @@ class CardOrderServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
-  void "orderCard"() {
+    void "orderCard"() {
     given:
     def cardOrder = cardOrder
     cardOrder.id = null
@@ -166,7 +159,6 @@ class CardOrderServiceImplTest extends Specification {
     resp.size() == 36
   }
 
-  @Test
   @Unroll
   void "orderCard ensures result"() {
     given:

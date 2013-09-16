@@ -32,9 +32,9 @@
 
 
 
+
 import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PreconditionViolation
-import org.junit.Test
 import org.springframework.ldap.core.DistinguishedName
 import se.su.it.svc.CardInfoServiceImpl
 import se.su.it.svc.commons.SvcAudit
@@ -55,7 +55,6 @@ class CardInfoServiceImplTest extends Specification {
     GldapoSchemaRegistry.metaClass = null
   }
 
-  @Test
   def "Test getAllCards with null uid argument"() {
     setup:
     def cardInfoServiceImpl = new CardInfoServiceImpl()
@@ -67,7 +66,6 @@ class CardInfoServiceImplTest extends Specification {
     thrown(PreconditionViolation)
   }
 
-  @Test
   def "Test getAllCards with null SvcAudit argument"() {
     setup:
     def cardInfoServiceImpl = new CardInfoServiceImpl()
@@ -79,7 +77,6 @@ class CardInfoServiceImplTest extends Specification {
     thrown(PreconditionViolation)
   }
 
-  @Test
   def "Test getAllCards returns list of SuCard when person exists"() {
     setup:
     def person = new SuPerson()
@@ -98,7 +95,6 @@ class CardInfoServiceImplTest extends Specification {
     ret[0] instanceof SuCard
   }
 
-  @Test
   def "Test getAllCards throws exception if person doesn't exist"() {
     setup:
     GroovyMock(SuPersonQuery, global: true)
@@ -111,7 +107,6 @@ class CardInfoServiceImplTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  @Test
   def "Test that getAllCards ensures SuCard[]"() {
     setup:
     def person = new SuPerson()
@@ -129,7 +124,6 @@ class CardInfoServiceImplTest extends Specification {
     resp instanceof SuCard[]
   }
 
-  @Test
   def "Test getCardByUUID with null suCardUUID argument, should throw IllegalArgumentException"() {
     setup:
     def cardInfoServiceImpl = new CardInfoServiceImpl()
@@ -141,7 +135,6 @@ class CardInfoServiceImplTest extends Specification {
     thrown(PreconditionViolation)
   }
 
-  @Test
   def "Test getCardByUUID with null SvcAudit argument, should throw IllegalArgumentException"() {
     setup:
     def cardInfoServiceImpl = new CardInfoServiceImpl()
@@ -153,7 +146,6 @@ class CardInfoServiceImplTest extends Specification {
     thrown(PreconditionViolation)
   }
 
-  @Test
   def "Test getCardByUUID when card doesn't exist"() {
     given:
     SuCardQuery.metaClass.static.findCardBySuCardUUID = {String directory,String uid -> return null }
@@ -166,7 +158,6 @@ class CardInfoServiceImplTest extends Specification {
     resp == null
   }
 
-  @Test
   def "Test getCardByUUID default flow"() {
     given:
     SuCardQuery.metaClass.static.findCardBySuCardUUID = {String directory,String uid -> return new SuCard() }
