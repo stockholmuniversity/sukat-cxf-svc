@@ -31,8 +31,11 @@
 
 package se.su.it.svc
 
-import org.apache.log4j.Logger
+import groovy.util.logging.Slf4j
+import org.gcontracts.annotations.Requires
+import org.springframework.ldap.core.DistinguishedName
 import se.su.it.commons.Kadmin
+import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuService
@@ -52,9 +55,8 @@ import javax.jws.WebService
  * Implementing class for ServiceService CXF Web Service.
  * This Class handles all Service activities in SUKAT.
  */
-@WebService
+@WebService @Slf4j
 public class ServiceServiceImpl implements ServiceService {
-  private static final Logger logger = Logger.getLogger(ServiceServiceImpl.class)
 
   /**
    * This method returns services for the specified uid.
@@ -66,19 +68,22 @@ public class ServiceServiceImpl implements ServiceService {
    * @see se.su.it.svc.ldap.SuService
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public SuService[] getServices(@WebParam(name = "uid") String uid, @WebParam(name = "audit") SvcAudit audit) {
-    if(uid == null || audit == null)
-      throw new java.lang.IllegalArgumentException("getServices - Null argument values not allowed in this function")
+
+  @Requires({
+    uid && audit && !LdapAttributeValidator.validateAttributes([uid:uid, audit:audit])
+  })
+  public SuService[] getServices(
+      @WebParam(name = "uid") String uid,
+      @WebParam(name = "audit") SvcAudit audit) {
+
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
-    if(person) {
-      def services = SuServiceQuery.getSuServices(GldapoManager.LDAP_RO,person.getDn())
-      logger.debug("getServices - Found: ${services.size()} service(s) ${services.collect{service -> service.suServiceType}.join(",")} with params: uid=<${uid}>")
-      return services
-    } else {
-      throw new IllegalArgumentException("getServices no such uid found: "+uid)
-    }
-    logger.debug("getServices - No services found with params: uid=<${uid}>")
-    return []
+    DistinguishedName dn = new DistinguishedName(person.getDn())
+    def services = SuServiceQuery.getSuServices(GldapoManager.LDAP_RO, dn)
+
+    log.debug("getServices - Found: ${services?.size()} service(s) " +
+        "${ services.collect { service -> service.suServiceType }.join(",") } with params: uid=<${uid}>")
+
+    return services
   }
 
   /**
@@ -125,41 +130,48 @@ public class ServiceServiceImpl implements ServiceService {
    * @see se.su.it.svc.ldap.SuService
    * @see se.su.it.svc.commons.SvcAudit
    */
-  public SuService enableServiceFully(@WebParam(name = "uid") String uid, @WebParam(name = "serviceType") String serviceType, @WebParam(name = "qualifier") String qualifier, @WebParam(name = "description") String description, @WebParam(name = "audit") SvcAudit audit) {
-    if(uid == null || serviceType == null || qualifier == null || description == null || audit == null)
-      throw new java.lang.IllegalArgumentException("enableServiceFully - Null argument values not allowed in this function")
+  @Requires({
+    uid && serviceType != null && qualifier != null && description != null && audit &&
+      !LdapAttributeValidator.validateAttributes([uid:uid, audit:audit])})
+  public SuService enableServiceFully(
+      @WebParam(name = "uid") String uid,
+      @WebParam(name = "serviceType") String serviceType,
+      @WebParam(name = "qualifier") String qualifier,
+      @WebParam(name = "description") String description,
+      @WebParam(name = "audit") SvcAudit audit) {
 
     SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
-    if(person == null)
-      throw new java.lang.IllegalArgumentException("enableServiceFully no such uid found: "+uid)
 
     String subUid = ""
     // START Try to create sub account if it do not exist
-    if(qualifier && qualifier.length() > 0) {
+    if (qualifier && qualifier.length() > 0) {
       subUid = uid + "." + qualifier;
       def subAccounts = SuSubAccountQuery.getSuSubAccounts(GldapoManager.LDAP_RO, person.getDn())
-      if(!subAccounts.find {subAcc -> subAcc.uid == subUid}) {
-        logger.debug("enableServiceFully - Trying to create sub account uid=<${subUid}> to be used by service=<${serviceType}> for uid=<${uid}>")
+      if (!subAccounts.find { subAcc -> subAcc.uid == subUid }) {
+        log.debug("enableServiceFully - Trying to create sub account uid=<${subUid}> to be used by service=<${serviceType}> for uid=<${uid}>")
         SuSubAccount subAcc = new SuSubAccount()
         subAcc.parent = person.getDn().toString()
         subAcc.uid = subUid
         subAcc.description = description
         subAcc.objectClass = ["top", "account"]
-        if(serviceType.equalsIgnoreCase("urn:x-su:service:type:jabber")) {
+        if (serviceType.equalsIgnoreCase("urn:x-su:service:type:jabber")) {
           subAcc.objectClass.add("jabberUser")
           subAcc.jabberID = GeneralUtils.uidToPrincipal(uid)
         }
         SuSubAccountQuery.createSubAccount(GldapoManager.LDAP_RW, subAcc)
         def subAccountPwd = Kadmin.newInstance().resetOrCreatePrincipal(GeneralUtils.uidToKrb5Principal(subUid))
-        logger.info("enableServiceFully - Created sub account uid=<${subUid}> to be used by service=<${serviceType}> for uid=<${uid}>")
+        log.info("enableServiceFully - Created sub account uid=<${subUid}> to be used by service=<${serviceType}> for uid=<${uid}>")
       } else {
-        logger.info("enableServiceFully - Sub account uid=<${subUid}> to be used by service=<${serviceType}> for uid=<${uid}> already exist. Using it.")
+        log.info("enableServiceFully - Sub account uid=<${subUid}> to be used by service=<${serviceType}> for uid=<${uid}> already exist. Using it.")
       }
     }
+
     // END Try to create sub account if it do not exist
-    SuService suService = SuServiceQuery.getSuServiceByType(GldapoManager.LDAP_RW, person.getDn(), serviceType)
-    if(suService == null) {
-      logger.debug("enableServiceFully - Trying to create service=<${serviceType}> for uid=<${uid}>")
+    SuService suService = SuServiceQuery.getSuServiceByType(
+        GldapoManager.LDAP_RW, person.getDn() as DistinguishedName, serviceType)
+
+    if (suService == null) {
+      log.debug("enableServiceFully - Trying to create service=<${serviceType}> for uid=<${uid}>")
       //create service
       suService = new SuService()
       suService.objectClass = ["top", "suServiceObject", "suService", "organizationalRole"]
@@ -168,21 +180,21 @@ public class ServiceServiceImpl implements ServiceService {
       suService.suServiceType = serviceType
       suService.suServiceStartTime = new Date().format("yyyyMMddHHmm'Z'")
       suService.suServiceStatus = "enabled"
-      if(subUid.length() > 0) {
+      if (subUid.length() > 0) {
         suService.roleOccupant = "uid=${subUid},${person.getDn().toString()}"
-        logger.debug("enableServiceFully - Setting roleOccupant of service=<${serviceType}> to <${suService.roleOccupant}>")
+        log.debug("enableServiceFully - Setting roleOccupant of service=<${serviceType}> to <${suService.roleOccupant}>")
       }
-      suService.parent=person.getDn().toString()
-      SuServiceQuery.createService(GldapoManager.LDAP_RW,suService)
-      logger.info("enableServiceFully - Created service=<${serviceType}> for uid=<${uid}>")
+      suService.parent = person.getDn().toString()
+      SuServiceQuery.createService(GldapoManager.LDAP_RW, suService)
+      log.info("enableServiceFully - Created service=<${serviceType}> for uid=<${uid}>")
     } else {
       //enable service
-      logger.debug("enableServiceFully - Service=<${serviceType}> for uid=<${uid}> already exist. Trying to enable it.")
+      log.debug("enableServiceFully - Service=<${serviceType}> for uid=<${uid}> already exist. Trying to enable it.")
       if (suService.suServiceStatus.equalsIgnoreCase("blocked") || suService.suServiceStatus.equalsIgnoreCase("locked"))
-        throw new IllegalArgumentException("enableServiceFully Service " + suService.getDn().toString() +  " is blocked/locked")
+        throw new IllegalArgumentException("enableServiceFully Service " + suService.getDn().toString() + " is blocked/locked")
       suService.suServiceStatus = "enabled"
       SuServiceQuery.saveSuService(suService)
-      logger.info("enableServiceFully - Service=<${serviceType}> for uid=<${uid}> enabled.")
+      log.info("enableServiceFully - Service=<${serviceType}> for uid=<${uid}> enabled.")
     }
     return suService
   }
@@ -207,16 +219,16 @@ public class ServiceServiceImpl implements ServiceService {
       if(service != null) {
         if (service.suServiceStatus.equalsIgnoreCase("blocked") || service.suServiceStatus.equalsIgnoreCase("locked"))
           throw new IllegalArgumentException("blockService - service=<${serviceType}> for uid=<${uid}> is already blocked/locked")
-        logger.debug("blockService - Trying to block service=<${serviceType}> for uid=<${uid}>")
+        log.debug("blockService - Trying to block service=<${serviceType}> for uid=<${uid}>")
         service.suServiceStatus = "blocked"
         SuServiceQuery.saveSuService(service)
-        logger.info("blockService - Blocked service=<${serviceType}> for uid=<${uid}>")
+        log.info("blockService - Blocked service=<${serviceType}> for uid=<${uid}>")
         return
       }
     } else {
       throw new IllegalArgumentException("blockService no such uid found: "+uid)
     }
-    logger.debug("blockService - No service found with params: uid=<${uid}> serviceType=<${serviceType}>")
+    log.debug("blockService - No service found with params: uid=<${uid}> serviceType=<${serviceType}>")
     throw new IllegalArgumentException("blockService - No service found with params: uid=<${uid}> serviceType=<${serviceType}>")
     return
   }
@@ -242,16 +254,16 @@ public class ServiceServiceImpl implements ServiceService {
         def serviceDescs=SuServiceDescriptionQuery.getSuServiceDescriptions(GldapoManager.LDAP_RO)
         def servDesc=serviceDescs.find {serverDescription -> serverDescription.suServiceType.equalsIgnoreCase(serviceType)}
         String status = servDesc?.suServicePolicy?.contains("opt-in") ? "disabled":"enabled"
-        logger.debug("unblockService - Trying to unblock service=<${serviceType}> for uid=<${uid}>")
+        log.debug("unblockService - Trying to unblock service=<${serviceType}> for uid=<${uid}>")
         service.suServiceStatus = status
         SuServiceQuery.saveSuService(service)
-        logger.info("unblockService - Unblocked service=<${serviceType}> for uid=<${uid}> to service state=<${status}>")
+        log.info("unblockService - Unblocked service=<${serviceType}> for uid=<${uid}> to service state=<${status}>")
         return
       }
     } else {
       throw new IllegalArgumentException("unblockService no such uid found: "+uid)
     }
-    logger.debug("unblockService - No service found with params: uid=<${uid}> serviceType=<${serviceType}>")
+    log.debug("unblockService - No service found with params: uid=<${uid}> serviceType=<${serviceType}>")
     throw new IllegalArgumentException("unblockService - No service found with params: uid=<${uid}> serviceType=<${serviceType}>")
     return
   }

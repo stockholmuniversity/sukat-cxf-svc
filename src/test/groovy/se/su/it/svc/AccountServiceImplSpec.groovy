@@ -221,7 +221,7 @@ class AccountServiceImplSpec extends Specification {
 
   def "Test updateSuPerson without person exist"() {
     setup:
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> throw new IllegalArgumentException("foo") }
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
@@ -401,7 +401,7 @@ class AccountServiceImplSpec extends Specification {
 
   def "Test getMailRoutingAddress with person not found"() {
     setup:
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> throw new IllegalArgumentException("foo") }
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
@@ -468,7 +468,7 @@ class AccountServiceImplSpec extends Specification {
 
   def "Test setMailRoutingAddress with person not found"() {
     setup:
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> throw new IllegalArgumentException("foo") }
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
@@ -634,8 +634,7 @@ class AccountServiceImplSpec extends Specification {
 
   def "activateSuPerson: test when user doesn't exist in LDAP, should throw exception"() {
     given:
-    GroovyMock(SuPersonQuery, global: true)
-    SuPersonQuery.getSuPersonFromUID(_,_) >> { null }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> throw new IllegalArgumentException("foo") }
 
     when:
     service.activateSuPerson('uid', "student.su.se", ["other"] as String[], new SvcAudit())

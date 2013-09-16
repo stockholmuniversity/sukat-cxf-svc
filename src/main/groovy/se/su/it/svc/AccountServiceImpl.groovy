@@ -55,8 +55,8 @@ import javax.jws.WebService
  * Implementing class for AccountService CXF Web Service.
  * This Class handles all Account activities in SUKAT.
  */
-@Slf4j
-@WebService
+
+@WebService @Slf4j
 public class AccountServiceImpl implements AccountService {
 
   /**
@@ -138,7 +138,7 @@ public class AccountServiceImpl implements AccountService {
    * @see se.su.it.svc.commons.SvcAudit
    */
   @Requires({
-    ! LdapAttributeValidator.validateAttributes([
+    !LdapAttributeValidator.validateAttributes([
             uid: uid,
             svcsuperson: person,
             audit: audit ])
@@ -149,10 +149,6 @@ public class AccountServiceImpl implements AccountService {
           @WebParam(name = 'audit') SvcAudit audit
   ){
     SuPerson originalPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
-
-    if(!originalPerson) {
-      throw new IllegalArgumentException("updateSuPerson - No such uid found: "+uid)
-    }
 
     originalPerson.updateFromSvcSuPersonVO(person)
     log.debug("updateSuPerson - Trying to update SuPerson uid<${originalPerson.uid}>")
@@ -191,8 +187,9 @@ public class AccountServiceImpl implements AccountService {
           @WebParam(name = 'audit') SvcAudit audit
   ) {
 
-    if(SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid))
+    if (SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)) {
       throw new IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
+    }
 
     log.debug("createSuPerson - Creating initial sukat record from function arguments for uid<${uid}>")
     SuPersonStub suPerson = new SuPersonStub(
@@ -235,18 +232,15 @@ public class AccountServiceImpl implements AccountService {
           @WebParam(name = 'affiliations') String[] affiliations,
           @WebParam(name = 'audit') SvcAudit audit
   ) {
+
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
 
-    if (suPerson != null) {
-      SvcUidPwd svcUidPwd = new SvcUidPwd(uid: uid)
-      svcUidPwd.password = PasswordUtils.genRandomPassword(10, 10)
+    SvcUidPwd svcUidPwd = new SvcUidPwd(uid: uid)
+    svcUidPwd.password = PasswordUtils.genRandomPassword(10, 10)
 
-      suPerson.activate(svcUidPwd, affiliations, domain)
+    suPerson.activate(svcUidPwd, affiliations, domain)
 
-      return svcUidPwd
-    } else {
-      throw new IllegalArgumentException("enrollUser - no such uid found: " + uid)
-    }
+    return svcUidPwd
   }
 
   /**
@@ -287,11 +281,8 @@ public class AccountServiceImpl implements AccountService {
           @WebParam(name = 'uid') String uid,
           @WebParam(name = 'audit') SvcAudit audit
   ) {
-    SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
 
-    if(!suPerson) {
-      throw new IllegalArgumentException("getMailRoutingAddress - No such uid found: "+uid)
-    }
+    SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
 
     return suPerson.mailRoutingAddress
   }
@@ -317,10 +308,6 @@ public class AccountServiceImpl implements AccountService {
           @WebParam(name = 'audit') SvcAudit audit
   ) {
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
-
-    if(!suPerson) {
-      throw new IllegalArgumentException("setMailRoutingAddress - No such uid found: "+uid)
-    }
 
     suPerson.mailRoutingAddress = mailRoutingAddress
     SuPersonQuery.updateSuPerson(suPerson)

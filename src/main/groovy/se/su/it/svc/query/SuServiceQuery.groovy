@@ -31,6 +31,7 @@
 
 package se.su.it.svc.query
 
+import org.springframework.ldap.core.DistinguishedName
 import se.su.it.svc.ldap.SuService
 import se.su.it.svc.manager.EhCacheManager
 import se.su.it.svc.manager.GldapoManager
@@ -57,7 +58,7 @@ public class SuServiceQuery {
    * @see se.su.it.svc.ldap.SuService
    * @see se.su.it.svc.manager.GldapoManager
    */
-  static SuService[] getSuServices(String directory, org.springframework.ldap.core.DistinguishedName dn) {
+  static SuService[] getSuServices(String directory, DistinguishedName dn) {
     def query = { qDirectory, qDn ->
       SuService.findAll(directory: qDirectory, base: qDn) {
         and {
@@ -83,7 +84,7 @@ public class SuServiceQuery {
    * @see se.su.it.svc.ldap.SuService
    * @see se.su.it.svc.manager.GldapoManager
    */
-  static SuService getSuServiceByType(String directory, org.springframework.ldap.core.DistinguishedName dn, String serviceType) {
+  static SuService getSuServiceByType(String directory, DistinguishedName dn, String serviceType) {
     def query = { qDirectory, qDn, qServiceType ->
       SuService.find(directory: qDirectory, base: qDn) {
         and {

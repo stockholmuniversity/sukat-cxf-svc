@@ -48,14 +48,13 @@ class SuPersonQuerySpec extends Specification {
 
   def "getSuPersonFromUID should handle exception"() {
     given:
-    SuPerson.metaClass.static.find = { String a, String b, Closure c ->
-      throw new Exception()
-    }
+    GroovyMock(SuPerson, global:true)
+    SuPerson.find(*_) >> { throw new IllegalArgumentException() }
 
     when:
     SuPersonQuery.getSuPersonFromUID(null, null)
 
     then:
-    noExceptionThrown()
+    thrown(IllegalArgumentException)
   }
 }
