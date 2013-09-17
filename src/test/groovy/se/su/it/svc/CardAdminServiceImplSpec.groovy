@@ -2,6 +2,8 @@ package se.su.it.svc
 
 import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PreconditionViolation
+import se.su.it.svc.commons.SvcAudit
+import se.su.it.svc.ldap.SuCard
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -34,8 +36,6 @@ import org.gcontracts.PreconditionViolation
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import se.su.it.svc.commons.SvcAudit
-import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.query.SuCardOrderQuery
 import se.su.it.svc.query.SuCardQuery
 import spock.lang.Specification
@@ -46,6 +46,7 @@ class CardAdminServiceImplSpec extends Specification {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
     SuCard.metaClass.static.save = {->}
     SuCard.metaClass.static.find = { Map arg1, Closure arg2 ->}
+    SuCard.metaClass.static.update = {->}
   }
 
   def cleanup() {

@@ -2,7 +2,8 @@ package se.su.it.svc
 
 import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PreconditionViolation
-import org.springframework.ldap.core.DistinguishedName
+import se.su.it.commons.Kadmin
+import se.su.it.svc.commons.SvcAudit
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -35,8 +36,6 @@ import org.springframework.ldap.core.DistinguishedName
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import se.su.it.commons.Kadmin
-import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuService
 import se.su.it.svc.ldap.SuServiceDescription
@@ -45,7 +44,6 @@ import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuServiceDescriptionQuery
 import se.su.it.svc.query.SuServiceQuery
 import se.su.it.svc.query.SuSubAccountQuery
-import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 /**
@@ -59,6 +57,9 @@ class ServiceServiceImplSpec extends Specification {
 
   def setup() {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
+    SuService.metaClass.directory = "directory"
+    SuService.metaClass.static.update = {->}
+    SuService.metaClass.static.save = {->}
   }
 
   def cleanup() {
@@ -237,8 +238,10 @@ class ServiceServiceImplSpec extends Specification {
     SuServiceQuery.metaClass.static.createService = {String directory, SuService suService -> return void}
     SuServiceQuery.metaClass.static.saveSuService = {SuService suService -> return void}
     def serviceServiceImpl = new ServiceServiceImpl()
+
     when:
     def ret = serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", "A description", new SvcAudit())
+
     then:
     ret.roleOccupant.startsWith("uid=testuid.jabber") == true
   }
@@ -349,9 +352,8 @@ class ServiceServiceImplSpec extends Specification {
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return new SuPerson(uid: "testuid") }
     SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
     SuServiceQuery.metaClass.static.getSuServiceByType = {String directory, org.springframework.ldap.core.DistinguishedName dn, String serviceType -> return new SuService(suServiceStatus: "enabled")}
-    SuServiceQuery.metaClass.static.saveSuService = {SuService suService ->
-      serviceStatus = suService.suServiceStatus
-      return void
+    SuService.metaClass.update = { ->
+      serviceStatus = delegate.suServiceStatus
     }
 
     when:
@@ -416,9 +418,8 @@ class ServiceServiceImplSpec extends Specification {
     SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
     SuServiceQuery.metaClass.static.getSuServiceByType = {String directory, org.springframework.ldap.core.DistinguishedName dn, String serviceType -> return new SuService(suServiceStatus: "enabled")}
     SuServiceDescriptionQuery.metaClass.static.getSuServiceDescriptions = {String directory -> [new SuServiceDescription(suServiceType: "urn:x-su:service:type:jabber")]}
-    SuServiceQuery.metaClass.static.saveSuService = {SuService suService ->
-      serviceStatus = suService.suServiceStatus
-      return void
+    SuService.metaClass.update = { ->
+      serviceStatus = delegate.suServiceStatus
     }
 
     when:
@@ -436,9 +437,8 @@ class ServiceServiceImplSpec extends Specification {
     SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
     SuServiceQuery.metaClass.static.getSuServiceByType = {String directory, org.springframework.ldap.core.DistinguishedName dn, String serviceType -> return new SuService(suServiceStatus: "enabled")}
     SuServiceDescriptionQuery.metaClass.static.getSuServiceDescriptions = {String directory -> [new SuServiceDescription(suServiceType: "urn:x-su:service:type:jabber", suServicePolicy: "urn:x-su:service:policy:opt-in")]}
-    SuServiceQuery.metaClass.static.saveSuService = {SuService suService ->
-      serviceStatus = suService.suServiceStatus
-      return void
+    SuService.metaClass.update = { ->
+      serviceStatus = delegate.suServiceStatus
     }
 
     when:
