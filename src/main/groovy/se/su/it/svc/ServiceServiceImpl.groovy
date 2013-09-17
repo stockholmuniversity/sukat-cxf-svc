@@ -185,7 +185,8 @@ public class ServiceServiceImpl implements ServiceService {
         log.debug("enableServiceFully - Setting roleOccupant of service=<${serviceType}> to <${suService.roleOccupant}>")
       }
       suService.parent = person.getDn().toString()
-      SuServiceQuery.createService(GldapoManager.LDAP_RW, suService)
+      suService.directory = GldapoManager.LDAP_RW
+      suService.save()
       log.info("enableServiceFully - Created service=<${serviceType}> for uid=<${uid}>")
     } else {
       //enable service
@@ -193,7 +194,7 @@ public class ServiceServiceImpl implements ServiceService {
       if (suService.suServiceStatus.equalsIgnoreCase("blocked") || suService.suServiceStatus.equalsIgnoreCase("locked"))
         throw new IllegalArgumentException("enableServiceFully Service " + suService.getDn().toString() + " is blocked/locked")
       suService.suServiceStatus = "enabled"
-      SuServiceQuery.saveSuService(suService)
+      suService.update()
       log.info("enableServiceFully - Service=<${serviceType}> for uid=<${uid}> enabled.")
     }
     return suService
@@ -221,7 +222,7 @@ public class ServiceServiceImpl implements ServiceService {
           throw new IllegalArgumentException("blockService - service=<${serviceType}> for uid=<${uid}> is already blocked/locked")
         log.debug("blockService - Trying to block service=<${serviceType}> for uid=<${uid}>")
         service.suServiceStatus = "blocked"
-        SuServiceQuery.saveSuService(service)
+        service.update()
         log.info("blockService - Blocked service=<${serviceType}> for uid=<${uid}>")
         return
       }
@@ -230,7 +231,6 @@ public class ServiceServiceImpl implements ServiceService {
     }
     log.debug("blockService - No service found with params: uid=<${uid}> serviceType=<${serviceType}>")
     throw new IllegalArgumentException("blockService - No service found with params: uid=<${uid}> serviceType=<${serviceType}>")
-    return
   }
 
   /**
@@ -256,7 +256,7 @@ public class ServiceServiceImpl implements ServiceService {
         String status = servDesc?.suServicePolicy?.contains("opt-in") ? "disabled":"enabled"
         log.debug("unblockService - Trying to unblock service=<${serviceType}> for uid=<${uid}>")
         service.suServiceStatus = status
-        SuServiceQuery.saveSuService(service)
+        service.update()
         log.info("unblockService - Unblocked service=<${serviceType}> for uid=<${uid}> to service state=<${status}>")
         return
       }
@@ -265,7 +265,6 @@ public class ServiceServiceImpl implements ServiceService {
     }
     log.debug("unblockService - No service found with params: uid=<${uid}> serviceType=<${serviceType}>")
     throw new IllegalArgumentException("unblockService - No service found with params: uid=<${uid}> serviceType=<${serviceType}>")
-    return
   }
 }
 

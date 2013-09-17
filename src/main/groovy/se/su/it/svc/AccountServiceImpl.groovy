@@ -191,20 +191,13 @@ public class AccountServiceImpl implements AccountService {
       throw new IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
     }
 
-    log.debug("createSuPerson - Creating initial sukat record from function arguments for uid<${uid}>")
-    SuPersonStub suPerson = new SuPersonStub(
-            uid: uid,
-            cn: givenName + " " + sn,
-            sn: sn,
-            givenName: givenName,
-            displayName: givenName + " " + sn,
-            socialSecurityNumber: ssn,
-            objectClass: ['suPerson', 'sSNObject', 'inetOrgPerson']
-    )
-    suPerson.parent = Config.instance.props.ldap.accounts.default.parent
+    String parent = Config.instance.props.ldap.accounts.default.parent
+    String directory = GldapoManager.LDAP_RW
 
-    log.debug "createSuPerson - Writing initial sukat record to sukat for uid<${uid}>"
-    SuPersonQuery.initSuPerson(GldapoManager.LDAP_RW, suPerson)
+    SuPersonStub suPersonStub = SuPersonStub.newInstance(uid, givenName, sn, ssn, parent, directory)
+
+    log.debug("createSuPerson - Creating initial sukat record from function arguments for uid<${uid}>")
+    suPersonStub.save()
   }
 
   /**
