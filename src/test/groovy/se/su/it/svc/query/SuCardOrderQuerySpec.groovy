@@ -35,6 +35,8 @@ import gldapo.GldapoSchemaRegistry
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
 import org.apache.commons.dbcp.BasicDataSource
+import org.apache.log4j.spi.LoggerFactory
+import org.slf4j.Logger
 import se.su.it.svc.commons.SvcCardOrderVO
 import spock.lang.Shared
 import spock.lang.Specification
@@ -108,7 +110,7 @@ public class SuCardOrderQuerySpec extends Specification {
     resp.size() == 2
   }
 
-  void "handleOrderListResult: Handling single failures"() {
+  void "handleOrderListResult: Broken entry containing a property that does not exist in VO results in"() {
     given:
     def list = []
     list << new GroovyRowResult([id:1, owner:'foo'])
@@ -119,10 +121,7 @@ public class SuCardOrderQuerySpec extends Specification {
     def resp = service.handleOrderListResult(list)
 
     then:
-    resp.every { it instanceof SvcCardOrderVO }
-
-    and: 'VO has no attribute kaka so creating that object will fail.'
-    resp.size() == 2
+    thrown(MissingPropertyException)
   }
 
   void "findAllCardOrdersForUid: given uid => \'#uid\'"() {
@@ -232,15 +231,18 @@ public class SuCardOrderQuerySpec extends Specification {
   }
 
   void "orderCard: a failed request"() {
-    expect:
-    null == service.orderCard(null)
+    when:
+    service.orderCard(null)
+
+    then:
+    thrown(NullPointerException)
   }
 
   void "orderCard: When there are active orders"() {
     given:
     Sql.metaClass.rows = { String arg1, Map arg2 ->
       if (arg1 == service.findActiveCardOrdersQuery) {
-        return 1
+        return [1]
       }
     }
 
@@ -344,30 +346,36 @@ public class SuCardOrderQuerySpec extends Specification {
 
   def "markCardAsDiscarded"(){
     given:
-    SuCardOrderQuery spy = GroovySpy(SuCardOrderQuery) {
-      doMarkCardAsDiscarded(*_) >> {}
-      withConnection(_) >> { Closure query -> query.call() }
+    GroovySpy(SuCardOrderQuery, global:true)
+
+    SuCardOrderQuery.doMarkCardAsDiscarded(*_) >> {
+      return true
     }
 
     when:
-    def resp = spy.markCardAsDiscarded('uuid', 'uid')
+    def resp = new SuCardOrderQuery().markCardAsDiscarded('uuid', 'uid')
 
     then:
-    !resp
+    resp
   }
 
   def "markCardAsDiscarded fails"(){
     given:
-    SuCardOrderQuery spy = GroovySpy(SuCardOrderQuery) {
-      doMarkCardAsDiscarded(*_) >> { throw new RuntimeException('foo') }
-      withConnection(_) >> { Closure query -> query.call() }
+    GroovySpy(SuCardOrderQuery, global:true)
+
+    SuCardOrderQuery.getLog() >> { new Expando(
+        error: { String arg1, Throwable arg2 -> }
+    ) }
+
+    SuCardOrderQuery.doMarkCardAsDiscarded(*_) >> {
+      throw new RuntimeException("foo")
     }
 
     when:
-    def resp = spy.markCardAsDiscarded('uuid', 'uid')
+    def resp = new SuCardOrderQuery().markCardAsDiscarded('uuid', 'uid')
 
     then:
-    !resp
+    thrown(RuntimeException)
   }
 
 }

@@ -129,7 +129,7 @@ class SuCardOrderQuery {
    * @param cardOrderVO the card order to create a new card for
    * @return the UUID for the new card. Returns false if no card could be created.
    */
-  public String orderCard(SvcCardOrderVO cardOrderVO) {
+  public String orderCard(SvcCardOrderVO cardOrderVO) throws Exception {
     String uuid = null
 
     try {
@@ -170,7 +170,7 @@ class SuCardOrderQuery {
 
     } catch (ex) {
       log.error "Failed to create card order for ${cardOrderVO?.owner}", ex
-      return null
+      throw ex
     }
 
     log.info "Returning $uuid"
@@ -188,12 +188,11 @@ class SuCardOrderQuery {
   public boolean markCardAsDiscarded(String uuid, String uid) {
     Closure queryClosure = { Sql sql ->
       try {
-        doMarkCardAsDiscarded(sql, uuid, uid)
+        return doMarkCardAsDiscarded(sql, uuid, uid)
       } catch (ex) {
         log.error "Failed to mark card as discarded in sucard db.", ex
-        return false
+        throw ex
       }
-      return true
     }
 
     return (withConnection(queryClosure)) ? true : false
@@ -327,7 +326,7 @@ class SuCardOrderQuery {
    * @param query
    * @return closure result
    */
-  private withConnection = { Closure query ->
+  private withConnection(Closure query) {
     def response = null
     Sql sql = null
     try {
@@ -335,11 +334,12 @@ class SuCardOrderQuery {
       response = query(sql)
     } catch (ex) {
       log.error "Connection to SuCardDB failed", ex
-      throw(ex)
+      throw ex
     } finally {
       try {
         sql.close()
       } catch (ex) {
+        /* This exception we eat, since there is no point in propagating this error. */
         log.error "Failed to close connection", ex
       }
     }
@@ -368,7 +368,7 @@ class SuCardOrderQuery {
    * @param rows
    * @return a list of SvcCardOrderVO objects.
    */
-  private static ArrayList handleOrderListResult(List rows) {
+  private static ArrayList handleOrderListResult(List rows) throws Exception {
     def cardOrders = []
 
     for (row in rows) {
@@ -377,6 +377,7 @@ class SuCardOrderQuery {
         cardOrders << svcCardOrderVO
       } catch (ex) {
         log.error "Failed to add order $row to orders.", ex
+        throw ex
       }
     }
     cardOrders
