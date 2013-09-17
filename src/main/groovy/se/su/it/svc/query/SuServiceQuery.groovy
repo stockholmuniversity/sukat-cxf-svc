@@ -97,36 +97,4 @@ public class SuServiceQuery {
     def suService = (SuService)cacheManager.get(params, {query(directory,dn,serviceType)})
     return suService
   }
-
-  /**
-   * Create a SUKAT service.
-   *
-   *
-   * @param directory which directory to use, see GldapoManager.
-   * @param suService a suService object to be saved in SUKAT.
-   * @return void.
-   * @see se.su.it.svc.ldap.SuService
-   * @see se.su.it.svc.manager.GldapoManager
-   */
-  static void createService(String directory, SuService suService) {
-    suService.directory = directory
-    suService.save()
-    //refresh other cachkeys
-    this.getSuServices(GldapoManager.LDAP_RW,suService.getParent())
-    this.getSuServiceByType(GldapoManager.LDAP_RW,suService.getParent(),suService.suServiceType)
-  }
-
-  /**
-   * Save a SuService object to ldap.
-   *
-   *
-   * @return void.
-   * @see se.su.it.svc.ldap.SuService
-   * @see se.su.it.svc.manager.GldapoManager
-   */
-  static void saveSuService(SuService suService) {
-    suService.save()
-    def params = [key: ":getSuServiceByType:${suService.suServiceType}${suService.getDn()}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: false]
-    cacheManager.put(params, { suService })
-  }
 }

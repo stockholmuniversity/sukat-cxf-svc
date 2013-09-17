@@ -33,7 +33,6 @@ package se.su.it.svc.query
 
 import groovy.util.logging.Slf4j
 import se.su.it.svc.ldap.SuPerson
-import se.su.it.svc.ldap.SuPersonStub
 
 /**
  * This class is a helper class for doing GLDAPO queries on the SuPerson GLDAPO schema.
@@ -99,20 +98,6 @@ public class SuPersonQuery {
    */
   static void updateSuPerson(SuPerson person) {
     person.update()
-  }
-
-  /**
-   * Init SuPerson entry in sukat
-   *
-   * @param directory which directory to use, see GldapoManager.
-   * @param suPerson a SuPersonStub object to be saved in SUKAT.
-   * @return void.
-   * @see se.su.it.svc.ldap.SuPerson
-   * @see se.su.it.svc.manager.GldapoManager
-   */
-  static void initSuPerson(String directory, SuPersonStub suPerson) {
-    suPerson.directory = directory
-    suPerson.save()
   }
 
   /**

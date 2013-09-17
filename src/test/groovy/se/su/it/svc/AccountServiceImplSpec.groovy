@@ -4,6 +4,8 @@ import gldapo.GldapoSchemaRegistry
 import org.apache.commons.lang.NotImplementedException
 import org.gcontracts.PostconditionViolation
 import org.gcontracts.PreconditionViolation
+import se.su.it.commons.Kadmin
+import se.su.it.commons.PasswordUtils
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -36,14 +38,11 @@ import org.gcontracts.PreconditionViolation
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import se.su.it.commons.Kadmin
-import se.su.it.commons.PasswordUtils
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuPersonStub
-import se.su.it.svc.manager.Config
 import se.su.it.svc.query.SuPersonQuery
 import spock.lang.Shared
 import spock.lang.Specification
@@ -56,6 +55,9 @@ class AccountServiceImplSpec extends Specification {
   def setup() {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
     this.service = new AccountServiceImpl()
+    SuPersonStub.metaClass.save = {->}
+    SuPersonStub.metaClass.parent = "parent"
+    SuPersonStub.metaClass.directory = "directory"
   }
 
   def cleanup() {
@@ -157,7 +159,7 @@ class AccountServiceImplSpec extends Specification {
 
   def "Test resetPassword password 10 chars"() {
     setup:
-    def passwordUtils = GroovyMock(PasswordUtils, global: true)
+    GroovyMock(PasswordUtils, global: true)
     def kadmin = Mock(Kadmin)
     Kadmin.metaClass.static.newInstance = { kadmin }
     kadmin.principalExists(_) >> true
@@ -179,7 +181,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    String pwd = accountServiceImpl.resetPassword("testuid.jabber", new SvcAudit())
+    accountServiceImpl.resetPassword("testuid.jabber", new SvcAudit())
 
     then:
     1 * kadmin.principalExists("testuid/jabber") >> true
@@ -343,30 +345,28 @@ class AccountServiceImplSpec extends Specification {
     def ssn = '0000000000'
     def givenName = 'Test'
     def sn = 'Testsson'
-    SuPersonStub suPersson = null
-
-    SuPersonStub.metaClass.parent = "_"
 
     GroovyMock(SuPersonQuery, global: true)
-    SuPersonQuery.initSuPerson(*_) >> { a, b -> suPersson = b }
     SuPersonQuery.getSuPersonFromUID(*_) >> null
 
+    def spy = GroovySpy(SuPersonStub)
+
+    SuPersonStub.metaClass.static.newInstance = { String arg1, String arg2, String arg3, String arg4, String arg5, String arg6 ->
+      return spy
+    }
+
+    SuPersonStub.metaClass.save = {-> delegate.uid = uid.reverse() }
+
     when:
-    new AccountServiceImpl().createSuPerson(
+    service.createSuPerson(
             uid,
             ssn,
             givenName,
             sn,
             new SvcAudit())
 
-    then:
-    suPersson.uid == uid
-    suPersson.cn == givenName + ' ' + sn
-    suPersson.sn == sn
-    suPersson.givenName == givenName
-    suPersson.socialSecurityNumber == ssn
-    suPersson.objectClass.containsAll(["suPerson","sSNObject","inetOrgPerson"])
-    suPersson.parent == Config.instance.props.ldap.accounts.default.parent
+    then: 'we test that the object returned has been saved.'
+    spy.uid == uid.reverse()
   }
 
   def "Test terminateSuPerson"() {

@@ -35,8 +35,6 @@ import gldapo.GldapoSchemaRegistry
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
 import org.apache.commons.dbcp.BasicDataSource
-import org.apache.log4j.spi.LoggerFactory
-import org.slf4j.Logger
 import se.su.it.svc.commons.SvcCardOrderVO
 import spock.lang.Shared
 import spock.lang.Specification
@@ -118,7 +116,7 @@ public class SuCardOrderQuerySpec extends Specification {
     list << new GroovyRowResult([id:3, owner:'bar'])
 
     when:
-    def resp = service.handleOrderListResult(list)
+    service.handleOrderListResult(list)
 
     then:
     thrown(MissingPropertyException)
@@ -372,7 +370,7 @@ public class SuCardOrderQuerySpec extends Specification {
     }
 
     when:
-    def resp = new SuCardOrderQuery().markCardAsDiscarded('uuid', 'uid')
+    new SuCardOrderQuery().markCardAsDiscarded('uuid', 'uid')
 
     then:
     thrown(RuntimeException)

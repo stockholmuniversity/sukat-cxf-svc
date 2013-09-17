@@ -48,4 +48,33 @@ class SuPersonStub implements Serializable {
   String sn
   String givenName
   String displayName
+
+  public SuPersonStub() {}
+
+  public SuPersonStub(String uid,
+                      String givenName,
+                      String sn,
+                      String ssn,
+                      String parent,
+                      String directory) {
+
+    this.uid = uid
+    this.givenName = givenName
+    this.sn = sn
+    this.socialSecurityNumber = ssn
+    this.objectClass = ['suPerson', 'sSNObject', 'inetOrgPerson']
+    this.displayName = givenName + " " + sn
+    this.cn = givenName + " " + sn
+    this.parent = parent
+    this.directory = directory
+  }
+
+  public static transient SuPersonStub newInstance(String uid,
+                                                   String givenName,
+                                                   String sn,
+                                                   String ssn,
+                                                   String parent,
+                                                   String directory) {
+    return new SuPersonStub(uid, givenName, sn, ssn, parent, directory)
+  }
 }

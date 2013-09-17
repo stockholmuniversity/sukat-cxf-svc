@@ -2,6 +2,8 @@ package se.su.it.svc
 
 import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PreconditionViolation
+import org.springframework.ldap.core.DistinguishedName
+import se.su.it.svc.commons.SvcAudit
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -34,22 +36,21 @@ import org.gcontracts.PreconditionViolation
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.springframework.ldap.core.DistinguishedName
-import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuRole
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuRoleQuery
-import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 class RoleServiceImplSpec extends Specification {
 
   def setup() {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
+    SuRole.metaClass.update = {->}
   }
 
   def cleanup() {
+    SuRole.metaClass = null
     SuRoleQuery.metaClass = null
     SuPersonQuery.metaClass = null
     GldapoSchemaRegistry.metaClass = null
@@ -132,7 +133,6 @@ class RoleServiceImplSpec extends Specification {
 
     person.metaClass.getDn = { "uid=testuid,dc=it,dc=su,dc=se" }
 
-    SuRoleQuery.metaClass.static.saveSuRole = { SuRole role -> saved = role.cn }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> return person }
 
     SuRoleQuery.metaClass.static.getSuRoleFromDN = { String directory, String roleDN ->
@@ -141,6 +141,8 @@ class RoleServiceImplSpec extends Specification {
     }
 
     def roleServiceImpl = new RoleServiceImpl()
+
+    SuRole.metaClass.update {-> saved = delegate.cn }
 
     when:
     roleServiceImpl.addUidToRoles("testuid", myRoles, new SvcAudit())
@@ -228,7 +230,7 @@ class RoleServiceImplSpec extends Specification {
     person.metaClass.getDn = {new DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return person }
     SuRoleQuery.metaClass.static.getSuRoleFromDN = {String directory, String roleDN -> if(roleDN.startsWith("cn=Test1")) return suRole; if(roleDN.startsWith("cn=Test2")) return suRole2;}
-    SuRoleQuery.metaClass.static.saveSuRole = {SuRole role -> saved = role.cn}
+    SuRole.metaClass.update {-> saved = delegate.cn }
     def roleServiceImpl = new RoleServiceImpl()
 
     when:

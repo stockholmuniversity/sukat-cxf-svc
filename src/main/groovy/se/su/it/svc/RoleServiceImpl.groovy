@@ -94,7 +94,7 @@ public class RoleServiceImpl implements RoleService {
 
       if (!(uidDN in roList)) {
         role.roleOccupant.add(uidDN.toString())
-        SuRoleQuery.saveSuRole(role)
+        role.update()
         log.info("addUidToRoles - Uid<${person.uid}> added as occupant to role <${role.cn}> ")
       } else {
         log.debug("addUidToRoles - Occupant <${person.uid}> already exist for role <${role.cn}>")
@@ -142,7 +142,7 @@ public class RoleServiceImpl implements RoleService {
       if (uidDN in roList) {
         roList.remove(uidDN)
         role.roleOccupant = new LinkedList<String>(roList.collect { DistinguishedName dn -> dn.toString() })
-        SuRoleQuery.saveSuRole(role)
+        role.update()
         log.info("removeUidFromRoles - Uid<${person.uid}> removed as occupant from role <${role.cn}> ")
       } else {
         log.debug("removeUidFromRoles - Occupant <${person.uid}> not found for role <${role.cn}>")
