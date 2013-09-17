@@ -32,6 +32,7 @@
 package se.su.it.svc
 
 import groovy.util.logging.Slf4j
+import org.gcontracts.annotations.Requires
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.manager.GldapoManager
@@ -46,7 +47,9 @@ import javax.jws.WebService
  * This Class handles all University Card admin activities in SUKAT.
  */
 @WebService @Slf4j
-public class CardAdminServiceImpl implements CardAdminService{
+public class CardAdminServiceImpl implements CardAdminService {
+
+  def suCardOrderQuery
 
   /**
    * This method puts a university card in revoked state in both sukat and sucard db.
@@ -58,23 +61,22 @@ public class CardAdminServiceImpl implements CardAdminService{
    * @see se.su.it.svc.ldap.SuCard
    * @see se.su.it.svc.commons.SvcAudit
    */
+  @Requires({ suCardUUID && audit })
+  public void revokeCard(
+      @WebParam(name = "suCardUUID") String suCardUUID,
+      @WebParam(name = "audit") SvcAudit audit) {
 
-  public void revokeCard(@WebParam(name = "suCardUUID") String suCardUUID, @WebParam(name = "audit") SvcAudit audit) {
-    if (suCardUUID == null || audit == null)
-      throw new IllegalArgumentException("revokeCard - Null argument values not allowed in this function")
     SuCard card = SuCardQuery.findCardBySuCardUUID(GldapoManager.LDAP_RW, suCardUUID)
-    if (card != null) {
-      card.suCardState = "urn:x-su:su-card:state:revoked"
-      card.save()
-      try {
-        new SuCardOrderQuery().markCardAsDiscarded(suCardUUID, audit?.uid)
-      } catch (ex) {
-        log.error "Failed to mark card $card as discarded in sucarddb", ex
-      }
-    } else {
+
+    if (!card) {
       log.info("revokeCard: Could not find a card with uuid<${suCardUUID}>")
       throw new IllegalArgumentException("revokeCard: Could not find a card with uuid<${suCardUUID}>")
     }
+
+    card.suCardState = "urn:x-su:su-card:state:revoked"
+    card.save()
+
+    suCardOrderQuery.markCardAsDiscarded(suCardUUID, audit?.uid)
   }
 
   /**

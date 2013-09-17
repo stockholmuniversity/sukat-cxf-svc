@@ -1,6 +1,7 @@
 package se.su.it.svc
 
 import gldapo.GldapoSchemaRegistry
+import org.gcontracts.PreconditionViolation
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -43,9 +44,12 @@ class CardAdminServiceImplSpec extends Specification {
 
   def setup() {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
+    SuCard.metaClass.static.save = {->}
+    SuCard.metaClass.static.find = { Map arg1, Closure arg2 ->}
   }
 
   def cleanup() {
+    SuCard.metaClass = null
     SuCardQuery.metaClass = null
     SuCardOrderQuery.metaClass = null
     GldapoSchemaRegistry.metaClass = null
@@ -54,49 +58,65 @@ class CardAdminServiceImplSpec extends Specification {
   def "Test revokeCard with null suCardUUID argument"() {
     setup:
     def cardAdminServiceImpl = new CardAdminServiceImpl()
+
     when:
     cardAdminServiceImpl.revokeCard(null,new SvcAudit())
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   def "Test revokeCard with null SvcAudit argument"() {
     setup:
     def cardAdminServiceImpl = new CardAdminServiceImpl()
+
     when:
     cardAdminServiceImpl.revokeCard("testcarduuid",null)
+
     then:
-    thrown(IllegalArgumentException)
+    thrown(PreconditionViolation)
   }
 
   def "Test revokeCard sets state to revoked"() {
     setup:
     def suCard = new SuCard()
-    suCard.metaClass.save = { }
-    SuCardQuery.metaClass.static.findCardBySuCardUUID = {String arg1, String arg2 -> return suCard}
+
+    GroovyMock(SuCardQuery, global:true)
+    SuCardQuery.findCardBySuCardUUID(*_) >> { return suCard }
 
     def cardAdminServiceImpl = new CardAdminServiceImpl()
-    when:
-    cardAdminServiceImpl.revokeCard("testcarduuid",new SvcAudit())
-    then:
-    suCard.suCardState == "urn:x-su:su-card:state:revoked"
-  }
 
-  def "Test revokeCard when updating SuCardDb fails"() {
-    setup:
-    def suCard = new SuCard()
-    suCard.metaClass.save = { }
-    SuCardQuery.metaClass.static.findCardBySuCardUUID = {String arg1, String arg2 -> return suCard}
-    def cardAdminServiceImpl = new CardAdminServiceImpl()
-
-    SuCardOrderQuery.metaClass.markCardAsDiscarded = { String arg1, String arg2 ->
-      throw new RuntimeException('foo')
+    cardAdminServiceImpl.suCardOrderQuery = GroovyMock(SuCardOrderQuery) {
+      markCardAsDiscarded(*_) >> { return true }
     }
 
     when:
     cardAdminServiceImpl.revokeCard("testcarduuid",new SvcAudit())
 
     then:
+    suCard.suCardState == "urn:x-su:su-card:state:revoked"
+  }
+
+  def "Test revokeCard when updating SuCardDb fails"() {
+    setup:
+
+    def suCard = new SuCard()
+    GroovyMock(SuCardQuery, global:true)
+    SuCardQuery.findCardBySuCardUUID(*_) >> { return suCard }
+
+    def cardAdminServiceImpl = new CardAdminServiceImpl()
+
+    cardAdminServiceImpl.suCardOrderQuery = GroovyMock(SuCardOrderQuery) {
+      markCardAsDiscarded(*_) >> { throw new RuntimeException("foo") }
+    }
+
+    when:
+    cardAdminServiceImpl.revokeCard("testcarduuid",new SvcAudit())
+
+    then:
+    thrown(RuntimeException)
+
+    and:
     suCard.suCardState == "urn:x-su:su-card:state:revoked"
   }
 
