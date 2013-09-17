@@ -74,7 +74,7 @@ public class CardAdminServiceImpl implements CardAdminService {
     }
 
     card.suCardState = "urn:x-su:su-card:state:revoked"
-    card.save()
+    card.update()
 
     suCardOrderQuery.markCardAsDiscarded(suCardUUID, audit?.uid)
   }
@@ -96,7 +96,7 @@ public class CardAdminServiceImpl implements CardAdminService {
     SuCard card =SuCardQuery.findCardBySuCardUUID(GldapoManager.LDAP_RW,suCardUUID)
     if(card != null) {
       card.suCardPIN = pin
-      card.save()
+      card.update()
     } else {
       log.info("setCardPIN: Could not find a card with uuid<${suCardUUID}>")
       throw new IllegalArgumentException("revokeCard: Could not find a card with uuid<${suCardUUID}>")
