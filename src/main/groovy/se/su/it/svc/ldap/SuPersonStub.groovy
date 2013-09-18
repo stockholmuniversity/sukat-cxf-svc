@@ -32,10 +32,12 @@
 package se.su.it.svc.ldap
 
 import gldapo.schema.annotation.GldapoNamingAttribute
+import gldapo.schema.annotation.GldapoSchemaFilter
 
 /**
  * GLDAPO schema class for init superson.
  */
+@GldapoSchemaFilter("(objectClass=suPerson)")
 class SuPersonStub implements Serializable {
 
   static final long serialVersionUID = - 3513815096227848907L
