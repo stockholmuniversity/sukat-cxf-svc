@@ -33,158 +33,163 @@
        http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd
        http://cxf.apache.org/simple http://cxf.apache.org/schemas/simple.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd"
        default-autowire="byName">
-  <bean id="sukatLogManager" class="se.su.it.svc.manager.SukatLogManager"/>
-	<import resource="classpath:META-INF/cxf/cxf.xml" />
-  <import resource="classpath:META-INF/cxf/cxf-extension-soap.xml" />
-	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+    <bean id="sukatLogManager" class="se.su.it.svc.manager.SukatLogManager"/>
+    <import resource="classpath:META-INF/cxf/cxf.xml"/>
+    <import resource="classpath:META-INF/cxf/cxf-extension-soap.xml"/>
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
 
-  <context:component-scan base-package="se.su.it.svc"/>
+    <context:component-scan base-package="se.su.it.svc"/>
 
-  <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-    <property name="location" value="file:/local/sukat/conf/config.properties" />
-    <property name="ignoreResourceNotFound" value="true" />
-    <property name="ignoreUnresolvablePlaceholders" value="true" />
-  </bean>
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location" value="file:/local/sukat/conf/config.properties"/>
+        <property name="ignoreResourceNotFound" value="true"/>
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+    </bean>
 
-  <bean id="suCardDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
-		<property name="driverClassName" value="${sucard.database.driver}" />
-		<property name="url" value="${sucard.database.url}" />
-		<property name="username" value="${sucard.database.user}" />
-		<property name="password" value="${sucard.database.password}" />
-	</bean>
+    <bean id="suCardDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="${sucard.database.driver}"/>
+        <property name="url" value="${sucard.database.url}"/>
+        <property name="username" value="${sucard.database.user}"/>
+        <property name="password" value="${sucard.database.password}"/>
+    </bean>
 
-	<bean id="messageSource"
-	      class="org.springframework.context.support.ResourceBundleMessageSource">
-		<property name="basenames">
-			<list>
-				<value>messages</value>
-			</list>
-		</property>
-	</bean>
+    <bean id="messageSource"
+          class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basenames">
+            <list>
+                <value>messages</value>
+            </list>
+        </property>
+    </bean>
 
-  <!--uncomment the following if gorm and mysql support is to be enabled-->
-	<!--<gorm:sessionFactory xmlns:gorm="http://grails.org/schema/gorm"-->
-						<!--base-package="se.su.it.svc.domains"-->
-						<!--data-source-ref="dataSource"-->
-						<!--message-source-ref="messageSource">-->
-		<!--<property name="hibernateProperties">-->
-			<!--<util:map>-->
-				<!--<entry key="hibernate.hbm2ddl.auto" value="update">-->
-			<!--</entry></util:map>-->
-		<!--</property>-->
-	<!--</gorm:sessionFactory>-->
-  <context:annotation-config/>
-  <context:mbean-export/>
-  <tx:annotation-driven/>
+    <!--uncomment the following if gorm and mysql support is to be enabled-->
+    <!--<gorm:sessionFactory xmlns:gorm="http://grails.org/schema/gorm"-->
+    <!--base-package="se.su.it.svc.domains"-->
+    <!--data-source-ref="dataSource"-->
+    <!--message-source-ref="messageSource">-->
+    <!--<property name="hibernateProperties">-->
+    <!--<util:map>-->
+    <!--<entry key="hibernate.hbm2ddl.auto" value="update">-->
+    <!--</entry></util:map>-->
+    <!--</property>-->
+    <!--</gorm:sessionFactory>-->
+    <context:annotation-config/>
+    <context:mbean-export/>
+    <tx:annotation-driven/>
 
-  <bean name="annotationHandlerMapping" class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
-  <bean id="applicationContextProvider" class="se.su.it.svc.manager.ApplicationContextProvider"/>
-  <bean id="gldapoManager" class="se.su.it.svc.manager.GldapoManager"/>
+    <bean name="annotationHandlerMapping"
+          class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
+    <bean id="applicationContextProvider" class="se.su.it.svc.manager.ApplicationContextProvider"/>
+    <bean id="gldapoManager" class="se.su.it.svc.manager.GldapoManager"/>
 
-  <bean id="suCardOrderQuery" class="se.su.it.svc.query.SuCardOrderQuery">
-    <property name="suCardDataSource" ref="suCardDataSource"/>
-  </bean>
+    <bean id="suCardOrderQuery" class="se.su.it.svc.query.SuCardOrderQuery">
+        <property name="suCardDataSource" ref="suCardDataSource"/>
+    </bean>
 
-  <bean id="cardinfoserviceEndpoint" class="se.su.it.svc.CardInfoServiceImpl" />
-  <jaxws:endpoint
-	  id="cardinfoservice"
-	  implementorClass="se.su.it.svc.CardInfoServiceImpl"
-    implementor="#cardinfoserviceEndpoint"
-	  address="/CardInfoService" />
+    <bean id="cardinfoserviceEndpoint" class="se.su.it.svc.CardInfoServiceImpl"/>
+    <jaxws:endpoint
+            id="cardinfoservice"
+            implementorClass="se.su.it.svc.CardInfoServiceImpl"
+            implementor="#cardinfoserviceEndpoint"
+            address="/CardInfoService"/>
 
-  <bean id="cardorderserviceEndpoint" class="se.su.it.svc.CardOrderServiceImpl" />
-  <jaxws:endpoint
-      id="cardorderservice"
-      implementorClass="se.su.it.svc.CardOrderServiceImpl"
-      implementor="#cardorderserviceEndpoint"
-      address="/CardOrderService" />
+    <bean id="cardorderserviceEndpoint" class="se.su.it.svc.CardOrderServiceImpl"/>
+    <jaxws:endpoint
+            id="cardorderservice"
+            implementorClass="se.su.it.svc.CardOrderServiceImpl"
+            implementor="#cardorderserviceEndpoint"
+            address="/CardOrderService"/>
 
-  <bean id="cardadminserviceEndpoint" class="se.su.it.svc.CardAdminServiceImpl" />
-  <jaxws:endpoint
-    id="cardadminservice"
-    implementorClass="se.su.it.svc.CardAdminServiceImpl"
-    implementor="#cardadminserviceEndpoint"
-    address="/CardAdminService" />
+    <bean id="cardadminserviceEndpoint" class="se.su.it.svc.CardAdminServiceImpl"/>
+    <jaxws:endpoint
+            id="cardadminservice"
+            implementorClass="se.su.it.svc.CardAdminServiceImpl"
+            implementor="#cardadminserviceEndpoint"
+            address="/CardAdminService"/>
 
-  <bean id="entitlementserviceEndpoint" class="se.su.it.svc.EntitlementServiceImpl" />
-  <jaxws:endpoint
-    id="entitlementservice"
-    implementorClass="se.su.it.svc.EntitlementServiceImpl"
-    implementor="#entitlementserviceEndpoint"
-    address="/EntitlementService" />
+    <bean id="entitlementserviceEndpoint" class="se.su.it.svc.EntitlementServiceImpl"/>
+    <jaxws:endpoint
+            id="entitlementservice"
+            implementorClass="se.su.it.svc.EntitlementServiceImpl"
+            implementor="#entitlementserviceEndpoint"
+            address="/EntitlementService"/>
 
-  <bean id="serviceserviceEndpoint" class="se.su.it.svc.ServiceServiceImpl" />
-  <jaxws:endpoint
-    id="serviceservice"
-    implementorClass="se.su.it.svc.ServiceServiceImpl"
-    implementor="#serviceserviceEndpoint"
-    address="/ServiceService" />
+    <bean id="serviceserviceEndpoint" class="se.su.it.svc.ServiceServiceImpl"/>
+    <jaxws:endpoint
+            id="serviceservice"
+            implementorClass="se.su.it.svc.ServiceServiceImpl"
+            implementor="#serviceserviceEndpoint"
+            address="/ServiceService"/>
 
-  <bean id="accountserviceEndpoint" class="se.su.it.svc.AccountServiceImpl" />
-  <jaxws:endpoint
-    id="accountservice"
-    implementorClass="se.su.it.svc.AccountServiceImpl"
-    implementor="#accountserviceEndpoint"
-    address="/AccountService" />
+    <bean id="accountserviceEndpoint" class="se.su.it.svc.AccountServiceImpl"/>
+    <jaxws:endpoint
+            id="accountservice"
+            implementorClass="se.su.it.svc.AccountServiceImpl"
+            implementor="#accountserviceEndpoint"
+            address="/AccountService"/>
 
-  <bean id="roleserviceEndpoint" class="se.su.it.svc.RoleServiceImpl" />
-  <jaxws:endpoint
-    id="roleservice"
-    implementorClass="se.su.it.svc.RoleServiceImpl"
-    implementor="#roleserviceEndpoint"
-    address="/RoleService" />
+    <bean id="roleserviceEndpoint" class="se.su.it.svc.RoleServiceImpl"/>
+    <jaxws:endpoint
+            id="roleservice"
+            implementorClass="se.su.it.svc.RoleServiceImpl"
+            implementor="#roleserviceEndpoint"
+            address="/RoleService"/>
 
-  <bean id="webserviceadminEndpoint" class="se.su.it.svc.WebServiceAdminImpl" />
-  <jaxws:endpoint
-    id="webserviceadmin"
-    implementorClass="se.su.it.svc.WebServiceAdminImpl"
-    implementor="#webserviceadminEndpoint"
-    address="/WebServiceAdmin" />
+    <bean id="webserviceadminEndpoint" class="se.su.it.svc.WebServiceAdminImpl"/>
+    <jaxws:endpoint
+            id="webserviceadmin"
+            implementorClass="se.su.it.svc.WebServiceAdminImpl"
+            implementor="#webserviceadminEndpoint"
+            address="/WebServiceAdmin"/>
 
-  <jaxws:endpoint
-	  id="status"
-    implementor="se.su.it.svc.Status"
-	  address="/Status" />
+    <jaxws:endpoint
+            id="status"
+            implementor="se.su.it.svc.Status"
+            address="/Status"/>
 
-  <bean id="sanitizerAspect" class="se.su.it.svc.aspect.SanitizeWebParametersAspect"/>
+    <bean id="sanitizerAspect" class="se.su.it.svc.aspect.SanitizeWebParametersAspect"/>
 
-  <bean id="sanitizerPointcut" class="org.springframework.aop.support.JdkRegexpMethodPointcut">
-    <property name="pattern" value=".*" />
-  </bean>
+    <bean id="sanitizerPointcut" class="org.springframework.aop.support.JdkRegexpMethodPointcut">
+        <property name="pattern" value=".*"/>
+    </bean>
 
-  <bean id="sanitizerAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
-    <property name="advice" ref="sanitizerAspect" />
-    <property name="pointcut" ref="sanitizerPointcut" />
-  </bean>
+    <bean id="sanitizerAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
+        <property name="advice" ref="sanitizerAspect"/>
+        <property name="pointcut" ref="sanitizerPointcut"/>
+    </bean>
 
-  <bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
-    <property name="beanNames"><value>*Endpoint</value></property>
-    <property name="interceptorNames">
-      <list>
-        <value>sanitizerAdvisor</value>
-      </list>
-    </property>
-  </bean>
+    <bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+        <property name="beanNames">
+            <value>*Endpoint</value>
+        </property>
+        <property name="interceptorNames">
+            <list>
+                <value>sanitizerAdvisor</value>
+            </list>
+        </property>
+    </bean>
 
-  <!-- Audit aspect -->
-  <bean id="auditAspect" class="se.su.it.svc.aspect.AuditAspect" />
+    <!-- Audit aspect -->
+    <bean id="auditAspect" class="se.su.it.svc.aspect.AuditAspect"/>
 
-  <bean id="auditPointcut" class="org.springframework.aop.support.JdkRegexpMethodPointcut">
-    <property name="pattern" value=".*" />
-  </bean>
+    <bean id="auditPointcut" class="org.springframework.aop.support.JdkRegexpMethodPointcut">
+        <property name="pattern" value=".*"/>
+    </bean>
 
-  <bean id="auditAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
-    <property name="advice" ref="auditAspect" />
-    <property name="pointcut" ref="auditPointcut" />
-  </bean>
+    <bean id="auditAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
+        <property name="advice" ref="auditAspect"/>
+        <property name="pointcut" ref="auditPointcut"/>
+    </bean>
 
-  <bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
-    <property name="beanNames"><value>*Endpoint</value></property>
-    <property name="interceptorNames">
-      <list>
-        <value>auditAdvisor</value>
-      </list>
-    </property>
-  </bean>
+    <bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+        <property name="beanNames">
+            <value>*Endpoint</value>
+        </property>
+        <property name="interceptorNames">
+            <list>
+                <value>auditAdvisor</value>
+            </list>
+        </property>
+    </bean>
 </beans>
-<!-- END SNIPPET: beans -->
+        <!-- END SNIPPET: beans -->
