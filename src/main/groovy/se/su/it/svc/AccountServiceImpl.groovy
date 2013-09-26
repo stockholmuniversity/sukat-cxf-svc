@@ -367,26 +367,17 @@ public class AccountServiceImpl implements AccountService {
         audit: audit ]) &&
     mailLocalAddresses?.size() > 0
   })
-  public String[] addMailLocalAddresses(@WebParam(name = 'uid') String uid,
-                                        @WebParam(name='mailLocalAddresses') String[] mailLocalAddresses,
-                                        @WebParam(name="audit") SvcAudit audit) {
+  public String[] addMailLocalAddresses(@WebParam(name = "uid") String uid,
+                                        @WebParam(name = "mailLocalAddresses") String[] mailLocalAddresses,
+                                        @WebParam(name = "audit") SvcAudit audit) {
 
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
     // Can't depend on the mailLocalAddress Set doing it's thing without removing case.
 
-    mailLocalAddresses = mailLocalAddresses*.toLowerCase()
-    if (suPerson.mailLocalAddress == null) {
-      suPerson.mailLocalAddress = [] as LinkedHashSet
-      suPerson.mailLocalAddress.addAll(mailLocalAddresses)
-    } else {
-      List newEntries = mailLocalAddresses - suPerson?.mailLocalAddress*.toLowerCase()
-      if (newEntries) {
-        suPerson.mailLocalAddress += newEntries
-      }
-    }
+    String[] mailLocalAddress = suPerson.addMailLocalAddress(mailLocalAddresses as Set<String>)
 
     suPerson.update()
 
-    return suPerson.mailLocalAddress
+    return mailLocalAddress
   }
 }
