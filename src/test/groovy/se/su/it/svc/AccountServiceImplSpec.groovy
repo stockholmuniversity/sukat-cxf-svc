@@ -737,15 +737,17 @@ class AccountServiceImplSpec extends Specification {
     def mailLocalAddresses = ['kaka@su.se', "bar@su.se"]
     String uid = 'foo'
     def suPersonQueryMock = GroovyMock(SuPersonQuery, global:true)
-    SuPerson suPerson = new SuPerson()
+    SuPerson suPerson = GroovyMock(SuPerson)
     SuPersonQuery.getSuPersonFromUID(_, uid) >> suPerson
-
 
     when:
     def resp = service.addMailLocalAddresses(uid, mailLocalAddresses as String[], new SvcAudit())
 
     then:
     resp == mailLocalAddresses
+
+    and:
+    1 * suPerson.addMailLocalAddress(_) >> mailLocalAddresses
   }
 
   def "addMailLocalAddresses: When SuPerson"() {
@@ -754,14 +756,16 @@ class AccountServiceImplSpec extends Specification {
     def mailLocalAddresses = ['kaka@su.se', "bar@su.se"]
     String uid = 'foo'
     def suPersonQueryMock = GroovyMock(SuPersonQuery, global:true)
-    SuPerson suPerson = new SuPerson(mailLocalAddress: ["barbar@su.se", "kaka@su.se"])
+    SuPerson suPerson = GroovyMock(SuPerson) {
+      1 * addMailLocalAddress(*_) >> mailLocalAddresses
+    }
     SuPersonQuery.getSuPersonFromUID(_, uid) >> suPerson
 
     when:
     def resp = service.addMailLocalAddresses(uid, mailLocalAddresses as String[], new SvcAudit())
 
     then:
-    resp == ["kaka@su.se", "bar@su.se", "barbar@su.se"]
+    resp instanceof String[]
   }
 
 }
