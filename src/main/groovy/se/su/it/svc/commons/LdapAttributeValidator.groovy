@@ -57,6 +57,7 @@ public class LdapAttributeValidator {
           case "sn"                          : validateSn(val); break
           case "svcsuperson"                 : validateSvcSuPersonVO(val); break
           case "mailroutingaddress"          : validateMailRoutingAddress(val); break
+          case "maillocaladdresses"          : validateMailLocalAddresses(val); break
           default:
             log.debug("${validateAttributesString} - Attribute <${attributeName}> dont have a validation role!")
             break
@@ -220,6 +221,19 @@ public class LdapAttributeValidator {
     String tmpMailRoutingAddress = (String)mailRoutingAddress
     if (!checkValidMailAddress(tmpMailRoutingAddress))
       throwMe(validateAttributesString,"Attribute validation failed for mailRoutingAddress <${tmpMailRoutingAddress}>. mailRoutingAddress need to be a valid email address.")
+  }
+
+  private static void validateMailLocalAddresses(Object mailLocalAddresses) {
+    if (mailLocalAddresses instanceof String[]) {
+      for (mailLocalAddress in (String[]) mailLocalAddresses) {
+        if (!checkValidMailAddress(mailLocalAddress)) {
+          throwMe(validateAttributesString, "$mailLocalAddress is not a valid email address.")
+        }
+      }
+    } else {
+      throwMe(validateAttributesString,"Attribute validation failed for mailLocalAddresses <${mailLocalAddresses}>. " +
+          "mailRoutingAddress needs to be a String array.")
+    }
   }
 
   private static void throwMe(String function, String message) {

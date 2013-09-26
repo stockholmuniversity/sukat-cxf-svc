@@ -51,6 +51,7 @@ public interface AccountService {
   void terminateSuPerson(String uid, SvcAudit audit)
   String getMailRoutingAddress(String uid, SvcAudit audit)
   void setMailRoutingAddress(String uid, String mail, SvcAudit audit)
+  String[] addMailLocalAddresses(String uid, String[] mailLocalAddresses, SvcAudit audit)
   SvcSuPersonVO[] findAllSuPersonsBySocialSecurityNumber(String socialSecurityNumber, SvcAudit audit)
   SvcSuPersonVO findSuPersonByUid(String uid, SvcAudit audit)
 }

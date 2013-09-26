@@ -350,4 +350,43 @@ public class AccountServiceImpl implements AccountService {
 
     return suPerson ? suPerson?.createSvcSuPersonVO() : null
   }
+
+  /**
+   * Accepts an array of mailLocalAddresses, the new entries gets compared with the SuPersons current
+   * mailLocalAddress entries and new entries gets added to the suPerson entry.
+   *
+   * @param uid
+   * @param mailLocalAddresses
+   * @param audit
+   * @return new list of mailLocalAddresses bound to the suPerson after the update.
+   */
+  @Requires({
+    ! LdapAttributeValidator.validateAttributes([
+        uid: uid,
+        mailLocalAddresses: mailLocalAddresses,
+        audit: audit ]) &&
+    mailLocalAddresses?.size() > 0
+  })
+  public String[] addMailLocalAddresses(@WebParam(name = 'uid') String uid,
+                                        @WebParam(name='mailLocalAddresses') String[] mailLocalAddresses,
+                                        @WebParam(name="audit") SvcAudit audit) {
+
+    SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+    // Can't depend on the mailLocalAddress Set doing it's thing without removing case.
+
+    mailLocalAddresses = mailLocalAddresses*.toLowerCase()
+    if (suPerson.mailLocalAddress == null) {
+      suPerson.mailLocalAddress = [] as LinkedHashSet
+      suPerson.mailLocalAddress.addAll(mailLocalAddresses)
+    } else {
+      List newEntries = mailLocalAddresses - suPerson?.mailLocalAddress*.toLowerCase()
+      if (newEntries) {
+        suPerson.mailLocalAddress += newEntries
+      }
+    }
+
+    suPerson.update()
+
+    return suPerson.mailLocalAddress
+  }
 }

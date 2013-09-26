@@ -44,6 +44,7 @@ import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuPersonStub
 import se.su.it.svc.query.SuPersonQuery
+import spock.lang.IgnoreRest
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -686,4 +687,81 @@ class AccountServiceImplSpec extends Specification {
     ret.password == password
     1 * PasswordUtils.genRandomPassword(10, 10) >> password
   }
+
+  def "addMailLocalAddresses: given no valid uid"() {
+    when:
+    service.addMailLocalAddresses('', [] as String[], new SvcAudit())
+
+    then:
+    thrown(PreconditionViolation)
+  }
+
+  def "addMailLocalAddresses: given no mailLocalAddresses"() {
+    when:
+    service.addMailLocalAddresses('foo', [] as String[], new SvcAudit())
+
+    then:
+    thrown(PreconditionViolation)
+  }
+
+  def "addMailLocalAddresses: given an invalid email in mailLocalAddresses"() {
+    when:
+    service.addMailLocalAddresses('foo', ['foo', 'kaka@su.se'] as String[], new SvcAudit())
+
+    then:
+    thrown(PreconditionViolation)
+  }
+
+  def "addMailLocalAddresses: given no audit object"() {
+    when:
+    service.addMailLocalAddresses('foo', ['kaka@su.se'] as String[], null)
+
+    then:
+    thrown(PreconditionViolation)
+  }
+
+  def "addMailLocalAddresses: When SuPerson can't be found by uid"() {
+    given:
+    SuPerson.metaClass.static.find = { Map arg1, Closure arg2 ->}
+
+    when:
+    service.addMailLocalAddresses('foo', ['kaka@su.se'] as String[], new SvcAudit())
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  def "addMailLocalAddresses: When SuPerson doesn't already have the attribute mailLocalAddress"() {
+    given:
+    SuPerson.metaClass.update = {-> }
+    def mailLocalAddresses = ['kaka@su.se', "bar@su.se"]
+    String uid = 'foo'
+    def suPersonQueryMock = GroovyMock(SuPersonQuery, global:true)
+    SuPerson suPerson = new SuPerson()
+    SuPersonQuery.getSuPersonFromUID(_, uid) >> suPerson
+
+
+    when:
+    def resp = service.addMailLocalAddresses(uid, mailLocalAddresses as String[], new SvcAudit())
+
+    then:
+    resp == mailLocalAddresses
+  }
+
+  def "addMailLocalAddresses: When SuPerson"() {
+    given:
+    SuPerson.metaClass.update = {-> }
+    def mailLocalAddresses = ['kaka@su.se', "bar@su.se"]
+    String uid = 'foo'
+    def suPersonQueryMock = GroovyMock(SuPersonQuery, global:true)
+    SuPerson suPerson = new SuPerson(mailLocalAddress: ["barbar@su.se", "kaka@su.se"])
+    SuPersonQuery.getSuPersonFromUID(_, uid) >> suPerson
+
+    when:
+    def resp = service.addMailLocalAddresses(uid, mailLocalAddresses as String[], new SvcAudit())
+
+    then:
+    resp == ["kaka@su.se", "bar@su.se", "barbar@su.se"]
+  }
+
 }
