@@ -8,6 +8,7 @@ import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.manager.Config
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.util.GeneralUtils
+import spock.lang.IgnoreRest
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -381,5 +382,52 @@ class SuPersonSpec extends Specification {
     mailRoutingAddress << ["", "mail@su.se"]
     expected << [false, true]
 
+  }
+
+  def "addMailLocalAddresses: When SuPerson doesn't have any mailLocalAddress entries"() {
+    given:
+    def mailLocalAddresses = ['kaka@su.se', "bar@su.se"] as Set
+    SuPerson suPerson = new SuPerson(objectClass:[])
+
+    when:
+    def resp = suPerson.addMailLocalAddress(mailLocalAddresses)
+
+    then:
+    resp == mailLocalAddresses as String[]
+
+    and:
+    suPerson.objectClass.contains('inetLocalMailRecipient')
+  }
+
+  def "addMailLocalAddresses: When SuPerson already has mailLocalAddress entries."() {
+    given:
+    def mailLocalAddresses = ['kaka@su.se', "bar@su.se", "foo@bar.se"] as Set
+    SuPerson suPerson = new SuPerson(objectClass:['inetLocalMailRecipient'])
+    suPerson.@mailLocalAddress = ["barbar@su.se", "kaka@su.se"]
+
+    when:
+    def resp = suPerson.addMailLocalAddress(mailLocalAddresses)
+
+    then:
+    resp == ["kaka@su.se", "bar@su.se", "foo@bar.se", "barbar@su.se"]
+
+    and:
+    suPerson.objectClass.contains('inetLocalMailRecipient')
+  }
+
+  def "addMailLocalAddresses: When no new entries are added objectClass is not set either."() {
+    given:
+    def mailLocalAddresses = ["kaka@su.se"] as Set
+    SuPerson suPerson = new SuPerson()
+    suPerson.@mailLocalAddress = ["kaka@su.se"]
+
+    when:
+    def resp = suPerson.addMailLocalAddress(mailLocalAddresses)
+
+    then:
+    resp == ["kaka@su.se"]
+
+    and:
+    suPerson.objectClass == null
   }
 }
