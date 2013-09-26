@@ -1,3 +1,6 @@
+#Sets the endpoint url in the wsdl, ex https://sukat-svc.it.su.se/
+publishedEndpointUrl = %%ENDPOINT_URL%%
+
 #database settings
 database.url        = jdbc:mysql://localhost/gormtest
 database.driver     = com.mysql.jdbc.Driver
