@@ -563,10 +563,10 @@ class AccountServiceImplSpec extends Specification {
     thrown(PreconditionViolation)
   }
 
-    def "Test findSuPersonByUid: When a user ain't found"() {
+  def "Test findSuPersonByUid: When a user ain't found"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
+    SuPersonQuery.metaClass.static.findSuPersonByUID = { String directory, String uid -> return null }
 
     when:
     def resp = accountServiceImpl.findSuPersonByUid('foo', new SvcAudit())
@@ -578,7 +578,7 @@ class AccountServiceImplSpec extends Specification {
   def "Test findSuPersonByUid: When a user is found"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid ->
+    SuPersonQuery.metaClass.static.findSuPersonByUID = {String directory,String uid ->
       new SuPerson(
           uid:'foo',
           givenName:'givenName',

@@ -346,7 +346,7 @@ public class AccountServiceImpl implements AccountService {
           @WebParam(name = 'uid') String uid,
           @WebParam(name = 'audit') SvcAudit audit
   ) {
-    SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+    SuPerson suPerson = SuPersonQuery.findSuPersonByUID(GldapoManager.LDAP_RW, uid)
 
     return suPerson ? suPerson?.createSvcSuPersonVO() : null
   }
