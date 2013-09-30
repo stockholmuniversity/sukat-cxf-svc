@@ -59,6 +59,8 @@ import javax.jws.WebService
 @WebService @Slf4j
 public class AccountServiceImpl implements AccountService {
 
+  def configHolder
+
   /**
    * This method sets the primary affiliation for the specified uid.
    *
@@ -191,13 +193,12 @@ public class AccountServiceImpl implements AccountService {
       throw new IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
     }
 
-
-    String parent = Config.instance.props.ldap.accounts.default.parent
-    log.info "createSuPerson: parent is configured to be $parent"
-
-    if (!parent) {
+    if (!configHolder.props.ldap.accounts.default.containsKey("parent")) {
       throw new IllegalArgumentException("Missing parent.")
     }
+
+    String parent = configHolder.props.ldap.accounts.default.parent
+    log.info "createSuPerson: parent is configured to be $parent"
 
     String directory = GldapoManager.LDAP_RW
 

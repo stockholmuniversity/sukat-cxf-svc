@@ -43,6 +43,7 @@ import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuPersonStub
+import se.su.it.svc.manager.Config
 import se.su.it.svc.query.SuPersonQuery
 import spock.lang.IgnoreRest
 import spock.lang.Shared
@@ -340,15 +341,46 @@ class AccountServiceImplSpec extends Specification {
     thrown(PreconditionViolation)
   }
 
-  def "Test createSuPerson true flow"() {
+  def "Test createSuPerson when parent is unset"() {
     setup:
+
+    Properties properties = new Properties()
+    service.configHolder = [props:[ldap:[accounts:[default:properties]]]]
+
     def uid = 'uid'
     def ssn = '0000000000'
     def givenName = 'Test'
     def sn = 'Testsson'
 
     GroovyMock(SuPersonQuery, global: true)
-    SuPersonQuery.getSuPersonFromUID(*_) >> null
+    SuPersonQuery.findSuPersonByUID(*_) >> null
+
+    when:
+    service.createSuPerson(
+        uid,
+        ssn,
+        givenName,
+        sn,
+        new SvcAudit())
+
+    then: 'we test that the object returned has been saved.'
+    thrown(IllegalArgumentException)
+  }
+
+  def "Test createSuPerson true flow"() {
+    setup:
+    Properties properties = new Properties()
+    properties.put("parent", "foo")
+    service.configHolder = [props:[ldap:[accounts:[default:properties]]]]
+
+    def uid = 'uid'
+    def ssn = '0000000000'
+    def givenName = 'Test'
+    def sn = 'Testsson'
+
+
+    GroovyMock(SuPersonQuery, global: true)
+    SuPersonQuery.findSuPersonByUID(*_) >> null
 
     def spy = GroovySpy(SuPersonStub)
 
