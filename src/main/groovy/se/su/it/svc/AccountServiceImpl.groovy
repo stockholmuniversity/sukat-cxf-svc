@@ -187,7 +187,7 @@ public class AccountServiceImpl implements AccountService {
           @WebParam(name = 'audit') SvcAudit audit
   ) {
 
-    if (SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)) {
+    if (SuPersonQuery.findSuPersonByUID(GldapoManager.LDAP_RW, uid)) {
       throw new IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
     }
 

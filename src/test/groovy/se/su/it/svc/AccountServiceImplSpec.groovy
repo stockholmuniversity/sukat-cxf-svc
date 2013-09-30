@@ -264,7 +264,7 @@ class AccountServiceImplSpec extends Specification {
 
   def "Test createSuPerson with already exist uid argument"() {
     setup:
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> new SuPerson() }
+    SuPersonQuery.metaClass.static.findSuPersonByUID = {String directory,String uid -> new SuPerson() }
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
