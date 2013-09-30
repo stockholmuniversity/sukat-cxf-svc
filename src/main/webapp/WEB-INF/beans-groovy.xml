@@ -87,6 +87,8 @@
         <property name="suCardDataSource" ref="suCardDataSource"/>
     </bean>
 
+    <bean id="configHolder" class="se.su.it.svc.manager.Config" init-method="getInstance"/>
+
     <bean id="cardinfoserviceEndpoint" class="se.su.it.svc.CardInfoServiceImpl"/>
     <jaxws:endpoint
             id="cardinfoservice"
