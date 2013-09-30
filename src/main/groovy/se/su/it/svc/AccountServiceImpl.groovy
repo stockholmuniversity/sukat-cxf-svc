@@ -191,7 +191,14 @@ public class AccountServiceImpl implements AccountService {
       throw new IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
     }
 
+
     String parent = Config.instance.props.ldap.accounts.default.parent
+    log.info "createSuPerson: parent is configured to be $parent"
+
+    if (!parent) {
+      throw new IllegalArgumentException("Missing parent.")
+    }
+
     String directory = GldapoManager.LDAP_RW
 
     SuPersonStub suPersonStub = SuPersonStub.newInstance(uid, givenName, sn, ssn, parent, directory)

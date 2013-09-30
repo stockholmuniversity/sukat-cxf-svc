@@ -137,9 +137,9 @@ class Config {
       logger.error "Slurping config file failed.", ex
     }
 
-    logger.debug "ConfigObject: contains."
+    logger.info "ConfigObject: contains."
     this.props?.each { key, value ->
-      logger.debug "$key = $value"
+      logger.info "$key = $value"
     }
   }
 
