@@ -57,4 +57,29 @@ class SuPersonQuerySpec extends Specification {
     then:
     thrown(IllegalArgumentException)
   }
+
+  def "getSuPersonFromUID should throw exception on empty return value"() {
+    given:
+    GroovyMock(SuPerson, global:true)
+    SuPerson.find(*_) >> { return null }
+
+    when:
+    SuPersonQuery.getSuPersonFromUID(null, null)
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  def "findSuPersonByUID should return empty return value"() {
+    given:
+    GroovyMock(SuPerson, global:true)
+    SuPerson.find(*_) >> { return null }
+
+    when:
+    def resp = SuPersonQuery.findSuPersonByUID(null, null)
+
+    then:
+    resp == null
+  }
+
 }

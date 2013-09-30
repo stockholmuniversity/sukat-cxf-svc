@@ -48,22 +48,14 @@ import org.apache.log4j.Logger
  * def databaseServer   = props.database.serverURL
  *
  */
+@Singleton
 class Config {
   private static final Logger logger = Logger.getLogger(Config.class)
-  private static final Config INSTANCE = new Config()
 
   public ConfigObject props
 
   private Config() {
     loadProperties()
-  }
-
-  /**
-   *
-   * @return the singleton instance containing a groovy.util.ConfigObject called props.
-   */
-  static getInstance() {
-    return INSTANCE
   }
 
   /**
@@ -133,13 +125,12 @@ class Config {
 
     try {
       this.props = new ConfigSlurper().parse(props)
+      logger.info "ConfigObject: contains."
+      this.props?.each { key, value ->
+        logger. "$key = $value"
+      }
     } catch (ex) {
       logger.error "Slurping config file failed.", ex
-    }
-
-    logger.debug "ConfigObject: contains."
-    this.props?.each { key, value ->
-      logger.debug "$key = $value"
     }
   }
 
