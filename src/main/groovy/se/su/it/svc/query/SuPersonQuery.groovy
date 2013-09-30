@@ -51,18 +51,7 @@ public class SuPersonQuery {
    * @see se.su.it.svc.manager.GldapoManager
    */
   static SuPerson getSuPersonFromUID(String directory, String uid) throws IllegalArgumentException {
-    SuPerson suPerson = null
-    try {
-      suPerson = SuPerson.find(directory: directory, base: "") {
-        and {
-          eq("uid", uid)
-          eq("objectclass", "suPerson")
-        }
-      }
-    } catch (ex) {
-      log.error "Failed finding SuPerson for uid: $uid", ex
-      throw ex
-    }
+    SuPerson suPerson = findSuPersonByUID(directory, uid)
 
     if (!suPerson) {
       throw new IllegalArgumentException("User with uid $uid not found.")
