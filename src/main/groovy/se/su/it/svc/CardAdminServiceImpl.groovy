@@ -35,8 +35,7 @@ import groovy.util.logging.Slf4j
 import org.gcontracts.annotations.Requires
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuCard
-import se.su.it.svc.manager.GldapoManager
-import se.su.it.svc.query.SuCardOrderQuery
+import se.su.it.svc.manager.ConfigManager
 import se.su.it.svc.query.SuCardQuery
 
 import javax.jws.WebParam
@@ -66,7 +65,7 @@ public class CardAdminServiceImpl implements CardAdminService {
       @WebParam(name = "suCardUUID") String suCardUUID,
       @WebParam(name = "audit") SvcAudit audit) {
 
-    SuCard card = SuCardQuery.findCardBySuCardUUID(GldapoManager.LDAP_RW, suCardUUID)
+    SuCard card = SuCardQuery.findCardBySuCardUUID(ConfigManager.LDAP_RW, suCardUUID)
 
     if (!card) {
       log.info("revokeCard: Could not find a card with uuid<${suCardUUID}>")
@@ -93,7 +92,7 @@ public class CardAdminServiceImpl implements CardAdminService {
   public void setCardPIN(@WebParam(name = "suCardUUID") String suCardUUID, @WebParam(name = "pin") String pin, @WebParam(name = "audit") SvcAudit audit) {
     if(suCardUUID == null || pin == null || audit == null)
       throw new java.lang.IllegalArgumentException("setCardPIN - Null argument values not allowed in this function")
-    SuCard card =SuCardQuery.findCardBySuCardUUID(GldapoManager.LDAP_RW,suCardUUID)
+    SuCard card =SuCardQuery.findCardBySuCardUUID(ConfigManager.LDAP_RW,suCardUUID)
     if(card != null) {
       card.suCardPIN = pin
       card.update()

@@ -39,6 +39,7 @@ import net.sf.ehcache.config.CacheConfiguration
 import net.sf.ehcache.config.SearchAttribute
 import net.sf.ehcache.config.Searchable
 import org.apache.log4j.Logger
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * Created by: Jack Enqvist (jaen4109)
@@ -47,10 +48,13 @@ import org.apache.log4j.Logger
  */
 class EhCacheManager {
 
+  @Autowired
+  ConfigManager configManager
+
   private static final Logger logger = Logger.getLogger(EhCacheManager.class)
   def final Object NULL = "NULL"
   def final int DEFAULT_TTL = (60 * 10)
-  private props = Config.getInstance().props
+  private props = configManager?.config
 
 
   def final static EhCacheManager INSTANCE = new EhCacheManager()
@@ -76,22 +80,22 @@ class EhCacheManager {
     if (!cacheInstance) {
       CacheConfiguration config = new CacheConfiguration(cacheName, 0)
       try {
-        config.setOverflowToDisk(props.ehcache?.overflowToDisk ? props.ehcache?.overflowToDisk.toBoolean(): false)
+        config.setOverflowToDisk(props?.ehcache?.overflowToDisk ? props.ehcache?.overflowToDisk.toBoolean(): false)
         //TODO: This is the proposed, new, way to handle in-memory overflow. We need to decide on if we need fault tolerance (for a fee)
 //        config.persistence(new PersistenceConfiguration().strategy(PersistenceConfiguration.Strategy.LOCALTEMPSWAP))
 
-        config.setTimeToLiveSeconds(props.ehcache?.timeToLiveSeconds ? props.ehcache?.timeToLiveSeconds.toInteger() : 600);
-        config.setMaxElementsInMemory(props.ehcache?.maxElementsInMemory ? props.ehcache?.maxElementsInMemory.toInteger() : 10000)
+        config.setTimeToLiveSeconds(props?.ehcache?.timeToLiveSeconds ? props.ehcache?.timeToLiveSeconds.toInteger() : 600);
+        config.setMaxElementsInMemory(props?.ehcache?.maxElementsInMemory ? props.ehcache?.maxElementsInMemory.toInteger() : 10000)
         //TODO: This is the proposed, new, way to handle objects in local heap memory
 //        config.setMaxEntriesLocalHeap(10000L)
 
-        config.setEternal(props.ehcache?.eternal ? props.ehcache?.eternal.toBoolean() : false)
-        config.setTimeToIdleSeconds(props.ehcache?.timeToIdleSeconds ? props.ehcache?.timeToIdleSeconds.toInteger() : 120)
+        config.setEternal(props?.ehcache?.eternal ? props.ehcache?.eternal.toBoolean() : false)
+        config.setTimeToIdleSeconds(props?.ehcache?.timeToIdleSeconds ? props.ehcache?.timeToIdleSeconds.toInteger() : 120)
 
         //TODO: remove this configuration if uncommenting config.persistence above
-        config.setDiskPersistent(props.ehcache?.diskPersistent ? props.ehcache?.diskPersistent.toBoolean() : false)
-        config.setDiskExpiryThreadIntervalSeconds(props.ehcache?.diskExpiryThreadIntervalSeconds ? props.ehcache?.diskExpiryThreadIntervalSeconds.toInteger() : 120)
-        config.setMemoryStoreEvictionPolicy(props.ehcache?.memoryStoreEvictionPolicy ? props.ehcache?.memoryStoreEvictionPolicy.toString() : "LRU")
+        config.setDiskPersistent(props?.ehcache?.diskPersistent ? props.ehcache?.diskPersistent.toBoolean() : false)
+        config.setDiskExpiryThreadIntervalSeconds(props?.ehcache?.diskExpiryThreadIntervalSeconds ? props.ehcache?.diskExpiryThreadIntervalSeconds.toInteger() : 120)
+        config.setMemoryStoreEvictionPolicy(props?.ehcache?.memoryStoreEvictionPolicy ? props.ehcache?.memoryStoreEvictionPolicy.toString() : "LRU")
       } catch (e) {
         logger.info("Cant load the cache config, check if config is present. cause: " + e.cause)
         e.printStackTrace()
@@ -160,7 +164,7 @@ class EhCacheManager {
     def cache = getCache(params['cache'])
 
     def key = params['key']
-    def ttl = params['ttl'] ?: props.ehcache.defaultttl ?: DEFAULT_TTL
+    def ttl = params['ttl'] ?: props?.ehcache?.defaultttl ?: DEFAULT_TTL
 
     try {
       def value = closure()

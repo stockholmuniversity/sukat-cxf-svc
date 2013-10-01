@@ -43,8 +43,7 @@ import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuPersonStub
-import se.su.it.svc.manager.Config
-import se.su.it.svc.manager.GldapoManager
+import se.su.it.svc.manager.ConfigManager
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.util.GeneralUtils
 
@@ -59,7 +58,7 @@ import javax.jws.WebService
 @WebService @Slf4j
 public class AccountServiceImpl implements AccountService {
 
-  def configHolder
+  def configManager
 
   /**
    * This method sets the primary affiliation for the specified uid.
@@ -82,7 +81,7 @@ public class AccountServiceImpl implements AccountService {
           @WebParam(name = 'affiliation') String affiliation,
           @WebParam(name = 'audit') SvcAudit audit
   ) {
-    SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+    SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
 
     if(!person) {
       throw new IllegalArgumentException("updatePrimaryAffiliation no such uid found: "+uid)
@@ -150,7 +149,7 @@ public class AccountServiceImpl implements AccountService {
           @WebParam(name = 'person') SvcSuPersonVO person,
           @WebParam(name = 'audit') SvcAudit audit
   ){
-    SuPerson originalPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+    SuPerson originalPerson = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
 
     originalPerson.updateFromSvcSuPersonVO(person)
     log.debug("updateSuPerson - Trying to update SuPerson uid<${originalPerson.uid}>")
@@ -189,18 +188,18 @@ public class AccountServiceImpl implements AccountService {
           @WebParam(name = 'audit') SvcAudit audit
   ) {
 
-    if (SuPersonQuery.findSuPersonByUID(GldapoManager.LDAP_RW, uid)) {
+    if (SuPersonQuery.findSuPersonByUID(ConfigManager.LDAP_RW, uid)) {
       throw new IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
     }
 
-    if (!configHolder.props.ldap.accounts.default.containsKey("parent")) {
+    if (!configManager.config.ldap.accounts.default.containsKey("parent")) {
       throw new IllegalArgumentException("Missing parent.")
     }
 
-    String parent = configHolder.props.ldap.accounts.default.parent
+    String parent = configManager.config.ldap.accounts.default.parent
     log.info "createSuPerson: parent is configured to be $parent"
 
-    String directory = GldapoManager.LDAP_RW
+    String directory = ConfigManager.LDAP_RW
 
     SuPersonStub suPersonStub = SuPersonStub.newInstance(uid, givenName, sn, ssn, parent, directory)
 
@@ -234,7 +233,7 @@ public class AccountServiceImpl implements AccountService {
           @WebParam(name = 'audit') SvcAudit audit
   ) {
 
-    SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+    SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
 
     SvcUidPwd svcUidPwd = new SvcUidPwd(uid: uid)
     svcUidPwd.password = PasswordUtils.genRandomPassword(10, 10)
@@ -283,7 +282,7 @@ public class AccountServiceImpl implements AccountService {
           @WebParam(name = 'audit') SvcAudit audit
   ) {
 
-    SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+    SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
 
     return suPerson.mailRoutingAddress
   }
@@ -308,7 +307,7 @@ public class AccountServiceImpl implements AccountService {
           @WebParam(name = 'mailRoutingAddress') String mailRoutingAddress,
           @WebParam(name = 'audit') SvcAudit audit
   ) {
-    SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+    SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
 
     suPerson.mailRoutingAddress = mailRoutingAddress
     SuPersonQuery.updateSuPerson(suPerson)
@@ -332,7 +331,7 @@ public class AccountServiceImpl implements AccountService {
           @WebParam(name = "socialSecurityNumber") String ssn,
           @WebParam(name = "audit") SvcAudit audit
   ) {
-    SuPerson[] suPersons = SuPersonQuery.getSuPersonFromSsn(GldapoManager.LDAP_RW, ssn)
+    SuPerson[] suPersons = SuPersonQuery.getSuPersonFromSsn(ConfigManager.LDAP_RW, ssn)
 
     return suPersons ? suPersons*.createSvcSuPersonVO() : []
   }
@@ -354,7 +353,7 @@ public class AccountServiceImpl implements AccountService {
           @WebParam(name = 'uid') String uid,
           @WebParam(name = 'audit') SvcAudit audit
   ) {
-    SuPerson suPerson = SuPersonQuery.findSuPersonByUID(GldapoManager.LDAP_RW, uid)
+    SuPerson suPerson = SuPersonQuery.findSuPersonByUID(ConfigManager.LDAP_RW, uid)
 
     return suPerson ? suPerson?.createSvcSuPersonVO() : null
   }
@@ -379,7 +378,7 @@ public class AccountServiceImpl implements AccountService {
                                         @WebParam(name = "mailLocalAddresses") String[] mailLocalAddresses,
                                         @WebParam(name = "audit") SvcAudit audit) {
 
-    SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+    SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
     // Can't depend on the mailLocalAddress Set doing it's thing without removing case.
 
     String[] mailLocalAddress = suPerson.addMailLocalAddress(mailLocalAddresses as Set<String>)

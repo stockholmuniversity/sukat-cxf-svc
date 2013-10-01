@@ -38,7 +38,8 @@ import se.su.it.commons.ExecUtils
 import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
-import se.su.it.svc.manager.Config
+import se.su.it.svc.manager.ApplicationContextProvider
+import se.su.it.svc.manager.ConfigManager
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.util.AccountServiceUtils
 import se.su.it.svc.util.GeneralUtils
@@ -246,7 +247,8 @@ class SuPerson implements Serializable {
    */
   private boolean enable(String uid, String password) {
     boolean error = false
-    boolean skipCreate = Config.instance.props.enrollment.skipCreate == "true"
+
+    boolean skipCreate = skipCreateEnabled
 
     if (skipCreate) {
       log.warn "Skipping enable user since skipCreate is set to $skipCreate"
@@ -365,5 +367,13 @@ class SuPerson implements Serializable {
     }
 
     return mailLocalAddress as String[]
+  }
+
+  private boolean isSkipCreateEnabled() {
+    return configManager.config.enrollment.skipCreate == "true"
+  }
+
+  private ConfigManager getConfigManager() {
+    return (ConfigManager) ApplicationContextProvider.applicationContext.getBean("configManager")
   }
 }

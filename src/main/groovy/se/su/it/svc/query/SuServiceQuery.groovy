@@ -33,8 +33,8 @@ package se.su.it.svc.query
 
 import org.springframework.ldap.core.DistinguishedName
 import se.su.it.svc.ldap.SuService
+import se.su.it.svc.manager.ConfigManager
 import se.su.it.svc.manager.EhCacheManager
-import se.su.it.svc.manager.GldapoManager
 
 /**
  * This class is a helper class for doing GLDAPO queries on the SuService GLDAPO schema.
@@ -52,11 +52,11 @@ public class SuServiceQuery {
    * Returns an Array of SuService objects.
    *
    *
-   * @param directory which directory to use, see GldapoManager.
+   * @param directory which directory to use, see ConfigManager.
    * @param dn  the DistinguishedName for the user that you want to find cards for.
    * @return an <code>ArrayList<SuService></code> of SuService objects or an empty array if no service was found.
    * @see se.su.it.svc.ldap.SuService
-   * @see se.su.it.svc.manager.GldapoManager
+   * @see se.su.it.svc.manager.ConfigManager
    */
   static SuService[] getSuServices(String directory, DistinguishedName dn) {
     def query = { qDirectory, qDn ->
@@ -67,7 +67,7 @@ public class SuServiceQuery {
       }
     }
 
-    def params = [key: ":getSuServicesFor:${dn}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
+    def params = [key: ":getSuServicesFor:${dn}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == ConfigManager.LDAP_RW)]
     def suServices = (SuService[]) cacheManager.get(params, {query(directory, dn)})
 
     return suServices
@@ -77,12 +77,12 @@ public class SuServiceQuery {
    * Returns an SuService object.
    *
    *
-   * @param directory which directory to use, see GldapoManager.
+   * @param directory which directory to use, see ConfigManager.
    * @param dn  the DistinguishedName for the user that you want to find services for.
    * @param serviceType the specific serviceType to search for.
    * @return an <code><SuService></code> object or null if no service was found.
    * @see se.su.it.svc.ldap.SuService
-   * @see se.su.it.svc.manager.GldapoManager
+   * @see se.su.it.svc.manager.ConfigManager
    */
   static SuService getSuServiceByType(String directory, DistinguishedName dn, String serviceType) {
     def query = { qDirectory, qDn, qServiceType ->
@@ -93,7 +93,7 @@ public class SuServiceQuery {
         }
       }
     }
-    def params = [key: ":getSuServiceByType:${serviceType}${dn}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
+    def params = [key: ":getSuServiceByType:${serviceType}${dn}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == ConfigManager.LDAP_RW)]
     def suService = (SuService)cacheManager.get(params, {query(directory,dn,serviceType)})
     return suService
   }

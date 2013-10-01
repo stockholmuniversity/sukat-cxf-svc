@@ -4,6 +4,7 @@ import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PreconditionViolation
 import org.springframework.ldap.core.DistinguishedName
 import se.su.it.svc.commons.SvcAudit
+import se.su.it.svc.ldap.SuPerson
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -36,8 +37,8 @@ import se.su.it.svc.commons.SvcAudit
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuRole
+import se.su.it.svc.manager.EhCacheManager
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuRoleQuery
 import spock.lang.Specification
@@ -54,6 +55,7 @@ class RoleServiceImplSpec extends Specification {
     SuRoleQuery.metaClass = null
     SuPersonQuery.metaClass = null
     GldapoSchemaRegistry.metaClass = null
+    EhCacheManager.metaClass = null
   }
 
   def "Test addUidToRoles with null uid argument"() {
@@ -104,9 +106,7 @@ class RoleServiceImplSpec extends Specification {
     setup:
     def myRoles = ["cn=Test1,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE",
       "cn=Test2,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE"]
-    GroovyMock(SuPersonQuery, global:true)
-
-    SuPersonQuery.getSuPersonFromUID(*_) >> { throw new IllegalArgumentException("foo") }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> throw new IllegalArgumentException("foo") }
     def roleServiceImpl = new RoleServiceImpl()
 
     when:
@@ -133,9 +133,17 @@ class RoleServiceImplSpec extends Specification {
 
     person.metaClass.getDn = { "uid=testuid,dc=it,dc=su,dc=se" }
 
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> return person }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> person }
 
+    /**
     SuRoleQuery.metaClass.static.getSuRoleFromDN = { String directory, String roleDN ->
+      if (roleDN.startsWith("cn=Test1")) return suRole;
+      if (roleDN.startsWith("cn=Test2")) return suRole2;
+    }
+    */
+
+    GroovyMock(SuRoleQuery, global:true)
+    SuRoleQuery.getSuRoleFromDN(_,_) >> { String arg1, String roleDN ->
       if (roleDN.startsWith("cn=Test1")) return suRole;
       if (roleDN.startsWith("cn=Test2")) return suRole2;
     }
@@ -203,8 +211,7 @@ class RoleServiceImplSpec extends Specification {
     def myRoles = ["cn=Test1,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE",
       "cn=Test2,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE"]
 
-    GroovyMock(SuPersonQuery, global:true)
-    SuPersonQuery.getSuPersonFromUID(*_) >> { throw new IllegalArgumentException("foo") }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> throw new IllegalArgumentException("foo") }
 
     def roleServiceImpl = new RoleServiceImpl()
 
@@ -228,8 +235,14 @@ class RoleServiceImplSpec extends Specification {
     def myRoles = ["cn=Test1,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE",
       "cn=Test2,ou=Team Utveckling,ou=Systemsektionen,ou=Avdelningen för IT och media,ou=Universitetsförvaltningen,o=Stockholms universitet,c=SE"]
     person.metaClass.getDn = {new DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return person }
-    SuRoleQuery.metaClass.static.getSuRoleFromDN = {String directory, String roleDN -> if(roleDN.startsWith("cn=Test1")) return suRole; if(roleDN.startsWith("cn=Test2")) return suRole2;}
+
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> person }
+
+    GroovyMock(SuRoleQuery, global:true)
+    SuRoleQuery.getSuRoleFromDN(_,_) >> { arg1, roleDN ->
+      if(roleDN.startsWith("cn=Test1")) return suRole;
+      if(roleDN.startsWith("cn=Test2")) return suRole2;
+    }
     SuRole.metaClass.update {-> saved = delegate.cn }
     def roleServiceImpl = new RoleServiceImpl()
 

@@ -6,6 +6,7 @@ import org.gcontracts.PostconditionViolation
 import org.gcontracts.PreconditionViolation
 import se.su.it.commons.Kadmin
 import se.su.it.commons.PasswordUtils
+import se.su.it.svc.commons.SvcAudit
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -38,14 +39,11 @@ import se.su.it.commons.PasswordUtils
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuPersonStub
-import se.su.it.svc.manager.Config
 import se.su.it.svc.query.SuPersonQuery
-import spock.lang.IgnoreRest
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -345,15 +343,14 @@ class AccountServiceImplSpec extends Specification {
     setup:
 
     Properties properties = new Properties()
-    service.configHolder = [props:[ldap:[accounts:[default:properties]]]]
+    service.configManager = [config:[ldap:[accounts:[default:properties]]]]
 
     def uid = 'uid'
     def ssn = '0000000000'
     def givenName = 'Test'
     def sn = 'Testsson'
 
-    GroovyMock(SuPersonQuery, global: true)
-    SuPersonQuery.findSuPersonByUID(*_) >> null
+    SuPersonQuery.metaClass.static.findSuPersonByUID = { String a, String b -> null }
 
     when:
     service.createSuPerson(
@@ -371,16 +368,14 @@ class AccountServiceImplSpec extends Specification {
     setup:
     Properties properties = new Properties()
     properties.put("parent", "foo")
-    service.configHolder = [props:[ldap:[accounts:[default:properties]]]]
+    service.configManager = [config:[ldap:[accounts:[default:properties]]]]
 
     def uid = 'uid'
     def ssn = '0000000000'
     def givenName = 'Test'
     def sn = 'Testsson'
 
-
-    GroovyMock(SuPersonQuery, global: true)
-    SuPersonQuery.findSuPersonByUID(*_) >> null
+    SuPersonQuery.metaClass.static.findSuPersonByUID = { String a, String b -> null }
 
     def spy = GroovySpy(SuPersonStub)
 
@@ -542,8 +537,7 @@ class AccountServiceImplSpec extends Specification {
   def "Test findSuPersonBySocialSecurityNumber: When a user ain't found"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
-    GroovyMock(SuPersonQuery, global: true)
-    SuPersonQuery.getSuPersonFromSsn(_,_) >> { new SvcSuPersonVO[0] }
+    SuPersonQuery.metaClass.static.getSuPersonFromSsn = { String a, String b -> new SvcSuPersonVO[0] }
 
     when:
     def ret = accountServiceImpl.findAllSuPersonsBySocialSecurityNumber('1001010000', new SvcAudit())
@@ -648,10 +642,7 @@ class AccountServiceImplSpec extends Specification {
 
   def "activateSuPerson: test when user exists in LDAP, should handle user and return new password"() {
     given:
-    GroovyMock(SuPersonQuery, global: true)
-    SuPersonQuery.getSuPersonFromUID(_,_) >> {
-      return GroovyMock(SuPerson)
-    }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> return GroovyMock(SuPerson) }
 
     when:
     def svcUidPwd = service.activateSuPerson(
@@ -706,8 +697,7 @@ class AccountServiceImplSpec extends Specification {
     def password = "*" * 10
 
     SuPerson suPerson = Mock(SuPerson)
-    GroovyMock(SuPersonQuery, global: true)
-    SuPersonQuery.getSuPersonFromUID(_,_) >> { suPerson }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> suPerson }
 
     GroovyMock(PasswordUtils, global: true)
 
@@ -768,9 +758,8 @@ class AccountServiceImplSpec extends Specification {
     SuPerson.metaClass.update = {-> }
     def mailLocalAddresses = ['kaka@su.se', "bar@su.se"]
     String uid = 'foo'
-    def suPersonQueryMock = GroovyMock(SuPersonQuery, global:true)
     SuPerson suPerson = GroovyMock(SuPerson)
-    SuPersonQuery.getSuPersonFromUID(_, uid) >> suPerson
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> suPerson }
 
     when:
     def resp = service.addMailLocalAddresses(uid, mailLocalAddresses as String[], new SvcAudit())
@@ -787,11 +776,10 @@ class AccountServiceImplSpec extends Specification {
     SuPerson.metaClass.update = {-> }
     def mailLocalAddresses = ['kaka@su.se', "bar@su.se"]
     String uid = 'foo'
-    def suPersonQueryMock = GroovyMock(SuPersonQuery, global:true)
     SuPerson suPerson = GroovyMock(SuPerson) {
       1 * addMailLocalAddress(*_) >> mailLocalAddresses
     }
-    SuPersonQuery.getSuPersonFromUID(_, uid) >> suPerson
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> suPerson }
 
     when:
     def resp = service.addMailLocalAddresses(uid, mailLocalAddresses as String[], new SvcAudit())
