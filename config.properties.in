@@ -1,36 +1,22 @@
-#Sets the endpoint url in the wsdl, ex https://sukat-svc.it.su.se/
-publishedEndpointUrl = %%ENDPOINT_URL%%
-
-#database settings
-database.url        = jdbc:mysql://localhost/gormtest
-database.driver     = com.mysql.jdbc.Driver
-database.user       = gormtest
-database.password   = gormtest
-
-#ldap settings
-ldap.serverro           = ldap://ldap-test.su.se
-ldap.serverrw           = ldap://sukat-test-ldaprw02.it.su.se
-
 # Jetty settings
-http.port               = 443
+cxf-server.http.port               = 80
+
 # bind.address (Specify to bind to specific ip. Not mandatory)
-bind.address            = 127.0.0.1
-ssl.enabled             = true
-ssl.keystore            = cxf-svc-server.keystore
-ssl.password            = changeit
+cxf-server.bind.address            = 127.0.0.1
+cxf-server.ssl.enabled             = false
+cxf-server.ssl.keystore            = cxf-svc-server.keystore
+cxf-server.ssl.password            = changeit
 
 # Jetty spnego settings
-spnego.conf             = /etc/spnego.conf
-spnego.properties       = spnego.properties
-spnego.realm            = SU.SE
-spnego.kdc              = kerberos.su.se
+cxf-server.spnego.conf             = /etc/spnego.conf
+cxf-server.spnego.properties       = spnego.properties
+cxf-server.spnego.realm            = SU.SE
+cxf-server.spnego.kdc              = kerberos.su.se
 
-# EhCache settings
-ehcache.maxElementsInMemory             = 10000
-ehcache.eternal                         = false
-ehcache.timeToIdleSeconds               = 120
-ehcache.timeToLiveSeconds               = 600
-ehcache.overflowToDisk                  = false
-ehcache.diskPersistent                  = false
-ehcache.diskExpiryThreadIntervalSeconds = 120
-ehcache.memoryStoreEvictionPolicy       = "LRU"
+# Sets the endpoint url in the wsdl, ex https://sukat-svc.it.su.se/
+cxf-app.publishedEndpointUrl = %%ENDPOINT_URL%%
+
+# ldap settings
+cxf-app.ldap.serverro           = ldap://ldap-test.su.se
+cxf-app.ldap.serverrw           = ldap://sukat-test-ldaprw02.it.su.se
+

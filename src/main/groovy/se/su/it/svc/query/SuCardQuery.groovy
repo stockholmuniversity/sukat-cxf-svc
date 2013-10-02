@@ -45,13 +45,13 @@ public class SuCardQuery {
    * Returns a list (<code>ArrayList<SuCard></code>) of SuCard objects for a specific DistinguishedName, specified by the parameter dn.
    * !important: this query is cached,
    *
-   * @param directory which directory to use, see GldapoManager.
+   * @param directory which directory to use, see ConfigManager.
    * @param dn  the DistinguishedName for the user that you want to find cards for.
    * @param onlyActive  if only active cards should be returned in the result.
    * @return an <code>ArrayList<SuCard></code> of SuCard objects or an empty array if no card was found.
    * @throws Throwable if ldap search goes wrong
    * @see se.su.it.svc.ldap.SuCard
-   * @see se.su.it.svc.manager.GldapoManager
+   * @see se.su.it.svc.manager.ConfigManager
    */
 
   static SuCard[] findAllCardsBySuPersonDnAndOnlyActiveOrNot(String directory, DistinguishedName dn, boolean onlyActiveCards) {

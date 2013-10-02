@@ -32,8 +32,8 @@
 package se.su.it.svc.query
 
 import se.su.it.svc.ldap.SuServiceDescription
+import se.su.it.svc.manager.ConfigManager
 import se.su.it.svc.manager.EhCacheManager
-import se.su.it.svc.manager.GldapoManager
 
 /**
  * This class is a helper class for doing GLDAPO queries on the SuServiceDescription GLDAPO schema.
@@ -53,10 +53,10 @@ public class SuServiceDescriptionQuery {
    *
    *
    * @param serviceType String with ServiceType to fetch
-   * @param directory which directory to use, see GldapoManager.
+   * @param directory which directory to use, see ConfigManager.
    * @return an <code><SuServiceDescription></code>.
    * @see se.su.it.svc.ldap.SuServiceDescription
-   * @see se.su.it.svc.manager.GldapoManager
+   * @see se.su.it.svc.manager.ConfigManager
    */
   static SuServiceDescription getSuServiceDescription(String serviceType, String directory) {
     def query = { qDirectory ->
@@ -68,7 +68,7 @@ public class SuServiceDescriptionQuery {
       }
     }
 
-    def params = [key: ":getSuServiceDescription:", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
+    def params = [key: ":getSuServiceDescription:", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == ConfigManager.LDAP_RW)]
     def suServiceDescription = (SuServiceDescription) cacheManager.get(params, {query(directory)})
 
     return suServiceDescription
@@ -78,10 +78,10 @@ public class SuServiceDescriptionQuery {
    * Returns an Array of SuServiceDescription objects.
    *
    *
-   * @param directory which directory to use, see GldapoManager.
+   * @param directory which directory to use, see ConfigManager.
    * @return an <code>ArrayList<SuServiceDescription></code> of SuServiceDescription objects or an empty array if no service description was found.
    * @see se.su.it.svc.ldap.SuServiceDescription
-   * @see se.su.it.svc.manager.GldapoManager
+   * @see se.su.it.svc.manager.ConfigManager
    */
   static SuServiceDescription[] getSuServiceDescriptions(String directory) {
     def query = { qDirectory ->
@@ -92,7 +92,7 @@ public class SuServiceDescriptionQuery {
       }
     }
 
-    def params = [key: ":getSuServiceDescriptions:", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
+    def params = [key: ":getSuServiceDescriptions:", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == ConfigManager.LDAP_RW)]
     def suServiceDescriptionList = (SuServiceDescription[]) cacheManager.get(params, {query(directory)})
 
     return suServiceDescriptionList

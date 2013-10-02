@@ -4,6 +4,7 @@ import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PreconditionViolation
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuCard
+import se.su.it.svc.query.SuCardOrderQuery
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -36,7 +37,6 @@ import se.su.it.svc.ldap.SuCard
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import se.su.it.svc.query.SuCardOrderQuery
 import se.su.it.svc.query.SuCardQuery
 import spock.lang.Specification
 
@@ -44,9 +44,9 @@ class CardAdminServiceImplSpec extends Specification {
 
   def setup() {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
-    SuCard.metaClass.static.save = {->}
-    SuCard.metaClass.static.find = { Map arg1, Closure arg2 ->}
-    SuCard.metaClass.static.update = {->}
+    SuCard.metaClass.static.save = {-> }
+    SuCard.metaClass.static.find = { Map arg1, Closure arg2 -> }
+    SuCard.metaClass.static.update = {-> }
   }
 
   def cleanup() {
@@ -56,63 +56,63 @@ class CardAdminServiceImplSpec extends Specification {
     GldapoSchemaRegistry.metaClass = null
   }
 
-  def "Test revokeCard with null suCardUUID argument"() {
+  def "revokeCard with null suCardUUID argument"() {
     setup:
     def cardAdminServiceImpl = new CardAdminServiceImpl()
 
     when:
-    cardAdminServiceImpl.revokeCard(null,new SvcAudit())
+    cardAdminServiceImpl.revokeCard(null, new SvcAudit())
 
     then:
     thrown(PreconditionViolation)
   }
 
-  def "Test revokeCard with null SvcAudit argument"() {
+  def "revokeCard with null SvcAudit argument"() {
     setup:
     def cardAdminServiceImpl = new CardAdminServiceImpl()
 
     when:
-    cardAdminServiceImpl.revokeCard("testcarduuid",null)
+    cardAdminServiceImpl.revokeCard("testcarduuid", null)
 
     then:
     thrown(PreconditionViolation)
   }
 
-  def "Test revokeCard sets state to revoked"() {
+  def "revokeCard sets state to revoked"() {
     setup:
     def suCard = new SuCard()
 
-    GroovyMock(SuCardQuery, global:true)
-    SuCardQuery.findCardBySuCardUUID(*_) >> { return suCard }
+    GroovyMock(SuCardQuery, global: true)
+    SuCardQuery.findCardBySuCardUUID(* _) >> { return suCard }
 
     def cardAdminServiceImpl = new CardAdminServiceImpl()
 
     cardAdminServiceImpl.suCardOrderQuery = GroovyMock(SuCardOrderQuery) {
-      markCardAsDiscarded(*_) >> { return true }
+      markCardAsDiscarded(* _) >> { return true }
     }
 
     when:
-    cardAdminServiceImpl.revokeCard("testcarduuid",new SvcAudit())
+    cardAdminServiceImpl.revokeCard("testcarduuid", new SvcAudit())
 
     then:
     suCard.suCardState == "urn:x-su:su-card:state:revoked"
   }
 
-  def "Test revokeCard when updating SuCardDb fails"() {
+  def "revokeCard when updating SuCardDb fails"() {
     setup:
 
     def suCard = new SuCard()
-    GroovyMock(SuCardQuery, global:true)
-    SuCardQuery.findCardBySuCardUUID(*_) >> { return suCard }
+    GroovyMock(SuCardQuery, global: true)
+    SuCardQuery.findCardBySuCardUUID(* _) >> { return suCard }
 
     def cardAdminServiceImpl = new CardAdminServiceImpl()
 
     cardAdminServiceImpl.suCardOrderQuery = GroovyMock(SuCardOrderQuery) {
-      markCardAsDiscarded(*_) >> { throw new RuntimeException("foo") }
+      markCardAsDiscarded(* _) >> { throw new RuntimeException("foo") }
     }
 
     when:
-    cardAdminServiceImpl.revokeCard("testcarduuid",new SvcAudit())
+    cardAdminServiceImpl.revokeCard("testcarduuid", new SvcAudit())
 
     then:
     thrown(RuntimeException)
@@ -121,64 +121,64 @@ class CardAdminServiceImplSpec extends Specification {
     suCard.suCardState == "urn:x-su:su-card:state:revoked"
   }
 
-  def "Test revokeCard throws IllegalArgumentException when no card was found"() {
+  def "revokeCard throws IllegalArgumentException when no card was found"() {
     setup:
-    SuCardQuery.metaClass.static.findCardBySuCardUUID = {String arg1, String arg2 -> return null}
+    SuCardQuery.metaClass.static.findCardBySuCardUUID = { String arg1, String arg2 -> return null }
 
     def cardAdminServiceImpl = new CardAdminServiceImpl()
     when:
-    cardAdminServiceImpl.revokeCard("testcarduuid",new SvcAudit())
+    cardAdminServiceImpl.revokeCard("testcarduuid", new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
 
-    def "Test setCardPIN with null suCardUUID argument"() {
+  def "setCardPIN with null suCardUUID argument"() {
     setup:
     def cardAdminServiceImpl = new CardAdminServiceImpl()
     when:
-    cardAdminServiceImpl.setCardPIN(null,"1234", new SvcAudit())
+    cardAdminServiceImpl.setCardPIN(null, "1234", new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
 
-  def "Test setCardPIN with null pin argument"() {
+  def "setCardPIN with null pin argument"() {
     setup:
     def cardAdminServiceImpl = new CardAdminServiceImpl()
     when:
-    cardAdminServiceImpl.setCardPIN("testcarduuid",null, new SvcAudit())
+    cardAdminServiceImpl.setCardPIN("testcarduuid", null, new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }
 
-  def "Test setCardPIN with null SvcAudit argument"() {
+  def "setCardPIN with null SvcAudit argument"() {
     setup:
     def cardAdminServiceImpl = new CardAdminServiceImpl()
     when:
-    cardAdminServiceImpl.setCardPIN("testcarduuid","1234",null)
+    cardAdminServiceImpl.setCardPIN("testcarduuid", "1234", null)
     then:
     thrown(IllegalArgumentException)
   }
 
-  def "Test setCardPIN sets pin"() {
+  def "setCardPIN sets pin"() {
     setup:
     def suCard = new SuCard()
-    suCard.metaClass.save = { }
-    SuCardQuery.metaClass.static.findCardBySuCardUUID = {String arg1, String arg2 -> return suCard}
+    suCard.metaClass.save = {}
+    SuCardQuery.metaClass.static.findCardBySuCardUUID = { String arg1, String arg2 -> return suCard }
 
     def cardAdminServiceImpl = new CardAdminServiceImpl()
     when:
-    cardAdminServiceImpl.setCardPIN("testcarduuid","1234",new SvcAudit())
+    cardAdminServiceImpl.setCardPIN("testcarduuid", "1234", new SvcAudit())
     then:
     suCard.suCardPIN == "1234"
   }
 
-  def "Test setCardPIN returns false when no card was found"() {
+  def "setCardPIN returns false when no card was found"() {
     setup:
-    SuCardQuery.metaClass.static.findCardBySuCardUUID = {String arg1, String arg2 -> return null}
+    SuCardQuery.metaClass.static.findCardBySuCardUUID = { String arg1, String arg2 -> return null }
 
     def cardAdminServiceImpl = new CardAdminServiceImpl()
     when:
-    cardAdminServiceImpl.setCardPIN("testcarduuid","1234", new SvcAudit())
+    cardAdminServiceImpl.setCardPIN("testcarduuid", "1234", new SvcAudit())
     then:
     thrown(IllegalArgumentException)
   }

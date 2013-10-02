@@ -41,7 +41,7 @@ import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuService
 import se.su.it.svc.ldap.SuServiceDescription
 import se.su.it.svc.ldap.SuSubAccount
-import se.su.it.svc.manager.GldapoManager
+import se.su.it.svc.manager.ConfigManager
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuServiceDescriptionQuery
 import se.su.it.svc.query.SuServiceQuery
@@ -76,9 +76,9 @@ public class ServiceServiceImpl implements ServiceService {
       @WebParam(name = "uid") String uid,
       @WebParam(name = "audit") SvcAudit audit) {
 
-    SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
+    SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RO, uid)
     DistinguishedName dn = new DistinguishedName(person.getDn())
-    def services = SuServiceQuery.getSuServices(GldapoManager.LDAP_RO, dn)
+    def services = SuServiceQuery.getSuServices(ConfigManager.LDAP_RO, dn)
 
     log.debug("getServices - Found: ${services?.size()} service(s) " +
         "${ services.collect { service -> service.suServiceType }.join(",") } with params: uid=<${uid}>")
@@ -99,7 +99,7 @@ public class ServiceServiceImpl implements ServiceService {
   public SuServiceDescription getServiceTemplate(@WebParam(name = "serviceType") String serviceType, @WebParam(name = "audit") SvcAudit audit) {
     if(serviceType == null || audit == null)
       throw new java.lang.IllegalArgumentException("getServiceTemplate - Null argument values not allowed in this function")
-    return SuServiceDescriptionQuery.getSuServiceDescription(serviceType, GldapoManager.LDAP_RO)
+    return SuServiceDescriptionQuery.getSuServiceDescription(serviceType, ConfigManager.LDAP_RO)
   }
 
   /**
@@ -114,7 +114,7 @@ public class ServiceServiceImpl implements ServiceService {
   public SuServiceDescription[] getServiceTemplates(@WebParam(name = "audit") SvcAudit audit) {
     if(audit == null)
       throw new java.lang.IllegalArgumentException("getServiceTemplates - Null argument values not allowed in this function")
-    return SuServiceDescriptionQuery.getSuServiceDescriptions(GldapoManager.LDAP_RO)
+    return SuServiceDescriptionQuery.getSuServiceDescriptions(ConfigManager.LDAP_RO)
   }
 
   /**
@@ -140,13 +140,13 @@ public class ServiceServiceImpl implements ServiceService {
       @WebParam(name = "description") String description,
       @WebParam(name = "audit") SvcAudit audit) {
 
-    SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
+    SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RO, uid)
 
     String subUid = ""
     // START Try to create sub account if it do not exist
     if (qualifier && qualifier.length() > 0) {
       subUid = uid + "." + qualifier;
-      def subAccounts = SuSubAccountQuery.getSuSubAccounts(GldapoManager.LDAP_RO, person.getDn())
+      def subAccounts = SuSubAccountQuery.getSuSubAccounts(ConfigManager.LDAP_RO, person.getDn())
       if (!subAccounts.find { subAcc -> subAcc.uid == subUid }) {
         log.debug("enableServiceFully - Trying to create sub account uid=<${subUid}> to be used by service=<${serviceType}> for uid=<${uid}>")
         SuSubAccount subAcc = new SuSubAccount()
@@ -158,7 +158,7 @@ public class ServiceServiceImpl implements ServiceService {
           subAcc.objectClass.add("jabberUser")
           subAcc.jabberID = GeneralUtils.uidToPrincipal(uid)
         }
-        SuSubAccountQuery.createSubAccount(GldapoManager.LDAP_RW, subAcc)
+        SuSubAccountQuery.createSubAccount(ConfigManager.LDAP_RW, subAcc)
         def subAccountPwd = Kadmin.newInstance().resetOrCreatePrincipal(GeneralUtils.uidToKrb5Principal(subUid))
         log.info("enableServiceFully - Created sub account uid=<${subUid}> to be used by service=<${serviceType}> for uid=<${uid}>")
       } else {
@@ -168,7 +168,7 @@ public class ServiceServiceImpl implements ServiceService {
 
     // END Try to create sub account if it do not exist
     SuService suService = SuServiceQuery.getSuServiceByType(
-        GldapoManager.LDAP_RW, person.getDn() as DistinguishedName, serviceType)
+        ConfigManager.LDAP_RW, person.getDn() as DistinguishedName, serviceType)
 
     if (suService == null) {
       log.debug("enableServiceFully - Trying to create service=<${serviceType}> for uid=<${uid}>")
@@ -185,7 +185,7 @@ public class ServiceServiceImpl implements ServiceService {
         log.debug("enableServiceFully - Setting roleOccupant of service=<${serviceType}> to <${suService.roleOccupant}>")
       }
       suService.parent = person.getDn().toString()
-      suService.directory = GldapoManager.LDAP_RW
+      suService.directory = ConfigManager.LDAP_RW
       suService.save()
       log.info("enableServiceFully - Created service=<${serviceType}> for uid=<${uid}>")
     } else {
@@ -214,9 +214,9 @@ public class ServiceServiceImpl implements ServiceService {
   public void blockService(@WebParam(name = "uid") String uid, @WebParam(name = "serviceType") String serviceType, @WebParam(name = "audit") SvcAudit audit) {
     if(uid == null || serviceType == null || audit == null)
       throw new java.lang.IllegalArgumentException("blockService - Null argument values not allowed in this function")
-    SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
+    SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RO, uid)
     if(person) {
-      def service = SuServiceQuery.getSuServiceByType(GldapoManager.LDAP_RW, person.getDn(), serviceType)
+      def service = SuServiceQuery.getSuServiceByType(ConfigManager.LDAP_RW, person.getDn(), serviceType)
       if(service != null) {
         if (service.suServiceStatus.equalsIgnoreCase("blocked") || service.suServiceStatus.equalsIgnoreCase("locked"))
           throw new IllegalArgumentException("blockService - service=<${serviceType}> for uid=<${uid}> is already blocked/locked")
@@ -247,11 +247,11 @@ public class ServiceServiceImpl implements ServiceService {
   public void unblockService(@WebParam(name = "uid") String uid, @WebParam(name = "serviceType") String serviceType, @WebParam(name = "audit") SvcAudit audit) {
     if(uid == null || serviceType == null || audit == null)
       throw new java.lang.IllegalArgumentException("unblockService - Null argument values not allowed in this function")
-    SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
+    SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RO, uid)
     if(person) {
-      def service = SuServiceQuery.getSuServiceByType(GldapoManager.LDAP_RW, person.getDn(), serviceType)
+      def service = SuServiceQuery.getSuServiceByType(ConfigManager.LDAP_RW, person.getDn(), serviceType)
       if(service != null) {
-        def serviceDescs=SuServiceDescriptionQuery.getSuServiceDescriptions(GldapoManager.LDAP_RO)
+        def serviceDescs=SuServiceDescriptionQuery.getSuServiceDescriptions(ConfigManager.LDAP_RO)
         def servDesc=serviceDescs.find {serverDescription -> serverDescription.suServiceType.equalsIgnoreCase(serviceType)}
         String status = servDesc?.suServicePolicy?.contains("opt-in") ? "disabled":"enabled"
         log.debug("unblockService - Trying to unblock service=<${serviceType}> for uid=<${uid}>")

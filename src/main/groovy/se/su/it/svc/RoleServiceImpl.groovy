@@ -38,7 +38,8 @@ import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuRole
-import se.su.it.svc.manager.GldapoManager
+import se.su.it.svc.manager.ConfigManager
+
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuRoleQuery
 
@@ -75,13 +76,13 @@ public class RoleServiceImpl implements RoleService {
       @WebParam(name = "roleDNList") List<String> roleDNList,
       @WebParam(name = "audit") SvcAudit audit) {
 
-    SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
+    SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RO, uid)
 
     DistinguishedName uidDN = new DistinguishedName(person.getDn())
 
     for (roleDN in roleDNList) {
       log.debug("addUidToRoles - Trying to find role for DN<${roleDN}>")
-      SuRole role = SuRoleQuery.getSuRoleFromDN(GldapoManager.LDAP_RW, roleDN)
+      SuRole role = SuRoleQuery.getSuRoleFromDN(ConfigManager.LDAP_RW, roleDN)
 
       if (!role) {
         log.warn("addUidToRoles - Could not add uid <${person.uid}> to role <${roleDN}>, role not found!")
@@ -120,7 +121,7 @@ public class RoleServiceImpl implements RoleService {
       @WebParam(name = "roleDNList") List<String> roleDNList,
       @WebParam(name = "audit") SvcAudit audit) {
 
-    SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
+    SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RO, uid)
     DistinguishedName uidDN = new DistinguishedName(person.getDn())
 
     for (tmpRoleDN in roleDNList) {
@@ -128,7 +129,7 @@ public class RoleServiceImpl implements RoleService {
 
       log.debug("removeUidFromRoles - Trying to find role for DN<${roleDN.toString()}>")
 
-      SuRole role = SuRoleQuery.getSuRoleFromDN(GldapoManager.LDAP_RW, roleDN.toString())
+      SuRole role = SuRoleQuery.getSuRoleFromDN(ConfigManager.LDAP_RW, roleDN.toString())
 
       if (!role) {
         log.warn("removeUidFromRoles - Could not remove uid <${person.uid}> from role <${roleDN}>, role not found!")
