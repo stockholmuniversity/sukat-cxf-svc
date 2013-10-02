@@ -2,6 +2,7 @@ package se.su.it.svc
 
 import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PreconditionViolation
+import se.su.it.svc.commons.SvcAudit
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -34,10 +35,8 @@ import org.gcontracts.PreconditionViolation
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.query.SuPersonQuery
-import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 /**
@@ -163,8 +162,7 @@ class EntitlementServiceImplSpec extends Specification {
 
   def "Test removeEntitlement when person dont exists"() {
     setup:
-    GroovyMock(SuPersonQuery, global: true)
-    SuPersonQuery.getSuPersonFromUID(*_) >> { throw new IllegalArgumentException("foo") }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> throw new IllegalArgumentException("foo") }
 
     def entitlementServiceImpl = new EntitlementServiceImpl()
     when:
@@ -178,8 +176,7 @@ class EntitlementServiceImplSpec extends Specification {
     SuPerson person = new SuPerson()
     person.eduPersonEntitlement = null
 
-    GroovyMock(SuPersonQuery, global: true)
-    SuPersonQuery.getSuPersonFromUID(*_) >> { return person }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> person }
 
     def entitlementServiceImpl = new EntitlementServiceImpl()
 
@@ -196,8 +193,7 @@ class EntitlementServiceImplSpec extends Specification {
     SuPerson suPerson = new SuPerson()
     suPerson.eduPersonEntitlement = new LinkedHashSet<String>(["urn:mace:swami.se:gmai:test:test"])
 
-    GroovyMock(SuPersonQuery, global: true)
-    SuPersonQuery.getSuPersonFromUID(*_) >> { return suPerson }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> suPerson }
 
     def entitlementServiceImpl = new EntitlementServiceImpl()
 

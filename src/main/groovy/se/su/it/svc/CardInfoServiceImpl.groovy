@@ -37,7 +37,7 @@ import org.gcontracts.annotations.Requires
 import org.springframework.ldap.core.DistinguishedName
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuCard
-import se.su.it.svc.manager.GldapoManager
+import se.su.it.svc.manager.ConfigManager
 import se.su.it.svc.query.SuCardQuery
 import se.su.it.svc.query.SuPersonQuery
 
@@ -73,9 +73,9 @@ public class CardInfoServiceImpl implements CardInfoService {
           @WebParam(name = 'audit') SvcAudit audit
   ) {
 
-    def person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RO, uid)
+    def person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RO, uid)
 
-    String directory = GldapoManager.LDAP_RO
+    String directory = ConfigManager.LDAP_RO
     DistinguishedName dn = person.getDn()
 
     return SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(directory, dn, onlyActive) ?: new SuCard[0]
@@ -98,6 +98,6 @@ public class CardInfoServiceImpl implements CardInfoService {
           @WebParam(name = 'audit') SvcAudit audit
   ) {
 
-    return SuCardQuery.findCardBySuCardUUID(GldapoManager.LDAP_RO, suCardUUID)
+    return SuCardQuery.findCardBySuCardUUID(ConfigManager.LDAP_RO, suCardUUID)
   }
 }

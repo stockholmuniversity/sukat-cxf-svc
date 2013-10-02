@@ -5,10 +5,8 @@ import se.su.it.commons.ExecUtils
 import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
-import se.su.it.svc.manager.Config
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.util.GeneralUtils
-import spock.lang.IgnoreRest
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -22,6 +20,7 @@ class SuPersonSpec extends Specification {
 
   def cleanup() {
     SuPerson.metaClass = null
+    SuPersonQuery.metaClass = null
     GldapoSchemaRegistry.metaClass = null
   }
 
@@ -288,20 +287,22 @@ class SuPersonSpec extends Specification {
 
   def "enableUser should set uidNumber=-1 if skipCreate"() {
     given:
-    def posixAccoount = new SuPerson(objectClass: [])
-    Config.instance.props.enrollment.skipCreate = "true"
+    def posixAccount = new SuPerson(objectClass: [])
+
+    SuPerson.metaClass.isSkipCreateEnabled = {->
+      return true
+    }
 
     when:
-    posixAccoount.enable("", "")
+    posixAccount.enable("", "")
 
     then:
-    posixAccoount.uidNumber == "-1"
+    posixAccount.uidNumber == "-1"
   }
 
   def "enable should set attributes on person & return true"() {
     given:
 
-    GroovyMock(SuPersonQuery, global:true)
     GroovyMock(LdapAttributeValidator, global:true)
 
     SuPerson.metaClass.runEnableScript = { String arg1, String arg2 ->
@@ -314,7 +315,9 @@ class SuPersonSpec extends Specification {
 
     SuPerson suPerson = new SuPerson(objectClass: [])
 
-    Config.instance.props.enrollment.skipCreate = "false"
+    SuPerson.metaClass.isSkipCreateEnabled = {->
+      return false
+    }
 
     when:
     def ret = suPerson.enable("", "")
@@ -331,11 +334,20 @@ class SuPersonSpec extends Specification {
 
   def "activate should"() {
     given:
-    GroovyMock(SuPersonQuery, global: true)
-
     SuPerson suPerson = new SuPerson(objectClass: [])
 
     SuPerson.metaClass.runEnableScript = { String arg1, String arg2 ->
+      return true
+    }
+    boolean correctDomain = false, updated = false
+    SuPersonQuery.metaClass.static.moveSuPerson = { SuPerson a, String b ->
+      correctDomain = (a == suPerson && b == 'dc=it,dc=su,dc=se')
+    }
+    SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson a ->
+      updated = (a == suPerson)
+    }
+
+    SuPerson.metaClass.isSkipCreateEnabled = {->
       return true
     }
 
@@ -343,16 +355,14 @@ class SuPersonSpec extends Specification {
     suPerson.activate(new SvcUidPwd(), [SuPerson.Affilation.EMPLOYEE.value] as String[], "it.su.se")
 
     then: 'move the person to the correct domain'
-    1 * SuPersonQuery.moveSuPerson(suPerson, 'dc=it,dc=su,dc=se')
+    correctDomain
 
     and: 'update the SuPerson'
-    2 * SuPersonQuery.updateSuPerson(suPerson)
+    updated
   }
 
   def "activate should set affiliation"() {
     given:
-    GroovyMock(SuPersonQuery, global: true)
-
     SuPerson.metaClass.runEnableScript = { String arg1, String arg2 ->
       return true
     }

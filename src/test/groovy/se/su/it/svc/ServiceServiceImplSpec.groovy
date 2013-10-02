@@ -4,6 +4,8 @@ import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PreconditionViolation
 import se.su.it.commons.Kadmin
 import se.su.it.svc.commons.SvcAudit
+import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.ldap.SuService
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -36,8 +38,6 @@ import se.su.it.svc.commons.SvcAudit
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import se.su.it.svc.ldap.SuPerson
-import se.su.it.svc.ldap.SuService
 import se.su.it.svc.ldap.SuServiceDescription
 import se.su.it.svc.ldap.SuSubAccount
 import se.su.it.svc.query.SuPersonQuery
@@ -46,13 +46,6 @@ import se.su.it.svc.query.SuServiceQuery
 import se.su.it.svc.query.SuSubAccountQuery
 import spock.lang.Specification
 
-/**
- * Created with IntelliJ IDEA.
- * User: jqvar
- * Date: 2012-09-04
- * Time: 11:26
- * To change this template use File | Settings | File Templates.
- */
 class ServiceServiceImplSpec extends Specification {
 
   def setup() {
@@ -64,10 +57,10 @@ class ServiceServiceImplSpec extends Specification {
 
   def cleanup() {
     SuPerson.metaClass = null
-    SuPersonQuery.metaClass = null
     SuService.metaClass = null
+    SuPersonQuery.metaClass = null
     SuServiceQuery.metaClass = null
-    SuServiceDescriptionQuery.metaClass
+    SuServiceDescriptionQuery.metaClass = null
     SuSubAccountQuery.metaClass = null
     Kadmin.metaClass = null
     GldapoSchemaRegistry.metaClass = null
@@ -102,10 +95,9 @@ class ServiceServiceImplSpec extends Specification {
 
     def serviceServiceImpl = new ServiceServiceImpl()
 
-    GroovyMock(SuPersonQuery, global:true)
     GroovyMock(SuServiceQuery, global:true)
-    SuPersonQuery.getSuPersonFromUID(*_) >> { return person }
     SuServiceQuery.getSuServices(*_) >> { return [new SuService()] }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> person }
 
     when:
     def ret = serviceServiceImpl.getServices("testuid",new SvcAudit())
@@ -122,10 +114,9 @@ class ServiceServiceImplSpec extends Specification {
 
     def serviceServiceImpl = new ServiceServiceImpl()
 
-    GroovyMock(SuPersonQuery, global:true)
     GroovyMock(SuServiceQuery, global:true)
-    SuPersonQuery.getSuPersonFromUID(*_) >> { return person }
     SuServiceQuery.getSuServices(*_) >> { return [] }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> person }
 
     when:
     def ret = serviceServiceImpl.getServices("testuid",new SvcAudit())
@@ -136,8 +127,7 @@ class ServiceServiceImplSpec extends Specification {
 
   def "Test getServices returns exception when person dont exists"() {
     setup:
-    GroovyMock(SuPersonQuery, global:true)
-    SuPersonQuery.getSuPersonFromUID(*_) >> { throw new IllegalArgumentException("foo") }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> throw new IllegalArgumentException("foo") }
     def serviceServiceImpl = new ServiceServiceImpl()
 
     when:
@@ -215,8 +205,7 @@ class ServiceServiceImplSpec extends Specification {
 
   def "Test enableServiceFully returns exception when person dont exists"() {
     setup:
-    GroovyMock(SuPersonQuery, global:true)
-    SuPersonQuery.getSuPersonFromUID(*_) >> { throw new IllegalArgumentException("foo") }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> throw new IllegalArgumentException("foo") }
     def serviceServiceImpl = new ServiceServiceImpl()
 
     when:
@@ -228,7 +217,7 @@ class ServiceServiceImplSpec extends Specification {
 
   def "Test enableServiceFully with qualifier" () {
     setup:
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return new SuPerson(uid: "testuid") }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> new SuPerson(uid: "testuid") }
     SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
     SuSubAccountQuery.metaClass.static.getSuSubAccounts = {String directory, org.springframework.ldap.core.DistinguishedName dn -> return [new SuSubAccount(uid: "test2uid.jabber"),new SuSubAccount(uid: "testuid.jabber")]}
     SuSubAccountQuery.metaClass.static.createSubAccount = {String directory, SuSubAccount -> return void}
@@ -248,7 +237,7 @@ class ServiceServiceImplSpec extends Specification {
 
   def "Test enableServiceFully with blocked service status" () {
     setup:
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return new SuPerson(uid: "testuid") }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> new SuPerson(uid: "testuid") }
     SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
     SuSubAccountQuery.metaClass.static.getSuSubAccounts = {String directory, org.springframework.ldap.core.DistinguishedName dn -> return [new SuSubAccount(uid: "test2uid.jabber"),new SuSubAccount(uid: "testuid.jabber")]}
     SuSubAccountQuery.metaClass.static.createSubAccount = {String directory, SuSubAccount -> return void}
@@ -267,7 +256,7 @@ class ServiceServiceImplSpec extends Specification {
 
   def "Test enableServiceFully with locked service status" () {
     setup:
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return new SuPerson(uid: "testuid") }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> new SuPerson(uid: "testuid") }
     SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
     SuSubAccountQuery.metaClass.static.getSuSubAccounts = {String directory, org.springframework.ldap.core.DistinguishedName dn -> return [new SuSubAccount(uid: "test2uid.jabber"),new SuSubAccount(uid: "testuid.jabber")]}
     SuSubAccountQuery.metaClass.static.createSubAccount = {String directory, SuSubAccount -> return void}
@@ -319,8 +308,8 @@ class ServiceServiceImplSpec extends Specification {
 
   def "Test blockService no service found"() {
     setup:
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> new SuPerson(uid: "testuid") }
     def serviceServiceImpl = new ServiceServiceImpl()
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return new SuPerson(uid: "testuid") }
     SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
     SuServiceQuery.metaClass.static.getSuServiceByType = {String directory, org.springframework.ldap.core.DistinguishedName dn, String serviceType -> return null}
 
@@ -333,8 +322,8 @@ class ServiceServiceImplSpec extends Specification {
 
   def "Test blockService already blocked"() {
     setup:
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> new SuPerson(uid: "testuid") }
     def serviceServiceImpl = new ServiceServiceImpl()
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return new SuPerson(uid: "testuid") }
     SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
     SuServiceQuery.metaClass.static.getSuServiceByType = {String directory, org.springframework.ldap.core.DistinguishedName dn, String serviceType -> return new SuService(suServiceStatus: "locked")}
 
@@ -347,9 +336,9 @@ class ServiceServiceImplSpec extends Specification {
 
   def "Test blockService"() {
     setup:
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> new SuPerson(uid: "testuid") }
     String serviceStatus = null
     def serviceServiceImpl = new ServiceServiceImpl()
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return new SuPerson(uid: "testuid") }
     SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
     SuServiceQuery.metaClass.static.getSuServiceByType = {String directory, org.springframework.ldap.core.DistinguishedName dn, String serviceType -> return new SuService(suServiceStatus: "enabled")}
     SuService.metaClass.update = { ->
@@ -398,8 +387,8 @@ class ServiceServiceImplSpec extends Specification {
 
   def "Test unblockService no service found"() {
     setup:
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> new SuPerson(uid: "testuid") }
     def serviceServiceImpl = new ServiceServiceImpl()
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return new SuPerson(uid: "testuid") }
     SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
     SuServiceQuery.metaClass.static.getSuServiceByType = {String directory, org.springframework.ldap.core.DistinguishedName dn, String serviceType -> return null}
 
@@ -412,9 +401,9 @@ class ServiceServiceImplSpec extends Specification {
 
   def "Test unblockService without opt-in"() {
     setup:
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> new SuPerson(uid: "testuid") }
     String serviceStatus = null
     def serviceServiceImpl = new ServiceServiceImpl()
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return new SuPerson(uid: "testuid") }
     SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
     SuServiceQuery.metaClass.static.getSuServiceByType = {String directory, org.springframework.ldap.core.DistinguishedName dn, String serviceType -> return new SuService(suServiceStatus: "enabled")}
     SuServiceDescriptionQuery.metaClass.static.getSuServiceDescriptions = {String directory -> [new SuServiceDescription(suServiceType: "urn:x-su:service:type:jabber")]}
@@ -431,9 +420,9 @@ class ServiceServiceImplSpec extends Specification {
 
   def "Test unblockService with opt-in"() {
     setup:
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> new SuPerson(uid: "testuid") }
     String serviceStatus = null
     def serviceServiceImpl = new ServiceServiceImpl()
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return new SuPerson(uid: "testuid") }
     SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
     SuServiceQuery.metaClass.static.getSuServiceByType = {String directory, org.springframework.ldap.core.DistinguishedName dn, String serviceType -> return new SuService(suServiceStatus: "enabled")}
     SuServiceDescriptionQuery.metaClass.static.getSuServiceDescriptions = {String directory -> [new SuServiceDescription(suServiceType: "urn:x-su:service:type:jabber", suServicePolicy: "urn:x-su:service:policy:opt-in")]}

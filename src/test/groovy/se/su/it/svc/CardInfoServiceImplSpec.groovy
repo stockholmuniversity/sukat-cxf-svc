@@ -1,6 +1,7 @@
 package se.su.it.svc
 
 import gldapo.GldapoSchemaRegistry
+import org.gcontracts.PreconditionViolation
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -33,7 +34,6 @@ import gldapo.GldapoSchemaRegistry
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.gcontracts.PreconditionViolation
 import org.springframework.ldap.core.DistinguishedName
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuCard
@@ -50,6 +50,7 @@ class CardInfoServiceImplSpec extends Specification {
 
   def cleanup() {
     SuCardQuery.metaClass = null
+    SuPersonQuery.metaClass = null
     GldapoSchemaRegistry.metaClass = null
   }
 
@@ -79,8 +80,7 @@ class CardInfoServiceImplSpec extends Specification {
     setup:
     def person = new SuPerson()
     person.metaClass.getDn = { new DistinguishedName("") }
-    GroovyMock(SuPersonQuery, global: true)
-    SuPersonQuery.getSuPersonFromUID(*_) >> { String directory, String uid -> return person }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> person }
 
     GroovyMock(SuCardQuery, global: true)
     1 * SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(*_) >> [new SuCard()]
@@ -95,8 +95,7 @@ class CardInfoServiceImplSpec extends Specification {
 
   def "Test getAllCards throws exception if person doesn't exist"() {
     setup:
-    GroovyMock(SuPersonQuery, global: true)
-    SuPersonQuery.getSuPersonFromUID(*_) >> { throw new IllegalArgumentException("foo") }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> throw new IllegalArgumentException("foo") }
 
     when:
     new CardInfoServiceImpl().getAllCards("testuid",true,new SvcAudit())
@@ -109,8 +108,7 @@ class CardInfoServiceImplSpec extends Specification {
     setup:
     def person = new SuPerson()
     person.metaClass.getDn = { new DistinguishedName("") }
-    GroovyMock(SuPersonQuery, global: true)
-    SuPersonQuery.getSuPersonFromUID(*_) >> { String directory, String uid -> return person }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> person }
 
     GroovyMock(SuCardQuery, global: true)
     1 * SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(*_) >> null

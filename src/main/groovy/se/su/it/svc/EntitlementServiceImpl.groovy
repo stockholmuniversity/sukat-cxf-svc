@@ -32,12 +32,11 @@
 package se.su.it.svc
 
 import groovy.util.logging.Slf4j
-import org.apache.log4j.Logger
 import org.gcontracts.annotations.Requires
 import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
-import se.su.it.svc.manager.GldapoManager
+import se.su.it.svc.manager.ConfigManager
 import se.su.it.svc.query.SuPersonQuery
 
 import javax.jws.WebParam
@@ -68,7 +67,7 @@ public class EntitlementServiceImpl implements EntitlementService {
       @WebParam(name = "entitlement") String entitlement,
       @WebParam(name = "audit") SvcAudit audit) {
 
-    SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+    SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
 
     if (person.eduPersonEntitlement != null) {
       if (person.eduPersonEntitlement.find { it.equalsIgnoreCase(entitlement) }) {
@@ -104,7 +103,7 @@ public class EntitlementServiceImpl implements EntitlementService {
       @WebParam(name = "entitlement") String entitlement,
       @WebParam(name = "audit") SvcAudit audit) {
 
-    SuPerson person = SuPersonQuery.getSuPersonFromUID(GldapoManager.LDAP_RW, uid)
+    SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
 
     /* Find the proper cased string of the entitlement on the person to delete. */
     String matchingEntitlement = person.eduPersonEntitlement.find { it.equalsIgnoreCase(entitlement) }

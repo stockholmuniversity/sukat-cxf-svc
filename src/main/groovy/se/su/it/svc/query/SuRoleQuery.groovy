@@ -32,8 +32,8 @@
 package se.su.it.svc.query
 
 import se.su.it.svc.ldap.SuRole
+import se.su.it.svc.manager.ConfigManager
 import se.su.it.svc.manager.EhCacheManager
-import se.su.it.svc.manager.GldapoManager
 
 /**
  * This class is a helper class for doing GLDAPO queries on the SuRole GLDAPO schema.
@@ -52,11 +52,11 @@ public class SuRoleQuery {
    * Returns a SuRole object, specified by the parameter dn.
    *
    *
-   * @param directory which directory to use, see GldapoManager.
+   * @param directory which directory to use, see ConfigManager.
    * @param dn  the DN for the role that you want to find.
    * @return an <code><SuRole></code> or null.
    * @see se.su.it.svc.ldap.SuRole
-   * @see se.su.it.svc.manager.GldapoManager
+   * @see se.su.it.svc.manager.ConfigManager
    */
   static SuRole getSuRoleFromDN(String directory, String dn) {
     def query = { qDirectory, qDn ->
@@ -68,7 +68,7 @@ public class SuRoleQuery {
       }
     }
 
-    def params = [key: ":getSuRoleFromDN:${dn}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == GldapoManager.LDAP_RW)]
+    def params = [key: ":getSuRoleFromDN:${dn}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == ConfigManager.LDAP_RW)]
     def suRole = (SuRole) cacheManager.get(params, { query(directory, dn) })
 
     return suRole

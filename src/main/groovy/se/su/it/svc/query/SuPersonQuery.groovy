@@ -44,11 +44,11 @@ public class SuPersonQuery {
    * Returns a SuPerson object, specified by the parameter uid.
    *
    *
-   * @param directory which directory to use, see GldapoManager.
+   * @param directory which directory to use, see ConfigManager.
    * @param uid  the uid (user id) for the user that you want to find.
    * @return an <code><SuPerson></code> or null.
    * @see se.su.it.svc.ldap.SuPerson
-   * @see se.su.it.svc.manager.GldapoManager
+   * @see se.su.it.svc.manager.ConfigManager
    */
   static SuPerson getSuPersonFromUID(String directory, String uid) throws IllegalArgumentException {
     SuPerson suPerson = findSuPersonByUID(directory, uid)
@@ -64,11 +64,11 @@ public class SuPersonQuery {
    * Returns a SuPerson object, specified by the parameter uid.
    *
    *
-   * @param directory which directory to use, see GldapoManager.
+   * @param directory which directory to use, see ConfigManager.
    * @param uid  the uid (user id) for the user that you want to find.
    * @return an <code><SuPerson></code> or null.
    * @see se.su.it.svc.ldap.SuPerson
-   * @see se.su.it.svc.manager.GldapoManager
+   * @see se.su.it.svc.manager.ConfigManager
    */
   static SuPerson findSuPersonByUID(String directory, String uid) {
     SuPerson suPerson = null
@@ -92,11 +92,11 @@ public class SuPersonQuery {
   /**
    * Finds all SuPerson objects, specified by the parameter ssn.
    *
-   * @param directory which directory to use, see GldapoManager.
+   * @param directory which directory to use, see ConfigManager.
    * @param ssn  the ssn (social security number) for the user that you want to find.
    * @return a array of <code><SuPerson></code> or null.
    * @see se.su.it.svc.ldap.SuPerson
-   * @see se.su.it.svc.manager.GldapoManager
+   * @see se.su.it.svc.manager.ConfigManager
    */
   static List<SuPerson> getSuPersonFromSsn(String directory, String ssn) {
     return SuPerson.findAll(directory: directory, base: "") {
@@ -112,7 +112,7 @@ public class SuPersonQuery {
    *
    * @param person the person to update
    * @see se.su.it.svc.ldap.SuPerson
-   * @see se.su.it.svc.manager.GldapoManager
+   * @see se.su.it.svc.manager.ConfigManager
    */
   static void updateSuPerson(SuPerson person) {
     person.update()
