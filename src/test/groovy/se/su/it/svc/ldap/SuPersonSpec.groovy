@@ -367,6 +367,10 @@ class SuPersonSpec extends Specification {
       return true
     }
 
+    SuPerson.metaClass.isSkipCreateEnabled = {->
+      return false
+    }
+
     SuPerson suPerson = new SuPerson(objectClass: [])
     suPerson.objectClass = new TreeSet<String>()
 
