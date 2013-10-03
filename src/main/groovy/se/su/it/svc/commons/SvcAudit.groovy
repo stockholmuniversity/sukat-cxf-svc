@@ -33,6 +33,8 @@ package se.su.it.svc.commons
 
 import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType
+import javax.xml.bind.annotation.XmlElement
+import javax.xml.bind.annotation.XmlRootElement
 
 /**
  *  Audit class for all webservice requests.<br />
@@ -41,17 +43,17 @@ import javax.xml.bind.annotation.XmlAccessorType
  * <b>ipAddress</b> ip of Application Server.<br />
  * <b>client</b> ip of Client invoker.<br />
  */
-import javax.xml.bind.annotation.XmlAttribute
-import javax.xml.bind.annotation.XmlRootElement
 
 @XmlAccessorType( XmlAccessType.NONE )
 @XmlRootElement
-public class SvcAudit implements Serializable{
-  static final long serialVersionUID = -687991492884245073L
-  @XmlAttribute
-  String uid
-  @XmlAttribute
-  String ipAddress
-  @XmlAttribute
-  String client
+public class SvcAudit implements Serializable {
+
+  static final long serialVersionUID = 910077200531823985L;
+
+  @XmlElement
+  List<SvcAuditEntry> entries
+
+  public String getValue(String key) {
+    entries?.find { it.key == key }?.value
+  }
 }
