@@ -2,7 +2,7 @@ package se.su.it.svc
 
 import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PreconditionViolation
-import se.su.it.svc.commons.SvcAudit
+import se.su.it.svc.ldap.SuPerson
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -35,7 +35,6 @@ import se.su.it.svc.commons.SvcAudit
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.query.SuPersonQuery
 import spock.lang.Specification
 
@@ -62,7 +61,7 @@ class EntitlementServiceImplSpec extends Specification {
     def entitlementServiceImpl = new EntitlementServiceImpl()
 
     when:
-    entitlementServiceImpl.addEntitlement(null,"urn:mace:swami.se:gmai:test:test",new SvcAudit())
+    entitlementServiceImpl.addEntitlement(null,"urn:mace:swami.se:gmai:test:test")
 
     then:
     thrown(PreconditionViolation)
@@ -73,18 +72,7 @@ class EntitlementServiceImplSpec extends Specification {
     def entitlementServiceImpl = new EntitlementServiceImpl()
 
     when:
-    entitlementServiceImpl.addEntitlement("testuid",null,new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "Test addEntitlement with null SvcAudit argument"() {
-    setup:
-    def entitlementServiceImpl = new EntitlementServiceImpl()
-
-    when:
-    entitlementServiceImpl.addEntitlement("testuid","urn:mace:swami.se:gmai:test:test",null)
+    entitlementServiceImpl.addEntitlement("testuid",null)
 
     then:
     thrown(PreconditionViolation)
@@ -95,7 +83,7 @@ class EntitlementServiceImplSpec extends Specification {
     SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> throw new IllegalArgumentException("foo") }
     def entitlementServiceImpl = new EntitlementServiceImpl()
     when:
-    def ret = entitlementServiceImpl.addEntitlement("testuid","urn:mace:swami.se:gmai:test:test",new SvcAudit())
+    def ret = entitlementServiceImpl.addEntitlement("testuid","urn:mace:swami.se:gmai:test:test")
     then:
     thrown(IllegalArgumentException)
   }
@@ -110,7 +98,7 @@ class EntitlementServiceImplSpec extends Specification {
     SuPersonQuery.metaClass.static.saveSuPerson = {SuPerson arg1 -> return void}
     def entitlementServiceImpl = new EntitlementServiceImpl()
     when:
-    def ret = entitlementServiceImpl.addEntitlement("testuid","urn:mace:swami.se:gmai:test:test",new SvcAudit())
+    def ret = entitlementServiceImpl.addEntitlement("testuid","urn:mace:swami.se:gmai:test:test")
     then:
     thrown(IllegalArgumentException)
   }
@@ -122,7 +110,7 @@ class EntitlementServiceImplSpec extends Specification {
     SuPersonQuery.metaClass.static.updateSuPerson = {SuPerson arg1 -> return void}
     def entitlementServiceImpl = new EntitlementServiceImpl()
     when:
-    def ret = entitlementServiceImpl.addEntitlement("testuid","urn:mace:swami.se:gmai:test:test",new SvcAudit())
+    def ret = entitlementServiceImpl.addEntitlement("testuid","urn:mace:swami.se:gmai:test:test")
     then:
     person.eduPersonEntitlement.contains("urn:mace:swami.se:gmai:test:test") == true
   }
@@ -132,7 +120,7 @@ class EntitlementServiceImplSpec extends Specification {
     def entitlementServiceImpl = new EntitlementServiceImpl()
 
     when:
-    entitlementServiceImpl.removeEntitlement(null,"urn:mace:swami.se:gmai:test:test",new SvcAudit())
+    entitlementServiceImpl.removeEntitlement(null,"urn:mace:swami.se:gmai:test:test")
 
     then:
     thrown(PreconditionViolation)
@@ -143,18 +131,7 @@ class EntitlementServiceImplSpec extends Specification {
     def entitlementServiceImpl = new EntitlementServiceImpl()
 
     when:
-    entitlementServiceImpl.removeEntitlement("testuid",null,new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "Test removeEntitlement with null SvcAudit argument"() {
-    setup:
-    def entitlementServiceImpl = new EntitlementServiceImpl()
-
-    when:
-    entitlementServiceImpl.removeEntitlement("testuid","urn:mace:swami.se:gmai:test:test",null)
+    entitlementServiceImpl.removeEntitlement("testuid",null)
 
     then:
     thrown(PreconditionViolation)
@@ -166,7 +143,7 @@ class EntitlementServiceImplSpec extends Specification {
 
     def entitlementServiceImpl = new EntitlementServiceImpl()
     when:
-    def ret = entitlementServiceImpl.removeEntitlement("testuid","urn:mace:swami.se:gmai:test:test",new SvcAudit())
+    def ret = entitlementServiceImpl.removeEntitlement("testuid","urn:mace:swami.se:gmai:test:test")
     then:
     thrown(IllegalArgumentException)
   }
@@ -181,7 +158,7 @@ class EntitlementServiceImplSpec extends Specification {
     def entitlementServiceImpl = new EntitlementServiceImpl()
 
     when:
-    entitlementServiceImpl.removeEntitlement("testuid","urn:mace:swami.se:gmai:test:test",new SvcAudit())
+    entitlementServiceImpl.removeEntitlement("testuid","urn:mace:swami.se:gmai:test:test")
 
     then:
     thrown(IllegalArgumentException)
@@ -198,7 +175,7 @@ class EntitlementServiceImplSpec extends Specification {
     def entitlementServiceImpl = new EntitlementServiceImpl()
 
     when:
-    def ret = entitlementServiceImpl.removeEntitlement("testuid","urn:mace:swami.se:gmai:test:imnotthere",new SvcAudit())
+    def ret = entitlementServiceImpl.removeEntitlement("testuid","urn:mace:swami.se:gmai:test:imnotthere")
 
     then:
     thrown(IllegalArgumentException)
@@ -214,7 +191,7 @@ class EntitlementServiceImplSpec extends Specification {
     SuPersonQuery.metaClass.static.updateSuPerson = {SuPerson arg1 -> return void}
     def entitlementServiceImpl = new EntitlementServiceImpl()
     when:
-    def ret = entitlementServiceImpl.removeEntitlement("testuid","urn:mace:swami.se:gmai:test:test",new SvcAudit())
+    def ret = entitlementServiceImpl.removeEntitlement("testuid","urn:mace:swami.se:gmai:test:test")
     then:
     person.eduPersonEntitlement.contains("urn:mace:swami.se:gmai:test:test") == false
   }

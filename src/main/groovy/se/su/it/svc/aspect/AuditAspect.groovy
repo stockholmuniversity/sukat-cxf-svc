@@ -34,7 +34,9 @@ package se.su.it.svc.aspect
 import groovy.util.logging.Slf4j
 import org.aopalliance.intercept.MethodInterceptor
 import org.aopalliance.intercept.MethodInvocation
-import se.su.it.svc.commons.SvcAudit
+
+import java.lang.annotation.Annotation
+import java.lang.reflect.Method
 
 /**
  * Created with IntelliJ IDEA.
@@ -43,8 +45,6 @@ import se.su.it.svc.commons.SvcAudit
  * Time: 12:59
  * To change this template use File | Settings | File Templates.
  */
-import java.lang.annotation.Annotation
-import java.lang.reflect.Method
 import java.sql.Timestamp
 
 @Slf4j
@@ -100,18 +100,11 @@ public class AuditAspect implements MethodInterceptor {
       //Generate MethodDetails from annotation on method to be able to describe
       //functions that will be invoked by this method
       List<String> methodDetails = []
-      for (Annotation annotation in mi?.getAnnotations()) {
-        if (annotation.annotationType().getName().equalsIgnoreCase("se.su.it.svc.audit.AuditAspectMethodDetails")) {
-          Method[] methods = annotation.getClass().getMethods();
-          for (int i = 0; i < methods.length; i++) {
-            Method m = methods[i]
-            if (m.getName() == "details") {
-              String details = (String) m.invoke(annotation, null)
-              def detailsArr = details.split(",")
-              detailsArr.each {entry -> methodDetails << entry.replace(" ","").toString()}
-              break
-            }
-          }
+      if (mi.isAnnotationPresent(AuditAspectMethodDetails)) {
+        Annotation annotation = mi.getAnnotation(AuditAspectMethodDetails)
+        def details = annotation.details()?.split(',') ?: new String[0]
+        details.each { entry ->
+          methodDetails << entry.replace(" ","")
         }
       }
 
@@ -121,47 +114,16 @@ public class AuditAspect implements MethodInterceptor {
       outArgs.writeObject(args)
       outArgs.close()
 
-      // Determine uid and ip to use in the aspect entry
-      String auditIp
-      String auditUid
-      String auditClient
-
-      SvcAudit svcAudit = null
-      try {
-        def lastArg = args[-1]
-        if (lastArg && lastArg instanceof SvcAudit) {
-          svcAudit = (SvcAudit) lastArg
-        }
-      } catch (ex) {
-        log.debug "Couldn't get svc audit obj.", ex
-      }
-
-      if (svcAudit) {
-        log.debug("Found a non-null SvcAudit as last argument to method, extracting uid and ip")
-        auditIp = svcAudit.getIpAddress()
-        auditUid = svcAudit.getUid()
-        auditClient = svcAudit.getClient()
-      } else {
-        log.warn("No suitable SvcAudit supplied for call to " + mi.getName() +
-          " - will not be able to log originator IP/UID.")
-        auditIp = UNKNOWN
-        auditUid = UNKNOWN
-        auditClient = UNKNOWN
-      }
-
       // Create an AuditEntity based on the gathered information
       AuditEntity ae = AuditEntity.getInstance(
-          new Timestamp(new Date().getTime()).toString(),
-          auditIp,
-          auditUid,
-          auditClient,
-          mi?.getName(),
-          objectToString(args),
-          bsArgs.toByteArray().toString(),
-          UNKNOWN,
-          UNKNOWN,
-          STATE_INPROGRESS,
-          methodDetails
+              new Timestamp(new Date().getTime()).toString(),
+              mi?.getName(),
+              objectToString(args),
+              bsArgs.toByteArray().toString(),
+              UNKNOWN,
+              UNKNOWN,
+              STATE_INPROGRESS,
+              methodDetails
       )
 
       //TODO: Call RabbitMQ here to transmit the "aspect before data"

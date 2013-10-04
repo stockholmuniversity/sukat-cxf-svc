@@ -45,7 +45,6 @@ public class LdapAttributeValidator {
     try {
       map.each { String attributeName, Object val ->
         switch (attributeName.toLowerCase()) {
-          case "audit"                       : validateAudit(val); break
           case "uid"                         : validateUid(val); break
           case "affiliation"                 : validateAffiliations(val); break
           case "edupersonprimaryaffiliation" : validateEduPersonPrimaryAffiliation(val); break
@@ -68,15 +67,6 @@ public class LdapAttributeValidator {
     }
 
     return error
-  }
-
-  private static void validateAudit(Object audit) {
-    if (audit == null) {
-      throwMe(validateAttributesString,"Attribute validation failed for audit object <${audit}>. audit can not be null.")
-    }
-    if (!audit instanceof SvcAudit) {
-      throwMe(validateAttributesString,"Attribute validation failed for audit object <${audit}>. audit need to be a SvcAudit object.")
-    }
   }
 
   private static void validateUid(Object uid) {

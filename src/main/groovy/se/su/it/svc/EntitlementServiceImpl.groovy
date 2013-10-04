@@ -34,7 +34,6 @@ package se.su.it.svc
 import groovy.util.logging.Slf4j
 import org.gcontracts.annotations.Requires
 import se.su.it.svc.commons.LdapAttributeValidator
-import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.manager.ConfigManager
 import se.su.it.svc.query.SuPersonQuery
@@ -55,17 +54,15 @@ public class EntitlementServiceImpl implements EntitlementService {
    *
    * @param uid  uid of the user.
    * @param entitlement entitlement to add
-   * @param audit Audit object initilized with audit data about the client and user.
    * @return void.
    * @see se.su.it.svc.ldap.SuPerson
-   * @see se.su.it.svc.commons.SvcAudit
    */
-  @Requires({ uid && entitlement && audit &&
-      !LdapAttributeValidator.validateAttributes([uid:uid, entitlement:entitlement, audit:audit])})
+  @Requires({ uid && entitlement  &&
+      !LdapAttributeValidator.validateAttributes([uid:uid, entitlement:entitlement ])})
   public void addEntitlement(
       @WebParam(name = "uid") String uid,
-      @WebParam(name = "entitlement") String entitlement,
-      @WebParam(name = "audit") SvcAudit audit) {
+      @WebParam(name = "entitlement") String entitlement)
+  {
 
     SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
 
@@ -90,18 +87,16 @@ public class EntitlementServiceImpl implements EntitlementService {
    *
    * @param uid  uid of the user.
    * @param entitlement entitlement to remove
-   * @param audit Audit object initilized with audit data about the client and user.
    * @return void.
    * @see se.su.it.svc.ldap.SuPerson
-   * @see se.su.it.svc.commons.SvcAudit
    */
 
-  @Requires({ uid && entitlement && audit &&
-      !LdapAttributeValidator.validateAttributes([uid:uid, entitlement:entitlement, audit:audit])})
+  @Requires({ uid && entitlement  &&
+      !LdapAttributeValidator.validateAttributes([uid:uid, entitlement:entitlement ])})
   public void removeEntitlement(
       @WebParam(name = "uid") String uid,
-      @WebParam(name = "entitlement") String entitlement,
-      @WebParam(name = "audit") SvcAudit audit) {
+      @WebParam(name = "entitlement") String entitlement)
+  {
 
     SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
 

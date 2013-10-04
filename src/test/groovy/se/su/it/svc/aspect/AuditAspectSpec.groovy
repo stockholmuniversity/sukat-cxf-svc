@@ -2,6 +2,7 @@ package se.su.it.svc.aspect
 
 import gldapo.GldapoSchemaRegistry
 import org.aopalliance.intercept.MethodInvocation
+import spock.lang.Specification
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -33,9 +34,6 @@ import org.aopalliance.intercept.MethodInvocation
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-import se.su.it.svc.commons.SvcAudit
-import spock.lang.Specification
 
 import java.lang.reflect.Method
 
@@ -157,24 +155,10 @@ class AuditAspectSpec extends Specification {
     resp.operation == 'charAt'
   }
 
-  def "logBefore: Test with regular class when last arg is SvcAudit obj."() {
-    given:
-    Class<?> c = Class.forName('java.lang.String')
-    Method method = c.getDeclaredMethod("charAt", int)
-
-    AuditAspect auditAspect = new AuditAspect()
-
-    when:
-    def resp = (AuditEntity) auditAspect.logBefore(method, [new SvcAudit()])
-
-    then:
-    resp.operation == 'charAt'
-  }
-
   def "logAfter: Happy path"() {
     given:
     AuditAspect auditAspect = new AuditAspect()
-    AuditEntity ae = AuditEntity.getInstance('1','2','3','4','5','6','7','8','9','10', ['11', '12'])
+    AuditEntity ae = AuditEntity.getInstance('1','2','3','4','5','6','7', ['11', '12'])
 
     when:
     auditAspect.logAfter(ae, 'foo')
@@ -194,22 +178,22 @@ class AuditAspectSpec extends Specification {
     }
 
     AuditAspect auditAspect = new AuditAspect()
-    AuditEntity ae = AuditEntity.getInstance('1','2','3','4','5','6','7','8','9','10', ['11', '12'])
+    AuditEntity ae = AuditEntity.getInstance('1','2','3','4','5','6','7', ['11', '12'])
 
     when:
     auditAspect.logAfter(ae, 'foo')
 
     then:
-    ae.text_return == '8'
+    ae.text_return == '5'
 
     and:
-    ae.raw_return == '9'
+    ae.raw_return == '6'
   }
 
   def "logException: Happy path"() {
     given:
     AuditAspect auditAspect = new AuditAspect()
-    AuditEntity ae = AuditEntity.getInstance('1','2','3','4','5','6','7','8','9','10', ['11', '12'])
+    AuditEntity ae = AuditEntity.getInstance('1','2','3','4','5','6','7', ['11', '12'])
 
     when:
     auditAspect.logException(ae, new Exception('My Little Pony Exception'))

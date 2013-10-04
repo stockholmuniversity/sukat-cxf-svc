@@ -49,9 +49,6 @@ class AuditEntitySpec extends Specification {
 
     then:
     auditEntity.created       == null
-    auditEntity.ip_address    == null
-    auditEntity.uid           == null
-    auditEntity.client        == null
     auditEntity.operation     == null
     auditEntity.text_args     == null
     auditEntity.raw_args      == null
@@ -63,26 +60,23 @@ class AuditEntitySpec extends Specification {
 
   def "getInstance: Test factory method"() {
     when:
-    AuditEntity auditEntity = AuditEntity.getInstance('1','2','3','4','5','6','7','8','9','10',['11','12'])
+    AuditEntity auditEntity = AuditEntity.getInstance('1','2','3','4','5','6','7', ['11', '12'])
 
     then:
     auditEntity.created       == '1'
-    auditEntity.ip_address    == '2'
-    auditEntity.uid           == '3'
-    auditEntity.client        == '4'
-    auditEntity.operation     == '5'
-    auditEntity.text_args     == '6'
-    auditEntity.raw_args      == '7'
-    auditEntity.text_return   == '8'
-    auditEntity.raw_return    == '9'
-    auditEntity.state         == '10'
+    auditEntity.operation     == '2'
+    auditEntity.text_args     == '3'
+    auditEntity.raw_args      == '4'
+    auditEntity.text_return   == '5'
+    auditEntity.raw_return    == '6'
+    auditEntity.state         == '7'
     auditEntity.methodDetails == ['11','12']
   }
   def "test toString"() {
     given:
-    AuditEntity auditEntity = AuditEntity.getInstance('1','2','3','4','5','6','7','8','9','10',['11','12'])
+    AuditEntity auditEntity =AuditEntity.getInstance('1','2','3','4','5','6','7', ['11', '12'])
 
     expect:
-    auditEntity.toString() == "se.su.it.svc.aspect.AuditEntity(created:1, ip_address:2, uid:3, client:4, operation:5, text_args:6, text_return:8, state:10, methodDetails:[11, 12])"
+    auditEntity.toString() == "se.su.it.svc.aspect.AuditEntity(created:1, operation:2, text_args:3, text_return:5, state:7, methodDetails:[11, 12])"
   }
 }

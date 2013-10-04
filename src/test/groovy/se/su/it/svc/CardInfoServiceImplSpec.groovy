@@ -2,6 +2,7 @@ package se.su.it.svc
 
 import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PreconditionViolation
+import org.springframework.ldap.core.DistinguishedName
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -34,8 +35,6 @@ import org.gcontracts.PreconditionViolation
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.springframework.ldap.core.DistinguishedName
-import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.query.SuCardQuery
@@ -59,18 +58,7 @@ class CardInfoServiceImplSpec extends Specification {
     def cardInfoServiceImpl = new CardInfoServiceImpl()
 
     when:
-    cardInfoServiceImpl.getAllCards(null,false,new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "Test getAllCards with null SvcAudit argument"() {
-    setup:
-    def cardInfoServiceImpl = new CardInfoServiceImpl()
-
-    when:
-    cardInfoServiceImpl.getAllCards("testuid",false,null)
+    cardInfoServiceImpl.getAllCards(null,false)
 
     then:
     thrown(PreconditionViolation)
@@ -86,7 +74,7 @@ class CardInfoServiceImplSpec extends Specification {
     1 * SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(*_) >> [new SuCard()]
 
     when:
-    def ret = new CardInfoServiceImpl().getAllCards("testuid",true,new SvcAudit())
+    def ret = new CardInfoServiceImpl().getAllCards("testuid",true)
 
     then:
     ret.size() == 1
@@ -98,7 +86,7 @@ class CardInfoServiceImplSpec extends Specification {
     SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> throw new IllegalArgumentException("foo") }
 
     when:
-    new CardInfoServiceImpl().getAllCards("testuid",true,new SvcAudit())
+    new CardInfoServiceImpl().getAllCards("testuid",true)
 
     then:
     thrown(IllegalArgumentException)
@@ -114,7 +102,7 @@ class CardInfoServiceImplSpec extends Specification {
     1 * SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(*_) >> null
 
     when:
-    def resp = new CardInfoServiceImpl().getAllCards("testuid",true,new SvcAudit())
+    def resp = new CardInfoServiceImpl().getAllCards("testuid",true)
 
     then:
     resp instanceof SuCard[]
@@ -125,18 +113,7 @@ class CardInfoServiceImplSpec extends Specification {
     def cardInfoServiceImpl = new CardInfoServiceImpl()
 
     when:
-    cardInfoServiceImpl.getCardByUUID(null,new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "Test getCardByUUID with null SvcAudit argument, should throw IllegalArgumentException"() {
-    setup:
-    def cardInfoServiceImpl = new CardInfoServiceImpl()
-
-    when:
-    cardInfoServiceImpl.getCardByUUID("testcarduuid",null)
+    cardInfoServiceImpl.getCardByUUID(null)
 
     then:
     thrown(PreconditionViolation)
@@ -148,7 +125,7 @@ class CardInfoServiceImplSpec extends Specification {
     def cardInfoServiceImpl = new CardInfoServiceImpl()
 
     when:
-    def resp = cardInfoServiceImpl.getCardByUUID("testCardUUID", new SvcAudit())
+    def resp = cardInfoServiceImpl.getCardByUUID("testCardUUID")
 
     then:
     resp == null
@@ -161,7 +138,7 @@ class CardInfoServiceImplSpec extends Specification {
     def cardInfoServiceImpl = new CardInfoServiceImpl()
 
     when:
-    def res = cardInfoServiceImpl.getCardByUUID("testCardUUID", new SvcAudit())
+    def res = cardInfoServiceImpl.getCardByUUID("testCardUUID")
 
     then:
     assert res

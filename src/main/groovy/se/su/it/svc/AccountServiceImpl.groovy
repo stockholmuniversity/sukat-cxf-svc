@@ -38,7 +38,6 @@ import org.gcontracts.annotations.Requires
 import se.su.it.commons.Kadmin
 import se.su.it.commons.PasswordUtils
 import se.su.it.svc.commons.LdapAttributeValidator
-import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuPerson
@@ -65,21 +64,17 @@ public class AccountServiceImpl implements AccountService {
    *
    * @param uid  uid of the user.
    * @param affiliation the affiliation for this uid
-   * @param audit Audit object initilized with audit data about the client and user.
    * @throws IllegalArgumentException if the uid can't be found
    * @see se.su.it.svc.ldap.SuPerson
-   * @see se.su.it.svc.commons.SvcAudit
    */
   @Requires({
     ! LdapAttributeValidator.validateAttributes([
             uid: uid,
-            eduPersonPrimaryAffiliation: affiliation,
-            audit: audit ])
+            eduPersonPrimaryAffiliation: affiliation ])
   })
   public void updatePrimaryAffiliation(
           @WebParam(name = 'uid') String uid,
-          @WebParam(name = 'affiliation') String affiliation,
-          @WebParam(name = 'audit') SvcAudit audit
+          @WebParam(name = 'affiliation') String affiliation
   ) {
     SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
 
@@ -98,18 +93,15 @@ public class AccountServiceImpl implements AccountService {
    * This method resets the password for the specified uid and returns the clear text password.
    *
    * @param uid  uid of the user.
-   * @param audit Audit object initilized with audit data about the client and user.
    * @return String new password.
    * @throws IllegalArgumentException if the uid can't be found
-   * @see se.su.it.svc.commons.SvcAudit
    */
   @Requires({
-    uid && audit
+    uid
   })
   @Ensures({ result && result instanceof String && result.size() == 10 })
   public String resetPassword(
-          @WebParam(name = 'uid') String uid,
-          @WebParam(name = 'audit') SvcAudit audit
+          @WebParam(name = 'uid') String uid
   ) {
     String trueUid = GeneralUtils.uidToKrb5Principal(uid)
 
@@ -132,22 +124,18 @@ public class AccountServiceImpl implements AccountService {
    *
    * @param uid  uid of the user.
    * @param person pre-populated SvcSuPersonVO object, the attributes that differ in this object to the original will be updated in ldap.
-   * @param audit Audit object initilized with audit data about the client and user.
    * @throws IllegalArgumentException if the uid can't be found
    * @see se.su.it.svc.ldap.SuPerson
    * @see se.su.it.svc.commons.SvcSuPersonVO
-   * @see se.su.it.svc.commons.SvcAudit
    */
   @Requires({
     !LdapAttributeValidator.validateAttributes([
             uid: uid,
-            svcsuperson: person,
-            audit: audit ])
+            svcsuperson: person ])
   })
   public void updateSuPerson(
           @WebParam(name = 'uid') String uid,
-          @WebParam(name = 'person') SvcSuPersonVO person,
-          @WebParam(name = 'audit') SvcAudit audit
+          @WebParam(name = 'person') SvcSuPersonVO person
   ){
     SuPerson originalPerson = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
 
@@ -165,27 +153,23 @@ public class AccountServiceImpl implements AccountService {
    * @param ssn 6-10 digit social security number for the SuPerson.
    * @param givenName given name for the SuPerson.
    * @param sn surname of the SuPerson.
-   * @param audit Audit object initilized with audit data about the client and user.
    * @throws IllegalArgumentException if a user with the supplied uid already exists
    * @see se.su.it.svc.ldap.SuPerson
    * @see se.su.it.svc.ldap.SuPersonStub
    * @see se.su.it.svc.commons.SvcSuPersonVO
-   * @see se.su.it.svc.commons.SvcAudit
    */
   @Requires({
     ! LdapAttributeValidator.validateAttributes([
             uid: uid,
             ssn: ssn,
             givenName: givenName,
-            sn: sn,
-            audit: audit ])
+            sn: sn ])
   })
   public void createSuPerson(
           @WebParam(name = 'uid') String uid,
           @WebParam(name = 'ssn') String ssn,
           @WebParam(name = 'givenName') String givenName,
-          @WebParam(name = 'sn') String sn,
-          @WebParam(name = 'audit') SvcAudit audit
+          @WebParam(name = 'sn') String sn
   ) {
 
     if (SuPersonQuery.findSuPersonByUID(ConfigManager.LDAP_RW, uid)) {
@@ -213,24 +197,20 @@ public class AccountServiceImpl implements AccountService {
    * @param uid                         uid of the user to activate
    * @param domain                      domain of user in sukat. This is used to set the DN if user will be created.
    * @param eduPersonPrimaryAffiliation the primary affiliation to set.
-   * @param audit                       Audit object initilized with audit data about the client and user.
    * @return SvcUidPwd                  object with the uid and password.
    * @throws IllegalArgumentException if a user with the supplied uid can't be found
-   * @see se.su.it.svc.commons.SvcAudit
    */
   @Requires({
     ! LdapAttributeValidator.validateAttributes([
             uid: uid,
             domain: domain,
-            affiliation: affiliations,
-            audit: audit])
+            affiliation: affiliations ])
   })
   @Ensures({ result && result.uid && result.password && result.password.size() == 10 })
   public SvcUidPwd activateSuPerson(
           @WebParam(name = 'uid') String uid,
           @WebParam(name = 'domain') String domain,
-          @WebParam(name = 'affiliations') String[] affiliations,
-          @WebParam(name = 'audit') SvcAudit audit
+          @WebParam(name = 'affiliations') String[] affiliations
   ) {
 
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
@@ -247,18 +227,14 @@ public class AccountServiceImpl implements AccountService {
    * This method terminates the account for the specified uid in sukat.
    *
    * @param uid  uid of the user.
-   * @param audit Audit object initilized with audit data about the client and user.
    * @throws NotImplementedException
-   * @see se.su.it.svc.commons.SvcAudit
    */
   @Requires({
     ! LdapAttributeValidator.validateAttributes([
-            uid: uid,
-            audit: audit ])
+            uid: uid ])
   })
   public void terminateSuPerson(
-          @WebParam(name = 'uid') String uid,
-          @WebParam(name = 'audit') SvcAudit audit) {
+          @WebParam(name = 'uid') String uid) {
     throw new NotImplementedException()
   }
 
@@ -266,20 +242,16 @@ public class AccountServiceImpl implements AccountService {
    * This method gets the mailroutingaddress for the specified uid in sukat.
    *
    * @param uid  uid of the user.
-   * @param audit Audit object initilized with audit data about the client and user.
    * @return the users mailRoutingAddress
    * @throws IllegalArgumentException if the uid can't be found
-   * @see se.su.it.svc.commons.SvcAudit
    */
   @Requires({
     ! LdapAttributeValidator.validateAttributes([
-            uid: uid,
-            audit: audit ])
+            uid: uid ])
   })
   @Ensures({ result == null || result instanceof String})
   public String getMailRoutingAddress(
-          @WebParam(name = 'uid') String uid,
-          @WebParam(name = 'audit') SvcAudit audit
+          @WebParam(name = 'uid') String uid
   ) {
 
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
@@ -292,20 +264,16 @@ public class AccountServiceImpl implements AccountService {
    *
    * @param uid  uid of the user. 10 chars (YYMMDDXXXX)
    * @param mail mailaddress to be set for uid.
-   * @param audit Audit object initilized with audit data about the client and user.
    * @throws IllegalArgumentException if the uid can't be found
-   * @see se.su.it.svc.commons.SvcAudit
    */
   @Requires({
     ! LdapAttributeValidator.validateAttributes([
             uid: uid,
-            mailroutingaddress: mailRoutingAddress,
-            audit: audit ])
+            mailroutingaddress: mailRoutingAddress ])
   })
   public void setMailRoutingAddress(
           @WebParam(name = 'uid') String uid,
-          @WebParam(name = 'mailRoutingAddress') String mailRoutingAddress,
-          @WebParam(name = 'audit') SvcAudit audit
+          @WebParam(name = 'mailRoutingAddress') String mailRoutingAddress
   ) {
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
 
@@ -318,18 +286,15 @@ public class AccountServiceImpl implements AccountService {
    * Finds all SuPersons in ldap based on socialSecurityNumber
    *
    * @param ssn in 10 numbers (YYMMDDXXXX)
-   * @param audit Audit object initilized with audit data about the client and user.
    * @return an array of SvcSuPersonVO, one for each account found or an empty list
    */
   @Requires({
     ! LdapAttributeValidator.validateAttributes([
-            ssn: ssn,
-            audit: audit ])
+            ssn: ssn ])
   })
   @Ensures({ result != null && result instanceof SvcSuPersonVO[] })
   public SvcSuPersonVO[] findAllSuPersonsBySocialSecurityNumber(
-          @WebParam(name = "socialSecurityNumber") String ssn,
-          @WebParam(name = "audit") SvcAudit audit
+          @WebParam(name = "socialSecurityNumber") String ssn
   ) {
     SuPerson[] suPersons = SuPersonQuery.getSuPersonFromSsn(ConfigManager.LDAP_RW, ssn)
 
@@ -340,18 +305,15 @@ public class AccountServiceImpl implements AccountService {
    * Finds a SuPerson in ldap based on uid
    *
    * @param uid without (@domain)
-   * @param audit Audit object initilized with audit data about the client and user.
    * @return SvcSuPersonVO instance if found otherwise returns null.
    */
   @Requires({
     ! LdapAttributeValidator.validateAttributes([
-            uid: uid,
-            audit: audit ])
+            uid: uid ])
   })
   @Ensures({ result == null || result instanceof SvcSuPersonVO })
   public SvcSuPersonVO findSuPersonByUid(
-          @WebParam(name = 'uid') String uid,
-          @WebParam(name = 'audit') SvcAudit audit
+          @WebParam(name = 'uid') String uid
   ) {
     SuPerson suPerson = SuPersonQuery.findSuPersonByUID(ConfigManager.LDAP_RW, uid)
 
@@ -364,19 +326,17 @@ public class AccountServiceImpl implements AccountService {
    *
    * @param uid
    * @param mailLocalAddresses
-   * @param audit
    * @return new list of mailLocalAddresses bound to the suPerson after the update.
    */
   @Requires({
     ! LdapAttributeValidator.validateAttributes([
         uid: uid,
-        mailLocalAddresses: mailLocalAddresses,
-        audit: audit ]) &&
+        mailLocalAddresses: mailLocalAddresses ]) &&
     mailLocalAddresses?.size() > 0
   })
   public String[] addMailLocalAddresses(@WebParam(name = "uid") String uid,
-                                        @WebParam(name = "mailLocalAddresses") String[] mailLocalAddresses,
-                                        @WebParam(name = "audit") SvcAudit audit) {
+                                        @WebParam(name = "mailLocalAddresses") String[] mailLocalAddresses)
+  {
 
     SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
     // Can't depend on the mailLocalAddress Set doing it's thing without removing case.
