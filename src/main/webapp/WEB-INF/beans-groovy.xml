@@ -61,9 +61,10 @@
         <constructor-arg name="configFileName" type="java.lang.String" value="#{ systemProperties['config.properties'] }"/>
     </bean>
 
-
-    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="properties" value="#{ systemProperties['config.properties'] }"/>
+    <bean id="propertyConfigurer"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+          depends-on="configManager">
+        <property name="properties" value="#{ configManager.properties }"/>
         <property name="ignoreResourceNotFound" value="true"/>
         <property name="ignoreUnresolvablePlaceholders" value="true"/>
     </bean>
@@ -84,18 +85,6 @@
         </property>
     </bean>
 
-    <!--uncomment the following if gorm and mysql support is to be enabled-->
-    <!--<gorm:sessionFactory xmlns:gorm="http://grails.org/schema/gorm"-->
-    <!--base-package="se.su.it.svc.domains"-->
-    <!--data-source-ref="dataSource"-->
-    <!--message-source-ref="messageSource">-->
-    <!--<property name="hibernateProperties">-->
-    <!--<util:map>-->
-    <!--<entry key="hibernate.hbm2ddl.auto" value="update">-->
-    <!--</entry></util:map>-->
-    <!--</property>-->
-    <!--</gorm:sessionFactory>-->
-
     <context:annotation-config/>
     <context:mbean-export/>
     <tx:annotation-driven/>
@@ -109,8 +98,8 @@
         <property name="suCardDataSource" ref="suCardDataSource"/>
     </bean>
 
+    <!-- Endpoints -->
     <bean id="cardinfoserviceEndpoint" class="se.su.it.svc.CardInfoServiceImpl"/>
-
     <jaxws:endpoint
             id="cardinfoservice"
             implementorClass="se.su.it.svc.CardInfoServiceImpl"
@@ -180,6 +169,8 @@
             address="/Status"
             publishedEndpointUrl="${publishedEndpointUrl}/Status"/>
 
+
+    <!-- Aspects -->
     <bean id="sanitizerAspect" class="se.su.it.svc.aspect.SanitizeWebParametersAspect"/>
 
     <bean id="sanitizerPointcut" class="org.springframework.aop.support.JdkRegexpMethodPointcut">
@@ -202,7 +193,6 @@
         </property>
     </bean>
 
-    <!-- Audit aspect -->
     <bean id="auditAspect" class="se.su.it.svc.aspect.AuditAspect"/>
 
     <bean id="auditPointcut" class="org.springframework.aop.support.JdkRegexpMethodPointcut">
@@ -225,4 +215,3 @@
         </property>
     </bean>
 </beans>
-        <!-- END SNIPPET: beans -->

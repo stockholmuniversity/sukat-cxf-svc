@@ -53,32 +53,18 @@ class ConfigManager {
    * @param configFileName
    */
   private ConfigManager(String configFileName) {
-    try {
-      /** Parsing to properties first so the file type is a properties
-       * file not a groovy config file (cause of the cxf) framework being written i java.
-       * */
-      Properties properties = new Properties()
-      File configFile = new File(configFileName)
+    /** Parsing to properties first so the file type is a properties
+     * file not a groovy config file (cause of the cxf) framework being written i java.
+     * */
+    Properties properties = new Properties()
+    File configFile = new File(configFileName)
 
-      configFile?.withReader('UTF-8') { Reader reader ->
-        properties.load(reader)
-      }
-
-      log.info "ConfigManager: Initializing with config file: $configFileName"
-
-      this.config = new ConfigSlurper().parse(properties)
-
-      log.info "ConfigManager: Initialization complete."
-    } catch (ex) {
-      log.error "Failed to parse config file", ex
-      throw ex
+    configFile?.withReader('UTF-8') { Reader reader ->
+      properties.load(reader)
     }
-    try {
-      initializeGldapo()
-    } catch (ex) {
-      log.error "Gldapo initialization failed.", ex
-      throw ex
-    }
+
+    this.config = new ConfigSlurper().parse(properties)
+    initializeGldapo()
   }
   /**
    * Copy of the configuration returned in the form of properties.
