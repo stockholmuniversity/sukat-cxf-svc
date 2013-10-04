@@ -158,7 +158,7 @@ class AuditAspectSpec extends Specification {
   def "logAfter: Happy path"() {
     given:
     AuditAspect auditAspect = new AuditAspect()
-    AuditEntity ae = AuditEntity.getInstance('1','2','3','4','5','6','7','8','9','10', ['11', '12'])
+    AuditEntity ae = AuditEntity.getInstance('1','2','3','4','5','6','7', ['11', '12'])
 
     when:
     auditAspect.logAfter(ae, 'foo')
@@ -178,22 +178,22 @@ class AuditAspectSpec extends Specification {
     }
 
     AuditAspect auditAspect = new AuditAspect()
-    AuditEntity ae = AuditEntity.getInstance('1','2','3','4','5','6','7','8','9','10', ['11', '12'])
+    AuditEntity ae = AuditEntity.getInstance('1','2','3','4','5','6','7', ['11', '12'])
 
     when:
     auditAspect.logAfter(ae, 'foo')
 
     then:
-    ae.text_return == '8'
+    ae.text_return == '5'
 
     and:
-    ae.raw_return == '9'
+    ae.raw_return == '6'
   }
 
   def "logException: Happy path"() {
     given:
     AuditAspect auditAspect = new AuditAspect()
-    AuditEntity ae = AuditEntity.getInstance('1','2','3','4','5','6','7','8','9','10', ['11', '12'])
+    AuditEntity ae = AuditEntity.getInstance('1','2','3','4','5','6','7', ['11', '12'])
 
     when:
     auditAspect.logException(ae, new Exception('My Little Pony Exception'))
