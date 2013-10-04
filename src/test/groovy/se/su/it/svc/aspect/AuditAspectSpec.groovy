@@ -2,6 +2,7 @@ package se.su.it.svc.aspect
 
 import gldapo.GldapoSchemaRegistry
 import org.aopalliance.intercept.MethodInvocation
+import spock.lang.Specification
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -33,9 +34,6 @@ import org.aopalliance.intercept.MethodInvocation
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-import se.su.it.svc.commons.SvcAudit
-import spock.lang.Specification
 
 import java.lang.reflect.Method
 
@@ -152,20 +150,6 @@ class AuditAspectSpec extends Specification {
 
     when:
     def resp = (AuditEntity) auditAspect.logBefore(method, [])
-
-    then:
-    resp.operation == 'charAt'
-  }
-
-  def "logBefore: Test with regular class when last arg is SvcAudit obj."() {
-    given:
-    Class<?> c = Class.forName('java.lang.String')
-    Method method = c.getDeclaredMethod("charAt", int)
-
-    AuditAspect auditAspect = new AuditAspect()
-
-    when:
-    def resp = (AuditEntity) auditAspect.logBefore(method, [new SvcAudit()])
 
     then:
     resp.operation == 'charAt'

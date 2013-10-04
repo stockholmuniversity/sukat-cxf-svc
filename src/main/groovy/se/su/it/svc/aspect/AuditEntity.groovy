@@ -36,9 +36,6 @@ import groovy.transform.ToString
 @ToString(includeNames=true, excludes="raw_args,raw_return")
 public class AuditEntity {
   String created
-  String ip_address
-  String uid
-  String client
   String operation
   String text_args
   String raw_args
@@ -50,9 +47,6 @@ public class AuditEntity {
   private AuditEntity() {}
 
   public static getInstance(String created,
-                            String ip_address,
-                            String uid,
-                            String client,
                             String operation,
                             String text_args,
                             String raw_args,
@@ -63,9 +57,6 @@ public class AuditEntity {
 
     AuditEntity auditEntity = new AuditEntity()
     auditEntity.created       = created
-    auditEntity.ip_address    = ip_address
-    auditEntity.uid           = uid
-    auditEntity.client        = client
     auditEntity.operation     = operation
     auditEntity.text_args     = text_args
     auditEntity.raw_args      = raw_args

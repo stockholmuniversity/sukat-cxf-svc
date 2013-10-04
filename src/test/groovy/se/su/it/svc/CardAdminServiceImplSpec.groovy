@@ -2,9 +2,9 @@ package se.su.it.svc
 
 import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PreconditionViolation
-import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.query.SuCardOrderQuery
+import se.su.it.svc.query.SuCardQuery
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -37,7 +37,6 @@ import se.su.it.svc.query.SuCardOrderQuery
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import se.su.it.svc.query.SuCardQuery
 import spock.lang.Specification
 
 class CardAdminServiceImplSpec extends Specification {
@@ -61,18 +60,18 @@ class CardAdminServiceImplSpec extends Specification {
     def cardAdminServiceImpl = new CardAdminServiceImpl()
 
     when:
-    cardAdminServiceImpl.revokeCard(null, new SvcAudit())
+    cardAdminServiceImpl.revokeCard(null, 'uid')
 
     then:
     thrown(PreconditionViolation)
   }
 
-  def "revokeCard with null SvcAudit argument"() {
+  def "revokeCard with null revokerUid argument"() {
     setup:
     def cardAdminServiceImpl = new CardAdminServiceImpl()
 
     when:
-    cardAdminServiceImpl.revokeCard("testcarduuid", null)
+    cardAdminServiceImpl.revokeCard('uuid', null)
 
     then:
     thrown(PreconditionViolation)
@@ -92,7 +91,7 @@ class CardAdminServiceImplSpec extends Specification {
     }
 
     when:
-    cardAdminServiceImpl.revokeCard("testcarduuid", new SvcAudit())
+    cardAdminServiceImpl.revokeCard("testcarduuid", 'uid')
 
     then:
     suCard.suCardState == "urn:x-su:su-card:state:revoked"
@@ -112,7 +111,7 @@ class CardAdminServiceImplSpec extends Specification {
     }
 
     when:
-    cardAdminServiceImpl.revokeCard("testcarduuid", new SvcAudit())
+    cardAdminServiceImpl.revokeCard("testcarduuid", 'uid')
 
     then:
     thrown(RuntimeException)
@@ -127,7 +126,7 @@ class CardAdminServiceImplSpec extends Specification {
 
     def cardAdminServiceImpl = new CardAdminServiceImpl()
     when:
-    cardAdminServiceImpl.revokeCard("testcarduuid", new SvcAudit())
+    cardAdminServiceImpl.revokeCard("testcarduuid", 'uid')
     then:
     thrown(IllegalArgumentException)
   }
@@ -136,7 +135,7 @@ class CardAdminServiceImplSpec extends Specification {
     setup:
     def cardAdminServiceImpl = new CardAdminServiceImpl()
     when:
-    cardAdminServiceImpl.setCardPIN(null, "1234", new SvcAudit())
+    cardAdminServiceImpl.setCardPIN(null, "1234")
     then:
     thrown(IllegalArgumentException)
   }
@@ -145,16 +144,7 @@ class CardAdminServiceImplSpec extends Specification {
     setup:
     def cardAdminServiceImpl = new CardAdminServiceImpl()
     when:
-    cardAdminServiceImpl.setCardPIN("testcarduuid", null, new SvcAudit())
-    then:
-    thrown(IllegalArgumentException)
-  }
-
-  def "setCardPIN with null SvcAudit argument"() {
-    setup:
-    def cardAdminServiceImpl = new CardAdminServiceImpl()
-    when:
-    cardAdminServiceImpl.setCardPIN("testcarduuid", "1234", null)
+    cardAdminServiceImpl.setCardPIN("testcarduuid", null)
     then:
     thrown(IllegalArgumentException)
   }
@@ -167,7 +157,7 @@ class CardAdminServiceImplSpec extends Specification {
 
     def cardAdminServiceImpl = new CardAdminServiceImpl()
     when:
-    cardAdminServiceImpl.setCardPIN("testcarduuid", "1234", new SvcAudit())
+    cardAdminServiceImpl.setCardPIN("testcarduuid", "1234")
     then:
     suCard.suCardPIN == "1234"
   }
@@ -178,7 +168,7 @@ class CardAdminServiceImplSpec extends Specification {
 
     def cardAdminServiceImpl = new CardAdminServiceImpl()
     when:
-    cardAdminServiceImpl.setCardPIN("testcarduuid", "1234", new SvcAudit())
+    cardAdminServiceImpl.setCardPIN("testcarduuid", "1234")
     then:
     thrown(IllegalArgumentException)
   }

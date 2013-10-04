@@ -34,7 +34,6 @@ package se.su.it.svc
 import groovy.util.logging.Slf4j
 import org.gcontracts.annotations.Ensures
 import org.gcontracts.annotations.Requires
-import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcCardOrderVO
 import se.su.it.svc.util.CardOrderServiceUtils
 
@@ -50,15 +49,13 @@ class CardOrderServiceImpl implements CardOrderService {
    * Find all card orders for the supplied uid.
    *
    * @param uid the uid to find card orders for
-   * @param audit Audit object initilized with audit data about the client and user.
    * @return an array of SvcCardOrderVO containing the card orders found for the uid
    */
   @Override
-  @Requires({ uid && audit })
+  @Requires({ uid  })
   @Ensures({ result instanceof SvcCardOrderVO[] })
   public SvcCardOrderVO[] findAllCardOrdersForUid(
-          @WebParam(name = 'uid') String uid,
-          @WebParam(name = 'audit') SvcAudit audit
+          @WebParam(name = 'uid') String uid
   ) {
     def cardOrders = suCardOrderQuery.findAllCardOrdersForUid(uid) ?: []
 
@@ -68,15 +65,13 @@ class CardOrderServiceImpl implements CardOrderService {
    * Create a card order
    *
    * @param cardOrderVO
-   * @param audit
    * @return A UUID referencing the order created.
    */
   @Override
-  @Requires({ cardOrderVO && audit })
+  @Requires({ cardOrderVO  })
   @Ensures({ result?.size() == 36 })
   public String orderCard(
-          @WebParam(name = 'cardOrderVO') SvcCardOrderVO cardOrderVO,
-          @WebParam(name = 'audit') SvcAudit audit
+          @WebParam(name = 'cardOrderVO') SvcCardOrderVO cardOrderVO
   ) {
 
     def result = CardOrderServiceUtils.validateCardOrderVO(cardOrderVO)

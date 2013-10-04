@@ -33,7 +33,6 @@ package se.su.it.svc
 
 import groovy.util.logging.Slf4j
 import org.gcontracts.annotations.Requires
-import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.manager.ConfigManager
 import se.su.it.svc.query.SuCardQuery
@@ -55,15 +54,14 @@ public class CardAdminServiceImpl implements CardAdminService {
    *
    *
    * @param suCardUUID  the card uuid for the card.
-   * @param audit Audit object initilized with audit data about the client and user.
    * @return void.
    * @see se.su.it.svc.ldap.SuCard
-   * @see se.su.it.svc.commons.SvcAudit
    */
-  @Requires({ suCardUUID && audit })
+  @Requires({ suCardUUID && revokerUid })
   public void revokeCard(
       @WebParam(name = "suCardUUID") String suCardUUID,
-      @WebParam(name = "audit") SvcAudit audit) {
+      @WebParam(name = "revokerUid") String revokerUid)
+  {
 
     SuCard card = SuCardQuery.findCardBySuCardUUID(ConfigManager.LDAP_RW, suCardUUID)
 
@@ -75,7 +73,7 @@ public class CardAdminServiceImpl implements CardAdminService {
     card.suCardState = "urn:x-su:su-card:state:revoked"
     card.update()
 
-    suCardOrderQuery.markCardAsDiscarded(suCardUUID, audit?.uid)
+    suCardOrderQuery.markCardAsDiscarded(suCardUUID, revokerUid)
   }
 
   /**
@@ -84,13 +82,13 @@ public class CardAdminServiceImpl implements CardAdminService {
    *
    * @param suCardUUID  the card uuid for the card.
    * @param pin the new pin for the card.
-   * @param audit Audit object initilized with audit data about the client and user.
    * @return void.
    * @see se.su.it.svc.ldap.SuCard
-   * @see se.su.it.svc.commons.SvcAudit
    */
-  public void setCardPIN(@WebParam(name = "suCardUUID") String suCardUUID, @WebParam(name = "pin") String pin, @WebParam(name = "audit") SvcAudit audit) {
-    if(suCardUUID == null || pin == null || audit == null)
+  public void setCardPIN(
+          @WebParam(name = "suCardUUID") String suCardUUID,
+          @WebParam(name = "pin") String pin) {
+    if(suCardUUID == null || pin == null)
       throw new java.lang.IllegalArgumentException("setCardPIN - Null argument values not allowed in this function")
     SuCard card =SuCardQuery.findCardBySuCardUUID(ConfigManager.LDAP_RW,suCardUUID)
     if(card != null) {

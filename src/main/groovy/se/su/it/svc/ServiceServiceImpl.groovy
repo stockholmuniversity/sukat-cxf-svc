@@ -36,7 +36,6 @@ import org.gcontracts.annotations.Requires
 import org.springframework.ldap.core.DistinguishedName
 import se.su.it.commons.Kadmin
 import se.su.it.svc.commons.LdapAttributeValidator
-import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuService
 import se.su.it.svc.ldap.SuServiceDescription
@@ -63,18 +62,14 @@ public class ServiceServiceImpl implements ServiceService {
    *
    *
    * @param uid  uid of the user.
-   * @param audit Audit object initilized with audit data about the client and user.
    * @return array of SuService.
    * @see se.su.it.svc.ldap.SuService
-   * @see se.su.it.svc.commons.SvcAudit
    */
 
   @Requires({
-    uid && audit && !LdapAttributeValidator.validateAttributes([uid:uid, audit:audit])
+    uid  && !LdapAttributeValidator.validateAttributes([uid:uid ])
   })
-  public SuService[] getServices(
-      @WebParam(name = "uid") String uid,
-      @WebParam(name = "audit") SvcAudit audit) {
+  public SuService[] getServices(@WebParam(name = "uid") String uid) {
 
     SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RO, uid)
     DistinguishedName dn = new DistinguishedName(person.getDn())
@@ -91,14 +86,10 @@ public class ServiceServiceImpl implements ServiceService {
    *
    *
    * @param serviceType ServiceType of the serviceDescription that is wanted.
-   * @param audit Audit object initilized with audit data about the client and user.
    * @return SuServiceDescription.
    * @see se.su.it.svc.ldap.SuServiceDescription
-   * @see se.su.it.svc.commons.SvcAudit
    */
-  public SuServiceDescription getServiceTemplate(@WebParam(name = "serviceType") String serviceType, @WebParam(name = "audit") SvcAudit audit) {
-    if(serviceType == null || audit == null)
-      throw new java.lang.IllegalArgumentException("getServiceTemplate - Null argument values not allowed in this function")
+  public SuServiceDescription getServiceTemplate(@WebParam(name = "serviceType") String serviceType) {
     return SuServiceDescriptionQuery.getSuServiceDescription(serviceType, ConfigManager.LDAP_RO)
   }
 
@@ -106,14 +97,10 @@ public class ServiceServiceImpl implements ServiceService {
    * This method returns service descriptions found in sukat.
    *
    *
-   * @param audit Audit object initilized with audit data about the client and user.
    * @return array of SuServiceDescription.
    * @see se.su.it.svc.ldap.SuServiceDescription
-   * @see se.su.it.svc.commons.SvcAudit
    */
-  public SuServiceDescription[] getServiceTemplates(@WebParam(name = "audit") SvcAudit audit) {
-    if(audit == null)
-      throw new java.lang.IllegalArgumentException("getServiceTemplates - Null argument values not allowed in this function")
+  public SuServiceDescription[] getServiceTemplates() {
     return SuServiceDescriptionQuery.getSuServiceDescriptions(ConfigManager.LDAP_RO)
   }
 
@@ -125,20 +112,18 @@ public class ServiceServiceImpl implements ServiceService {
    * @param serviceType the urn of the serviceType required
    * @param qualifier, a String that indicates whether to create a sub account for this service with qualifier as par of sub uid
    * @param description String with description for the sub account
-   * @param audit Audit object initilized with audit data about the client and user.
    * @return SuService.
    * @see se.su.it.svc.ldap.SuService
-   * @see se.su.it.svc.commons.SvcAudit
    */
   @Requires({
-    uid && serviceType != null && qualifier != null && description != null && audit &&
-      !LdapAttributeValidator.validateAttributes([uid:uid, audit:audit])})
+    uid && serviceType != null && qualifier != null && description != null  &&
+      !LdapAttributeValidator.validateAttributes([uid:uid ])})
   public SuService enableServiceFully(
       @WebParam(name = "uid") String uid,
       @WebParam(name = "serviceType") String serviceType,
       @WebParam(name = "qualifier") String qualifier,
-      @WebParam(name = "description") String description,
-      @WebParam(name = "audit") SvcAudit audit) {
+      @WebParam(name = "description") String description)
+  {
 
     SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RO, uid)
 
@@ -206,13 +191,14 @@ public class ServiceServiceImpl implements ServiceService {
    *
    * @param uid  uid of the user.
    * @param serviceType the urn of the serviceType required
-   * @param audit Audit object initilized with audit data about the client and user.
    * @return void.
    * @see se.su.it.svc.ldap.SuService
-   * @see se.su.it.svc.commons.SvcAudit
    */
-  public void blockService(@WebParam(name = "uid") String uid, @WebParam(name = "serviceType") String serviceType, @WebParam(name = "audit") SvcAudit audit) {
-    if(uid == null || serviceType == null || audit == null)
+  public void blockService(
+          @WebParam(name = "uid") String uid,
+          @WebParam(name = "serviceType") String serviceType
+  ) {
+    if(uid == null || serviceType == null)
       throw new java.lang.IllegalArgumentException("blockService - Null argument values not allowed in this function")
     SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RO, uid)
     if(person) {
@@ -239,13 +225,14 @@ public class ServiceServiceImpl implements ServiceService {
    *
    * @param uid  uid of the user.
    * @param serviceType the urn of the serviceType required
-   * @param audit Audit object initilized with audit data about the client and user.
    * @return void.
    * @see se.su.it.svc.ldap.SuService
-   * @see se.su.it.svc.commons.SvcAudit
    */
-  public void unblockService(@WebParam(name = "uid") String uid, @WebParam(name = "serviceType") String serviceType, @WebParam(name = "audit") SvcAudit audit) {
-    if(uid == null || serviceType == null || audit == null)
+  public void unblockService(
+          @WebParam(name = "uid") String uid,
+          @WebParam(name = "serviceType") String serviceType
+  ) {
+    if(uid == null || serviceType == null)
       throw new java.lang.IllegalArgumentException("unblockService - Null argument values not allowed in this function")
     SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RO, uid)
     if(person) {

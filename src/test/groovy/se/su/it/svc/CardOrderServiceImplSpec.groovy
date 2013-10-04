@@ -1,6 +1,7 @@
 package se.su.it.svc
 
 import gldapo.GldapoSchemaRegistry
+import org.gcontracts.PostconditionViolation
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -33,9 +34,7 @@ import gldapo.GldapoSchemaRegistry
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.gcontracts.PostconditionViolation
 import org.gcontracts.PreconditionViolation
-import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcCardOrderVO
 import se.su.it.svc.query.SuCardOrderQuery
 import se.su.it.svc.util.CardOrderServiceUtils
@@ -74,21 +73,13 @@ class CardOrderServiceImplSpec extends Specification {
   @Unroll
   void "findAllCardOrdersForUid: given uid: \'#uid\'"(){
     when:
-    service.findAllCardOrdersForUid(uid, new SvcAudit())
+    service.findAllCardOrdersForUid(uid)
 
     then:
     thrown(PreconditionViolation)
 
     where:
     uid << [null, '']
-  }
-
-  void "findAllCardOrdersForUid: given no audit"(){
-    when:
-    service.findAllCardOrdersForUid('uid', null)
-
-    then:
-    thrown(PreconditionViolation)
   }
 
   void "findAllCardOrdersForUid: with no card orders."() {
@@ -98,7 +89,7 @@ class CardOrderServiceImplSpec extends Specification {
     }
 
     expect:
-    [] == service.findAllCardOrdersForUid('uid', new SvcAudit())
+    [] == service.findAllCardOrdersForUid('uid')
   }
 
   void "findAllCardOrdersForUid: with card orders."() {
@@ -108,7 +99,7 @@ class CardOrderServiceImplSpec extends Specification {
     }
 
     when:
-    def resp = service.findAllCardOrdersForUid('uid', new SvcAudit())
+    def resp = service.findAllCardOrdersForUid('uid')
 
     then:
     resp.size() == 2
@@ -117,15 +108,7 @@ class CardOrderServiceImplSpec extends Specification {
 
   void "orderCard: when given no cardOrder"() {
     when:
-    service.orderCard(null, null)
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  void "orderCard: when given no audit object"() {
-    when:
-    service.orderCard(new SvcCardOrderVO(id:1), null)
+    service.orderCard(null)
 
     then:
     thrown(PreconditionViolation)
@@ -135,7 +118,7 @@ class CardOrderServiceImplSpec extends Specification {
     given:
 
     when:
-    service.orderCard(cardOrder, new SvcAudit())
+    service.orderCard(cardOrder)
 
     then:
     thrown(IllegalArgumentException)
@@ -152,7 +135,7 @@ class CardOrderServiceImplSpec extends Specification {
     }
 
     when:
-    def resp = service.orderCard(cardOrder, new SvcAudit())
+    def resp = service.orderCard(cardOrder)
 
     then:
     resp.size() == 36
@@ -169,7 +152,7 @@ class CardOrderServiceImplSpec extends Specification {
     }
 
     when:
-    service.orderCard(cardOrder, new SvcAudit())
+    service.orderCard(cardOrder)
 
     then:
     thrown(PostconditionViolation)

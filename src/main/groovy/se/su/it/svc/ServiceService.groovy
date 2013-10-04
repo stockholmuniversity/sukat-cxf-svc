@@ -33,17 +33,16 @@ package se.su.it.svc
 
 import se.su.it.svc.annotations.SuCxfSvcSpocpRole
 import se.su.it.svc.aspect.AuditAspectMethodDetails
-import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuService
 import se.su.it.svc.ldap.SuServiceDescription
 
 @SuCxfSvcSpocpRole(role = "sukat-service-admin")
 public interface ServiceService {
-  SuService[] getServices(String uid, SvcAudit audit)
-  SuServiceDescription getServiceTemplate(String serviceType, SvcAudit audit)
-  SuServiceDescription[] getServiceTemplates(SvcAudit audit)
+  SuService[] getServices(String uid)
+  SuServiceDescription getServiceTemplate(String serviceType)
+  SuServiceDescription[] getServiceTemplates()
   @AuditAspectMethodDetails(details = "resetOrCreatePrincipal")
-  SuService enableServiceFully(String uid, String serviceType, String qualifier, String description, SvcAudit audit)
-  void blockService(String uid, String serviceType, SvcAudit audit)
-  void unblockService(String uid, String serviceType, SvcAudit audit)
+  SuService enableServiceFully(String uid, String serviceType, String qualifier, String description)
+  void blockService(String uid, String serviceType)
+  void unblockService(String uid, String serviceType)
 }

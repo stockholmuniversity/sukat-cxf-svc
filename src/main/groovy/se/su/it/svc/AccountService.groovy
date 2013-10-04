@@ -34,24 +34,23 @@ package se.su.it.svc
 import se.su.it.svc.annotations.SuCxfSvcSpocpRole
 import se.su.it.svc.aspect.AuditAspectMethodDetails
 import se.su.it.svc.aspect.AuditHideReturnValue
-import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
 
 @SuCxfSvcSpocpRole(role = "sukat-account-admin")
 public interface AccountService {
-  void updatePrimaryAffiliation(String uid, String affiliation, SvcAudit audit)
+  void updatePrimaryAffiliation(String uid, String affiliation)
   @AuditHideReturnValue
   @AuditAspectMethodDetails(details = "setPassword")
-  String resetPassword(String uid, SvcAudit audit)
-  void createSuPerson(String uid, String ssn, String givenName, String sn, SvcAudit audit)
-  void updateSuPerson(String uid, SvcSuPersonVO person, SvcAudit audit)
+  String resetPassword(String uid)
+  void createSuPerson(String uid, String ssn, String givenName, String sn)
+  void updateSuPerson(String uid, SvcSuPersonVO person)
   @AuditHideReturnValue
-  SvcUidPwd activateSuPerson(String uid, String domain, String[] affiliations, SvcAudit audit)
-  void terminateSuPerson(String uid, SvcAudit audit)
-  String getMailRoutingAddress(String uid, SvcAudit audit)
-  void setMailRoutingAddress(String uid, String mail, SvcAudit audit)
-  String[] addMailLocalAddresses(String uid, String[] mailLocalAddresses, SvcAudit audit)
-  SvcSuPersonVO[] findAllSuPersonsBySocialSecurityNumber(String socialSecurityNumber, SvcAudit audit)
-  SvcSuPersonVO findSuPersonByUid(String uid, SvcAudit audit)
+  SvcUidPwd activateSuPerson(String uid, String domain, String[] affiliations)
+  void terminateSuPerson(String uid)
+  String getMailRoutingAddress(String uid)
+  void setMailRoutingAddress(String uid, String mail)
+  String[] addMailLocalAddresses(String uid, String[] mailLocalAddresses)
+  SvcSuPersonVO[] findAllSuPersonsBySocialSecurityNumber(String socialSecurityNumber)
+  SvcSuPersonVO findSuPersonByUid(String uid)
 }

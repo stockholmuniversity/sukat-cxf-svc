@@ -34,9 +34,9 @@ package se.su.it.svc.aspect
 import groovy.util.logging.Slf4j
 import org.aopalliance.intercept.MethodInterceptor
 import org.aopalliance.intercept.MethodInvocation
-import se.su.it.svc.commons.SvcAudit
 
 import java.lang.annotation.Annotation
+import java.lang.reflect.Method
 
 /**
  * Created with IntelliJ IDEA.
@@ -45,7 +45,6 @@ import java.lang.annotation.Annotation
  * Time: 12:59
  * To change this template use File | Settings | File Templates.
  */
-import java.lang.reflect.Method
 import java.sql.Timestamp
 
 @Slf4j
@@ -115,29 +114,9 @@ public class AuditAspect implements MethodInterceptor {
       outArgs.writeObject(args)
       outArgs.close()
 
-      SvcAudit svcAudit = null
-      try {
-        def lastArg = args[-1]
-        if (lastArg && lastArg instanceof SvcAudit) {
-          svcAudit = (SvcAudit) lastArg
-        }
-      } catch (ex) {
-        log.debug "Couldn't get svc audit obj.", ex
-      }
-
-      if (svcAudit) {
-        log.debug("Found a non-null SvcAudit as last argument to method, extracting uid and ip")
-      } else {
-        log.warn("No suitable SvcAudit supplied for call to " + mi.getName() +
-          " - will not be able to log originator IP/UID.")
-      }
-
       // Create an AuditEntity based on the gathered information
       AuditEntity ae = AuditEntity.getInstance(
               new Timestamp(new Date().getTime()).toString(),
-              svcAudit?.getValue('ipAddress') ?: UNKNOWN,
-              svcAudit?.getValue('uid') ?: UNKNOWN,
-              svcAudit?.getValue('client') ?: UNKNOWN,
               mi?.getName(),
               objectToString(args),
               bsArgs.toByteArray().toString(),
