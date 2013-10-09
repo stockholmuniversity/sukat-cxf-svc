@@ -61,10 +61,8 @@
         <constructor-arg name="configFileName" type="java.lang.String" value="#{ systemProperties['config.properties'] }"/>
     </bean>
 
-
     <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="properties" value="#{ systemProperties['config.properties'] }"/>
-        <property name="ignoreResourceNotFound" value="true"/>
+        <property name="properties" value="#{ configManager.properties }"/>
         <property name="ignoreUnresolvablePlaceholders" value="true"/>
     </bean>
 
@@ -116,7 +114,7 @@
             implementorClass="se.su.it.svc.CardInfoServiceImpl"
             implementor="#cardinfoserviceEndpoint"
             address="/CardInfoService"
-            publishedEndpointUrl="${publishedEndpointUrl}/CardInfoService"/>
+            publishedEndpointUrl="${soap.publishedEndpointUrl}/CardInfoService"/>
 
     <bean id="cardorderserviceEndpoint" class="se.su.it.svc.CardOrderServiceImpl"/>
     <jaxws:endpoint
@@ -124,7 +122,7 @@
             implementorClass="se.su.it.svc.CardOrderServiceImpl"
             implementor="#cardorderserviceEndpoint"
             address="/CardOrderService"
-            publishedEndpointUrl="${publishedEndpointUrl}/CardOrderService"/>
+            publishedEndpointUrl="${soap.publishedEndpointUrl}/CardOrderService"/>
 
     <bean id="cardadminserviceEndpoint" class="se.su.it.svc.CardAdminServiceImpl"/>
     <jaxws:endpoint
@@ -132,7 +130,7 @@
             implementorClass="se.su.it.svc.CardAdminServiceImpl"
             implementor="#cardadminserviceEndpoint"
             address="/CardAdminService"
-            publishedEndpointUrl="${publishedEndpointUrl}/CardAdminService"/>
+            publishedEndpointUrl="${soap.publishedEndpointUrl}/CardAdminService"/>
 
     <bean id="entitlementserviceEndpoint" class="se.su.it.svc.EntitlementServiceImpl"/>
     <jaxws:endpoint
@@ -140,7 +138,7 @@
             implementorClass="se.su.it.svc.EntitlementServiceImpl"
             implementor="#entitlementserviceEndpoint"
             address="/EntitlementService"
-            publishedEndpointUrl="${publishedEndpointUrl}/EntitlementService"/>
+            publishedEndpointUrl="${soap.publishedEndpointUrl}/EntitlementService"/>
 
     <bean id="serviceserviceEndpoint" class="se.su.it.svc.ServiceServiceImpl"/>
     <jaxws:endpoint
@@ -148,7 +146,7 @@
             implementorClass="se.su.it.svc.ServiceServiceImpl"
             implementor="#serviceserviceEndpoint"
             address="/ServiceService"
-            publishedEndpointUrl="${publishedEndpointUrl}/ServiceService"/>
+            publishedEndpointUrl="${soap.publishedEndpointUrl}/ServiceService"/>
 
     <bean id="accountserviceEndpoint" class="se.su.it.svc.AccountServiceImpl"/>
     <jaxws:endpoint
@@ -156,7 +154,7 @@
             implementorClass="se.su.it.svc.AccountServiceImpl"
             implementor="#accountserviceEndpoint"
             address="/AccountService"
-            publishedEndpointUrl="${publishedEndpointUrl}/AccountService"/>
+            publishedEndpointUrl="${soap.publishedEndpointUrl}/AccountService"/>
 
     <bean id="roleserviceEndpoint" class="se.su.it.svc.RoleServiceImpl"/>
     <jaxws:endpoint
@@ -164,7 +162,7 @@
             implementorClass="se.su.it.svc.RoleServiceImpl"
             implementor="#roleserviceEndpoint"
             address="/RoleService"
-            publishedEndpointUrl="${publishedEndpointUrl}/RoleService"/>
+            publishedEndpointUrl="${soap.publishedEndpointUrl}/RoleService"/>
 
     <bean id="webserviceadminEndpoint" class="se.su.it.svc.WebServiceAdminImpl"/>
     <jaxws:endpoint
@@ -172,13 +170,13 @@
             implementorClass="se.su.it.svc.WebServiceAdminImpl"
             implementor="#webserviceadminEndpoint"
             address="/WebServiceAdmin"
-            publishedEndpointUrl="${publishedEndpointUrl}/WebServiceAdmin"/>
+            publishedEndpointUrl="${soap.publishedEndpointUrl}/WebServiceAdmin"/>
 
     <jaxws:endpoint
             id="status"
             implementor="se.su.it.svc.Status"
             address="/Status"
-            publishedEndpointUrl="${publishedEndpointUrl}/Status"/>
+            publishedEndpointUrl="${soap.publishedEndpointUrl}/Status"/>
 
     <bean id="sanitizerAspect" class="se.su.it.svc.aspect.SanitizeWebParametersAspect"/>
 
