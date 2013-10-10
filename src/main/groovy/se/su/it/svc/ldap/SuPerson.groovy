@@ -370,7 +370,7 @@ class SuPerson implements Serializable {
   }
 
   private boolean isSkipCreateEnabled() {
-    return configManager.config.enrollment.skipCreate == "true"
+    return configManager.config.enrollment.create.skip == "true"
   }
 
   private ConfigManager getConfigManager() {
