@@ -33,10 +33,10 @@ package se.su.it.svc.manager
 
 import gldapo.Gldapo
 import groovy.util.logging.Slf4j
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer
+import org.springframework.beans.factory.InitializingBean
 
 @Slf4j
-class ConfigManager {
+class ConfigManager implements InitializingBean {
 
   private final ConfigObject config
 
@@ -91,7 +91,7 @@ class ConfigManager {
     URL configUrl = file.toURI().toURL()
     config.merge(slurper.parse(configUrl))
 
-    /** Set variabls and initialize Gldapo */
+    /** Set variables and initialize Gldapo */
 
     checkMandatoryProperties()
 
@@ -127,9 +127,10 @@ class ConfigManager {
   }
 
   public String toString() {
+
     StringBuilder sb = new StringBuilder()
-    sb.append("\n**** ConfigManager ****")
-    this?.config?.toProperties()?.each { key, value ->
+    sb.append("\n**** ConfigManager Configuration ****")
+    this?.config?.toProperties()?.sort { it.key }?.each { key, value ->
       sb.append("\n$key => $value")
     }
     sb.append("\n")
@@ -142,5 +143,10 @@ class ConfigManager {
    */
   private final static void initializeGldapo(URL configUrl) {
     Gldapo.initialize(configUrl)
+  }
+
+  @Override
+  void afterPropertiesSet() throws Exception {
+    println toString()
   }
 }

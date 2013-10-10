@@ -6,9 +6,9 @@ import se.su.it.svc.ldap.SuService
 import se.su.it.svc.ldap.SuServiceDescription
 import se.su.it.svc.ldap.SuSubAccount
 
-//soap {
-//  publishedEndpointUrl = "http://localhost:80"
-//}
+soap {
+  publishedEndpointUrl = "http://localhost:80"
+}
 
 ldap {
   ro {
