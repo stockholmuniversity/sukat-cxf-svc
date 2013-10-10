@@ -35,7 +35,6 @@ import groovy.util.logging.Slf4j
 import org.gcontracts.annotations.Ensures
 import org.gcontracts.annotations.Requires
 import org.springframework.ldap.core.DistinguishedName
-import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.manager.ConfigManager
 import se.su.it.svc.query.SuCardQuery
@@ -57,20 +56,17 @@ public class CardInfoServiceImpl implements CardInfoService {
    *
    * @param uid  the uid (user id) for the user that you want to find cards for.
    * @param onlyActive  if only active cards should be returned in the result.
-   * @param audit Audit object initilized with audit data about the client and user.
    * @return an <code>ArrayList<SuCard></code> of SuCard objects or an empty array if no card was found.
    * @throws IllegalArgumentException if no user can be found for the supplied uid
    * @throws Exception if something goes wrong while fetching cards
    * @see se.su.it.svc.ldap.SuCard
-   * @see se.su.it.svc.commons.SvcAudit
    */
   @Override
-  @Requires({ uid && audit && onlyActive != null })
+  @Requires({ uid  && onlyActive != null })
   @Ensures({ result != null && result instanceof SuCard[] })
   public SuCard[] getAllCards(
           @WebParam(name = 'uid') String uid,
-          @WebParam(name = 'onlyActive') boolean onlyActive,
-          @WebParam(name = 'audit') SvcAudit audit
+          @WebParam(name = 'onlyActive') boolean onlyActive
   ) {
 
     def person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RO, uid)
@@ -85,17 +81,14 @@ public class CardInfoServiceImpl implements CardInfoService {
    * Returns a SuCard object for a specific suCardUUID, specified by the parameter suCardUUID.
    *
    * @param suCardUUID  the card uuid for the card.
-   * @param audit Audit object initilized with audit data about the client and user.
    * @return an SuCard object or null if no card was found.
    * @see se.su.it.svc.ldap.SuCard
-   * @see se.su.it.svc.commons.SvcAudit
    */
   @Override
-  @Requires({ suCardUUID && audit })
+  @Requires({ suCardUUID  })
   @Ensures({ result == null || result instanceof SuCard })
   public SuCard getCardByUUID(
-          @WebParam(name = 'suCardUUID') String suCardUUID,
-          @WebParam(name = 'audit') SvcAudit audit
+          @WebParam(name = 'suCardUUID') String suCardUUID
   ) {
 
     return SuCardQuery.findCardBySuCardUUID(ConfigManager.LDAP_RO, suCardUUID)

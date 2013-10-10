@@ -32,7 +32,6 @@
 package se.su.it.svc
 
 import se.su.it.svc.annotations.SuCxfSvcSpocpRole
-import se.su.it.svc.commons.SvcAudit
 
 /**
  * Created with IntelliJ IDEA.
@@ -43,6 +42,6 @@ import se.su.it.svc.commons.SvcAudit
  */
 @SuCxfSvcSpocpRole(role = "sukat-entitlement-admin")
 public interface EntitlementService {
-  void addEntitlement(String uid, String entitlement, SvcAudit audit)
-  void removeEntitlement(String uid,String entitlement,SvcAudit audit)
+  void addEntitlement(String uid, String entitlement)
+  void removeEntitlement(String uid,String entitlement)
 }

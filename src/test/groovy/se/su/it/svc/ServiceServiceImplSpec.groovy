@@ -3,9 +3,9 @@ package se.su.it.svc
 import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PreconditionViolation
 import se.su.it.commons.Kadmin
-import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuService
+import se.su.it.svc.ldap.SuServiceDescription
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -38,7 +38,6 @@ import se.su.it.svc.ldap.SuService
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import se.su.it.svc.ldap.SuServiceDescription
 import se.su.it.svc.ldap.SuSubAccount
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuServiceDescriptionQuery
@@ -71,18 +70,7 @@ class ServiceServiceImplSpec extends Specification {
     def serviceServiceImpl = new ServiceServiceImpl()
 
     when:
-    serviceServiceImpl.getServices(null,new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "Test getServices with null SvcAudit argument"() {
-    setup:
-    def serviceServiceImpl = new ServiceServiceImpl()
-
-    when:
-    serviceServiceImpl.getServices("testuid",null)
+    serviceServiceImpl.getServices(null)
 
     then:
     thrown(PreconditionViolation)
@@ -100,7 +88,7 @@ class ServiceServiceImplSpec extends Specification {
     SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> person }
 
     when:
-    def ret = serviceServiceImpl.getServices("testuid",new SvcAudit())
+    def ret = serviceServiceImpl.getServices("testuid")
 
     then:
     ret.size() == 1
@@ -119,7 +107,7 @@ class ServiceServiceImplSpec extends Specification {
     SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> person }
 
     when:
-    def ret = serviceServiceImpl.getServices("testuid",new SvcAudit())
+    def ret = serviceServiceImpl.getServices("testuid")
 
     then:
     ret.size() == 0
@@ -131,18 +119,7 @@ class ServiceServiceImplSpec extends Specification {
     def serviceServiceImpl = new ServiceServiceImpl()
 
     when:
-    def ret = serviceServiceImpl.getServices("testuid",new SvcAudit())
-
-    then:
-    thrown(IllegalArgumentException)
-  }
-
-  def "Test getServiceTemplates with null SvcAudit argument"() {
-    setup:
-    def serviceServiceImpl = new ServiceServiceImpl()
-
-    when:
-    serviceServiceImpl.getServiceTemplates(null)
+    def ret = serviceServiceImpl.getServices("testuid")
 
     then:
     thrown(IllegalArgumentException)
@@ -153,7 +130,7 @@ class ServiceServiceImplSpec extends Specification {
     def serviceServiceImpl = new ServiceServiceImpl()
 
     when:
-    serviceServiceImpl.enableServiceFully(null, "urn:x-su:service:type:jabber", "jabber", "A description", new SvcAudit())
+    serviceServiceImpl.enableServiceFully(null, "urn:x-su:service:type:jabber", "jabber", "A description")
 
     then:
     thrown(PreconditionViolation)
@@ -164,7 +141,7 @@ class ServiceServiceImplSpec extends Specification {
     def serviceServiceImpl = new ServiceServiceImpl()
 
     when:
-    serviceServiceImpl.enableServiceFully("testuid", null, "jabber", "A description", new SvcAudit())
+    serviceServiceImpl.enableServiceFully("testuid", null, "jabber", "A description")
 
     then:
     thrown(PreconditionViolation)
@@ -175,7 +152,7 @@ class ServiceServiceImplSpec extends Specification {
     def serviceServiceImpl = new ServiceServiceImpl()
 
     when:
-    serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", null, "A description", new SvcAudit())
+    serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", null, "A description")
 
     then:
     thrown(PreconditionViolation)
@@ -186,18 +163,7 @@ class ServiceServiceImplSpec extends Specification {
     def serviceServiceImpl = new ServiceServiceImpl()
 
     when:
-    serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", null, new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "Test enableServiceFully with null SvcAudit argument"() {
-    setup:
-    def serviceServiceImpl = new ServiceServiceImpl()
-
-    when:
-    serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", "A description",null)
+    serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", null)
 
     then:
     thrown(PreconditionViolation)
@@ -209,7 +175,7 @@ class ServiceServiceImplSpec extends Specification {
     def serviceServiceImpl = new ServiceServiceImpl()
 
     when:
-    def ret = serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", "A description", new SvcAudit())
+    def ret = serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", "A description")
 
     then:
     thrown(IllegalArgumentException)
@@ -229,7 +195,7 @@ class ServiceServiceImplSpec extends Specification {
     def serviceServiceImpl = new ServiceServiceImpl()
 
     when:
-    def ret = serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", "A description", new SvcAudit())
+    def ret = serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", "A description")
 
     then:
     ret.roleOccupant.startsWith("uid=testuid.jabber") == true
@@ -249,7 +215,7 @@ class ServiceServiceImplSpec extends Specification {
     SuServiceQuery.metaClass.static.saveSuService = {SuService suService -> return void}
     def serviceServiceImpl = new ServiceServiceImpl()
     when:
-    def ret = serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", "A description", new SvcAudit())
+    def ret = serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", "A description")
     then:
     thrown(IllegalArgumentException)
   }
@@ -268,7 +234,7 @@ class ServiceServiceImplSpec extends Specification {
     SuServiceQuery.metaClass.static.saveSuService = {SuService suService -> return void}
     def serviceServiceImpl = new ServiceServiceImpl()
     when:
-    def ret = serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", "A description", new SvcAudit())
+    def ret = serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", "A description")
     then:
     thrown(IllegalArgumentException)
   }
@@ -278,7 +244,7 @@ class ServiceServiceImplSpec extends Specification {
     def serviceServiceImpl = new ServiceServiceImpl()
 
     when:
-    serviceServiceImpl.blockService(null, "urn:x-su:service:type:jabber", new SvcAudit())
+    serviceServiceImpl.blockService(null, "urn:x-su:service:type:jabber")
 
     then:
     thrown(IllegalArgumentException)
@@ -289,18 +255,7 @@ class ServiceServiceImplSpec extends Specification {
     def serviceServiceImpl = new ServiceServiceImpl()
 
     when:
-    serviceServiceImpl.blockService("testuid", null, new SvcAudit())
-
-    then:
-    thrown(IllegalArgumentException)
-  }
-
-  def "Test blockService with null SvcAudit argument"() {
-    setup:
-    def serviceServiceImpl = new ServiceServiceImpl()
-
-    when:
-    serviceServiceImpl.blockService("testuid", "urn:x-su:service:type:jabber", null)
+    serviceServiceImpl.blockService("testuid", null)
 
     then:
     thrown(IllegalArgumentException)
@@ -314,7 +269,7 @@ class ServiceServiceImplSpec extends Specification {
     SuServiceQuery.metaClass.static.getSuServiceByType = {String directory, org.springframework.ldap.core.DistinguishedName dn, String serviceType -> return null}
 
     when:
-    serviceServiceImpl.blockService("testuid", "urn:x-su:service:type:jabber", new SvcAudit())
+    serviceServiceImpl.blockService("testuid", "urn:x-su:service:type:jabber")
 
     then:
     thrown(IllegalArgumentException)
@@ -328,7 +283,7 @@ class ServiceServiceImplSpec extends Specification {
     SuServiceQuery.metaClass.static.getSuServiceByType = {String directory, org.springframework.ldap.core.DistinguishedName dn, String serviceType -> return new SuService(suServiceStatus: "locked")}
 
     when:
-    serviceServiceImpl.blockService("testuid", "urn:x-su:service:type:jabber", new SvcAudit())
+    serviceServiceImpl.blockService("testuid", "urn:x-su:service:type:jabber")
 
     then:
     thrown(IllegalArgumentException)
@@ -346,7 +301,7 @@ class ServiceServiceImplSpec extends Specification {
     }
 
     when:
-    serviceServiceImpl.blockService("testuid", "urn:x-su:service:type:jabber", new SvcAudit())
+    serviceServiceImpl.blockService("testuid", "urn:x-su:service:type:jabber")
 
     then:
     serviceStatus == "blocked"
@@ -357,7 +312,7 @@ class ServiceServiceImplSpec extends Specification {
     def serviceServiceImpl = new ServiceServiceImpl()
 
     when:
-    serviceServiceImpl.unblockService(null, "urn:x-su:service:type:jabber", new SvcAudit())
+    serviceServiceImpl.unblockService(null, "urn:x-su:service:type:jabber")
 
     then:
     thrown(IllegalArgumentException)
@@ -368,18 +323,7 @@ class ServiceServiceImplSpec extends Specification {
     def serviceServiceImpl = new ServiceServiceImpl()
 
     when:
-    serviceServiceImpl.unblockService("testuid", null, new SvcAudit())
-
-    then:
-    thrown(IllegalArgumentException)
-  }
-
-  def "Test unblockService with null SvcAudit argument"() {
-    setup:
-    def serviceServiceImpl = new ServiceServiceImpl()
-
-    when:
-    serviceServiceImpl.unblockService("testuid", "urn:x-su:service:type:jabber", null)
+    serviceServiceImpl.unblockService("testuid", null)
 
     then:
     thrown(IllegalArgumentException)
@@ -393,7 +337,7 @@ class ServiceServiceImplSpec extends Specification {
     SuServiceQuery.metaClass.static.getSuServiceByType = {String directory, org.springframework.ldap.core.DistinguishedName dn, String serviceType -> return null}
 
     when:
-    serviceServiceImpl.unblockService("testuid", "urn:x-su:service:type:jabber", new SvcAudit())
+    serviceServiceImpl.unblockService("testuid", "urn:x-su:service:type:jabber")
 
     then:
     thrown(IllegalArgumentException)
@@ -412,7 +356,7 @@ class ServiceServiceImplSpec extends Specification {
     }
 
     when:
-    serviceServiceImpl.unblockService("testuid", "urn:x-su:service:type:jabber", new SvcAudit())
+    serviceServiceImpl.unblockService("testuid", "urn:x-su:service:type:jabber")
 
     then:
     serviceStatus == "enabled"
@@ -431,7 +375,7 @@ class ServiceServiceImplSpec extends Specification {
     }
 
     when:
-    serviceServiceImpl.unblockService("testuid", "urn:x-su:service:type:jabber", new SvcAudit())
+    serviceServiceImpl.unblockService("testuid", "urn:x-su:service:type:jabber")
 
     then:
     serviceStatus == "disabled"

@@ -35,11 +35,9 @@ import groovy.util.logging.Slf4j
 import org.gcontracts.annotations.Requires
 import org.springframework.ldap.core.DistinguishedName
 import se.su.it.svc.commons.LdapAttributeValidator
-import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuRole
 import se.su.it.svc.manager.ConfigManager
-
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuRoleQuery
 
@@ -60,21 +58,18 @@ public class RoleServiceImpl implements RoleService {
    *
    * @param uid uid of the user.
    * @param roleDNList List<String> of DN's for the roles
-   * @param audit Audit object initilized with audit data about the client and user.
    * @return void.
-   * @see se.su.it.svc.commons.SvcAudit
    */
 
   @Requires({
     uid &&
         roleDNList?.size() > 0 &&
-        audit &&
-        !LdapAttributeValidator.validateAttributes([uid:uid, audit:audit])
+        !LdapAttributeValidator.validateAttributes([uid:uid ])
   })
   public void addUidToRoles(
       @WebParam(name = "uid") String uid,
-      @WebParam(name = "roleDNList") List<String> roleDNList,
-      @WebParam(name = "audit") SvcAudit audit) {
+      @WebParam(name = "roleDNList") List<String> roleDNList)
+  {
 
     SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RO, uid)
 
@@ -109,17 +104,15 @@ public class RoleServiceImpl implements RoleService {
    *
    * @param uid uid of the user.
    * @param roleDNList List<String> of DN's for the roles
-   * @param audit Audit object initilized with audit data about the client and user.
    * @return void.
-   * @see se.su.it.svc.commons.SvcAudit
    */
   @Requires({
-    uid && roleDNList?.size() > 0 && audit
+    uid && roleDNList?.size() > 0
   })
   public void removeUidFromRoles(
       @WebParam(name = "uid") String uid,
-      @WebParam(name = "roleDNList") List<String> roleDNList,
-      @WebParam(name = "audit") SvcAudit audit) {
+      @WebParam(name = "roleDNList") List<String> roleDNList)
+  {
 
     SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RO, uid)
     DistinguishedName uidDN = new DistinguishedName(person.getDn())

@@ -6,7 +6,7 @@ import org.gcontracts.PostconditionViolation
 import org.gcontracts.PreconditionViolation
 import se.su.it.commons.Kadmin
 import se.su.it.commons.PasswordUtils
-import se.su.it.svc.commons.SvcAudit
+import se.su.it.svc.commons.SvcSuPersonVO
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -39,7 +39,6 @@ import se.su.it.svc.commons.SvcAudit
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuPersonStub
@@ -73,7 +72,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.updatePrimaryAffiliation(null, "employee", new SvcAudit())
+    accountServiceImpl.updatePrimaryAffiliation(null, "employee")
 
     then:
     thrown(PreconditionViolation)
@@ -84,18 +83,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.updatePrimaryAffiliation("testuid", null, new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "Test updatePrimaryAffiliation with null SvcAudit argument"() {
-    setup:
-    def accountServiceImpl = new AccountServiceImpl()
-
-    when:
-    accountServiceImpl.updatePrimaryAffiliation("testuid", "employee", null)
+    accountServiceImpl.updatePrimaryAffiliation("testuid", null)
 
     then:
     thrown(PreconditionViolation)
@@ -106,7 +94,7 @@ class AccountServiceImplSpec extends Specification {
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return null }
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.updatePrimaryAffiliation("testuid", "employee", new SvcAudit())
+    accountServiceImpl.updatePrimaryAffiliation("testuid", "employee")
     then:
     thrown(IllegalArgumentException)
   }
@@ -118,7 +106,7 @@ class AccountServiceImplSpec extends Specification {
     SuPersonQuery.metaClass.static.updateSuPerson = {SuPerson person -> myaffiliation = person.eduPersonPrimaryAffiliation}
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.updatePrimaryAffiliation("testuid", "employee", new SvcAudit())
+    accountServiceImpl.updatePrimaryAffiliation("testuid", "employee")
     then:
     myaffiliation == "employee"
   }
@@ -128,18 +116,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.resetPassword(null, new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "Test resetPassword with null audit argument"() {
-    setup:
-    def accountServiceImpl = new AccountServiceImpl()
-
-    when:
-    accountServiceImpl.resetPassword("testuid", null)
+    accountServiceImpl.resetPassword(null)
 
     then:
     thrown(PreconditionViolation)
@@ -151,7 +128,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.resetPassword("testuid", new SvcAudit())
+    accountServiceImpl.resetPassword("testuid")
 
     then:
     thrown(IllegalArgumentException)
@@ -166,7 +143,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    def ret = accountServiceImpl.resetPassword("testuid", new SvcAudit())
+    def ret = accountServiceImpl.resetPassword("testuid")
 
     then:
     1* PasswordUtils.genRandomPassword(10, 10) >> "*" *10
@@ -181,7 +158,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.resetPassword("testuid.jabber", new SvcAudit())
+    accountServiceImpl.resetPassword("testuid.jabber")
 
     then:
     1 * kadmin.principalExists("testuid/jabber") >> true
@@ -193,7 +170,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.updateSuPerson(null,new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.updateSuPerson(null,new SvcSuPersonVO())
 
     then:
     thrown(PreconditionViolation)
@@ -204,18 +181,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.updateSuPerson("testuid",null, new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "Test updateSuPerson with null SvcAudit argument"() {
-    setup:
-    def accountServiceImpl = new AccountServiceImpl()
-
-    when:
-    accountServiceImpl.updateSuPerson("testuid",new SvcSuPersonVO(), null)
+    accountServiceImpl.updateSuPerson("testuid",null)
 
     then:
     thrown(PreconditionViolation)
@@ -227,7 +193,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.updateSuPerson("testuid",new SvcSuPersonVO(), new SvcAudit())
+    accountServiceImpl.updateSuPerson("testuid",new SvcSuPersonVO())
 
     then:
     thrown(IllegalArgumentException)
@@ -244,7 +210,7 @@ class AccountServiceImplSpec extends Specification {
     SuPersonQuery.metaClass.static.updateSuPerson = {SuPerson person -> title = person.title;listEntry0=person.eduPersonAffiliation.iterator().next()}
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    accountServiceImpl.updateSuPerson("testuid",suPerson, new SvcAudit())
+    accountServiceImpl.updateSuPerson("testuid",suPerson)
     then:
     title.iterator().next() == "knallhatt"
     listEntry0 == "other"
@@ -255,7 +221,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson(null,"196601010357","Test","Testsson", new SvcAudit())
+    accountServiceImpl.createSuPerson(null,"196601010357","Test","Testsson")
 
     then:
     thrown(PreconditionViolation)
@@ -267,7 +233,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","6601010357","Test","Testsson", new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","6601010357","Test","Testsson")
 
     then:
     thrown(IllegalArgumentException)
@@ -278,7 +244,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest",null,"Test","Testsson", new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest",null,"Test","Testsson")
 
     then:
     thrown(PreconditionViolation)
@@ -289,7 +255,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","20001128-5764","Test","Testsson", new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","20001128-5764","Test","Testsson")
 
     then:
     thrown(PreconditionViolation)
@@ -300,7 +266,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","196601010357",null,"Testsson", new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","196601010357",null,"Testsson")
 
     then:
     thrown(PreconditionViolation)
@@ -311,7 +277,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","196601010357","Test",null, new SvcAudit())
+    accountServiceImpl.createSuPerson("testtest","196601010357","Test",null)
 
     then:
     thrown(PreconditionViolation)
@@ -322,18 +288,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","196601010357","Test","Testsson", new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "Test createSuPerson with null audit argument"() {
-    setup:
-    def accountServiceImpl = new AccountServiceImpl()
-
-    when:
-    accountServiceImpl.createSuPerson("testtest","196601010357","Test","Testsson", null)
+    accountServiceImpl.createSuPerson("testtest","196601010357","Test","Testsson")
 
     then:
     thrown(PreconditionViolation)
@@ -357,8 +312,7 @@ class AccountServiceImplSpec extends Specification {
         uid,
         ssn,
         givenName,
-        sn,
-        new SvcAudit())
+        sn)
 
     then: 'we test that the object returned has been saved.'
     thrown(IllegalArgumentException)
@@ -390,8 +344,7 @@ class AccountServiceImplSpec extends Specification {
             uid,
             ssn,
             givenName,
-            sn,
-            new SvcAudit())
+            sn)
 
     then: 'we test that the object returned has been saved.'
     spy.uid == uid.reverse()
@@ -399,7 +352,7 @@ class AccountServiceImplSpec extends Specification {
 
   def "Test terminateSuPerson"() {
     when:
-    new AccountServiceImpl().terminateSuPerson("testuid", new SvcAudit())
+    new AccountServiceImpl().terminateSuPerson("testuid")
 
     then:
     thrown(NotImplementedException)
@@ -410,18 +363,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.getMailRoutingAddress(null, new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "Test getMailRoutingAddress with null audit argument"() {
-    setup:
-    def accountServiceImpl = new AccountServiceImpl()
-
-    when:
-    accountServiceImpl.getMailRoutingAddress("testuid", null)
+    accountServiceImpl.getMailRoutingAddress(null)
 
     then:
     thrown(PreconditionViolation)
@@ -433,7 +375,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.getMailRoutingAddress("testuid", new SvcAudit())
+    accountServiceImpl.getMailRoutingAddress("testuid")
 
     then:
     thrown(IllegalArgumentException)
@@ -445,7 +387,7 @@ class AccountServiceImplSpec extends Specification {
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return suPerson }
     def accountServiceImpl = new AccountServiceImpl()
     when:
-    def ret = accountServiceImpl.getMailRoutingAddress("testuid", new SvcAudit())
+    def ret = accountServiceImpl.getMailRoutingAddress("testuid")
     then:
     ret == "kalle"
   }
@@ -455,7 +397,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.setMailRoutingAddress(null, "mail@test.su.se", new SvcAudit())
+    accountServiceImpl.setMailRoutingAddress(null, "mail@test.su.se")
 
     then:
     thrown(PreconditionViolation)
@@ -466,7 +408,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.setMailRoutingAddress("testuid", null, new SvcAudit())
+    accountServiceImpl.setMailRoutingAddress("testuid", null)
 
     then:
     thrown(PreconditionViolation)
@@ -477,18 +419,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.setMailRoutingAddress("testuid", "testuser.mail.se", new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "Test setMailRoutingAddress with null audit argument"() {
-    setup:
-    def accountServiceImpl = new AccountServiceImpl()
-
-    when:
-    accountServiceImpl.setMailRoutingAddress("testuid", "mail@test.su.se", null)
+    accountServiceImpl.setMailRoutingAddress("testuid", "testuser.mail.se")
 
     then:
     thrown(PreconditionViolation)
@@ -500,7 +431,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.setMailRoutingAddress("testuid", "mail@test.su.se", new SvcAudit())
+    accountServiceImpl.setMailRoutingAddress("testuid", "mail@test.su.se")
 
     then:
     thrown(IllegalArgumentException)
@@ -514,7 +445,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.setMailRoutingAddress("testuid", "mail@test.su.se", new SvcAudit())
+    accountServiceImpl.setMailRoutingAddress("testuid", "mail@test.su.se")
 
     then:
     suPerson.mailRoutingAddress == "mail@test.su.se"
@@ -528,7 +459,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.findAllSuPersonsBySocialSecurityNumber(null, new SvcAudit())
+    accountServiceImpl.findAllSuPersonsBySocialSecurityNumber(null)
 
     then:
     thrown(PreconditionViolation)
@@ -540,7 +471,7 @@ class AccountServiceImplSpec extends Specification {
     SuPersonQuery.metaClass.static.getSuPersonFromSsn = { String a, String b -> new SvcSuPersonVO[0] }
 
     when:
-    def ret = accountServiceImpl.findAllSuPersonsBySocialSecurityNumber('1001010000', new SvcAudit())
+    def ret = accountServiceImpl.findAllSuPersonsBySocialSecurityNumber('1001010000')
 
     then:
     notThrown(PostconditionViolation)
@@ -563,7 +494,7 @@ class AccountServiceImplSpec extends Specification {
     }
 
     when:
-    def resp = accountServiceImpl.findAllSuPersonsBySocialSecurityNumber('1001010000', new SvcAudit())
+    def resp = accountServiceImpl.findAllSuPersonsBySocialSecurityNumber('1001010000')
 
     then:
     resp instanceof SvcSuPersonVO[]
@@ -583,7 +514,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.findSuPersonByUid(null, new SvcAudit())
+    accountServiceImpl.findSuPersonByUid(null)
 
     then:
     thrown(PreconditionViolation)
@@ -595,7 +526,7 @@ class AccountServiceImplSpec extends Specification {
     SuPersonQuery.metaClass.static.findSuPersonByUID = { String directory, String uid -> return null }
 
     when:
-    def resp = accountServiceImpl.findSuPersonByUid('foo', new SvcAudit())
+    def resp = accountServiceImpl.findSuPersonByUid('foo')
 
     then:
     resp == null
@@ -617,7 +548,7 @@ class AccountServiceImplSpec extends Specification {
     }
 
     when:
-    def resp = accountServiceImpl.findSuPersonByUid('foo', new SvcAudit())
+    def resp = accountServiceImpl.findSuPersonByUid('foo')
 
     then:
     resp instanceof SvcSuPersonVO
@@ -634,7 +565,7 @@ class AccountServiceImplSpec extends Specification {
 
   def "activateSuPersonWithMailRoutingAddress: test when attributes are invalid, should throw Exception"() {
     when:
-    service.activateSuPerson("uid", "domain", ['affiliation'] as String[], new SvcAudit())
+    service.activateSuPerson("uid", "domain", ['affiliation'] as String[])
 
     then:
     thrown(PreconditionViolation)
@@ -648,8 +579,7 @@ class AccountServiceImplSpec extends Specification {
     def svcUidPwd = service.activateSuPerson(
             "uid",
             "student.su.se",
-            ['other'] as String[],
-            new SvcAudit())
+            ['other'] as String[])
 
     then:
     svcUidPwd.uid == 'uid'
@@ -661,7 +591,7 @@ class AccountServiceImplSpec extends Specification {
     SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> throw new IllegalArgumentException("foo") }
 
     when:
-    service.activateSuPerson('uid', "student.su.se", ["other"] as String[], new SvcAudit())
+    service.activateSuPerson('uid', "student.su.se", ["other"] as String[])
 
     then:
     thrown(IllegalArgumentException)
@@ -669,7 +599,7 @@ class AccountServiceImplSpec extends Specification {
 
   def "Test activateSuPerson without null domain argument"() {
     when:
-    service.activateSuPerson('uid', null, ["other"] as String[], new SvcAudit())
+    service.activateSuPerson('uid', null, ["other"] as String[])
 
     then:
     thrown(PreconditionViolation)
@@ -677,15 +607,7 @@ class AccountServiceImplSpec extends Specification {
 
   def "Test activateSuPerson without null eduPersonAffiliation argument"() {
     when:
-    service.activateSuPerson('uid', "student.su.se", null, new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "Test activateSuPerson without null SvcAudit argument"() {
-    when:
-    service.activateSuPerson('uid', "student.su.se", ["other"] as String[], null)
+    service.activateSuPerson('uid', "student.su.se", null)
 
     then:
     thrown(PreconditionViolation)
@@ -702,7 +624,7 @@ class AccountServiceImplSpec extends Specification {
     GroovyMock(PasswordUtils, global: true)
 
     when:
-    SvcUidPwd ret = service.activateSuPerson(uid, "student.su.se", ["other"] as String[], new SvcAudit())
+    SvcUidPwd ret = service.activateSuPerson(uid, "student.su.se", ["other"] as String[])
 
     then:
     ret.uid == uid
@@ -712,7 +634,7 @@ class AccountServiceImplSpec extends Specification {
 
   def "addMailLocalAddresses: given no valid uid"() {
     when:
-    service.addMailLocalAddresses('', [] as String[], new SvcAudit())
+    service.addMailLocalAddresses('', [] as String[])
 
     then:
     thrown(PreconditionViolation)
@@ -720,7 +642,7 @@ class AccountServiceImplSpec extends Specification {
 
   def "addMailLocalAddresses: given no mailLocalAddresses"() {
     when:
-    service.addMailLocalAddresses('foo', [] as String[], new SvcAudit())
+    service.addMailLocalAddresses('foo', [] as String[])
 
     then:
     thrown(PreconditionViolation)
@@ -728,15 +650,7 @@ class AccountServiceImplSpec extends Specification {
 
   def "addMailLocalAddresses: given an invalid email in mailLocalAddresses"() {
     when:
-    service.addMailLocalAddresses('foo', ['foo', 'kaka@su.se'] as String[], new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "addMailLocalAddresses: given no audit object"() {
-    when:
-    service.addMailLocalAddresses('foo', ['kaka@su.se'] as String[], null)
+    service.addMailLocalAddresses('foo', ['foo', 'kaka@su.se'] as String[])
 
     then:
     thrown(PreconditionViolation)
@@ -747,7 +661,7 @@ class AccountServiceImplSpec extends Specification {
     SuPerson.metaClass.static.find = { Map arg1, Closure arg2 ->}
 
     when:
-    service.addMailLocalAddresses('foo', ['kaka@su.se'] as String[], new SvcAudit())
+    service.addMailLocalAddresses('foo', ['kaka@su.se'] as String[])
 
     then:
     thrown(IllegalArgumentException)
@@ -762,7 +676,7 @@ class AccountServiceImplSpec extends Specification {
     SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> suPerson }
 
     when:
-    def resp = service.addMailLocalAddresses(uid, mailLocalAddresses as String[], new SvcAudit())
+    def resp = service.addMailLocalAddresses(uid, mailLocalAddresses as String[])
 
     then:
     resp == mailLocalAddresses
@@ -782,7 +696,7 @@ class AccountServiceImplSpec extends Specification {
     SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> suPerson }
 
     when:
-    def resp = service.addMailLocalAddresses(uid, mailLocalAddresses as String[], new SvcAudit())
+    def resp = service.addMailLocalAddresses(uid, mailLocalAddresses as String[])
 
     then:
     resp instanceof String[]

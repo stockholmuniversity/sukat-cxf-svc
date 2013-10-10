@@ -3,8 +3,8 @@ package se.su.it.svc
 import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PreconditionViolation
 import org.springframework.ldap.core.DistinguishedName
-import se.su.it.svc.commons.SvcAudit
 import se.su.it.svc.ldap.SuPerson
+import se.su.it.svc.ldap.SuRole
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -37,7 +37,6 @@ import se.su.it.svc.ldap.SuPerson
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import se.su.it.svc.ldap.SuRole
 import se.su.it.svc.manager.EhCacheManager
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuRoleQuery
@@ -63,7 +62,7 @@ class RoleServiceImplSpec extends Specification {
     def roleServiceImpl = new RoleServiceImpl()
 
     when:
-    roleServiceImpl.addUidToRoles(null,["dummyDN"], new SvcAudit())
+    roleServiceImpl.addUidToRoles(null,["dummyDN"])
 
     then:
     thrown(PreconditionViolation)
@@ -74,7 +73,7 @@ class RoleServiceImplSpec extends Specification {
     def roleServiceImpl = new RoleServiceImpl()
 
     when:
-    roleServiceImpl.addUidToRoles("testuid",null, new SvcAudit())
+    roleServiceImpl.addUidToRoles("testuid",null)
 
     then:
     thrown(PreconditionViolation)
@@ -85,18 +84,7 @@ class RoleServiceImplSpec extends Specification {
     def roleServiceImpl = new RoleServiceImpl()
 
     when:
-    roleServiceImpl.addUidToRoles("testuid",[], new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "Test addUidToRoles with null SvcAudit argument"() {
-    setup:
-    def roleServiceImpl = new RoleServiceImpl()
-
-    when:
-    roleServiceImpl.addUidToRoles("testuid",["dummyDN"], null)
+    roleServiceImpl.addUidToRoles("testuid",[])
 
     then:
     thrown(PreconditionViolation)
@@ -110,7 +98,7 @@ class RoleServiceImplSpec extends Specification {
     def roleServiceImpl = new RoleServiceImpl()
 
     when:
-    roleServiceImpl.addUidToRoles("testuid", myRoles, new SvcAudit())
+    roleServiceImpl.addUidToRoles("testuid", myRoles)
 
     then:
     thrown(IllegalArgumentException)
@@ -153,7 +141,7 @@ class RoleServiceImplSpec extends Specification {
     SuRole.metaClass.update {-> saved = delegate.cn }
 
     when:
-    roleServiceImpl.addUidToRoles("testuid", myRoles, new SvcAudit())
+    roleServiceImpl.addUidToRoles("testuid", myRoles)
 
     then:
     saved == "Test1"
@@ -166,7 +154,7 @@ class RoleServiceImplSpec extends Specification {
     def roleServiceImpl = new RoleServiceImpl()
 
     when:
-    roleServiceImpl.removeUidFromRoles(null,["dummyDN"], new SvcAudit())
+    roleServiceImpl.removeUidFromRoles(null,["dummyDN"])
 
     then:
     thrown(PreconditionViolation)
@@ -177,7 +165,7 @@ class RoleServiceImplSpec extends Specification {
     def roleServiceImpl = new RoleServiceImpl()
 
     when:
-    roleServiceImpl.removeUidFromRoles("testuid",null, new SvcAudit())
+    roleServiceImpl.removeUidFromRoles("testuid",null)
 
     then:
     thrown(PreconditionViolation)
@@ -188,19 +176,7 @@ class RoleServiceImplSpec extends Specification {
     def roleServiceImpl = new RoleServiceImpl()
 
     when:
-    roleServiceImpl.removeUidFromRoles("testuid",[], new SvcAudit())
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "Test removeUidFromRoles with null SvcAudit argument"() {
-    setup:
-    def roleServiceImpl = new RoleServiceImpl()
-
-
-    when:
-    roleServiceImpl.removeUidFromRoles("testuid",["dummyDN"], null)
+    roleServiceImpl.removeUidFromRoles("testuid",[])
 
     then:
     thrown(PreconditionViolation)
@@ -216,7 +192,7 @@ class RoleServiceImplSpec extends Specification {
     def roleServiceImpl = new RoleServiceImpl()
 
     when:
-    roleServiceImpl.removeUidFromRoles("testuid", myRoles, new SvcAudit())
+    roleServiceImpl.removeUidFromRoles("testuid", myRoles)
 
     then:
     thrown(IllegalArgumentException)
@@ -247,7 +223,7 @@ class RoleServiceImplSpec extends Specification {
     def roleServiceImpl = new RoleServiceImpl()
 
     when:
-    roleServiceImpl.removeUidFromRoles("testuid", myRoles, new SvcAudit())
+    roleServiceImpl.removeUidFromRoles("testuid", myRoles)
 
     then:
     saved == "Test2"
