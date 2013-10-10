@@ -33,15 +33,29 @@ package se.su.it.svc.manager
 
 import gldapo.Gldapo
 import groovy.util.logging.Slf4j
-import se.su.it.svc.ldap.*
+import org.springframework.beans.factory.InitializingBean
 
 @Slf4j
-class ConfigManager {
+class ConfigManager implements InitializingBean {
 
   private final ConfigObject config
 
-  public static final String LDAP_RO = "ldapreadonly"
-  public static final String LDAP_RW = "ldapreadwrite"
+  public static String LDAP_RO
+  public static String LDAP_RW
+
+  private static final String APP_CONFIG_FILE_PROPERTY_KEY = "cxf-server.application.conf"
+
+  private static List<String> mandatoryProperties = [
+      'soap.publishedEndpointUrl',
+      'ldap.ro.name',
+      'ldap.ro.url',
+      'ldap.rw.name',
+      'ldap.rw.url',
+      'sucard.database.url',
+      'sucard.database.driver',
+      'sucard.database.user',
+      'sucard.database.password',
+  ]
 
   /**
    * Singleton private constructor (unused but defined).
@@ -53,31 +67,48 @@ class ConfigManager {
    * @param configFileName
    */
   private ConfigManager(String configFileName) {
-    try {
-      /** Parsing to properties first so the file type is a properties
-       * file not a groovy config file (cause of the cxf) framework being written i java.
-       * */
-      Properties properties = new Properties()
-      File configFile = new File(configFileName)
 
-      configFile?.withReader('UTF-8') { Reader reader ->
-        properties.load(reader)
-      }
+    /** Parsing to properties first so the file type is a properties
+     * file not a groovy config file (cause of the cxf) framework being written i java.
+     * */
+    Properties properties = new Properties()
+    File configFile = new File(configFileName)
 
-      log.info "ConfigManager: Initializing with config file: $configFileName"
-
-      this.config = new ConfigSlurper().parse(properties)
-
-      log.info "ConfigManager: Initialization complete."
-    } catch (ex) {
-      log.error "Failed to parse config file", ex
-      throw ex
+    configFile?.withReader('UTF-8') { Reader reader ->
+      properties.load(reader)
     }
-    try {
-      initializeGldapo()
-    } catch (ex) {
-      log.error "Gldapo initialization failed.", ex
-      throw ex
+
+    ConfigSlurper slurper = new ConfigSlurper()
+
+    config = slurper.parse(properties)
+
+    File file = new File(properties.getProperty(APP_CONFIG_FILE_PROPERTY_KEY))
+
+    if (!file.exists()) {
+      throw new IllegalStateException("Missing application configuration file.")
+    }
+
+    URL configUrl = file.toURI().toURL()
+    config.merge(slurper.parse(configUrl))
+
+    /** Set variables and initialize Gldapo */
+
+    checkMandatoryProperties()
+
+    LDAP_RO = config.app.ldap.ro.name
+    LDAP_RW = config.app.ldap.rw.name
+
+    if (configUrl) {
+      initializeGldapo(configUrl)
+    }
+  }
+
+  private void checkMandatoryProperties() {
+    Properties properties = getProperties()
+    for (property in mandatoryProperties) {
+      if (properties.getProperty(property) == null) {
+        throw new IllegalStateException("Missing mandatory property: $property")
+      }
     }
   }
   /**
@@ -94,58 +125,28 @@ class ConfigManager {
   public ConfigObject getConfig() {
     return new ConfigSlurper().parse(getProperties())
   }
+
+  public String toString() {
+
+    StringBuilder sb = new StringBuilder()
+    sb.append("\n**** ConfigManager Configuration ****")
+    this?.config?.toProperties()?.sort { it.key }?.each { key, value ->
+      sb.append("\n$key => $value")
+    }
+    sb.append("\n")
+
+    return sb.toString()
+  }
+
   /**
    * Initializes Gldapo (will be removed soon).
    */
-  private final void initializeGldapo() {
-    String readOnly = config.app.ldap.serverro
-    String readWrite = config.app.ldap.serverrw
-    log.info "ConfigManager: ReadOnly url: $readOnly"
-    log.info "ConfigManager: ReadWrite url: $readWrite"
-
-    Gldapo.initialize(
-        directories: [(LDAP_RO):
-            [url: readOnly,
-                base: "",
-                userDn: "",
-                password: "",
-                ignorePartialResultException: false,
-                env: [
-                    "java.naming.security.authentication": "GSSAPI",
-                    "javax.security.sasl.server.authentication": "true"
-                ],
-                searchControls: [
-                    countLimit: 500,
-                    timeLimit: 120000,
-                    searchScope: "subtree"
-                ]
-            ],(LDAP_RW):
-            [url: readWrite,
-                base: "",
-                userDn: "",
-                password: "",
-                ignorePartialResultException: false,
-                env: [
-                    "java.naming.security.authentication": "GSSAPI",
-                    "javax.security.sasl.server.authentication": "true"
-                ],
-                searchControls: [
-                    countLimit: 500,
-                    timeLimit: 120000,
-                    searchScope: "subtree"
-                ]
-            ]
-        ],
-        schemas: [
-            SuPersonStub,
-            SuRole,
-            SuCard,
-            SuPerson,
-            SuServiceDescription,
-            SuService,
-            SuSubAccount,
-            ]
-    )
+  private final static void initializeGldapo(URL configUrl) {
+    Gldapo.initialize(configUrl)
   }
 
+  @Override
+  void afterPropertiesSet() throws Exception {
+    println toString()
+  }
 }
