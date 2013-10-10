@@ -8,15 +8,14 @@ cxf-server.ssl.keystore            = cxf-svc-server.keystore
 cxf-server.ssl.password            = changeit
 
 # Jetty spnego settings
-cxf-server.spnego.conf             = /etc/spnego.conf
-cxf-server.spnego.properties       = spnego.properties
+cxf-server.spnego.conf             = etc/spnego.conf
+cxf-server.spnego.properties       = etc/spnego.properties
 cxf-server.spnego.realm            = SU.SE
 cxf-server.spnego.kdc              = kerberos.su.se
 
-# Sets the endpoint url in the wsdl, ex https://sukat-svc.it.su.se/
-cxf-app.publishedEndpointUrl = %%ENDPOINT_URL%%
+# Spocp
+cxf-server.spocp.enabled            = true
+cxf-server.spocp.server             = spocp-test.su.se
+cxf-server.spocp.port               = 4751
 
-# ldap settings
-cxf-app.ldap.serverro           = ldap://ldap-test.su.se
-cxf-app.ldap.serverrw           = ldap://sukat-test-ldaprw02.it.su.se
-
+cxf-server.application.conf         = etc/applicationConfig.groovy
