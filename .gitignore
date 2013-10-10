@@ -1,4 +1,4 @@
-./webapp/
+webapp/
 *.swp
 config.properties
 spnego.conf
@@ -14,9 +14,8 @@ web-app/META-INF/
 *.ipr
 *.iws
 *.war
-web-app/img/.DS_Store
-web-app/.DS_Store
 .DS_Store
 atlassian-ide-plugin.xml
 cxf-svc-server.keystore
 spnego.properties
+etc/applicationConfig.groovy

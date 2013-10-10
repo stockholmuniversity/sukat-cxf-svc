@@ -6,28 +6,53 @@ import se.su.it.svc.ldap.SuService
 import se.su.it.svc.ldap.SuServiceDescription
 import se.su.it.svc.ldap.SuSubAccount
 
+/**
+*  enrollment.create.skip does the following.
+*  true = Create user in SUKAT, DO NOT create in AFS and KDC.
+*  false = Create user in SUKAT, AFS and KDC.
+*/
+enrollment {
+  create {
+    skip = "%%SKIP_CREATE%%"
+  }
+}
+
 soap {
-  publishedEndpointUrl = "http://localhost:80"
+  publishedEndpointUrl = "%%PUBLISHED_ENDPOINT_URL%%"
 }
 
 ldap {
+  accounts {
+    parent = "%%DEFAULT_PARENT%%"
+  }
   ro {
     name = "ldapreadonly"
-    url = "ldap://ldap-test.su.se"
+    url = "ldap://ldap%%ALTINSTANCE%%.su.se"
   }
   rw {
     name = "ldapreadwrite"
-    url = "ldap://sukat-test-ldaprw02.it.su.se"
+    url = "ldap://%%LDAPSERVERRW%%"
   }
 }
 
 sucard {
   database {
-    driver = ""
-    url = ""
-    password = ""
-    user = ""
+    driver = "%%SUCARD_DB_DRIVER%%"
+    url = "jdbc:mysql://%%SUCARDDBHOST%%:3306/sucard?autoReconnect=true"
+    user = "%%SUCARD_DB_USER%%"
+    password = "%%SUCARD_DB_PASSWORD%%"
   }
+}
+
+ehcache {
+  maxElementsInMemory             = 10000
+  eternal                         = false
+  timeToIdleSeconds               = 120
+  timeToLiveSeconds               = 600
+  overflowToDisk                  = false
+  diskPersistent                  = false
+  diskExpiryThreadIntervalSeconds = 120
+  memoryStoreEvictionPolicy       = "LRU"
 }
 
 directories {
