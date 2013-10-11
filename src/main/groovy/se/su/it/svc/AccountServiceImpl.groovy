@@ -176,10 +176,6 @@ public class AccountServiceImpl implements AccountService {
       throw new IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
     }
 
-    if (!configManager.config.ldap.accounts.default.containsKey("parent")) {
-      throw new IllegalArgumentException("Missing parent.")
-    }
-
     String parent = configManager.config.ldap.accounts.parent
     log.info "createSuPerson: parent is configured to be $parent"
 
