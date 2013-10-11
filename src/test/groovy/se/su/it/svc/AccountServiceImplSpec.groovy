@@ -294,30 +294,6 @@ class AccountServiceImplSpec extends Specification {
     thrown(PreconditionViolation)
   }
 
-  def "Test createSuPerson when parent is unset"() {
-    setup:
-
-    Properties properties = new Properties()
-    service.configManager = [config:[ldap:[accounts:[default:properties]]]]
-
-    def uid = 'uid'
-    def ssn = '0000000000'
-    def givenName = 'Test'
-    def sn = 'Testsson'
-
-    SuPersonQuery.metaClass.static.findSuPersonByUID = { String a, String b -> null }
-
-    when:
-    service.createSuPerson(
-        uid,
-        ssn,
-        givenName,
-        sn)
-
-    then: 'we test that the object returned has been saved.'
-    thrown(IllegalArgumentException)
-  }
-
   def "Test createSuPerson true flow"() {
     setup:
     Properties properties = new Properties()
