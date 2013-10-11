@@ -143,6 +143,9 @@ class AuditAspectSpec extends Specification {
 
   def "logBefore: Test with regular class."() {
     given:
+
+    AuditAspect.metaClass.getId = {-> return "foo" }
+
     Class<?> c = Class.forName('java.lang.String')
     Method method = c.getDeclaredMethod("charAt", int)
 
@@ -157,6 +160,7 @@ class AuditAspectSpec extends Specification {
 
   def "logAfter: Happy path"() {
     given:
+    AuditAspect.metaClass.getId = {-> return "foo" }
     AuditAspect auditAspect = new AuditAspect()
     AuditEntity ae = AuditEntity.getInstance('1','2','3','4','5','6','7', ['11', '12'])
 

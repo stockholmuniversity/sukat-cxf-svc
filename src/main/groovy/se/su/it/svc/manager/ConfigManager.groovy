@@ -97,8 +97,8 @@ class ConfigManager implements InitializingBean {
 
     checkMandatoryProperties()
 
-    LDAP_RO = config.app.ldap.ro.name
-    LDAP_RW = config.app.ldap.rw.name
+    LDAP_RO = config.ldap.ro.name
+    LDAP_RW = config.ldap.rw.name
 
     if (configUrl) {
       initializeGldapo(configUrl)
@@ -156,6 +156,10 @@ class ConfigManager implements InitializingBean {
   }
 
   @Override
+  /**
+   * Log is not initialized at the time of execution in the development environment (works fine when war packaged...),
+   * so a println is needed.
+   */
   void afterPropertiesSet() throws Exception {
     log.info toString()
     println toString()
