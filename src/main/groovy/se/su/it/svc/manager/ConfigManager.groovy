@@ -46,7 +46,9 @@ class ConfigManager implements InitializingBean {
   private static final String APP_CONFIG_FILE_PROPERTY_KEY = "cxf-server.application.conf"
 
   private static List<String> mandatoryProperties = [
+      'enrollment.create.skip',
       'soap.publishedEndpointUrl',
+      'ldap.accounts.parent',
       'ldap.ro.name',
       'ldap.ro.url',
       'ldap.rw.name',
@@ -95,8 +97,8 @@ class ConfigManager implements InitializingBean {
 
     checkMandatoryProperties()
 
-    LDAP_RO = config.app.ldap.ro.name
-    LDAP_RW = config.app.ldap.rw.name
+    LDAP_RO = config.ldap.ro.name
+    LDAP_RW = config.ldap.rw.name
 
     if (configUrl) {
       initializeGldapo(configUrl)
@@ -130,8 +132,16 @@ class ConfigManager implements InitializingBean {
 
     StringBuilder sb = new StringBuilder()
     sb.append("\n**** ConfigManager Configuration ****")
-    this?.config?.toProperties()?.sort { it.key }?.each { key, value ->
-      sb.append("\n$key => $value")
+    this?.config?.toProperties()?.sort { it.key }?.each { String key, value ->
+      if (key.contains("password")) {
+        if (value instanceof String && value?.size()) {
+          sb.append("\n$key => *********")
+        } else {
+          sb.append("\n$key => ''")
+        }
+      } else {
+        sb.append("\n$key => $value")
+      }
     }
     sb.append("\n")
 
@@ -146,7 +156,12 @@ class ConfigManager implements InitializingBean {
   }
 
   @Override
+  /**
+   * Log is not initialized at the time of execution in the development environment (works fine when war packaged...),
+   * so a println is needed.
+   */
   void afterPropertiesSet() throws Exception {
+    log.info toString()
     println toString()
   }
 }

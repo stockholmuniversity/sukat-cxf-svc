@@ -34,7 +34,9 @@ package se.su.it.svc.aspect
 import groovy.util.logging.Slf4j
 import org.aopalliance.intercept.MethodInterceptor
 import org.aopalliance.intercept.MethodInvocation
+import org.apache.cxf.phase.PhaseInterceptorChain
 
+import javax.servlet.http.HttpServletRequest
 import java.lang.annotation.Annotation
 import java.lang.reflect.Method
 
@@ -94,8 +96,12 @@ public class AuditAspect implements MethodInterceptor {
 
   protected Object logBefore(Method mi, Object[] args) throws Exception {
     // Surround the aspect logging with a global try/catch so that we can do softFail in a single catch block
+
     try {
-      log.info("Invoked " + mi.getName() + " with " + args.length + " params")
+
+      String id = getId()
+
+      log.info("[$id] Invoked: ${mi.getName()} with ${args.length} params")
 
       //Generate MethodDetails from annotation on method to be able to describe
       //functions that will be invoked by this method
@@ -127,7 +133,7 @@ public class AuditAspect implements MethodInterceptor {
       )
 
       //TODO: Call RabbitMQ here to transmit the "aspect before data"
-      log.info("Audit before -\r\n" + ae)
+      log.info "[$id] Received: $ae"
       // Return a reference to the ae for reuse in success/exception logs
       return ae
 
@@ -140,6 +146,9 @@ public class AuditAspect implements MethodInterceptor {
   protected void logAfter(Object ref, Object ret) {
 
     try {
+
+      String id = getId()
+
       AuditEntity ae = (AuditEntity) ref
 
       //log.info("Decorating ae " + ae + " with return value: " + ret)
@@ -156,7 +165,7 @@ public class AuditAspect implements MethodInterceptor {
       ae.state = STATE_SUCCESS
 
       //TODO: Call RabbitMQ here to transmit the "aspect after data"
-      log.info("Audit after -\r\n" + ae)
+      log.info("[$id] Returned: $ae")
 
     } catch (Exception e) {
       log.warn("Audit logging failed, no return value will be stored", e)
@@ -197,5 +206,18 @@ public class AuditAspect implements MethodInterceptor {
     }
 
     return '['.plus(o?.collect { it?.toString() }?.join(',')).plus(']')
+  }
+
+  protected String getId() {
+    String id = ''
+
+    try {
+      HttpServletRequest request = (HttpServletRequest) PhaseInterceptorChain.getCurrentMessage().get("HTTP.REQUEST")
+      id = request.getSession().id
+    } catch (ex) {
+      log.debug("Failed to get id from session", ex)
+    }
+
+    return id
   }
 }
