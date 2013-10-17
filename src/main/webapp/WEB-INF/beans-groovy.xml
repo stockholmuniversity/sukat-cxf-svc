@@ -58,7 +58,7 @@
     <context:component-scan base-package="se.su.it.svc"/>
 
     <bean id="configManager" class="se.su.it.svc.manager.ConfigManager" scope="singleton">
-        <constructor-arg name="configFileName" type="java.lang.String" value="#{ systemProperties['config.properties'] }"/>
+        <constructor-arg name="configFileName" type="java.lang.String" value="#{ systemProperties['config'] }"/>
     </bean>
 
     <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">

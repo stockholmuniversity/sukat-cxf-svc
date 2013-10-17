@@ -33,17 +33,14 @@ package se.su.it.svc.manager
 
 import gldapo.Gldapo
 import groovy.util.logging.Slf4j
-import org.springframework.beans.factory.InitializingBean
 
 @Slf4j
-class ConfigManager implements InitializingBean {
+class ConfigManager {
 
   private final ConfigObject config
 
   public static String LDAP_RO
   public static String LDAP_RW
-
-  private static final String APP_CONFIG_FILE_PROPERTY_KEY = "cxf-server.application.conf"
 
   private static List<String> mandatoryProperties = [
       'enrollment.create.skip',
@@ -73,25 +70,11 @@ class ConfigManager implements InitializingBean {
     /** Parsing to properties first so the file type is a properties
      * file not a groovy config file (cause of the cxf) framework being written i java.
      * */
-    Properties properties = new Properties()
-    File configFile = new File(configFileName)
 
-    configFile?.withReader('UTF-8') { Reader reader ->
-      properties.load(reader)
-    }
-
-    ConfigSlurper slurper = new ConfigSlurper()
-
-    config = slurper.parse(properties)
-
-    File file = new File(properties.getProperty(APP_CONFIG_FILE_PROPERTY_KEY))
-
-    if (!file.exists()) {
-      throw new IllegalStateException("Missing application configuration file.")
-    }
-
-    URL configUrl = file.toURI().toURL()
-    config.merge(slurper.parse(configUrl))
+    File configFile = getConfigFile(configFileName)
+    URL configUrl = configFile.toURI().toURL()
+    ConfigObject configObject = parseConfig(configUrl)
+    this.config = configObject
 
     /** Set variables and initialize Gldapo */
 
@@ -103,6 +86,20 @@ class ConfigManager implements InitializingBean {
     if (configUrl) {
       initializeGldapo(configUrl)
     }
+  }
+
+  private static synchronized File getConfigFile(String configFileName) {
+    File file = new File(configFileName)
+
+    if (!file.exists()) {
+      throw new IllegalStateException("Missing application configuration file.")
+    }
+    return file
+  }
+
+  public static synchronized ConfigObject parseConfig(URL configUrl) {
+    ConfigSlurper slurper = new ConfigSlurper()
+    return slurper.parse(configUrl)
   }
 
   private void checkMandatoryProperties() {
@@ -153,15 +150,5 @@ class ConfigManager implements InitializingBean {
    */
   private final static void initializeGldapo(URL configUrl) {
     Gldapo.initialize(configUrl)
-  }
-
-  @Override
-  /**
-   * Log is not initialized at the time of execution in the development environment (works fine when war packaged...),
-   * so a println is needed.
-   */
-  void afterPropertiesSet() throws Exception {
-    log.info toString()
-    println toString()
   }
 }
