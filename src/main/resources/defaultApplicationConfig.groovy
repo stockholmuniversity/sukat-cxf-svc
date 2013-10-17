@@ -1,3 +1,8 @@
+log {
+  debug = "false"
+  file = "sukat-cxf-dev.log"
+}
+
 'cxf-server' {
   http {
     port = "8080"

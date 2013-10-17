@@ -3,38 +3,39 @@ import se.su.it.svc.Start
 
 @Slf4j
 class Run extends Start {
+
+  private static ConfigObject config
+
   public static void main(String[] args) {
-
-    println "Before"
-
     try {
-      // load default config.
+      log.info "Initializing Jetty server."
+      start(configuration.toProperties())
+    } catch (ex) {
+      System.err.println ex.message
+    }
+  }
 
-      log.info "Loading default configuration."
+  public static synchronized ConfigObject getConfiguration() {
+
+    if (!config) {
+      println "Initializing Configuration"
+      println "Loading Default Configuration"
       URLClassLoader cl = (URLClassLoader) Thread.currentThread().getContextClassLoader();
       URL defaultConfigUrl = cl.getResource("WEB-INF/classes/defaultApplicationConfig.groovy");
       ConfigObject config = new ConfigSlurper().parse(defaultConfigUrl)
 
-
+      this.config = config
 
       // merge custom config.
-      log.info "Loading custom configuration."
+      println "Loading Custom Configuration"
       File configFile = new File(System.getProperty('config'))
       if (configFile) {
-        log.info "Custom config file found => ${configFile.absolutePath}"
         URL configUrl = configFile.toURI().toURL()
         ConfigObject customConfig = new ConfigSlurper().parse(configUrl)
-        config.merge(customConfig)
+        this.config.merge(customConfig)
       }
-
-      Properties properties = config.toProperties()
-
-      log.info "Initializing Jetty server."
-      start(properties)
-    } catch (ex) {
-      System.err.println ex.message
+      println "Configuration Loaded."
     }
-
-    println "After"
+    return config
   }
 }

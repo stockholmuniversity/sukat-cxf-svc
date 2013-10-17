@@ -82,14 +82,41 @@
       <version>0.8.5</version>
     </dependency>
 
+    <!-- Logback -->
 
-    <!--
-        <dependency>
-          <groupId>log4j</groupId>
-          <artifactId>log4j</artifactId>
-          <version>1.2.17</version>
-        </dependency>
-    -->
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+      <version>1.0.13</version>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.0.13</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.5</version>
+    </dependency>
+
+    <!-- Log Bridges -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>log4j-over-slf4j</artifactId>
+      <version>1.7.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+      <version>1.7.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jul-to-slf4j</artifactId>
+      <version>1.7.5</version>
+    </dependency>
 
     <dependency>
       <groupId>net.sf.ehcache</groupId>
@@ -211,11 +238,11 @@
                 se.su.it.svc,
                 org.eclipse.jetty,
                 javax.servlet,
-                log4j,
                 org.spocp.jspocp,
                 org.codehaus.groovy,
                 org.gcontracts,
-                org.slf4j
+                org.slf4j,
+                ch.qos.logback
               </includeGroupIds>
               <excludeArtifactIds>jsp-api,jstl</excludeArtifactIds>
               <excludes>META-INF/ECLIPSEF.*</excludes>
@@ -252,6 +279,7 @@
                 <move todir="${project.build.directory}/${project.artifactId}-${project.version}/">
                   <fileset dir="${project.build.directory}/classes/">
                     <include name="Run.class" />
+                    <include name="logback.groovy" />
                   </fileset>
                 </move>
               </tasks>

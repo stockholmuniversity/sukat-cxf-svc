@@ -1,4 +1,3 @@
-webapp/
 *.swp
 config.properties
 spnego.conf
