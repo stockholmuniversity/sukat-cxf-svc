@@ -12,6 +12,7 @@
       <artifactId>groovy-all</artifactId>
       <version>1.8.9</version>
     </dependency>
+
     <dependency>
     	<groupId>org.grails</groupId>
     	<artifactId>grails-bootstrap</artifactId>
@@ -58,7 +59,7 @@
     <dependency>
       <groupId>se.su.it.svc</groupId>
       <artifactId>cxf-server</artifactId>
-      <version>1.0.20</version>
+      <version>1.0.21-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
@@ -80,10 +81,41 @@
       <artifactId>gldapo</artifactId>
       <version>0.8.5</version>
     </dependency>
+
+    <!-- Logback -->
+
     <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.17</version>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+      <version>1.0.13</version>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.0.13</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.5</version>
+    </dependency>
+
+    <!-- Log Bridges -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>log4j-over-slf4j</artifactId>
+      <version>1.7.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+      <version>1.7.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jul-to-slf4j</artifactId>
+      <version>1.7.5</version>
     </dependency>
 
     <dependency>
@@ -202,7 +234,16 @@
               <goal>unpack-dependencies</goal>
             </goals>
             <configuration>
-              <includeGroupIds>se.su.it.svc,org.eclipse.jetty,javax.servlet,log4j,org.spocp.jspocp</includeGroupIds>
+              <includeGroupIds>
+                se.su.it.svc,
+                org.eclipse.jetty,
+                javax.servlet,
+                org.spocp.jspocp,
+                org.codehaus.groovy,
+                org.gcontracts,
+                org.slf4j,
+                ch.qos.logback
+              </includeGroupIds>
               <excludeArtifactIds>jsp-api,jstl</excludeArtifactIds>
               <excludes>META-INF/ECLIPSEF.*</excludes>
               <outputDirectory>
@@ -220,11 +261,34 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>Start</mainClass>
+              <mainClass>Run</mainClass>
               <addClasspath>true</addClasspath>
             </manifest>
           </archive>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>main-class-placement</id>
+            <phase>prepare-package</phase>
+            <configuration>
+              <tasks>
+                <move todir="${project.build.directory}/${project.artifactId}-${project.version}/">
+                  <fileset dir="${project.build.directory}/classes/">
+                    <include name="Run.class" />
+                    <include name="logback.groovy" />
+                  </fileset>
+                </move>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
