@@ -58,6 +58,8 @@ class SuCardOrderQuery {
       "FROM request r JOIN address a ON r.address = a.id" +
       " JOIN status s ON r.status = s.id WHERE r.owner = :uid"
 
+  public static final findCardOrderByCardId = "SELECT id FROM request WHERE id = :id"
+
   /**
    * Find all active card orders for <b>owner</b>
    */
@@ -307,16 +309,46 @@ class SuCardOrderQuery {
    * @param uid
    * @return true
    */
-  private static boolean doMarkCardAsDiscarded(Sql sql, String uuid, String uid) {
-    sql.withTransaction {
-      sql?.executeUpdate(markCardAsDiscardedQuery, [id:uuid])
-      sql?.executeInsert(insertStatusHistoryQuery, [
-          status:5,
-          request: uuid,
-          comment: "Discarded by " + uid,
-          createTime: new Timestamp(new Date().getTime())
-      ])
+  private boolean doMarkCardAsDiscarded(Sql sql, String uuid, String uid) {
+    boolean ordersInDb = (sql?.rows(findCardOrderByCardId, [id:uuid])?.size() > 0)
+
+    if (ordersInDb) {
+      /** Card order exists in database so we modify the existing order entry */
+      log.info "Order for card with id $uuid found in database."
+      sql.withTransaction {
+        sql?.executeUpdate(markCardAsDiscardedQuery, [id:uuid])
+        sql?.executeInsert(insertStatusHistoryQuery, [
+            status:5,
+            request: uuid,
+            comment: "Discarded by " + uid,
+            createTime: new Timestamp(new Date().getTime())
+        ])
+      }
+    } else {
+      /** Card was created before or not through SuCard application, inserting new entry. */
+      log.info "No order for card with id $uuid found in database, inserting order for logging purposes."
+      sql.withTransaction {
+        sql?.executeInsert(insertRequestQuery, [
+            id:uuid,
+            owner: "LEGACY CARD (set by " + uid + ")",
+            serial: null,
+            printer: null,
+            createTime: new Timestamp(new Date().getTime()),
+            firstname: "LEGACY",
+            lastname: "CARD",
+            address: null,
+            status: 5
+        ])
+        sql?.executeInsert(insertStatusHistoryQuery, [
+            status:5,
+            request: uuid,
+            comment: "Discarded by " + uid,
+            createTime: new Timestamp(new Date().getTime())
+        ])
+      }
     }
+
+
     return true
   }
 
