@@ -35,6 +35,7 @@ import gldapo.GldapoSchemaRegistry
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
 import org.apache.commons.dbcp.BasicDataSource
+import org.slf4j.Logger
 import se.su.it.svc.commons.SvcCardOrderVO
 import spock.lang.Shared
 import spock.lang.Specification
@@ -54,6 +55,7 @@ public class SuCardOrderQuerySpec extends Specification {
     service = null
     Sql.metaClass = null
     GldapoSchemaRegistry.metaClass = null
+    SuCardOrderQuery.metaClass = null
   }
 
   private SvcCardOrderVO getCardOrder(){
@@ -313,6 +315,11 @@ public class SuCardOrderQuerySpec extends Specification {
 
   def "doMarkCardAsDiscarded"(){
     given:
+
+    Sql.metaClass.rows = { String arg1, Map arg2 ->
+      return ['row']
+    }
+
     Sql.metaClass.withTransaction = { Closure closure -> closure() }
     Sql.metaClass.executeUpdate = { String arg1, Map arg2 ->
       switch(arg1){
@@ -344,9 +351,8 @@ public class SuCardOrderQuerySpec extends Specification {
 
   def "markCardAsDiscarded"(){
     given:
-    GroovySpy(SuCardOrderQuery, global:true)
 
-    SuCardOrderQuery.doMarkCardAsDiscarded(*_) >> {
+    SuCardOrderQuery.metaClass.doMarkCardAsDiscarded = { Sql arg1, String arg2, String arg3 ->
       return true
     }
 
