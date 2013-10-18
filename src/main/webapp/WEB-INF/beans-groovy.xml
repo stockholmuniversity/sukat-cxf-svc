@@ -69,6 +69,7 @@
         <property name="url" value="${sucard.database.url}"/>
         <property name="username" value="${sucard.database.user}"/>
         <property name="password" value="${sucard.database.password}"/>
+        <property name="validationQuery" value="select 1"/>
     </bean>
 
     <bean id="messageSource"
