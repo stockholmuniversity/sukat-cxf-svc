@@ -265,6 +265,16 @@
               <addClasspath>true</addClasspath>
             </manifest>
           </archive>
+          <packagingExcludes>
+            WEB-INF/lib/cxf-server*.jar,
+            WEB-INF/lib/jetty*.jar,
+            WEB-INF/lib/javax.servlet-api*.jar,
+            WEB-INF/lib/jspocp*.jar,
+            WEB-INF/lib/groovy-all*.jar,
+            WEB-INF/lib/gcontracts*.jar,
+            WEB-INF/lib/slf4j-api*.jar,
+            WEB-INF/lib/logback*.jar,
+          </packagingExcludes>
         </configuration>
       </plugin>
 
