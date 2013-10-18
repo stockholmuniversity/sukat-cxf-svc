@@ -1,6 +1,26 @@
 log {
-  debug = "false"
-  file = "sukat-cxf-dev.log"
+  dev {
+    debug = "true"
+    appenders {
+      appenders = ['CONSOLE', 'FILE']
+      file {
+        logFile = "sukat-cxf-svc.log"
+      }
+    }
+  }
+  prod {
+    debug = "false"
+    appenders {
+      appenders = ['SYSLOG', 'FILE']
+      file {
+        logFile = "/local/sukat/logs/sukat-cxf-svc.log"
+      }
+      syslog {
+        syslogHost = "127.0.0.1"
+        facility = "SYSLOG"
+      }
+    }
+  }
 }
 
 'cxf-server' {
