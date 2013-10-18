@@ -11,22 +11,18 @@ class SanitizeWebParametersAspect implements MethodInterceptor {
 
   @Override
   Object invoke(MethodInvocation methodInvocation) throws Throwable {
-
-    Object response = null
-
-
     Method method = methodInvocation.getMethod()
     Object[] args = methodInvocation.getArguments()
     Object caller = methodInvocation.getThis()
 
+    Object[] washedArgs = args
     try {
-      Object[] washedArgs = washArgs(args)
-      response = caller.invokeMethod(method.name, washedArgs)
+      washedArgs = washArgs(args)
     } catch (ex) {
       log.error "Failed to sanitize arguments for method ${method.name}, attributes supplied were: ${args.join(", ")}", ex
     }
 
-    return response
+    return caller.invokeMethod(method.name, washedArgs)
   }
 
   private static Object[] washArgs(Object[] args) {
