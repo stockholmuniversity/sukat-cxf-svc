@@ -1,5 +1,5 @@
 import groovy.util.logging.Slf4j
-import se.su.it.svc.Start
+import se.su.it.svc.server.Start
 
 @Slf4j
 class Run extends Start {

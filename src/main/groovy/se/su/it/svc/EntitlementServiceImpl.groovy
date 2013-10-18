@@ -37,6 +37,7 @@ import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.manager.ConfigManager
 import se.su.it.svc.query.SuPersonQuery
+import se.su.it.svc.server.annotations.AuthzRole
 
 import javax.jws.WebParam
 import javax.jws.WebService
@@ -46,6 +47,7 @@ import javax.jws.WebService
  * This Class handles all Entitlement admin activities in SUKAT.
  */
 @WebService @Slf4j
+@AuthzRole(role = "sukat-entitlement-admin")
 public class EntitlementServiceImpl implements EntitlementService {
 
   /**

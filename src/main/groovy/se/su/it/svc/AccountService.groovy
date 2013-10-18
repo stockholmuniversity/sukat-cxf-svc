@@ -31,13 +31,11 @@
 
 package se.su.it.svc
 
-import se.su.it.svc.annotations.SuCxfSvcSpocpRole
-import se.su.it.svc.aspect.AuditAspectMethodDetails
-import se.su.it.svc.aspect.AuditHideReturnValue
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
+import se.su.it.svc.server.annotations.AuditAspectMethodDetails
+import se.su.it.svc.server.annotations.AuditHideReturnValue
 
-@SuCxfSvcSpocpRole(role = "sukat-account-admin")
 public interface AccountService {
   void updatePrimaryAffiliation(String uid, String affiliation)
   @AuditHideReturnValue

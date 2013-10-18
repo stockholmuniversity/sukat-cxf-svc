@@ -36,6 +36,7 @@ import org.gcontracts.annotations.Requires
 import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.manager.ConfigManager
 import se.su.it.svc.query.SuCardQuery
+import se.su.it.svc.server.annotations.AuthzRole
 
 import javax.jws.WebParam
 import javax.jws.WebService
@@ -45,6 +46,7 @@ import javax.jws.WebService
  * This Class handles all University Card admin activities in SUKAT.
  */
 @WebService @Slf4j
+@AuthzRole(role = "sukat-card-admin")
 public class CardAdminServiceImpl implements CardAdminService {
 
   def suCardOrderQuery

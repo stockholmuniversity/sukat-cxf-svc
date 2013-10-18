@@ -77,6 +77,11 @@
       <version>3.0.4.RELEASE</version>
     </dependency>
     <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-aop</artifactId>
+      <version>3.0.4.RELEASE</version>
+    </dependency>
+    <dependency>
       <groupId>org.codehaus</groupId>
       <artifactId>gldapo</artifactId>
       <version>0.8.5</version>
@@ -242,7 +247,9 @@
                 org.codehaus.groovy,
                 org.gcontracts,
                 org.slf4j,
-                ch.qos.logback
+                ch.qos.logback,
+                org.aspectj,
+                org.apache.cxf,
               </includeGroupIds>
               <excludeArtifactIds>jsp-api,jstl</excludeArtifactIds>
               <excludes>META-INF/ECLIPSEF.*</excludes>
@@ -266,15 +273,17 @@
             </manifest>
           </archive>
           <packagingExcludes>
-            WEB-INF/lib/cxf-server*.jar,
-            WEB-INF/lib/jetty*.jar,
-            WEB-INF/lib/javax.servlet-api*.jar,
-            WEB-INF/lib/jspocp*.jar,
-            WEB-INF/lib/groovy-all*.jar,
-            WEB-INF/lib/gcontracts*.jar,
             WEB-INF/lib/slf4j-api*.jar,
             WEB-INF/lib/logback*.jar,
-          </packagingExcludes>
+          </packagingExcludes><!--
+            WEB-INF/lib/cxf-server*.jar,
+            WEB-INF/lib/jspocp*.jar,
+            WEB-INF/lib/aspectj*.jar,
+            WEB-INF/lib/jetty*.jar,
+            WEB-INF/lib/javax.servlet-api*.jar,
+            WEB-INF/lib/groovy-all*.jar,
+            WEB-INF/lib/gcontracts*.jar,
+          </packagingExcludes>-->
         </configuration>
       </plugin>
 

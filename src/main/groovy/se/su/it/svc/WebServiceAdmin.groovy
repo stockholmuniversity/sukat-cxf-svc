@@ -31,9 +31,6 @@
 
 package se.su.it.svc
 
-import se.su.it.svc.annotations.SuCxfSvcSpocpRole
-
-@SuCxfSvcSpocpRole(role = "sukat-account-admin")
 public interface WebServiceAdmin {
   void setRootLogLevel(String level)
   void setApplicationLogLevel(String level)

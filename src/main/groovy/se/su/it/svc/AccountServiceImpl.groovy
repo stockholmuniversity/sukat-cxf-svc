@@ -44,10 +44,13 @@ import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuPersonStub
 import se.su.it.svc.manager.ConfigManager
 import se.su.it.svc.query.SuPersonQuery
+import se.su.it.svc.server.annotations.AuthzRole
 import se.su.it.svc.util.GeneralUtils
 
+import javax.annotation.Resource
 import javax.jws.WebParam
 import javax.jws.WebService
+import javax.xml.ws.WebServiceContext
 
 /**
  * Implementing class for AccountService CXF Web Service.
@@ -55,7 +58,11 @@ import javax.jws.WebService
  */
 
 @WebService @Slf4j
+@AuthzRole(role = "sukat-account-admin")
 public class AccountServiceImpl implements AccountService {
+
+  @Resource
+  public WebServiceContext context;
 
   def configManager
 
@@ -241,6 +248,7 @@ public class AccountServiceImpl implements AccountService {
    * @return the users mailRoutingAddress
    * @throws IllegalArgumentException if the uid can't be found
    */
+  @AuthzRole(role = "sukat-account-admin")
   @Requires({
     ! LdapAttributeValidator.validateAttributes([
             uid: uid ])

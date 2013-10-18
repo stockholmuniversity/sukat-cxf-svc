@@ -31,7 +31,6 @@
 
 package se.su.it.svc
 
-
 import se.su.it.svc.commons.SvcCardOrderVO
 
 public interface CardOrderService {
