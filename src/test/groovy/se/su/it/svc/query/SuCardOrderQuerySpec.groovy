@@ -244,12 +244,20 @@ public class SuCardOrderQuerySpec extends Specification {
       }
     }
 
-    expect:
-    null == service.orderCard(cardOrder)
+    when:
+    service.orderCard(cardOrder)
+
+    then:
+    thrown(IllegalStateException)
   }
 
   void "orderCard"() {
     given:
+
+    Sql.metaClass.withTransaction = { Closure closure ->
+      closure()
+    }
+
     Sql.metaClass.rows = { String arg1, Map arg2 ->
       switch(arg1) {
         case service.findActiveCardOrdersQuery:

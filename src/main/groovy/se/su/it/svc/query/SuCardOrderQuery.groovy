@@ -144,11 +144,12 @@ class SuCardOrderQuery {
         log.debug "Active card orders returned: ${cardOrders?.size()}"
 
         if (cardOrders?.size() > 0) {
-          log.error "Can't order new card since an order already exists."
+          String errorMsg = "Can't order new card since an order already exists."
+          log.error errorMsg
           for (order in cardOrders) {
             log.debug "Order: $order"
           }
-          return false
+          throw new IllegalStateException(errorMsg)
         }
 
         uuid = findFreeUUID(sql)
@@ -158,7 +159,7 @@ class SuCardOrderQuery {
           doCardOrderInsert(sql, addressArgs, requestArgs)
         } catch (ex) {
           log.error "Error in SQL card order transaction.", ex
-          return false
+          throw ex
         }
         return true
       }
