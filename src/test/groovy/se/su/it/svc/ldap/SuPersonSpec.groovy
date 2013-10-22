@@ -415,15 +415,15 @@ class SuPersonSpec extends Specification {
 
   def "addMailLocalAddresses: When SuPerson already has mailLocalAddress entries."() {
     given:
-    def mailLocalAddresses = ['kaka@su.se', "bar@su.se", "foo@bar.se"] as Set
+    def mailLocalAddresses = ['kaka@su.se', "bar@su.se", "foo@bar.se"] as LinkedHashSet
     SuPerson suPerson = new SuPerson(objectClass:['inetLocalMailRecipient'])
-    suPerson.@mailLocalAddress = ["barbar@su.se", "kaka@su.se"]
+    suPerson.@mailLocalAddress = ["barbar@su.se", "kaka@su.se"] as LinkedHashSet
 
     when:
     def resp = suPerson.addMailLocalAddress(mailLocalAddresses)
 
     then:
-    resp == ["kaka@su.se", "bar@su.se", "foo@bar.se", "barbar@su.se"]
+    resp == ["barbar@su.se", "kaka@su.se", "foo@bar.se", "bar@su.se"]
 
     and:
     suPerson.objectClass.contains('inetLocalMailRecipient')
