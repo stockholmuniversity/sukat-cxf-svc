@@ -45,9 +45,14 @@ class SuCardOrderQuery {
   def suCardDataSource
 
   /**
-   * WEB (online order)
+   * Constant WEB (online order)
    */
-  private final int DEFAULT_ORDER_STATUS = 3
+  public static final String STATUS_DEFAULT_ORDER = 'WEB'
+
+  /**
+   * Constant DISCARDED (discarded card)
+   */
+  public static final String STATUS_DISCARDED = 'DISCARDED'
 
   /**
    * Find all card orders for <b>uid</b>
@@ -79,19 +84,19 @@ class SuCardOrderQuery {
    *  <b>lastname</b>
    */
   public static final insertRequestQuery = "INSERT INTO request VALUES(:id, :owner, :serial, " +
-      ":printer, :createTime, :address, :status, :firstname, :lastname)"
+      ":printer, :createTime, :address, (select id from status where value=:status), :firstname, :lastname)"
 
   /**
    * Insert into <i>status_history</i> values <b>status</b>, <b>request</b>, <b>comment</b> &
    *  <b>createTime</b>
    */
-  public static final insertStatusHistoryQuery = "INSERT INTO status_history VALUES " +
-      "(null, :status, :request, :comment, :createTime)"
+  public static final insertStatusHistoryQuery = "INSERT INTO status_history (status, request, comment, timestamp) " +
+                                                 "VALUES ((select id from status where value=:status), :request, :comment, :createTime)"
 
   /**
    * Update <i>request</i> with new <b>discardedStatus</b> for <b>id</b>
    */
-  public static final markCardAsDiscardedQuery = "UPDATE request SET status = :discardedStatus WHERE id = :id"
+  public static final markCardAsDiscardedQuery = "UPDATE request SET status = (select id from status where value=:status) WHERE id = :id"
 
   /**
    * Find <i>id</i> from <i>request</i> for <b>uuid</b>
@@ -144,11 +149,12 @@ class SuCardOrderQuery {
         log.debug "Active card orders returned: ${cardOrders?.size()}"
 
         if (cardOrders?.size() > 0) {
-          log.error "Can't order new card since an order already exists."
+          String errorMsg = "Can't order new card since an order already exists."
+          log.error errorMsg
           for (order in cardOrders) {
             log.debug "Order: $order"
           }
-          return false
+          throw new IllegalStateException(errorMsg)
         }
 
         uuid = findFreeUUID(sql)
@@ -158,7 +164,7 @@ class SuCardOrderQuery {
           doCardOrderInsert(sql, addressArgs, requestArgs)
         } catch (ex) {
           log.error "Error in SQL card order transaction.", ex
-          return false
+          throw ex
         }
         return true
       }
@@ -224,7 +230,7 @@ class SuCardOrderQuery {
       String comment = "Card order created by " + requestArgs?.owner
 
       def statusResponse = sql?.executeInsert(statusQuery,
-          [status:DEFAULT_ORDER_STATUS,
+          [status:STATUS_DEFAULT_ORDER,
               request:requestArgs.id,
               comment: comment,
               createTime:new Timestamp(new Date().getTime())
@@ -254,7 +260,7 @@ class SuCardOrderQuery {
         firstname: cardOrderVO.firstname,
         lastname: cardOrderVO.lastname,
         address: null,
-        status: DEFAULT_ORDER_STATUS
+        status: STATUS_DEFAULT_ORDER
     ]
   }
 
@@ -309,9 +315,9 @@ class SuCardOrderQuery {
    */
   private static boolean doMarkCardAsDiscarded(Sql sql, String uuid, String uid) {
     sql.withTransaction {
-      sql?.executeUpdate(markCardAsDiscardedQuery, [id:uuid])
+      sql?.executeUpdate(markCardAsDiscardedQuery, [id:uuid, status: STATUS_DISCARDED])
       sql?.executeInsert(insertStatusHistoryQuery, [
-          status:5,
+          status: STATUS_DISCARDED,
           request: uuid,
           comment: "Discarded by " + uid,
           createTime: new Timestamp(new Date().getTime())
