@@ -173,7 +173,7 @@ public class SuCardOrderQuerySpec extends Specification {
     resp.firstname == svcCardOrderVO.firstname
     resp.lastname == svcCardOrderVO.lastname
     resp.address == null
-    resp.status == service.DEFAULT_ORDER_STATUS
+    resp.status == service.STATUS_DEFAULT_ORDER
 
   }
 
@@ -210,7 +210,7 @@ public class SuCardOrderQuerySpec extends Specification {
 
   void "getInsertRequestQuery"() {
     expect:
-    service.insertRequestQuery == "INSERT INTO request VALUES(:id, :owner, :serial, :printer, :createTime, :address, :status, :firstname, :lastname)"
+    service.insertRequestQuery == "INSERT INTO request VALUES(:id, :owner, :serial, :printer, :createTime, :address, (select id from status where value=:status), :firstname, :lastname)"
   }
 
   void "getFindActiveCardOrdersQuery"() {
@@ -225,7 +225,7 @@ public class SuCardOrderQuerySpec extends Specification {
 
   void "getInsertStatusHistoryQuery"() {
     expect:
-    service.insertStatusHistoryQuery == "INSERT INTO status_history VALUES (null, :status, :request, :comment, :createTime)"
+    service.insertStatusHistoryQuery == "INSERT INTO status_history (status, request, comment, timestamp) VALUES ((select id from status where value=:status), :request, :comment, :createTime)"
   }
 
   void "orderCard: a failed request"() {
@@ -244,12 +244,20 @@ public class SuCardOrderQuerySpec extends Specification {
       }
     }
 
-    expect:
-    null == service.orderCard(cardOrder)
+    when:
+    service.orderCard(cardOrder)
+
+    then:
+    thrown(IllegalStateException)
   }
 
   void "orderCard"() {
     given:
+
+    Sql.metaClass.withTransaction = { Closure closure ->
+      closure()
+    }
+
     Sql.metaClass.rows = { String arg1, Map arg2 ->
       switch(arg1) {
         case service.findActiveCardOrdersQuery:
@@ -308,7 +316,7 @@ public class SuCardOrderQuerySpec extends Specification {
 
   def "getMarkCardAsDiscardedQuery"() {
     expect:
-    service.markCardAsDiscardedQuery == "UPDATE request SET status = :discardedStatus WHERE id = :id"
+    service.markCardAsDiscardedQuery == "UPDATE request SET status = (select id from status where value=:status) WHERE id = :id"
   }
 
   def "doMarkCardAsDiscarded"(){
