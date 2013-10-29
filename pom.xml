@@ -59,7 +59,7 @@
     <dependency>
       <groupId>se.su.it.svc</groupId>
       <artifactId>cxf-server</artifactId>
-      <version>1.0.21-SNAPSHOT</version>
+      <version>1.0.21</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
@@ -275,15 +275,7 @@
           <packagingExcludes>
             WEB-INF/lib/slf4j-api*.jar,
             WEB-INF/lib/logback*.jar,
-          </packagingExcludes><!--
-            WEB-INF/lib/cxf-server*.jar,
-            WEB-INF/lib/jspocp*.jar,
-            WEB-INF/lib/aspectj*.jar,
-            WEB-INF/lib/jetty*.jar,
-            WEB-INF/lib/javax.servlet-api*.jar,
-            WEB-INF/lib/groovy-all*.jar,
-            WEB-INF/lib/gcontracts*.jar,
-          </packagingExcludes>-->
+          </packagingExcludes>
         </configuration>
       </plugin>
 
