@@ -31,12 +31,10 @@
 
 package se.su.it.svc
 
-import se.su.it.svc.annotations.SuCxfSvcSpocpRole
-import se.su.it.svc.aspect.AuditAspectMethodDetails
 import se.su.it.svc.ldap.SuService
 import se.su.it.svc.ldap.SuServiceDescription
+import se.su.it.svc.server.annotations.AuditAspectMethodDetails
 
-@SuCxfSvcSpocpRole(role = "sukat-service-admin")
 public interface ServiceService {
   SuService[] getServices(String uid)
   SuServiceDescription getServiceTemplate(String serviceType)

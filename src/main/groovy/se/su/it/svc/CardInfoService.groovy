@@ -31,10 +31,8 @@
 
 package se.su.it.svc
 
-import se.su.it.svc.annotations.SuCxfSvcSpocpRole
 import se.su.it.svc.ldap.SuCard
 
-@SuCxfSvcSpocpRole(role = "sukat-card-reader")
 public interface CardInfoService {
   SuCard[] getAllCards(String uid, boolean onlyActive);
   SuCard getCardByUUID(String suCardUUID);

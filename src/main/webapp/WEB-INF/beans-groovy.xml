@@ -20,34 +20,27 @@
 <!-- START SNIPPET: beans -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:gorm="http://grails.org/schema/gorm"
-       xmlns:simple="http://cxf.apache.org/simple"
-       xmlns:lang="http://www.springframework.org/schema/lang"
        xmlns:jaxws="http://cxf.apache.org/jaxws"
-       xmlns:util="http://www.springframework.org/schema/util"
        xmlns:tx="http://www.springframework.org/schema/tx"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
 
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.springframework.org/schema/aop
-       http://www.springframework.org/schema/a
-       http://grails.org/schema/gorm
-       http://grails.org/schema/gorm/gorm.xsd
+
        http://www.springframework.org/schema/tx
        http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
-       http://www.springframework.org/schema/lang
-       http://www.springframework.org/schema/lang/spring-lang.xsd
-       http://cxf.apache.org/simple
-       http://cxf.apache.org/schemas/simple.xsd
+
        http://cxf.apache.org/jaxws
        http://cxf.apache.org/schemas/jaxws.xsd
-       http://www.springframework.org/schema/util
-       http://www.springframework.org/schema/util/spring-util-2.0.xsd
+
        http://www.springframework.org/schema/context
-       http://www.springframework.org/schema/context/spring-context.xsd"
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"
        default-autowire="byName">
 
+  <aop:aspectj-autoproxy/>
 
     <import resource="classpath:META-INF/cxf/cxf.xml"/>
     <import resource="classpath:META-INF/cxf/cxf-extension-soap.xml"/>
@@ -165,48 +158,23 @@
             address="/Status"
             publishedEndpointUrl="${soap.publishedEndpointUrl}/Status"/>
 
-    <bean id="sanitizerAspect" class="se.su.it.svc.aspect.SanitizeWebParametersAspect"/>
+  <bean id="sanitizerAspect" class="se.su.it.svc.server.aspect.SanitizeWebParametersAspect"/>
 
-    <bean id="sanitizerPointcut" class="org.springframework.aop.support.JdkRegexpMethodPointcut">
-        <property name="pattern" value=".*"/>
-    </bean>
+  <bean id="auditAspect" class="se.su.it.svc.server.aspect.AuditAspect"/>
 
-    <bean id="sanitizerAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
-        <property name="advice" ref="sanitizerAspect"/>
-        <property name="pointcut" ref="sanitizerPointcut"/>
-    </bean>
+  <bean id="spocpConnectionFactory" class="org.spocp.client.SPOCPConnectionFactoryImpl">
+    <property name="server" value="${cxf-server.spocp.server}"/>
+    <property name="port" value="${cxf-server.spocp.port}"/>
+  </bean>
 
-    <bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
-        <property name="beanNames">
-            <value>*Endpoint</value>
-        </property>
-        <property name="interceptorNames">
-            <list>
-                <value>sanitizerAdvisor</value>
-            </list>
-        </property>
-    </bean>
+  <bean id="spocpRoleAuthorizor" class="se.su.it.svc.server.security.SpocpRoleAuthorizor" >
+    <property name="spocpConnectionFactory" ref="spocpConnectionFactory"/>
+  </bean>
 
-    <!-- Audit aspect -->
-    <bean id="auditAspect" class="se.su.it.svc.aspect.AuditAspect"/>
+  <bean id="defaultAuthorizor" class="se.su.it.svc.server.security.DefaultAuthorizor"/>
 
-    <bean id="auditPointcut" class="org.springframework.aop.support.JdkRegexpMethodPointcut">
-        <property name="pattern" value=".*"/>
-    </bean>
+  <bean id="spocpAspect" class="se.su.it.svc.server.aspect.AuthorizorAspect">
+    <property name="authorizor" ref="${authorizor.bean}"/>
+  </bean>
 
-    <bean id="auditAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
-        <property name="advice" ref="auditAspect"/>
-        <property name="pointcut" ref="auditPointcut"/>
-    </bean>
-
-    <bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
-        <property name="beanNames">
-            <value>*Endpoint</value>
-        </property>
-        <property name="interceptorNames">
-            <list>
-                <value>auditAdvisor</value>
-            </list>
-        </property>
-    </bean>
 </beans>

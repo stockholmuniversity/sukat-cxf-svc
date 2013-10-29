@@ -40,6 +40,7 @@ import se.su.it.svc.ldap.SuRole
 import se.su.it.svc.manager.ConfigManager
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuRoleQuery
+import se.su.it.svc.server.annotations.AuthzRole
 
 import javax.jws.WebParam
 import javax.jws.WebService
@@ -50,6 +51,7 @@ import javax.jws.WebService
  */
 
 @WebService @Slf4j
+@AuthzRole(role = "sukat-account-admin")
 public class RoleServiceImpl implements RoleService {
 
   /**

@@ -31,9 +31,6 @@
 
 package se.su.it.svc
 
-import se.su.it.svc.annotations.SuCxfSvcSpocpRole
-
-@SuCxfSvcSpocpRole(role = "sukat-account-admin")
 public interface RoleService {
   void addUidToRoles(String uid,List<String> roleDNList)
   void removeUidFromRoles(String uid,List<String> roleDNList)

@@ -31,8 +31,6 @@
 
 package se.su.it.svc
 
-import se.su.it.svc.annotations.SuCxfSvcSpocpRole
-
 /**
  * Created with IntelliJ IDEA.
  * User: jqvar
@@ -40,7 +38,6 @@ import se.su.it.svc.annotations.SuCxfSvcSpocpRole
  * Time: 12:09
  * To change this template use File | Settings | File Templates.
  */
-@SuCxfSvcSpocpRole(role = "sukat-entitlement-admin")
 public interface EntitlementService {
   void addEntitlement(String uid, String entitlement)
   void removeEntitlement(String uid,String entitlement)

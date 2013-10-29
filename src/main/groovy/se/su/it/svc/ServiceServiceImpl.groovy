@@ -45,6 +45,7 @@ import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuServiceDescriptionQuery
 import se.su.it.svc.query.SuServiceQuery
 import se.su.it.svc.query.SuSubAccountQuery
+import se.su.it.svc.server.annotations.AuthzRole
 import se.su.it.svc.util.GeneralUtils
 
 import javax.jws.WebParam
@@ -55,6 +56,7 @@ import javax.jws.WebService
  * This Class handles all Service activities in SUKAT.
  */
 @WebService @Slf4j
+@AuthzRole(role = "sukat-service-admin")
 public class ServiceServiceImpl implements ServiceService {
 
   /**
