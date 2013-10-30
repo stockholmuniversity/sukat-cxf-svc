@@ -371,12 +371,6 @@
       <name>SU Maven2</name>
       <url>http://maven.it.su.se/it.su.se/maven2</url>
     </repository>
-    <repository>
-      <id>su-maven</id>
-      <name>SU Maven</name>
-      <url>http://maven.it.su.se/it.su.se/maven</url>
-      <layout>default</layout>
-    </repository>
   </repositories>
 
   <distributionManagement>
