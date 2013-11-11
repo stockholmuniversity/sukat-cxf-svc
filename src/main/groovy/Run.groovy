@@ -43,14 +43,14 @@ class Run extends Start {
     String configProperty = System.getProperty(CONFIG_FILE_PROPERTY)
 
     if (!configProperty) {
-      log.info "Using default configuration: No config property '$CONFIG_FILE_PROPERTY' defined."
+      println "Using default configuration: No config property '$CONFIG_FILE_PROPERTY' defined."
       return
     }
 
     File configFile = new File(configProperty)
 
     if (!configFile?.exists()) {
-      log.error "Using default configuration: Config file $configFile.absolutePath does not exist."
+      println "Using default configuration: Config file $configFile.absolutePath does not exist."
       return
     }
 
