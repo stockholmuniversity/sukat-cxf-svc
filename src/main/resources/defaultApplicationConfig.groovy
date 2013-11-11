@@ -4,7 +4,7 @@ log {
     appenders {
       appenders = ['CONSOLE', 'FILE']
       file {
-        logFile = "sukat-cxf-svc.log"
+        logFile = "application.log"
       }
     }
   }
@@ -13,7 +13,7 @@ log {
     appenders {
       appenders = ['SYSLOG', 'FILE']
       file {
-        logFile = "/local/sukat/logs/sukat-cxf-svc.log"
+        logFile = "/local/sukat/logs/application.log"
       }
       syslog {
         syslogHost = "127.0.0.1"
