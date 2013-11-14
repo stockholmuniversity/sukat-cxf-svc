@@ -16,6 +16,7 @@ class SuPersonSpec extends Specification {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> return }
     SuPerson.metaClass.static.update = {-> true }
     SuPerson.metaClass.static.save = {-> true }
+    SuPerson.metaClass.static.move = { String s -> true }
   }
 
   def cleanup() {
@@ -379,6 +380,29 @@ class SuPersonSpec extends Specification {
 
     then:
     suPerson.eduPersonPrimaryAffiliation == SuPerson.Affilation.EMPLOYEE.value
+  }
+
+  def "activate should set mail & mailLocalAddress"() {
+    given:
+    String uid = 'foo'
+    String domain = 'bar'
+    SuPerson.metaClass.runEnableScript = { String arg1, String arg2 ->
+      return true
+    }
+
+    SuPerson.metaClass.isSkipCreateEnabled = {->
+      return false
+    }
+
+    SuPerson suPerson = new SuPerson(objectClass: [], uid: uid)
+    suPerson.objectClass = new TreeSet<String>()
+
+    when:
+    suPerson.activate(new SvcUidPwd(), [SuPerson.Affilation.EMPLOYEE.value] as String[], domain)
+
+    then:
+    suPerson.mail == "${uid}@${domain}"
+    suPerson.mailLocalAddress.contains(suPerson.mail)
   }
 
   @Unroll
