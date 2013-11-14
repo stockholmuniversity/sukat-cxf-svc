@@ -343,6 +343,7 @@ class SuPerson implements Serializable {
 
     updateAffiliations(affiliations)
     mail = uid + "@" + domain
+    addMailLocalAddress([mail] as Set)
 
     SuPersonQuery.moveSuPerson(this, AccountServiceUtils.domainToDN(domain))
     SuPersonQuery.updateSuPerson(this)
