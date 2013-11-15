@@ -8,9 +8,9 @@ import static ch.qos.logback.classic.Level.DEBUG
 import static ch.qos.logback.classic.Level.INFO
 
 final String env = getEnvironment()
-final ConfigObject logConfig = Run.configuration.log."$env"
+final ConfigObject logConfig = Run.configuration?.log?."$env"
 
-if(logConfig.logbackStatusListener)
+if(logConfig?.logbackStatusListener)
   displayStatusOnConsole()
 
 scan('5 minutes')  // Scan for changes every 5 minutes.
@@ -32,24 +32,24 @@ def setupAppenders = {
     switch(entry) {
       case 'FILE':
         appender('FILE', FileAppender) {
-          file = logConfig.appenders.file.logFile
+          file = logConfig?.appenders?.file?.logFile
           encoder(PatternLayoutEncoder) {
-            pattern = logConfig.appenders.file.pattern ?: defaultPattern
+            pattern = logConfig?.appenders?.file?.pattern ?: defaultPattern
           }
         }
         break
       case 'CONSOLE':
         appender('CONSOLE', ConsoleAppender) {
           encoder(PatternLayoutEncoder) {
-            pattern = logConfig.appenders.console.pattern ?: defaultPattern
+            pattern = logConfig?.appenders?.console?.pattern ?: defaultPattern
           }
         }
         break
       case 'SYSLOG':
         appender('SYSLOG', SyslogAppender) {
-          syslogHost = logConfig.appenders.syslog.syslogHost
-          facility = logConfig.appenders.syslog.facility
-          suffixPattern = logConfig.appenders.syslog.pattern
+          syslogHost = logConfig?.appenders?.syslog?.syslogHost ?: "127.0.0.1"
+          facility = logConfig?.appenders?.syslog?.facility ?: "USER"
+          suffixPattern = logConfig?.appenders?.syslog?.pattern ?: defaultPattern
           stackTracePattern = "    "
         }
         break
@@ -64,12 +64,12 @@ def setupLoggers = {
 }
 
 def getAppenders(logConfig) {
-  return logConfig.appenders.appenders
+  return logConfig?.appenders?.appenders ?: ['CONSOLE']
 }
 
 def getLogLevel(logConfig) {
   // TODO: More dynamic setting of Levels
-  (logConfig.debug == "true" ? DEBUG : INFO)
+  (logConfig?.debug == "true" ? DEBUG : INFO)
 }
 
 def String getEnvironment() {
