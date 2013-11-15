@@ -1,16 +1,18 @@
-import ch.qos.logback.classic.net.SyslogAppender
-
-import static ch.qos.logback.classic.Level.*
-import ch.qos.logback.core.ConsoleAppender
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
-import ch.qos.logback.core.status.OnConsoleStatusListener
+import ch.qos.logback.classic.net.SyslogAppender
+import ch.qos.logback.core.ConsoleAppender
 import ch.qos.logback.core.FileAppender
+import ch.qos.logback.core.status.OnConsoleStatusListener
 
+import static ch.qos.logback.classic.Level.DEBUG
+import static ch.qos.logback.classic.Level.INFO
 
 final String env = getEnvironment()
 final ConfigObject logConfig = Run.configuration.log."$env"
 
-displayStatusOnConsole()
+if(logConfig.logbackStatusListener)
+  displayStatusOnConsole()
+
 scan('5 minutes')  // Scan for changes every 5 minutes.
 
 // TODO: Make this proof of concept somewhat more dynamic.
@@ -47,15 +49,14 @@ def setupAppenders = {
         appender('SYSLOG', SyslogAppender) {
           syslogHost = logConfig.appenders.syslog.syslogHost
           facility = logConfig.appenders.syslog.facility
+          suffixPattern = logConfig.appenders.syslog.pattern
+          stackTracePattern = "    "
         }
         break
       default:
         System.err.println "Unknown appender: $entry"
     }
   }
-
-
-
 }
 
 def setupLoggers = {

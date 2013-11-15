@@ -1,6 +1,7 @@
 log {
   dev {
     debug = "true"
+    logbackStatusListener = true
     appenders {
       appenders = ['CONSOLE', 'FILE']
       file {
@@ -17,7 +18,8 @@ log {
       }
       syslog {
         syslogHost = "127.0.0.1"
-        facility = "SYSLOG"
+        facility = "USER"
+        pattern = "sukat-svc: [%thread] %logger - %msg"
       }
     }
   }
