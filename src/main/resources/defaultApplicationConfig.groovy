@@ -1,30 +1,3 @@
-log {
-  dev {
-    debug = "true"
-    logbackStatusListener = true
-    appenders {
-      appenders = ['CONSOLE', 'FILE']
-      file {
-        logFile = "application.log"
-      }
-    }
-  }
-  prod {
-    debug = "false"
-    appenders {
-      appenders = ['SYSLOG', 'FILE']
-      file {
-        logFile = "/local/sukat/logs/application.log"
-      }
-      syslog {
-        syslogHost = "127.0.0.1"
-        facility = "USER"
-        pattern = "sukat-svc: [%thread] %logger - %msg"
-      }
-    }
-  }
-}
-
 'cxf-server' {
   http {
     port = "8080"
