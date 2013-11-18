@@ -34,6 +34,14 @@ enrollment {
   }
 }
 
+
+/**
+ * Configure which authorization bean to use.
+ */
+authorizor {
+  bean = 'defaultAuthorizor'
+}
+
 soap {
   publishedEndpointUrl = "http://localhost:8080"
 }
