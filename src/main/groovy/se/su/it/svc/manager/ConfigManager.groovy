@@ -136,20 +136,15 @@ class ConfigManager {
 
   private synchronized void printConfiguration(String name, ConfigObject config) {
 
-    StringBuilder sb = new StringBuilder()
-    sb.append("\n").append(name)
+    log.info name
 
     config?.toProperties()?.sort { it.key }?.each { String key, value ->
       if (key.contains("password")) {
-        sb.append("\n$key => *********")
+        log.info "$key => *********"
       } else {
-        sb.append("\n$key => $value")
+        log.info "$key => $value"
       }
     }
-
-    sb.append("\n")
-
-    log.info sb.toString()
   }
 
   private final synchronized ConfigObject loadDefaultConfig() {

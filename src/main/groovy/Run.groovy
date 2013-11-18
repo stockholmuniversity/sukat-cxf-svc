@@ -14,8 +14,7 @@ class Run extends Start {
       log.info "Initializing Jetty server."
       start(configuration.toProperties())
     } catch (ex) {
-      System.err.println "Failed to start Jetty server " + ex.message
-      ex.printStackTrace()
+      log.error "Failed to start Jetty server ${ex.message}", ex
       System.exit(1)
     }
   }
