@@ -101,7 +101,7 @@ class ConfigManager {
     File file = new File(configFileName)
 
     if (!file.exists()) {
-      throw new IllegalStateException("Missing application configuration file => $configFileName")
+      log.warn "Missing application configuration file => $configFileName"
     }
     return file
   }
