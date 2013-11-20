@@ -30,31 +30,31 @@ class Run extends Start {
     /** Handle default config */
     URLClassLoader cl = (URLClassLoader) Thread.currentThread().getContextClassLoader();
     URL defaultConfigUrl = cl.getResource(DEFAULT_CONFIG_FILE_PATH);
-    ConfigObject config = new ConfigSlurper().parse(defaultConfigUrl)
+    ConfigObject defaultConfig = new ConfigSlurper().parse(defaultConfigUrl)
 
-    if (!config) {
+    if (!defaultConfig) {
       throw new IllegalStateException("Failed to load default config file $DEFAULT_CONFIG_FILE_PATH")
     }
-
-    this.config = config
 
     /** Merge custom config. */
     String configProperty = System.getProperty(CONFIG_FILE_PROPERTY)
 
-    if (!configProperty) {
+    if (configProperty) {
+      File configFile = new File(configProperty)
+
+      if (configFile?.exists()) {
+        URL configUrl = configFile.toURI().toURL()
+        ConfigObject customConfig = new ConfigSlurper().parse(configUrl)
+        defaultConfig.merge(customConfig)
+
+        config = defaultConfig
+      }
+      else {
+        log.warn "Using default configuration: Config file $configFile.absolutePath does not exist."
+      }
+    }
+    else {
       log.warn "Using default configuration: No config property '$CONFIG_FILE_PROPERTY' defined."
-      return
     }
-
-    File configFile = new File(configProperty)
-
-    if (!configFile?.exists()) {
-      log.warn "Using default configuration: Config file $configFile.absolutePath does not exist."
-      return
-    }
-
-    URL configUrl = configFile.toURI().toURL()
-    ConfigObject customConfig = new ConfigSlurper().parse(configUrl)
-    this.config.merge(customConfig)
   }
 }

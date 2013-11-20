@@ -32,7 +32,6 @@
 package se.su.it.svc
 
 import org.apache.log4j.LogManager
-import org.apache.log4j.Logger
 import se.su.it.svc.server.annotations.AuthzRole
 import se.su.it.svc.util.WebServiceAdminUtils
 
@@ -44,7 +43,6 @@ import java.nio.channels.FileChannel
 @WebService
 @AuthzRole(role = "sukat-account-admin")
 public class WebServiceAdminImpl implements WebServiceAdmin{
-  private static final Logger logger = Logger.getLogger(WebServiceAdminImpl.class)
   private static final MappedByteBuffer mem = new RandomAccessFile("/tmp/cxf-server-tmp.txt", "rw").getChannel().map(FileChannel.MapMode.READ_WRITE, 0, 1);
 
   void setRootLogLevel(@WebParam(name = "level") String level) {

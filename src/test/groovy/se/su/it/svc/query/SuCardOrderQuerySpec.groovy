@@ -374,14 +374,14 @@ public class SuCardOrderQuerySpec extends Specification {
     ) }
 
     SuCardOrderQuery.doMarkCardAsDiscarded(*_) >> {
-      throw new RuntimeException("foo")
+      throw new IllegalStateException("foo")
     }
 
     when:
     new SuCardOrderQuery().markCardAsDiscarded('uuid', 'uid')
 
     then:
-    thrown(RuntimeException)
+    thrown(IllegalStateException)
   }
 
 }

@@ -146,7 +146,7 @@ public class ServiceServiceImpl implements ServiceService {
           subAcc.jabberID = GeneralUtils.uidToPrincipal(uid)
         }
         SuSubAccountQuery.createSubAccount(ConfigManager.LDAP_RW, subAcc)
-        def subAccountPwd = Kadmin.newInstance().resetOrCreatePrincipal(GeneralUtils.uidToKrb5Principal(subUid))
+        Kadmin.newInstance().resetOrCreatePrincipal(GeneralUtils.uidToKrb5Principal(subUid))
         log.info("enableServiceFully - Created sub account uid=<${subUid}> to be used by service=<${serviceType}> for uid=<${uid}>")
       } else {
         log.info("enableServiceFully - Sub account uid=<${subUid}> to be used by service=<${serviceType}> for uid=<${uid}> already exist. Using it.")

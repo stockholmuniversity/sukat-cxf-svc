@@ -251,7 +251,7 @@ class SuPersonSpec extends Specification {
   def "runEnableScript should return false on exception"() {
     given:
     GroovyMock(ExecUtils, global: true)
-    ExecUtils.exec(*_) >> { throw new Exception() }
+    ExecUtils.exec(*_) >> { throw new NullPointerException() }
 
     when:
     def ret = new SuPerson().runEnableScript("", "")
