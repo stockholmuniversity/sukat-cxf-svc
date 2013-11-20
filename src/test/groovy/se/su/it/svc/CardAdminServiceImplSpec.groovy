@@ -5,6 +5,7 @@ import org.gcontracts.PreconditionViolation
 import se.su.it.svc.ldap.SuCard
 import se.su.it.svc.query.SuCardOrderQuery
 import se.su.it.svc.query.SuCardQuery
+import spock.lang.Specification
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -36,9 +37,6 @@ import se.su.it.svc.query.SuCardQuery
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-import spock.lang.Specification
-
 class CardAdminServiceImplSpec extends Specification {
 
   def setup() {
@@ -107,14 +105,14 @@ class CardAdminServiceImplSpec extends Specification {
     def cardAdminServiceImpl = new CardAdminServiceImpl()
 
     cardAdminServiceImpl.suCardOrderQuery = GroovyMock(SuCardOrderQuery) {
-      markCardAsDiscarded(* _) >> { throw new RuntimeException("foo") }
+      markCardAsDiscarded(* _) >> { throw new IllegalStateException("foo") }
     }
 
     when:
     cardAdminServiceImpl.revokeCard("testcarduuid", 'uid')
 
     then:
-    thrown(RuntimeException)
+    thrown(IllegalStateException)
 
     and:
     suCard.suCardState == "urn:x-su:su-card:state:revoked"

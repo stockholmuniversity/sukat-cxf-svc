@@ -338,7 +338,7 @@ class SuPerson implements Serializable {
 
     if (!enabledUser) {
       log.error("enrollUser - enroll failed while excecuting perl scripts for uid <$uid>")
-      throw new RuntimeException("enrollUser - enroll failed in scripts.")
+      throw new IllegalStateException("enrollUser - enroll failed in scripts.")
     }
 
     updateAffiliations(affiliations)
