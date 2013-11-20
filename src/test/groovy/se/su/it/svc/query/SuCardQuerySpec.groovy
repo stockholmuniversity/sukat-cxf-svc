@@ -50,14 +50,14 @@ class SuCardQuerySpec extends Specification {
   def "findAllCardsBySuPersonDnAndOnlyActiveOrNot should pass exception forward"() {
     given:
     SuCard.metaClass.static.findAll = { LinkedHashMap a, Closure c ->
-      throw new Exception()
+      throw new NullPointerException()
     }
 
     when:
     SuCardQuery.findAllCardsBySuPersonDnAndOnlyActiveOrNot(null, null, true)
 
     then:
-    thrown(Exception)
+    thrown(NullPointerException)
   }
 
   def "findAllCardsBySuPersonDnAndOnlyActiveOrNot - happy path"() {
@@ -96,14 +96,14 @@ class SuCardQuerySpec extends Specification {
   def "findCardBySuCardUUID should forward exception"() {
     given:
     SuCard.metaClass.static.find = { LinkedHashMap a, Closure c ->
-      throw new Exception()
+      throw new NullPointerException()
     }
 
     when:
     SuCardQuery.findCardBySuCardUUID(null, null)
 
     then:
-    thrown(Exception)
+    thrown(NullPointerException)
   }
 
   def "findCardBySuCardUUID - happy path"() {
