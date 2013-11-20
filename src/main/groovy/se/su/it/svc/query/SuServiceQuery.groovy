@@ -33,24 +33,14 @@ package se.su.it.svc.query
 
 import org.springframework.ldap.core.DistinguishedName
 import se.su.it.svc.ldap.SuService
-import se.su.it.svc.manager.ConfigManager
-import se.su.it.svc.manager.EhCacheManager
 
 /**
  * This class is a helper class for doing GLDAPO queries on the SuService GLDAPO schema.
  */
 public class SuServiceQuery {
-  /**
-   * the CacheManager provides an instance of EhCache and some overridden methods (get/put/remove)
-   * !important: when getting an object from LDAP which is to be changed, we always need to get it from the master,
-   *             ie: using the props.ldap.serverrw (readWrite, to ensure that we are changing the up-to-date value)
-   *             and NOT fetching the object from the cache.
-   */
-  def static cacheManager = EhCacheManager.getInstance()
 
   /**
    * Returns an Array of SuService objects.
-   *
    *
    * @param directory which directory to use, see ConfigManager.
    * @param dn  the DistinguishedName for the user that you want to find cards for.
@@ -59,23 +49,15 @@ public class SuServiceQuery {
    * @see se.su.it.svc.manager.ConfigManager
    */
   static SuService[] getSuServices(String directory, DistinguishedName dn) {
-    def query = { qDirectory, qDn ->
-      SuService.findAll(directory: qDirectory, base: qDn) {
-        and {
-          eq("objectclass", "suServiceObject")
-        }
+    return SuService.findAll(directory: directory, base: dn) {
+      and {
+        eq("objectclass", "suServiceObject")
       }
     }
-
-    def params = [key: ":getSuServicesFor:${dn}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == ConfigManager.LDAP_RW)]
-    def suServices = (SuService[]) cacheManager.get(params, {query(directory, dn)})
-
-    return suServices
   }
 
   /**
    * Returns an SuService object.
-   *
    *
    * @param directory which directory to use, see ConfigManager.
    * @param dn  the DistinguishedName for the user that you want to find services for.
@@ -85,16 +67,11 @@ public class SuServiceQuery {
    * @see se.su.it.svc.manager.ConfigManager
    */
   static SuService getSuServiceByType(String directory, DistinguishedName dn, String serviceType) {
-    def query = { qDirectory, qDn, qServiceType ->
-      SuService.find(directory: qDirectory, base: qDn) {
-        and {
-          eq("objectclass", "suServiceObject")
-          eq("suServiceType", qServiceType)
-        }
+    return SuService.find(directory: directory, base: dn) {
+      and {
+        eq("objectclass", "suServiceObject")
+        eq("suServiceType", serviceType)
       }
     }
-    def params = [key: ":getSuServiceByType:${serviceType}${dn}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == ConfigManager.LDAP_RW)]
-    def suService = (SuService)cacheManager.get(params, {query(directory,dn,serviceType)})
-    return suService
   }
 }

@@ -32,8 +32,6 @@
 package se.su.it.svc.query
 
 import se.su.it.svc.ldap.SuRole
-import se.su.it.svc.manager.ConfigManager
-import se.su.it.svc.manager.EhCacheManager
 
 /**
  * This class is a helper class for doing GLDAPO queries on the SuRole GLDAPO schema.
@@ -41,16 +39,7 @@ import se.su.it.svc.manager.EhCacheManager
 public class SuRoleQuery {
 
   /**
-   * the CacheManager provides an instance of EhCache and some overridden methods (get/put/remove)
-   * !important: when getting an object from LDAP which is to be changed, we always need to get it from the master,
-   *             ie: using the props.ldap.serverrw (readWrite, to ensure that we are changing the up-to-date value)
-   *             and NOT fetching the object from the cache.
-   */
-  def static cacheManager = EhCacheManager.getInstance()
-
-  /**
    * Returns a SuRole object, specified by the parameter dn.
-   *
    *
    * @param directory which directory to use, see ConfigManager.
    * @param dn  the DN for the role that you want to find.
@@ -59,18 +48,11 @@ public class SuRoleQuery {
    * @see se.su.it.svc.manager.ConfigManager
    */
   static SuRole getSuRoleFromDN(String directory, String dn) {
-    def query = { qDirectory, qDn ->
-      SuRole.find(directory: qDirectory, base: qDn) {
-        and {
-          eq("objectclass", "organizationalRole")
-          eq("objectclass", "suRole")
-        }
+    return SuRole.find(directory: directory, base: dn) {
+      and {
+        eq("objectclass", "organizationalRole")
+        eq("objectclass", "suRole")
       }
     }
-
-    def params = [key: ":getSuRoleFromDN:${dn}", ttl: cacheManager.DEFAULT_TTL, cache: cacheManager.DEFAULT_CACHE_NAME, forceRefresh: (directory == ConfigManager.LDAP_RW)]
-    def suRole = (SuRole) cacheManager.get(params, { query(directory, dn) })
-
-    return suRole
   }
 }
