@@ -6,6 +6,7 @@ import se.su.it.commons.Kadmin
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuService
 import se.su.it.svc.ldap.SuServiceDescription
+import se.su.it.svc.ldap.SuSubAccount
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -38,7 +39,6 @@ import se.su.it.svc.ldap.SuServiceDescription
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import se.su.it.svc.ldap.SuSubAccount
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuServiceDescriptionQuery
 import se.su.it.svc.query.SuServiceQuery
@@ -119,7 +119,7 @@ class ServiceServiceImplSpec extends Specification {
     def serviceServiceImpl = new ServiceServiceImpl()
 
     when:
-    def ret = serviceServiceImpl.getServices("testuid")
+    serviceServiceImpl.getServices("testuid")
 
     then:
     thrown(IllegalArgumentException)
@@ -175,7 +175,7 @@ class ServiceServiceImplSpec extends Specification {
     def serviceServiceImpl = new ServiceServiceImpl()
 
     when:
-    def ret = serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", "A description")
+    serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", "A description")
 
     then:
     thrown(IllegalArgumentException)
@@ -215,7 +215,7 @@ class ServiceServiceImplSpec extends Specification {
     SuServiceQuery.metaClass.static.saveSuService = {SuService suService -> return void}
     def serviceServiceImpl = new ServiceServiceImpl()
     when:
-    def ret = serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", "A description")
+    serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", "A description")
     then:
     thrown(IllegalArgumentException)
   }
@@ -234,7 +234,7 @@ class ServiceServiceImplSpec extends Specification {
     SuServiceQuery.metaClass.static.saveSuService = {SuService suService -> return void}
     def serviceServiceImpl = new ServiceServiceImpl()
     when:
-    def ret = serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", "A description")
+    serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", "A description")
     then:
     thrown(IllegalArgumentException)
   }
