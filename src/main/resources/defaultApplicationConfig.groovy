@@ -1,35 +1,3 @@
-log {
-  dev {
-    debug = "true"
-    appenders {
-      appenders = ['CONSOLE', 'FILE']
-      file {
-        logFile = "application.log"
-      }
-    }
-  }
-  prod {
-    debug = "false"
-    appenders {
-      appenders = ['SYSLOG', 'FILE']
-      file {
-        logFile = "/local/sukat/logs/application.log"
-      }
-      syslog {
-        syslogHost = "127.0.0.1"
-        facility = "SYSLOG"
-      }
-    }
-  }
-}
-
-/**
- * Configure which authorization bean to use.
- */
-authorizor {
-  bean = 'spocpRoleAuthorizor'
-}
-
 'cxf-server' {
   http {
     port = "8080"
@@ -64,6 +32,14 @@ enrollment {
   create {
     skip = "true"
   }
+}
+
+
+/**
+ * Configure which authorization bean to use.
+ */
+authorizor {
+  bean = 'defaultAuthorizor'
 }
 
 soap {
