@@ -69,17 +69,6 @@ sucard {
   }
 }
 
-ehcache {
-  maxElementsInMemory             = 10000
-  eternal                         = false
-  timeToIdleSeconds               = 120
-  timeToLiveSeconds               = 600
-  overflowToDisk                  = false
-  diskPersistent                  = false
-  diskExpiryThreadIntervalSeconds = 120
-  memoryStoreEvictionPolicy       = "LRU"
-}
-
 directories {
   "${ldap.ro.name}" {
     url = "${ldap.ro.url}"

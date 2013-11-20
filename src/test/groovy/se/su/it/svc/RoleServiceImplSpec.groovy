@@ -5,6 +5,7 @@ import org.gcontracts.PreconditionViolation
 import org.springframework.ldap.core.DistinguishedName
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuRole
+import se.su.it.svc.query.SuPersonQuery
 
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
@@ -37,8 +38,6 @@ import se.su.it.svc.ldap.SuRole
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import se.su.it.svc.manager.EhCacheManager
-import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuRoleQuery
 import spock.lang.Specification
 
@@ -54,7 +53,6 @@ class RoleServiceImplSpec extends Specification {
     SuRoleQuery.metaClass = null
     SuPersonQuery.metaClass = null
     GldapoSchemaRegistry.metaClass = null
-    EhCacheManager.metaClass = null
   }
 
   def "Test addUidToRoles with null uid argument"() {
