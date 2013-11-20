@@ -23,6 +23,14 @@ log {
   }
 }
 
+/**
+ * Configure which authorization bean to use.
+ */
+authorizor {
+  bean = 'spocpRoleAuthorizor'
+}
+
+
 'cxf-server' {
   http {
     port = "8080"
