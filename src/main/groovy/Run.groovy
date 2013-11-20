@@ -10,9 +10,6 @@ class Run extends Start {
   public static final String DEFAULT_CONFIG_FILE_PATH = "WEB-INF/classes/defaultApplicationConfig.groovy"
 
   public static void main(String[] args) {
-    // Prevent ehcache from accessing the internet on startup.
-    System.setProperty("net.sf.ehcache.skipUpdateCheck", "true")
-
     try {
       log.info "Initializing Jetty server."
       start(configuration.toProperties())
