@@ -39,6 +39,7 @@ import org.apache.cxf.phase.PhaseInterceptorChain
 import javax.servlet.http.HttpServletRequest
 import java.lang.annotation.Annotation
 import java.lang.reflect.Method
+import java.sql.Timestamp
 
 /**
  * Created with IntelliJ IDEA.
@@ -47,8 +48,6 @@ import java.lang.reflect.Method
  * Time: 12:59
  * To change this template use File | Settings | File Templates.
  */
-import java.sql.Timestamp
-
 @Slf4j
 public class AuditAspect implements MethodInterceptor {
   private static final String STATE_INPROGRESS = "IN PROGRESS"
@@ -62,11 +61,12 @@ public class AuditAspect implements MethodInterceptor {
     Object rval
 
     // Log the invocation attempt, keep a reference to the opaque aspect object
-    Object auditRef = null
+    Object auditRef
+    Method method = invocation.getMethod()
     try {
-      auditRef = logBefore(invocation.getMethod(), invocation.getArguments())
+      auditRef = logBefore(method, invocation.getArguments())
     } catch (Exception e) {
-      log.warn("logBefore failed for " + invocation.getMethod().getName() + " - Not proceeding.")
+      log.warn("logBefore failed for " + method.getName() + " - Not proceeding.")
       throw new Exception("Audit Engine is DOWN - not performing any actions at the moment", e)
     }
 
@@ -83,7 +83,7 @@ public class AuditAspect implements MethodInterceptor {
 
     // Add the return value to the aspect log entry
     if (auditRef != null) {
-      if (invocation.method?.isAnnotationPresent(AuditHideReturnValue)) {
+      if (method?.isAnnotationPresent(AuditHideReturnValue)) {
         logAfter(auditRef, HIDDEN_VALUE)
       }
       else {
