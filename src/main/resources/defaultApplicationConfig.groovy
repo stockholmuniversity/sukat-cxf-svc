@@ -11,8 +11,8 @@
     password = "changeit"
   }
   spnego {
-    conf = "etc/spnego.conf"
-    properties = "etc/spnego.properties"
+    conf = "/local/sukat/conf/spnego.conf"
+    properties = "/local/sukat/conf/spnego.properties"
     realm = "SU.SE"
     kdc = "kerberos.su.se"
   }
