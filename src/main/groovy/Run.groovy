@@ -30,9 +30,9 @@ class Run extends Start {
     /** Handle default config */
     URLClassLoader cl = (URLClassLoader) Thread.currentThread().getContextClassLoader();
     URL defaultConfigUrl = cl.getResource(DEFAULT_CONFIG_FILE_PATH);
-    ConfigObject defaultConfig = new ConfigSlurper().parse(defaultConfigUrl)
+    ConfigObject configResult = new ConfigSlurper().parse(defaultConfigUrl)
 
-    if (!defaultConfig) {
+    if (!configResult) {
       throw new IllegalStateException("Failed to load default config file $DEFAULT_CONFIG_FILE_PATH")
     }
 
@@ -45,9 +45,7 @@ class Run extends Start {
       if (configFile?.exists()) {
         URL configUrl = configFile.toURI().toURL()
         ConfigObject customConfig = new ConfigSlurper().parse(configUrl)
-        defaultConfig.merge(customConfig)
-
-        config = defaultConfig
+        configResult.merge(customConfig)
       }
       else {
         log.warn "Using default configuration: Config file $configFile.absolutePath does not exist."
@@ -56,5 +54,7 @@ class Run extends Start {
     else {
       log.warn "Using default configuration: No config property '$CONFIG_FILE_PROPERTY' defined."
     }
+
+    config = configResult
   }
 }
