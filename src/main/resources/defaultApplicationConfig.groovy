@@ -10,11 +10,13 @@
     keystore = "cxf-svc-server.keystore"
     password = "changeit"
   }
+  login {
+    config = "/local/sukat/conf/login.config"
+  }
   spnego {
-    conf = "/local/sukat/conf/spnego.conf"
-    properties = "/local/sukat/conf/spnego.properties"
     realm = "SU.SE"
     kdc = "kerberos.su.se"
+    targetName = "HTTP/localhost"
   }
   spocp {
     enabled = "true"

@@ -1,6 +1,5 @@
 *.swp
-config.properties
-spnego.conf
+login.conf
 target/
 classes/
 logs/
@@ -16,5 +15,4 @@ web-app/META-INF/
 .DS_Store
 atlassian-ide-plugin.xml
 cxf-svc-server.keystore
-spnego.properties
 etc/applicationConfig.groovy
