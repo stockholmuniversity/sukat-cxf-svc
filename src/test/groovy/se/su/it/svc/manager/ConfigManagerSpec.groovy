@@ -1,6 +1,5 @@
 package se.su.it.svc.manager
 
-import spock.lang.Ignore
 import spock.lang.Specification
 
 class ConfigManagerSpec extends Specification {
@@ -9,23 +8,19 @@ class ConfigManagerSpec extends Specification {
     ConfigManager.metaClass = null;
   }
 
-  def "ConfigManager: default constructor does nothing."() {
+  def "ConfigManager: default constructor parses conf."() {
     when:
-    ConfigManager configManager = new ConfigManager()
+    ConfigManager configManager = ConfigManager.getInstance()
 
     then:
-    configManager.@config == null
+    configManager.@config instanceof ConfigObject
   }
 
-  @Ignore
-  def "ConfigManager(): ..."() {
-    given:
-    ConfigManager.metaClass.loadDefaultConfig = {}
-
+  def "ConfigManager(): reads default config"() {
     when:
-    def configManager = new ConfigManager('src/test/resources/config-test.properties')
+    def configManager = ConfigManager.getInstance()
 
     then:
-    configManager.@config.containsKey "foo"
+    configManager.@config.containsKey "test"
   }
 }
