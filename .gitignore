@@ -1,5 +1,5 @@
 *.swp
-login.conf
+login.config
 target/
 logs/
 out/
