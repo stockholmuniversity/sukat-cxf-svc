@@ -31,17 +31,19 @@
 
 package se.su.it.svc.manager
 
-import gldapo.Gldapo
 import groovy.util.logging.Slf4j
+import se.su.it.svc.server.config.ConfigHolder
 
 @Slf4j
-class ConfigManager {
+@Singleton
+class ConfigManager implements ConfigHolder {
 
   private final ConfigObject config
 
   public static String LDAP_RO
   public static String LDAP_RW
 
+  public static final String CUSTOM_CONFIG_PROP = 'config'
   public static final String DEFAULT_CONFIG_FILE_PATH = "WEB-INF/classes/defaultApplicationConfig.groovy"
 
   private static List<String> mandatoryProperties = [
@@ -61,31 +63,20 @@ class ConfigManager {
   /**
    * Singleton private constructor (unused but defined).
    */
-  private ConfigManager() {}
-
-  /**
-   * Default constructor invoked via bean xml config.
-   * @param configFileName
-   */
-  private ConfigManager(String configFileName) {
-
+  private ConfigManager() {
     /** Parsing to properties first so the file type is a properties
      * file not a groovy config file (cause of the cxf) framework being written i java.
      * */
-
     ConfigObject config = loadDefaultConfig()
 
-    File customConfigFile = getConfigFile(configFileName)
+    File customConfigFile = getConfigFile(System.getProperty(CUSTOM_CONFIG_PROP))
 
     if (customConfigFile.exists()) {
       ConfigObject customConfig = parseConfig(customConfigFile.toURI().toURL())
-      printConfiguration("*** ConfigManager: Loading Custom Configuration ***", customConfig)
       config.merge(customConfig)
     }
 
     this.config = config
-
-    printConfiguration("*** ConfigManager: Final Configuration ***", config)
 
     /** Set variables and initialize Gldapo */
 
@@ -93,12 +84,10 @@ class ConfigManager {
 
     LDAP_RO = config.ldap.ro.name
     LDAP_RW = config.ldap.rw.name
-
-    initializeGldapo(config as Map)
   }
 
   private static synchronized File getConfigFile(String configFileName) {
-    File file = new File(configFileName)
+    File file = new File(configFileName ?: "")
 
     if (!file.exists()) {
       log.warn "Missing application configuration file => $configFileName"
@@ -134,15 +123,16 @@ class ConfigManager {
     return new ConfigSlurper().parse(getProperties())
   }
 
-  private synchronized void printConfiguration(String name, ConfigObject config) {
+  public synchronized void printConfiguration() {
+    log.info "*** ConfigManager: Final Configuration ***"
 
-    log.info name
+    TreeMap sorted = new TreeMap<String, Object>(config?.flatten())
 
-    config?.toProperties()?.sort { it.key }?.each { String key, value ->
-      if (key.contains("password")) {
-        log.info "$key => *********"
+    for (Map.Entry<String, Object> entry : sorted.entrySet()) {
+      if (entry.key.contains("password")) {
+        log.info "$entry.key => *********"
       } else {
-        log.info "$key => $value"
+        log.info "$entry.key => $entry.value"
       }
     }
   }
@@ -150,14 +140,11 @@ class ConfigManager {
   private final synchronized ConfigObject loadDefaultConfig() {
     URLClassLoader cl = (URLClassLoader) Thread.currentThread().getContextClassLoader();
     URL defaultConfigUrl = cl.getResource(DEFAULT_CONFIG_FILE_PATH);
-    ConfigObject config = new ConfigSlurper().parse(defaultConfigUrl)
-    return config
-  }
 
-  /**
-   * Initializes Gldapo (will be removed soon).
-   */
-  private final static void initializeGldapo(Map config) {
-    Gldapo.initialize(config)
+    if (! defaultConfigUrl) {
+      throw new IllegalStateException("Default configuration not found at: $defaultConfigUrl")
+    }
+
+    return new ConfigSlurper().parse(defaultConfigUrl)
   }
 }

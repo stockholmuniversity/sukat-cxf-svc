@@ -26,4 +26,8 @@ class AccountServiceUtilsSpec extends Specification {
     'su.se'    | 'dc=su,dc=se'
     'it.su.se' | 'dc=it,dc=su,dc=se'
   }
+
+  def "domainToDN handles null"() {
+    expect: AccountServiceUtils.domainToDN(null) == ''
+  }
 }

@@ -43,14 +43,13 @@
   <aop:aspectj-autoproxy/>
 
     <import resource="classpath:META-INF/cxf/cxf.xml"/>
-    <import resource="classpath:META-INF/cxf/cxf-extension-soap.xml"/>
     <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
 
     <context:component-scan base-package="se.su.it.svc"/>
 
-    <bean id="configManager" class="se.su.it.svc.manager.ConfigManager" scope="singleton">
-        <constructor-arg name="configFileName" type="java.lang.String" value="#{ systemProperties['config'] }"/>
-    </bean>
+    <bean id="configManager" class="se.su.it.svc.manager.ConfigManager" scope="singleton" init-method="getInstance" />
+
+    <bean id="gldapoManager" class="se.su.it.svc.manager.GldapoManager" scope="singleton" />
 
     <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="properties" value="#{ configManager.properties }"/>

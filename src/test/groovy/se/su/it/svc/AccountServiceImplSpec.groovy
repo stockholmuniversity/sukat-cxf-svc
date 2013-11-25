@@ -1,13 +1,3 @@
-package se.su.it.svc
-
-import gldapo.GldapoSchemaRegistry
-import org.apache.commons.lang.NotImplementedException
-import org.gcontracts.PostconditionViolation
-import org.gcontracts.PreconditionViolation
-import se.su.it.commons.Kadmin
-import se.su.it.commons.PasswordUtils
-import se.su.it.svc.commons.SvcSuPersonVO
-
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.
@@ -39,6 +29,15 @@ import se.su.it.svc.commons.SvcSuPersonVO
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+package se.su.it.svc
+
+import gldapo.GldapoSchemaRegistry
+import org.apache.commons.lang.NotImplementedException
+import org.gcontracts.PostconditionViolation
+import org.gcontracts.PreconditionViolation
+import se.su.it.commons.Kadmin
+import se.su.it.commons.PasswordUtils
+import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuPersonStub
