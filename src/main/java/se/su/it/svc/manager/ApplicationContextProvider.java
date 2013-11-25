@@ -55,34 +55,28 @@ public class ApplicationContextProvider implements ApplicationContextAware {
   public static ApplicationContext getApplicationContext() {
     return ctx;
   }
+
   /**
    * Bind hibernate session to current thread.
    * You need to invoke this method before any gorm related work begins on the current thread.
-   *
-   *
-   * @return void.
    */
   public static void bindTxSession() {
     SessionFactory sessionFactory = (SessionFactory) ctx.getBean("sessionFactory");
     Session session = SessionFactoryUtils.getSession(sessionFactory, true);
     TransactionSynchronizationManager.bindResource(sessionFactory, new SessionHolder(session));
   }
+
   /**
    * Unbind hibernate session to current thread.
    * You need to invoke this after you are finished with any gorm related work on the current thread.
-   *
-   *
-   * @return void.
    */
   public static void unbindTxSession() {
     SessionFactory sessionFactory = (SessionFactory) ctx.getBean("sessionFactory");
     TransactionSynchronizationManager.unbindResource(sessionFactory);
   }
+
   /**
    * Set the applicationcontext.
-   *
-   *
-   * @return void.
    */
   public void setApplicationContext(ApplicationContext ctx) throws BeansException {
     // Assign the ApplicationContext into a static method
