@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>se.su.it.cxf</groupId>
   <artifactId>sukat-cxf-svc</artifactId>
-  <version>1.3.0rc07</version>
+  <version>1.3.0rc08-SNAPSHOT</version>
   <packaging>war</packaging>
   <name>sukat-cxf-svc-war</name>
 
@@ -285,7 +285,7 @@
     <connection>scm:git:git@github.com:stockholmuniversity/sukat-cxf-svc.git</connection>
     <url>scm:git:git@github.com:stockholmuniversity/sukat-cxf-svc.git</url>
     <developerConnection>scm:git:git@github.com:stockholmuniversity/sukat-cxf-svc.git</developerConnection>
-    <tag>1.3.0rc07</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <reporting>
