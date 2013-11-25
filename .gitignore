@@ -1,7 +1,6 @@
 *.swp
 login.conf
 target/
-classes/
 logs/
 out/
 web-app/META-INF/
