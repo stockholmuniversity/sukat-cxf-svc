@@ -1,3 +1,5 @@
+customConfig = "/local/sukat/conf/applicationConfig.groovy"
+
 'cxf-server' {
   http {
     port = "8080"

@@ -43,7 +43,6 @@ class ConfigManager implements ConfigHolder {
   public static String LDAP_RO
   public static String LDAP_RW
 
-  public static final String CUSTOM_CONFIG_PROP = 'config'
   public static final String DEFAULT_CONFIG_FILE_PATH = "WEB-INF/classes/defaultApplicationConfig.groovy"
 
   private static List<String> mandatoryProperties = [
@@ -69,7 +68,7 @@ class ConfigManager implements ConfigHolder {
      * */
     ConfigObject config = loadDefaultConfig()
 
-    File customConfigFile = getConfigFile(System.getProperty(CUSTOM_CONFIG_PROP))
+    File customConfigFile = getConfigFile(config.customConfig)
 
     if (customConfigFile.exists()) {
       ConfigObject customConfig = parseConfig(customConfigFile.toURI().toURL())
