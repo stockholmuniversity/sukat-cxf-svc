@@ -64,7 +64,6 @@ class ConfigManager implements ConfigHolder {
    * Singleton private constructor (unused but defined).
    */
   private ConfigManager() {
-    println("FOOOO: " + this)
     /** Parsing to properties first so the file type is a properties
      * file not a groovy config file (cause of the cxf) framework being written i java.
      * */
