@@ -20,7 +20,7 @@
     <dependency>
       <groupId>se.su.it.svc</groupId>
       <artifactId>cxf-server</artifactId>
-      <version>1.1.0</version>
+      <version>1.1.1</version>
     </dependency>
     <dependency>
       <groupId>org.hibernate</groupId>
@@ -35,6 +35,11 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-web</artifactId>
+      <version>3.0.4.RELEASE</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
       <version>3.0.4.RELEASE</version>
     </dependency>
     <dependency>
@@ -224,15 +229,40 @@
               <classpathLayoutType>custom</classpathLayoutType>
               <customClasspathLayout>WEB-INF/lib/$${artifact.artifactId}-$${artifact.version}$${dashClassifier?}.$${artifact.extension}</customClasspathLayout>
             </manifest>
-            <manifestEntries>
-                <Class-Path>classes/ ./</Class-Path>
-            </manifestEntries>
           </archive>
           <packagingExcludes>
             WEB-INF/lib/slf4j-api*.jar,
             WEB-INF/lib/logback*.jar,
           </packagingExcludes>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>main-class-placement</id>
+            <phase>prepare-package</phase>
+            <configuration>
+              <tasks>
+                <move todir="${project.build.directory}/${project.artifactId}-${project.version}/">
+                  <fileset dir="${project.build.directory}/classes/">
+                    <include name="Run.class" />
+                    <include name="logback.groovy" />
+                  </fileset>
+                </move>
+                <move todir="${project.build.directory}/${project.artifactId}-${project.version}/se/su/it/svc/manager">
+                  <fileset dir="${project.build.directory}/classes/se/su/it/svc/manager">
+                    <include name="ConfigManager.class" />
+                  </fileset>
+                </move>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>

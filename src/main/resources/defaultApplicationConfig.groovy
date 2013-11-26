@@ -106,11 +106,11 @@ directories {
   }
 }
 schemas = [
-    se.su.it.svc.ldap.SuPersonStub,
-    se.su.it.svc.ldap.SuRole,
-    se.su.it.svc.ldap.SuCard,
-    se.su.it.svc.ldap.SuPerson,
-    se.su.it.svc.ldap.SuServiceDescription,
-    se.su.it.svc.ldap.SuService,
-    se.su.it.svc.ldap.SuSubAccount,
+    'se.su.it.svc.ldap.SuPersonStub',
+    'se.su.it.svc.ldap.SuRole',
+    'se.su.it.svc.ldap.SuCard',
+    'se.su.it.svc.ldap.SuPerson',
+    'se.su.it.svc.ldap.SuServiceDescription',
+    'se.su.it.svc.ldap.SuService',
+    'se.su.it.svc.ldap.SuSubAccount',
 ]
