@@ -64,6 +64,7 @@ class ConfigManager implements ConfigHolder {
    * Singleton private constructor (unused but defined).
    */
   private ConfigManager() {
+    println("FOOOO: " + this)
     /** Parsing to properties first so the file type is a properties
      * file not a groovy config file (cause of the cxf) framework being written i java.
      * */
@@ -96,8 +97,10 @@ class ConfigManager implements ConfigHolder {
   }
 
   public static synchronized ConfigObject parseConfig(URL configUrl) {
-    ConfigSlurper slurper = new ConfigSlurper()
-    return slurper.parse(configUrl)
+    def classLoader = new GroovyClassLoader(ConfigManager.class.classLoader)
+    def script = classLoader.parseClass(configUrl.text).newInstance()
+
+    return new ConfigSlurper().parse(script as Script, configUrl)
   }
 
   private void checkMandatoryProperties() {
@@ -138,13 +141,13 @@ class ConfigManager implements ConfigHolder {
   }
 
   private final synchronized ConfigObject loadDefaultConfig() {
-    URLClassLoader cl = (URLClassLoader) Thread.currentThread().getContextClassLoader();
+    URLClassLoader cl = (URLClassLoader) this.class.classLoader
     URL defaultConfigUrl = cl.getResource(DEFAULT_CONFIG_FILE_PATH);
 
     if (! defaultConfigUrl) {
       throw new IllegalStateException("Default configuration not found at: $defaultConfigUrl")
     }
 
-    return new ConfigSlurper().parse(defaultConfigUrl)
+    return parseConfig(defaultConfigUrl)
   }
 }
