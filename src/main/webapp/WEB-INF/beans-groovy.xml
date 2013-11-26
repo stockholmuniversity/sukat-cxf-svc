@@ -68,7 +68,7 @@
     <context:mbean-export/>
     <tx:annotation-driven/>
 
-    <!-- TODO: Do we really need this? last dependency on 'spring-webmvc' as far as iI know. -->
+    <!-- TODO: Do we really need this? last dependency on 'spring-webmvc' as far as I know. -->
     <bean name="annotationHandlerMapping"
           class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
 
