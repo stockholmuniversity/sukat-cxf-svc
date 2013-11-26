@@ -20,7 +20,7 @@
     <dependency>
       <groupId>se.su.it.svc</groupId>
       <artifactId>cxf-server</artifactId>
-      <version>1.1.0</version>
+      <version>1.1.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.hibernate</groupId>
@@ -229,9 +229,6 @@
               <classpathLayoutType>custom</classpathLayoutType>
               <customClasspathLayout>WEB-INF/lib/$${artifact.artifactId}-$${artifact.version}$${dashClassifier?}.$${artifact.extension}</customClasspathLayout>
             </manifest>
-            <manifestEntries>
-                <Class-Path>classes/ ./</Class-Path>
-            </manifestEntries>
           </archive>
           <packagingExcludes>
             WEB-INF/lib/slf4j-api*.jar,
