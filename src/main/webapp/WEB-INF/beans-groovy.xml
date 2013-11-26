@@ -64,19 +64,11 @@
         <property name="validationQuery" value="select 1"/>
     </bean>
 
-    <bean id="messageSource"
-          class="org.springframework.context.support.ResourceBundleMessageSource">
-        <property name="basenames">
-            <list>
-                <value>messages</value>
-            </list>
-        </property>
-    </bean>
-
     <context:annotation-config/>
     <context:mbean-export/>
     <tx:annotation-driven/>
 
+    <!-- TODO: Do we really need this? last dependency on 'spring-webmvc' as far as iI know. -->
     <bean name="annotationHandlerMapping"
           class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
 
