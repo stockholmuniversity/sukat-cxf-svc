@@ -77,10 +77,6 @@
     <property name="removeAbandonedTimeout" value="300"/>
   </bean>
 
-  <!-- TODO: Do we really need this? last dependency on 'spring-webmvc' as far as I know. -->
-  <bean name="annotationHandlerMapping"
-        class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
-
   <bean id="applicationContextProvider" class="se.su.it.svc.manager.ApplicationContextProvider"/>
 
   <bean id="suCardOrderQuery" class="se.su.it.svc.query.SuCardOrderQuery">
