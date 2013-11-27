@@ -62,7 +62,6 @@
     <property name="ignoreUnresolvablePlaceholders" value="true"/>
   </bean>
 
-  <!-- TODO: Look for another DataSource, this requires an old dependency -->
   <bean id="suCardDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
     <property name="driverClassName" value="${sucard.database.driver}"/>
     <property name="url" value="${sucard.database.url}"/>
