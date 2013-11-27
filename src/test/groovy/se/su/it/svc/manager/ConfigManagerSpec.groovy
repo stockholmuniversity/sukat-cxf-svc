@@ -10,7 +10,7 @@ class ConfigManagerSpec extends Specification {
 
   def "ConfigManager: default constructor parses conf."() {
     when:
-    ConfigManager configManager = ConfigManager.getInstance()
+    ConfigManager configManager = new ConfigManager()
 
     then:
     configManager.@config instanceof ConfigObject
@@ -18,7 +18,7 @@ class ConfigManagerSpec extends Specification {
 
   def "ConfigManager(): reads default config"() {
     when:
-    def configManager = ConfigManager.getInstance()
+    def configManager = new ConfigManager()
 
     then:
     configManager.@config.containsKey "test"

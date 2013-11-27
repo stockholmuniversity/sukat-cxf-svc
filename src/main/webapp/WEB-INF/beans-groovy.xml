@@ -42,14 +42,20 @@
 
   <aop:aspectj-autoproxy/>
 
+    <context:annotation-config/>
+    <context:mbean-export/>
+    <tx:annotation-driven/>
+
     <import resource="classpath:META-INF/cxf/cxf.xml"/>
     <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
 
     <context:component-scan base-package="se.su.it.svc"/>
 
-    <bean id="configManager" class="se.su.it.svc.manager.ConfigManager" scope="singleton" init-method="getInstance" />
+    <bean id="configManager" class="se.su.it.svc.manager.ConfigManager" scope="singleton" lazy-init="false" />
 
-    <bean id="gldapoManager" class="se.su.it.svc.manager.GldapoManager" scope="singleton" />
+    <bean id="gldapoManager" class="se.su.it.svc.manager.GldapoManager" scope="singleton" >
+      <constructor-arg ref="configManager" />
+    </bean>
 
     <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="properties" value="#{ configManager.properties }"/>
@@ -155,8 +161,8 @@
   <bean id="auditAspect" class="se.su.it.svc.server.aspect.AuditAspect"/>
 
   <bean id="spocpConnectionFactory" class="org.spocp.client.SPOCPConnectionFactoryImpl">
-    <property name="server" value="${cxf-server.spocp.server}"/>
-    <property name="port" value="${cxf-server.spocp.port}"/>
+    <property name="server" value="${spocp.server}"/>
+    <property name="port" value="${spocp.port}"/>
   </bean>
 
   <bean id="spocpRoleAuthorizor" class="se.su.it.svc.server.security.SpocpRoleAuthorizor" >

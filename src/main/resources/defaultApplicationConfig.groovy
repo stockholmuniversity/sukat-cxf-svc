@@ -1,30 +1,9 @@
 customConfig = "/local/sukat/conf/applicationConfig.groovy"
 
-'cxf-server' {
-  http {
-    port = "8080"
-  }
-  bind {
-    address = "127.0.0.1"
-  }
-  ssl {
-    enabled = "false"
-    keystore = "cxf-svc-server.keystore"
-    password = "changeit"
-  }
-  login {
-    config = "/local/sukat/conf/login.config"
-  }
-  spnego {
-    realm = "SU.SE"
-    kdc = "kerberos.su.se"
-    targetName = "HTTP/localhost"
-  }
-  spocp {
-    enabled = "true"
-    server = "spocp-test.su.se"
-    port = "4751"
-  }
+spocp {
+  enabled = "true"
+  server = "spocp-test.su.se"
+  port = "4751"
 }
 
 /**
@@ -108,11 +87,11 @@ directories {
   }
 }
 schemas = [
-    'se.su.it.svc.ldap.SuPersonStub',
-    'se.su.it.svc.ldap.SuRole',
-    'se.su.it.svc.ldap.SuCard',
-    'se.su.it.svc.ldap.SuPerson',
-    'se.su.it.svc.ldap.SuServiceDescription',
-    'se.su.it.svc.ldap.SuService',
-    'se.su.it.svc.ldap.SuSubAccount',
+    se.su.it.svc.ldap.SuPersonStub,
+    se.su.it.svc.ldap.SuRole,
+    se.su.it.svc.ldap.SuCard,
+    se.su.it.svc.ldap.SuPerson,
+    se.su.it.svc.ldap.SuServiceDescription,
+    se.su.it.svc.ldap.SuService,
+    se.su.it.svc.ldap.SuSubAccount,
 ]

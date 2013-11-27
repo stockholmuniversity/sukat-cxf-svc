@@ -20,7 +20,7 @@
     <dependency>
       <groupId>se.su.it.svc</groupId>
       <artifactId>cxf-server</artifactId>
-      <version>1.1.1</version>
+      <version>1.2.0</version>
     </dependency>
     <dependency>
       <groupId>org.hibernate</groupId>
@@ -249,11 +249,6 @@
                   <fileset dir="${project.build.directory}/classes/">
                     <include name="Run.class" />
                     <include name="logback.groovy" />
-                  </fileset>
-                </move>
-                <move todir="${project.build.directory}/${project.artifactId}-${project.version}/se/su/it/svc/manager">
-                  <fileset dir="${project.build.directory}/classes/se/su/it/svc/manager">
-                    <include name="ConfigManager.class" />
                   </fileset>
                 </move>
               </tasks>

@@ -1,5 +1,7 @@
 test = "test"
 
+customConfig = ""
+
 enrollment {
   create {
     skip = "true"
