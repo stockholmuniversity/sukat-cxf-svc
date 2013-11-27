@@ -1,15 +1,14 @@
 import groovy.util.logging.Slf4j
-import se.su.it.svc.manager.ConfigManager
-import se.su.it.svc.server.Start
+import se.su.it.svc.server.Server
 
 @Slf4j
-class Run extends Start {
+class Run extends Server {
   public static void main(String[] args) {
     try {
       log.info "Initializing Jetty server."
-      start(ConfigManager.getInstance())
+      new Run().start()
     } catch (ex) {
-      log.error "Failed to start Jetty server ${ex.message}", ex
+      log.error "Failed to start Jetty server: ${ex.message}", ex
       System.exit(1)
     }
   }

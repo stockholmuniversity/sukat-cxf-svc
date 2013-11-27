@@ -42,20 +42,27 @@
 
   <aop:aspectj-autoproxy/>
 
+    <context:annotation-config/>
+    <context:mbean-export/>
+    <tx:annotation-driven/>
+
     <import resource="classpath:META-INF/cxf/cxf.xml"/>
     <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
 
     <context:component-scan base-package="se.su.it.svc"/>
 
-    <bean id="configManager" class="se.su.it.svc.manager.ConfigManager" scope="singleton" init-method="getInstance" />
+    <bean id="configManager" class="se.su.it.svc.manager.ConfigManager" scope="singleton" lazy-init="false" />
 
-    <bean id="gldapoManager" class="se.su.it.svc.manager.GldapoManager" scope="singleton" />
+    <bean id="gldapoManager" class="se.su.it.svc.manager.GldapoManager" scope="singleton" >
+      <constructor-arg ref="configManager" />
+    </bean>
 
     <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="properties" value="#{ configManager.properties }"/>
         <property name="ignoreUnresolvablePlaceholders" value="true"/>
     </bean>
 
+    <!-- TODO: Look for another DataSource, this requires an old dependency -->
     <bean id="suCardDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
         <property name="driverClassName" value="${sucard.database.driver}"/>
         <property name="url" value="${sucard.database.url}"/>
@@ -64,19 +71,11 @@
         <property name="validationQuery" value="select 1"/>
     </bean>
 
-    <bean id="messageSource"
-          class="org.springframework.context.support.ResourceBundleMessageSource">
-        <property name="basenames">
-            <list>
-                <value>messages</value>
-            </list>
-        </property>
-    </bean>
-
     <context:annotation-config/>
     <context:mbean-export/>
     <tx:annotation-driven/>
 
+    <!-- TODO: Do we really need this? last dependency on 'spring-webmvc' as far as I know. -->
     <bean name="annotationHandlerMapping"
           class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
 
@@ -162,8 +161,8 @@
   <bean id="auditAspect" class="se.su.it.svc.server.aspect.AuditAspect"/>
 
   <bean id="spocpConnectionFactory" class="org.spocp.client.SPOCPConnectionFactoryImpl">
-    <property name="server" value="${cxf-server.spocp.server}"/>
-    <property name="port" value="${cxf-server.spocp.port}"/>
+    <property name="server" value="${spocp.server}"/>
+    <property name="port" value="${spocp.port}"/>
   </bean>
 
   <bean id="spocpRoleAuthorizor" class="se.su.it.svc.server.security.SpocpRoleAuthorizor" >

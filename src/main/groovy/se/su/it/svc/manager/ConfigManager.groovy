@@ -32,21 +32,18 @@
 package se.su.it.svc.manager
 
 import groovy.util.logging.Slf4j
-import se.su.it.svc.server.config.ConfigHolder
 
 @Slf4j
-@Singleton
-class ConfigManager implements ConfigHolder {
+class ConfigManager {
 
   private final ConfigObject config
 
   public static String LDAP_RO
   public static String LDAP_RW
 
-  public static final String CUSTOM_CONFIG_PROP = 'config'
   public static final String DEFAULT_CONFIG_FILE_PATH = "WEB-INF/classes/defaultApplicationConfig.groovy"
 
-  private static List<String> mandatoryProperties = [
+  private static final List<String> MANDATORY_PROPERTIES = [
       'enrollment.create.skip',
       'soap.publishedEndpointUrl',
       'ldap.accounts.parent',
@@ -69,7 +66,7 @@ class ConfigManager implements ConfigHolder {
      * */
     ConfigObject config = loadDefaultConfig()
 
-    File customConfigFile = getConfigFile(System.getProperty(CUSTOM_CONFIG_PROP))
+    File customConfigFile = getConfigFile(config.customConfig)
 
     if (customConfigFile.exists()) {
       ConfigObject customConfig = parseConfig(customConfigFile.toURI().toURL())
@@ -78,12 +75,12 @@ class ConfigManager implements ConfigHolder {
 
     this.config = config
 
-    /** Set variables and initialize Gldapo */
-
     checkMandatoryProperties()
 
     LDAP_RO = config.ldap.ro.name
     LDAP_RW = config.ldap.rw.name
+
+    printConfiguration()
   }
 
   private static synchronized File getConfigFile(String configFileName) {
@@ -96,15 +93,12 @@ class ConfigManager implements ConfigHolder {
   }
 
   public static synchronized ConfigObject parseConfig(URL configUrl) {
-    def classLoader = new GroovyClassLoader(ConfigManager.class.classLoader)
-    def script = classLoader.parseClass(configUrl.text).newInstance()
-
-    return new ConfigSlurper().parse(script as Script, configUrl)
+    return new ConfigSlurper().parse(configUrl)
   }
 
   private void checkMandatoryProperties() {
     Properties properties = getProperties()
-    for (property in mandatoryProperties) {
+    for (property in MANDATORY_PROPERTIES) {
       if (properties.getProperty(property) == null) {
         throw new IllegalStateException("Missing mandatory property: $property")
       }
@@ -126,15 +120,15 @@ class ConfigManager implements ConfigHolder {
   }
 
   public synchronized void printConfiguration() {
-    log.info "*** ConfigManager: Final Configuration ***"
+    log.info "*** SUKAT-svc: Final Configuration ***"
 
-    TreeMap sorted = new TreeMap<String, Object>(config?.flatten())
+    TreeMap<String, Object> sorted = new TreeMap<String, Object>(config?.flatten())
 
-    for (Map.Entry<String, Object> entry : sorted.entrySet()) {
-      if (entry.key.contains("password")) {
-        log.info "$entry.key => *********"
+    sorted.each { key, value ->
+      if (key.contains("password")) {
+        log.info "$key => *********"
       } else {
-        log.info "$entry.key => $entry.value"
+        log.info "$key => $value"
       }
     }
   }
