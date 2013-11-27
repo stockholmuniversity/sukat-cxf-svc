@@ -42,126 +42,126 @@
 
   <aop:aspectj-autoproxy/>
 
-    <context:annotation-config/>
-    <context:mbean-export/>
-    <tx:annotation-driven/>
+  <context:annotation-config/>
+  <context:mbean-export/>
+  <tx:annotation-driven/>
 
-    <import resource="classpath:META-INF/cxf/cxf.xml"/>
-    <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
+  <import resource="classpath:META-INF/cxf/cxf.xml"/>
+  <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
 
-    <context:component-scan base-package="se.su.it.svc"/>
+  <context:component-scan base-package="se.su.it.svc"/>
 
-    <bean id="configManager" class="se.su.it.svc.manager.ConfigManager" scope="singleton" lazy-init="false" />
+  <bean id="configManager" class="se.su.it.svc.manager.ConfigManager" scope="singleton" lazy-init="false"/>
 
-    <bean id="gldapoManager" class="se.su.it.svc.manager.GldapoManager" scope="singleton" >
-      <constructor-arg ref="configManager" />
-    </bean>
+  <bean id="gldapoManager" class="se.su.it.svc.manager.GldapoManager" scope="singleton">
+    <constructor-arg ref="configManager"/>
+  </bean>
 
-    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="properties" value="#{ configManager.properties }"/>
-        <property name="ignoreUnresolvablePlaceholders" value="true"/>
-    </bean>
+  <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="properties" value="#{ configManager.properties }"/>
+    <property name="ignoreUnresolvablePlaceholders" value="true"/>
+  </bean>
 
-    <!-- TODO: Look for another DataSource, this requires an old dependency -->
-    <bean id="suCardDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
-      <property name="driverClassName" value="${sucard.database.driver}"/>
-      <property name="url" value="${sucard.database.url}"/>
-      <property name="username" value="${sucard.database.user}"/>
-      <property name="password" value="${sucard.database.password}"/>
-      <property name="validationQuery" value="select 1"/>
-      <property name="minIdle" value="2" />
-      <property name="maxIdle" value="20" />
-      <property name="maxActive" value="20" />
-      <property name="poolPreparedStatements" value="true" />
-      <property name="maxOpenPreparedStatements" value="0" />
-      <property name="removeAbandoned" value="true" />
-      <property name="removeAbandonedTimeout" value="300" />
-    </bean>
+  <!-- TODO: Look for another DataSource, this requires an old dependency -->
+  <bean id="suCardDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+    <property name="driverClassName" value="${sucard.database.driver}"/>
+    <property name="url" value="${sucard.database.url}"/>
+    <property name="username" value="${sucard.database.user}"/>
+    <property name="password" value="${sucard.database.password}"/>
+    <property name="validationQuery" value="select 1"/>
+    <property name="minIdle" value="2"/>
+    <property name="maxIdle" value="20"/>
+    <property name="maxActive" value="20"/>
+    <property name="poolPreparedStatements" value="true"/>
+    <property name="maxOpenPreparedStatements" value="0"/>
+    <property name="removeAbandoned" value="true"/>
+    <property name="removeAbandonedTimeout" value="300"/>
+  </bean>
 
-    <context:annotation-config/>
-    <context:mbean-export/>
-    <tx:annotation-driven/>
+  <context:annotation-config/>
+  <context:mbean-export/>
+  <tx:annotation-driven/>
 
-    <!-- TODO: Do we really need this? last dependency on 'spring-webmvc' as far as I know. -->
-    <bean name="annotationHandlerMapping"
-          class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
+  <!-- TODO: Do we really need this? last dependency on 'spring-webmvc' as far as I know. -->
+  <bean name="annotationHandlerMapping"
+        class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
 
-    <bean id="applicationContextProvider" class="se.su.it.svc.manager.ApplicationContextProvider"/>
+  <bean id="applicationContextProvider" class="se.su.it.svc.manager.ApplicationContextProvider"/>
 
-    <bean id="suCardOrderQuery" class="se.su.it.svc.query.SuCardOrderQuery">
-        <property name="suCardDataSource" ref="suCardDataSource"/>
-    </bean>
+  <bean id="suCardOrderQuery" class="se.su.it.svc.query.SuCardOrderQuery">
+    <property name="suCardDataSource" ref="suCardDataSource"/>
+  </bean>
 
-    <bean id="cardinfoserviceEndpoint" class="se.su.it.svc.CardInfoServiceImpl"/>
+  <bean id="cardinfoserviceEndpoint" class="se.su.it.svc.CardInfoServiceImpl"/>
 
-    <jaxws:endpoint
-            id="cardinfoservice"
-            implementorClass="se.su.it.svc.CardInfoServiceImpl"
-            implementor="#cardinfoserviceEndpoint"
-            address="/CardInfoService"
-            publishedEndpointUrl="${soap.publishedEndpointUrl}/CardInfoService"/>
+  <jaxws:endpoint
+          id="cardinfoservice"
+          implementorClass="se.su.it.svc.CardInfoServiceImpl"
+          implementor="#cardinfoserviceEndpoint"
+          address="/CardInfoService"
+          publishedEndpointUrl="${soap.publishedEndpointUrl}/CardInfoService"/>
 
-    <bean id="cardorderserviceEndpoint" class="se.su.it.svc.CardOrderServiceImpl"/>
-    <jaxws:endpoint
-            id="cardorderservice"
-            implementorClass="se.su.it.svc.CardOrderServiceImpl"
-            implementor="#cardorderserviceEndpoint"
-            address="/CardOrderService"
-            publishedEndpointUrl="${soap.publishedEndpointUrl}/CardOrderService"/>
+  <bean id="cardorderserviceEndpoint" class="se.su.it.svc.CardOrderServiceImpl"/>
+  <jaxws:endpoint
+          id="cardorderservice"
+          implementorClass="se.su.it.svc.CardOrderServiceImpl"
+          implementor="#cardorderserviceEndpoint"
+          address="/CardOrderService"
+          publishedEndpointUrl="${soap.publishedEndpointUrl}/CardOrderService"/>
 
-    <bean id="cardadminserviceEndpoint" class="se.su.it.svc.CardAdminServiceImpl"/>
-    <jaxws:endpoint
-            id="cardadminservice"
-            implementorClass="se.su.it.svc.CardAdminServiceImpl"
-            implementor="#cardadminserviceEndpoint"
-            address="/CardAdminService"
-            publishedEndpointUrl="${soap.publishedEndpointUrl}/CardAdminService"/>
+  <bean id="cardadminserviceEndpoint" class="se.su.it.svc.CardAdminServiceImpl"/>
+  <jaxws:endpoint
+          id="cardadminservice"
+          implementorClass="se.su.it.svc.CardAdminServiceImpl"
+          implementor="#cardadminserviceEndpoint"
+          address="/CardAdminService"
+          publishedEndpointUrl="${soap.publishedEndpointUrl}/CardAdminService"/>
 
-    <bean id="entitlementserviceEndpoint" class="se.su.it.svc.EntitlementServiceImpl"/>
-    <jaxws:endpoint
-            id="entitlementservice"
-            implementorClass="se.su.it.svc.EntitlementServiceImpl"
-            implementor="#entitlementserviceEndpoint"
-            address="/EntitlementService"
-            publishedEndpointUrl="${soap.publishedEndpointUrl}/EntitlementService"/>
+  <bean id="entitlementserviceEndpoint" class="se.su.it.svc.EntitlementServiceImpl"/>
+  <jaxws:endpoint
+          id="entitlementservice"
+          implementorClass="se.su.it.svc.EntitlementServiceImpl"
+          implementor="#entitlementserviceEndpoint"
+          address="/EntitlementService"
+          publishedEndpointUrl="${soap.publishedEndpointUrl}/EntitlementService"/>
 
-    <bean id="serviceserviceEndpoint" class="se.su.it.svc.ServiceServiceImpl"/>
-    <jaxws:endpoint
-            id="serviceservice"
-            implementorClass="se.su.it.svc.ServiceServiceImpl"
-            implementor="#serviceserviceEndpoint"
-            address="/ServiceService"
-            publishedEndpointUrl="${soap.publishedEndpointUrl}/ServiceService"/>
+  <bean id="serviceserviceEndpoint" class="se.su.it.svc.ServiceServiceImpl"/>
+  <jaxws:endpoint
+          id="serviceservice"
+          implementorClass="se.su.it.svc.ServiceServiceImpl"
+          implementor="#serviceserviceEndpoint"
+          address="/ServiceService"
+          publishedEndpointUrl="${soap.publishedEndpointUrl}/ServiceService"/>
 
-    <bean id="accountserviceEndpoint" class="se.su.it.svc.AccountServiceImpl"/>
-    <jaxws:endpoint
-            id="accountservice"
-            implementorClass="se.su.it.svc.AccountServiceImpl"
-            implementor="#accountserviceEndpoint"
-            address="/AccountService"
-            publishedEndpointUrl="${soap.publishedEndpointUrl}/AccountService"/>
+  <bean id="accountserviceEndpoint" class="se.su.it.svc.AccountServiceImpl"/>
+  <jaxws:endpoint
+          id="accountservice"
+          implementorClass="se.su.it.svc.AccountServiceImpl"
+          implementor="#accountserviceEndpoint"
+          address="/AccountService"
+          publishedEndpointUrl="${soap.publishedEndpointUrl}/AccountService"/>
 
-    <bean id="roleserviceEndpoint" class="se.su.it.svc.RoleServiceImpl"/>
-    <jaxws:endpoint
-            id="roleservice"
-            implementorClass="se.su.it.svc.RoleServiceImpl"
-            implementor="#roleserviceEndpoint"
-            address="/RoleService"
-            publishedEndpointUrl="${soap.publishedEndpointUrl}/RoleService"/>
+  <bean id="roleserviceEndpoint" class="se.su.it.svc.RoleServiceImpl"/>
+  <jaxws:endpoint
+          id="roleservice"
+          implementorClass="se.su.it.svc.RoleServiceImpl"
+          implementor="#roleserviceEndpoint"
+          address="/RoleService"
+          publishedEndpointUrl="${soap.publishedEndpointUrl}/RoleService"/>
 
-    <bean id="webserviceadminEndpoint" class="se.su.it.svc.WebServiceAdminImpl"/>
-    <jaxws:endpoint
-            id="webserviceadmin"
-            implementorClass="se.su.it.svc.WebServiceAdminImpl"
-            implementor="#webserviceadminEndpoint"
-            address="/WebServiceAdmin"
-            publishedEndpointUrl="${soap.publishedEndpointUrl}/WebServiceAdmin"/>
+  <bean id="webserviceadminEndpoint" class="se.su.it.svc.WebServiceAdminImpl"/>
+  <jaxws:endpoint
+          id="webserviceadmin"
+          implementorClass="se.su.it.svc.WebServiceAdminImpl"
+          implementor="#webserviceadminEndpoint"
+          address="/WebServiceAdmin"
+          publishedEndpointUrl="${soap.publishedEndpointUrl}/WebServiceAdmin"/>
 
-    <jaxws:endpoint
-            id="status"
-            implementor="se.su.it.svc.Status"
-            address="/Status"
-            publishedEndpointUrl="${soap.publishedEndpointUrl}/Status"/>
+  <jaxws:endpoint
+          id="status"
+          implementor="se.su.it.svc.Status"
+          address="/Status"
+          publishedEndpointUrl="${soap.publishedEndpointUrl}/Status"/>
 
   <bean id="sanitizerAspect" class="se.su.it.svc.server.aspect.SanitizeWebParametersAspect"/>
 
@@ -172,7 +172,7 @@
     <property name="port" value="${spocp.port}"/>
   </bean>
 
-  <bean id="spocpRoleAuthorizor" class="se.su.it.svc.server.security.SpocpRoleAuthorizor" >
+  <bean id="spocpRoleAuthorizor" class="se.su.it.svc.server.security.SpocpRoleAuthorizor">
     <property name="spocpConnectionFactory" ref="spocpConnectionFactory"/>
   </bean>
 
