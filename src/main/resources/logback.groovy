@@ -10,7 +10,7 @@ scan('5 minutes')  // Scan for changes every 5 minutes.
 appender('SYSLOG', SyslogAppender) {
   syslogHost = "127.0.0.1"
   facility = "USER"
-  suffixPattern = "sukat-svc: %-5level [%thread] %logger - %msg"
+  suffixPattern = "sukat-svc: %-5level [%thread] %logger{0} - %msg"
 }
 
 root INFO, ['SYSLOG']
