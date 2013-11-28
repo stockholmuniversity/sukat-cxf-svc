@@ -22,7 +22,7 @@ enrollment {
  * Configure which authorization bean to use.
  */
 authorizor {
-  bean = 'defaultAuthorizor'
+  bean = 'spocpRoleAuthorizor'
 }
 
 soap {
