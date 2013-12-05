@@ -45,6 +45,8 @@ import se.su.it.svc.query.SuPersonQuery
 import spock.lang.Shared
 import spock.lang.Specification
 
+import java.lang.reflect.Method
+
 class AccountServiceImplSpec extends Specification {
 
   @Shared
@@ -162,6 +164,58 @@ class AccountServiceImplSpec extends Specification {
     then:
     1 * kadmin.principalExists("testuid/jabber") >> true
     1 * kadmin.setPassword("testuid/jabber", _)
+  }
+
+  def "scramblePassword - is a void method"() {
+    when:
+    Method m = AccountServiceImpl.getMethod('scramblePassword', String)
+
+    then:
+    m.returnType == void
+  }
+
+  def "scramblePassword - happy path"() {
+    setup:
+    String uid = "foo"
+    def spy = Spy(AccountServiceImpl) {
+      1 * resetPassword(uid) >> 'foobar'
+    }
+
+    when:
+    spy.scramblePassword(uid)
+
+    then:
+    notThrown(IllegalStateException)
+  }
+
+  def "scramblePassword - passes exception forward"() {
+    setup:
+    String uid = "foo"
+    def spy = Spy(AccountServiceImpl) {
+      1 * resetPassword(uid) >> { throw new IllegalStateException("foo") }
+    }
+
+    when:
+    spy.scramblePassword(uid)
+
+    then:
+    thrown(IllegalStateException)
+  }
+
+  def "scramblePassword - fails precondition on null uid"() {
+    when:
+    new AccountServiceImpl().scramblePassword(null)
+
+    then:
+    thrown(PreconditionViolation)
+  }
+
+  def "scramblePassword - fails precondition on empty uid"() {
+    when:
+    new AccountServiceImpl().scramblePassword('')
+
+    then:
+    thrown(PreconditionViolation)
   }
 
   def "Test updateSuPerson with null uid argument"() {

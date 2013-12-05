@@ -41,6 +41,7 @@ public interface AccountService {
   @AuditHideReturnValue
   @AuditAspectMethodDetails(details = "setPassword")
   String resetPassword(String uid)
+  void scramblePassword(String uid)
   void createSuPerson(String uid, String ssn, String givenName, String sn)
   void updateSuPerson(String uid, SvcSuPersonVO person)
   @AuditHideReturnValue

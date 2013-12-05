@@ -121,8 +121,28 @@ public class AccountServiceImpl implements AccountService {
       log.info("resetPassword - Password was reset for uid=<${uid}>")
       return pwd
     } else {
-      log.debug("resetPassword - No such uid found: "+uid)
+      log.warn("resetPassword - No such uid found: "+uid)
       throw new IllegalArgumentException("resetPassword - No such uid found: "+uid)
+    }
+  }
+
+  /**
+   * This method resets the password for the specified uid without returning the result.
+   *
+   * @param uid  uid of the user.
+   * @throws IllegalArgumentException if the uid can't be found
+   */
+  @Requires({
+    uid
+  })
+  public void scramblePassword(
+          @WebParam(name = 'uid') String uid
+  ) {
+    try {
+      resetPassword(uid)
+    } catch (ex) {
+      log.warn "scramblePassword - Exception while scrambling password for uid '${uid}': " + ex.message
+      throw ex
     }
   }
 
