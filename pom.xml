@@ -10,7 +10,7 @@
     <dependency>
       <groupId>se.su.it.svc</groupId>
       <artifactId>cxf-server</artifactId>
-      <version>1.2.5</version>
+      <version>1.2.6</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.groovy</groupId>
