@@ -35,11 +35,9 @@ ldap {
   }
   ro {
     name = "ldapreadonly"
-    url = "ldap://ldap-test.su.se"
   }
   rw {
     name = "ldapreadwrite"
-    url = "ldap://sukat-test-ldaprw02.it.su.se"
   }
 }
 
@@ -53,8 +51,8 @@ sucard {
 }
 
 directories {
-  "${ldap.ro.name}" {
-    url = "${ldap.ro.url}"
+  ldapreadonly {
+    url = "ldap://ldap-test.su.se"
     base = ""
     userDn = ""
     password = ""
@@ -69,8 +67,8 @@ directories {
       searchScope = "subtree"
     }
   }
-  "${ldap.rw.name}" {
-    url = "${ldap.rw.url}"
+  ldapreadwrite {
+    url = "ldap://sukat-test-ldaprw02.it.su.se"
     base = ""
     userDn = ""
     password = ""
