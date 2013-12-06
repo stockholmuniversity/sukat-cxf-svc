@@ -18,11 +18,9 @@ ldap {
   }
   ro {
     name = "ldapreadonly"
-    url = "ldap://localhost"
   }
   rw {
     name = "ldapreadwrite"
-    url = "ldap://localhost"
   }
 }
 
