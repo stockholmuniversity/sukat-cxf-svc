@@ -45,6 +45,7 @@ import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuServiceDescriptionQuery
 import se.su.it.svc.query.SuServiceQuery
 import se.su.it.svc.query.SuSubAccountQuery
+import se.su.it.svc.server.annotations.AuditAspectMethodDetails
 import se.su.it.svc.server.annotations.AuthzRole
 import se.su.it.svc.util.GeneralUtils
 
@@ -120,6 +121,7 @@ public class ServiceServiceImpl implements ServiceService {
   @Requires({
     uid && serviceType != null && qualifier != null && description != null  &&
       !LdapAttributeValidator.validateAttributes([uid:uid ])})
+  @AuditAspectMethodDetails(details = "resetOrCreatePrincipal")
   public SuService enableServiceFully(
       @WebParam(name = "uid") String uid,
       @WebParam(name = "serviceType") String serviceType,

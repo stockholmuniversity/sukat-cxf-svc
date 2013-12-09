@@ -44,6 +44,8 @@ import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuPersonStub
 import se.su.it.svc.manager.ConfigManager
 import se.su.it.svc.query.SuPersonQuery
+import se.su.it.svc.server.annotations.AuditAspectMethodDetails
+import se.su.it.svc.server.annotations.AuditHideReturnValue
 import se.su.it.svc.server.annotations.AuthzRole
 import se.su.it.svc.util.GeneralUtils
 
@@ -107,6 +109,8 @@ public class AccountServiceImpl implements AccountService {
     uid
   })
   @Ensures({ result && result instanceof String && result.size() == 10 })
+  @AuditHideReturnValue
+  @AuditAspectMethodDetails(details = "setPassword")
   public String resetPassword(
           @WebParam(name = 'uid') String uid
   ) {
@@ -230,6 +234,7 @@ public class AccountServiceImpl implements AccountService {
             affiliation: affiliations ])
   })
   @Ensures({ result && result.uid && result.password && result.password.size() == 10 })
+  @AuditHideReturnValue
   public SvcUidPwd activateSuPerson(
           @WebParam(name = 'uid') String uid,
           @WebParam(name = 'domain') String domain,
