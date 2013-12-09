@@ -33,13 +33,11 @@ package se.su.it.svc
 
 import se.su.it.svc.ldap.SuService
 import se.su.it.svc.ldap.SuServiceDescription
-import se.su.it.svc.server.annotations.AuditAspectMethodDetails
 
 public interface ServiceService {
   SuService[] getServices(String uid)
   SuServiceDescription getServiceTemplate(String serviceType)
   SuServiceDescription[] getServiceTemplates()
-  @AuditAspectMethodDetails(details = "resetOrCreatePrincipal")
   SuService enableServiceFully(String uid, String serviceType, String qualifier, String description)
   void blockService(String uid, String serviceType)
   void unblockService(String uid, String serviceType)

@@ -33,18 +33,13 @@ package se.su.it.svc
 
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
-import se.su.it.svc.server.annotations.AuditAspectMethodDetails
-import se.su.it.svc.server.annotations.AuditHideReturnValue
 
 public interface AccountService {
   void updatePrimaryAffiliation(String uid, String affiliation)
-  @AuditHideReturnValue
-  @AuditAspectMethodDetails(details = "setPassword")
   String resetPassword(String uid)
   void scramblePassword(String uid)
   void createSuPerson(String uid, String ssn, String givenName, String sn)
   void updateSuPerson(String uid, SvcSuPersonVO person)
-  @AuditHideReturnValue
   SvcUidPwd activateSuPerson(String uid, String domain, String[] affiliations)
   void terminateSuPerson(String uid)
   String getMailRoutingAddress(String uid)
