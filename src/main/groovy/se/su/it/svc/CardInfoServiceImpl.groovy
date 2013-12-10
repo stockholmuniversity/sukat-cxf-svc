@@ -68,7 +68,7 @@ public class CardInfoServiceImpl implements CardInfoService {
   @Ensures({ result != null && result instanceof SuCard[] })
   public SuCard[] getAllCards(
           @WebParam(name = 'uid') String uid,
-          @WebParam(name = 'onlyActive') boolean onlyActive
+          @WebParam(name = 'onlyActive') Boolean onlyActive
   ) {
 
     def person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RO, uid)
