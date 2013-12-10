@@ -34,6 +34,6 @@ package se.su.it.svc
 import se.su.it.svc.ldap.SuCard
 
 public interface CardInfoService {
-  SuCard[] getAllCards(String uid, boolean onlyActive);
+  SuCard[] getAllCards(String uid, Boolean onlyActive);
   SuCard getCardByUUID(String suCardUUID);
 }
