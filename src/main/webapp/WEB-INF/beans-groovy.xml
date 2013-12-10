@@ -75,14 +75,14 @@
     <property name="removeAbandonedTimeout" value="300"/>
   </bean>
 
-  <bean id="sql" class="groovy.sql.Sql" destroy-method="close">
+  <bean id="suCardSql" class="groovy.sql.Sql" destroy-method="close">
     <constructor-arg ref="suCardDataSource" />
   </bean>
 
   <bean id="applicationContextProvider" class="se.su.it.svc.manager.ApplicationContextProvider"/>
 
   <bean id="suCardOrderQuery" class="se.su.it.svc.query.SuCardOrderQuery">
-    <property name="sql" ref="sql"/>
+    <property name="suCardSql" ref="suCardSql"/>
   </bean>
 
   <bean id="cardinfoserviceEndpoint" class="se.su.it.svc.CardInfoServiceImpl"/>

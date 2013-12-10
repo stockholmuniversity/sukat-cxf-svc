@@ -41,7 +41,7 @@ import java.sql.Timestamp
 @Slf4j
 class SuCardOrderQuery {
 
-  def sql
+  def suCardSql
 
   /**
    * Constant WEB (online order)
@@ -115,7 +115,7 @@ class SuCardOrderQuery {
     if (uid) {
       log.info "Querying card orders for uid: $uid"
 
-      List rows = sql?.rows(findAllCardsQuery, [uid:uid]) ?: []
+      List rows = suCardSql?.rows(findAllCardsQuery, [uid:uid]) ?: []
 
       log.info "Found ${rows?.size()} order entries in the database for $uid."
 
@@ -140,8 +140,8 @@ class SuCardOrderQuery {
       Map addressArgs = getAddressQueryArgs(cardOrderVO)
       Map requestArgs = getRequestQueryArgs(cardOrderVO)
 
-      if (sql) {
-        def cardOrders = sql?.rows(findActiveCardOrdersQuery, [owner:cardOrderVO.owner])
+      if (suCardSql) {
+        def cardOrders = suCardSql?.rows(findActiveCardOrdersQuery, [owner:cardOrderVO.owner])
 
         log.debug "Active card orders returned: ${cardOrders?.size()}"
 
@@ -154,11 +154,11 @@ class SuCardOrderQuery {
           throw new IllegalStateException(errorMsg)
         }
 
-        uuid = findFreeUUID(sql)
+        uuid = findFreeUUID(suCardSql)
         requestArgs.id = uuid
 
         try {
-          doCardOrderInsert(sql, addressArgs, requestArgs)
+          doCardOrderInsert(suCardSql, addressArgs, requestArgs)
           log.info "Card order successfully added to database!"
         } catch (ex) {
           log.error "Error in SQL card order transaction.", ex
@@ -183,7 +183,7 @@ class SuCardOrderQuery {
    */
   public boolean markCardAsDiscarded(String uuid, String uid) {
     try {
-      return doMarkCardAsDiscarded(sql, uuid, uid)
+      return doMarkCardAsDiscarded(suCardSql, uuid, uid)
     } catch (ex) {
       log.error "Failed to mark card as discarded in sucard db.", ex
       throw ex

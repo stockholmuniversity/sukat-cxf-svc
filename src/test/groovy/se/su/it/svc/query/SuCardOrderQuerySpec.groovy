@@ -46,7 +46,7 @@ public class SuCardOrderQuerySpec extends Specification {
   void setup() {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
     service = new SuCardOrderQuery()
-    service.sql = Mock(Sql)
+    service.suCardSql = Mock(Sql)
   }
 
   void cleanup() {
@@ -117,7 +117,7 @@ public class SuCardOrderQuerySpec extends Specification {
     given:
     def list = [[id:1, owner:'foo'], [id:1, owner:'foo'], [id:1, owner:'foo']]
 
-    service.sql.rows(*_) >> {
+    service.suCardSql.rows(*_) >> {
       return list
     }
 
@@ -179,10 +179,10 @@ public class SuCardOrderQuerySpec extends Specification {
 
   void "findFreeUUID"() {
     given:
-    service.sql.rows(_, _) >> []
+    service.suCardSql.rows(_, _) >> []
 
     when:
-    def resp = service.findFreeUUID(service.sql)
+    def resp = service.findFreeUUID(service.suCardSql)
 
     then:'Expect a UUID back (should be 36 chars long)'
     resp instanceof String
@@ -219,7 +219,7 @@ public class SuCardOrderQuerySpec extends Specification {
 
   void "orderCard: When there are active orders"() {
     given:
-    service.sql.rows(*_) >> { String arg1, Object[] arg2 ->
+    service.suCardSql.rows(*_) >> { String arg1, Object[] arg2 ->
       if (arg1 == service.findActiveCardOrdersQuery) {
         return [1]
       }
@@ -235,15 +235,15 @@ public class SuCardOrderQuerySpec extends Specification {
   void "orderCard"() {
     given:
 
-    service.sql.withTransaction(*_) >> { Closure closure ->
+    service.suCardSql.withTransaction(*_) >> { Closure closure ->
       closure()
     }
 
-    service.sql.rows(*_) >> {
+    service.suCardSql.rows(*_) >> {
       return []
     }
 
-    service.sql.executeInsert(_, _) >> { String arg1, Object[] arg2 ->
+    service.suCardSql.executeInsert(_, _) >> { String arg1, Object[] arg2 ->
       switch(arg1){
         case service.insertAddressQuery:
           return [[1]]
@@ -266,8 +266,8 @@ public class SuCardOrderQuerySpec extends Specification {
 
   def "doCardOrderInsert (is tested through orderCard but closure removes coverage)."(){
     given:
-    service.sql.withTransaction(*_) >> { Closure closure -> closure() }
-    service.sql.executeInsert(*_) >> { String arg1, Object[] arg2 ->
+    service.suCardSql.withTransaction(*_) >> { Closure closure -> closure() }
+    service.suCardSql.executeInsert(*_) >> { String arg1, Object[] arg2 ->
       switch(arg1){
         case service.insertAddressQuery:
           return [[1]]
@@ -282,7 +282,7 @@ public class SuCardOrderQuerySpec extends Specification {
 
     expect:
     service.doCardOrderInsert(
-        service.sql,
+        service.suCardSql,
         service.getAddressQueryArgs(cardOrder),
         service.getRequestQueryArgs(cardOrder)
     )
@@ -295,8 +295,8 @@ public class SuCardOrderQuerySpec extends Specification {
 
   def "doMarkCardAsDiscarded"(){
     given:
-    service.sql.withTransaction(*_) >> { Closure closure -> closure() }
-    service.sql.executeUpdate(*_) >> { String arg1, Object[] arg2 ->
+    service.suCardSql.withTransaction(*_) >> { Closure closure -> closure() }
+    service.suCardSql.executeUpdate(*_) >> { String arg1, Object[] arg2 ->
       switch(arg1){
         case service.markCardAsDiscardedQuery:
           return 1
@@ -304,7 +304,7 @@ public class SuCardOrderQuerySpec extends Specification {
           return 0
       }
     }
-    service.sql.executeInsert(*_) >> { String arg1, Object[] arg2 ->
+    service.suCardSql.executeInsert(*_) >> { String arg1, Object[] arg2 ->
       switch(arg1){
         case service.insertStatusHistoryQuery:
           return [true]
@@ -315,7 +315,7 @@ public class SuCardOrderQuerySpec extends Specification {
 
     when:
     def resp = service.doMarkCardAsDiscarded(
-        service.sql,
+        service.suCardSql,
         'uuid',
         'uid'
     )
