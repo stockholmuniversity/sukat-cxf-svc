@@ -34,7 +34,6 @@ package se.su.it.svc.query
 import gldapo.GldapoSchemaRegistry
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
-import org.apache.commons.dbcp.BasicDataSource
 import se.su.it.svc.commons.SvcCardOrderVO
 import spock.lang.Shared
 import spock.lang.Specification
@@ -47,12 +46,11 @@ public class SuCardOrderQuerySpec extends Specification {
   void setup() {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
     service = new SuCardOrderQuery()
-    service.suCardDataSource = Mock(BasicDataSource)
+    service.suCardSql = Mock(Sql)
   }
 
   void cleanup() {
     service = null
-    Sql.metaClass = null
     GldapoSchemaRegistry.metaClass = null
   }
 
@@ -72,24 +70,9 @@ public class SuCardOrderQuerySpec extends Specification {
 
   void "getFindAllCardsQuery"() {
     expect: 'should return'
-    service.findAllCardsQuery == "SELECT r.id, serial, owner, printer, createTime, firstname, lastname, streetaddress1," +
-        " streetaddress2, locality, zipcode, value, description FROM request r JOIN address a " +
+    service.findAllCardsQuery == "SELECT r.id, r.serial, r.owner, r.printer, r.createTime, r.firstname, r.lastname, a.streetaddress1," +
+        " a.streetaddress2, a.locality, a.zipcode, s.value, s.description FROM request r JOIN address a " +
         "ON r.address = a.id JOIN status s ON r.status = s.id WHERE r.owner = :uid"
-  }
-
-  void "doListQuery"() {
-    given:
-    def list = ['list', 'of', 'objects']
-
-    Sql.metaClass.rows = { String arg1, Map arg2 ->
-      return list
-    }
-
-    when:
-    def resp = service.doListQuery("String", [map:'map'])
-
-    then:
-    resp == list
   }
 
   void "handleOrderListResult: When creation of objects work"() {
@@ -134,7 +117,7 @@ public class SuCardOrderQuerySpec extends Specification {
     given:
     def list = [[id:1, owner:'foo'], [id:1, owner:'foo'], [id:1, owner:'foo']]
 
-    Sql.metaClass.rows = { String arg1, Map arg2 ->
+    service.suCardSql.rows(*_) >> {
       return list
     }
 
@@ -196,12 +179,10 @@ public class SuCardOrderQuerySpec extends Specification {
 
   void "findFreeUUID"() {
     given:
-    Sql.metaClass.rows = { String arg1, Map arg2 ->
-      return []
-    }
+    service.suCardSql.rows(_, _) >> []
 
     when:
-    def resp = service.findFreeUUID(new Sql(service.suCardDataSource))
+    def resp = service.findFreeUUID(service.suCardSql)
 
     then:'Expect a UUID back (should be 36 chars long)'
     resp instanceof String
@@ -238,7 +219,7 @@ public class SuCardOrderQuerySpec extends Specification {
 
   void "orderCard: When there are active orders"() {
     given:
-    Sql.metaClass.rows = { String arg1, Map arg2 ->
+    service.suCardSql.rows(*_) >> { String arg1, Object[] arg2 ->
       if (arg1 == service.findActiveCardOrdersQuery) {
         return [1]
       }
@@ -254,22 +235,15 @@ public class SuCardOrderQuerySpec extends Specification {
   void "orderCard"() {
     given:
 
-    Sql.metaClass.withTransaction = { Closure closure ->
+    service.suCardSql.withTransaction(*_) >> { Closure closure ->
       closure()
     }
 
-    Sql.metaClass.rows = { String arg1, Map arg2 ->
-      switch(arg1) {
-        case service.findActiveCardOrdersQuery:
-          return []
-        case service.findFreeUUIDQuery:
-          return []
-        default:
-          return []
-      }
+    service.suCardSql.rows(*_) >> {
+      return []
     }
 
-    Sql.metaClass.executeInsert = { String arg1, Map arg2 ->
+    service.suCardSql.executeInsert(_, _) >> { String arg1, Object[] arg2 ->
       switch(arg1){
         case service.insertAddressQuery:
           return [[1]]
@@ -292,8 +266,8 @@ public class SuCardOrderQuerySpec extends Specification {
 
   def "doCardOrderInsert (is tested through orderCard but closure removes coverage)."(){
     given:
-    Sql.metaClass.withTransaction = { Closure closure -> closure() }
-    Sql.metaClass.executeInsert = { String arg1, Map arg2 ->
+    service.suCardSql.withTransaction(*_) >> { Closure closure -> closure() }
+    service.suCardSql.executeInsert(*_) >> { String arg1, Object[] arg2 ->
       switch(arg1){
         case service.insertAddressQuery:
           return [[1]]
@@ -308,7 +282,7 @@ public class SuCardOrderQuerySpec extends Specification {
 
     expect:
     service.doCardOrderInsert(
-        new Sql(service.suCardDataSource),
+        service.suCardSql,
         service.getAddressQueryArgs(cardOrder),
         service.getRequestQueryArgs(cardOrder)
     )
@@ -321,16 +295,16 @@ public class SuCardOrderQuerySpec extends Specification {
 
   def "doMarkCardAsDiscarded"(){
     given:
-    Sql.metaClass.withTransaction = { Closure closure -> closure() }
-    Sql.metaClass.executeUpdate = { String arg1, Map arg2 ->
+    service.suCardSql.withTransaction(*_) >> { Closure closure -> closure() }
+    service.suCardSql.executeUpdate(*_) >> { String arg1, Object[] arg2 ->
       switch(arg1){
         case service.markCardAsDiscardedQuery:
-          return [true]
+          return 1
         default:
-          return [false]
+          return 0
       }
     }
-    Sql.metaClass.executeInsert = { String arg1, Map arg2 ->
+    service.suCardSql.executeInsert(*_) >> { String arg1, Object[] arg2 ->
       switch(arg1){
         case service.insertStatusHistoryQuery:
           return [true]
@@ -341,7 +315,7 @@ public class SuCardOrderQuerySpec extends Specification {
 
     when:
     def resp = service.doMarkCardAsDiscarded(
-        new Sql(service.suCardDataSource),
+        service.suCardSql,
         'uuid',
         'uid'
     )
