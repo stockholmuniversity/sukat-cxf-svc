@@ -34,7 +34,6 @@ package se.su.it.svc.query
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
 import groovy.util.logging.Slf4j
-import org.apache.commons.dbcp.BasicDataSource
 import se.su.it.svc.commons.SvcCardOrderVO
 
 import java.sql.Timestamp
@@ -42,7 +41,7 @@ import java.sql.Timestamp
 @Slf4j
 class SuCardOrderQuery {
 
-  def suCardDataSource
+  def sql
 
   /**
    * Constant WEB (online order)
@@ -57,9 +56,9 @@ class SuCardOrderQuery {
   /**
    * Find all card orders for <b>uid</b>
    */
-  public static final findAllCardsQuery = "SELECT r.id, serial, owner, printer, " +
-      "createTime, firstname, lastname, streetaddress1, " +
-      "streetaddress2, locality, zipcode, value, description " +
+  public static final findAllCardsQuery = "SELECT r.id, r.serial, r.owner, r.printer, " +
+      "r.createTime, r.firstname, r.lastname, a.streetaddress1, " +
+      "a.streetaddress2, a.locality, a.zipcode, s.value, s.description " +
       "FROM request r JOIN address a ON r.address = a.id" +
       " JOIN status s ON r.status = s.id WHERE r.owner = :uid"
 
@@ -116,7 +115,7 @@ class SuCardOrderQuery {
     if (uid) {
       log.info "Querying card orders for uid: $uid"
 
-      List rows = doListQuery(findAllCardsQuery, [uid:uid]) ?: []
+      List rows = sql?.rows(findAllCardsQuery, [uid:uid]) ?: []
 
       log.info "Found ${rows?.size()} order entries in the database for $uid."
 
@@ -141,9 +140,7 @@ class SuCardOrderQuery {
       Map addressArgs = getAddressQueryArgs(cardOrderVO)
       Map requestArgs = getRequestQueryArgs(cardOrderVO)
 
-      Closure queryClosure = { Sql sql ->
-        if (!sql) { return false }
-
+      if (sql) {
         def cardOrders = sql?.rows(findActiveCardOrdersQuery, [owner:cardOrderVO.owner])
 
         log.debug "Active card orders returned: ${cardOrders?.size()}"
@@ -162,25 +159,18 @@ class SuCardOrderQuery {
 
         try {
           doCardOrderInsert(sql, addressArgs, requestArgs)
+          log.info "Card order successfully added to database!"
         } catch (ex) {
           log.error "Error in SQL card order transaction.", ex
           throw ex
         }
-        return true
       }
-
-      if (withConnection(queryClosure)) {
-        log.info "Card order successfully added to database!"
-      }
-
-
     } catch (ex) {
       log.error "Failed to create card order for ${cardOrderVO?.owner}", ex
       throw ex
     }
 
     log.info "Returning $uuid"
-
     return uuid
   }
 
@@ -192,16 +182,12 @@ class SuCardOrderQuery {
    * @return true if the card has been marked as discarded, false if the operation fails.
    */
   public boolean markCardAsDiscarded(String uuid, String uid) {
-    Closure queryClosure = { Sql sql ->
-      try {
-        return doMarkCardAsDiscarded(sql, uuid, uid)
-      } catch (ex) {
-        log.error "Failed to mark card as discarded in sucard db.", ex
-        throw ex
-      }
+    try {
+      return doMarkCardAsDiscarded(sql, uuid, uid)
+    } catch (ex) {
+      log.error "Failed to mark card as discarded in sucard db.", ex
+      throw ex
     }
-
-    return (withConnection(queryClosure)) ? true : false
   }
   /**
    * Handles the persisting of the card order request.
@@ -211,7 +197,7 @@ class SuCardOrderQuery {
    * @param requestArgs
    * @return true
    */
-  private boolean doCardOrderInsert(Sql sql, Map addressArgs, Map requestArgs) {
+  private static boolean doCardOrderInsert(Sql sql, Map addressArgs, Map requestArgs) {
     sql.withTransaction {
       String addressQuery = insertAddressQuery
       String requestQuery = insertRequestQuery
@@ -249,7 +235,7 @@ class SuCardOrderQuery {
    * @param cardOrderVO
    * @return a map with values.
    */
-  private Map getRequestQueryArgs(SvcCardOrderVO cardOrderVO) {
+  private static Map getRequestQueryArgs(SvcCardOrderVO cardOrderVO) {
     /** id and address will be set later in the process and serials should be unset. */
     return [
         id: null,
@@ -324,48 +310,6 @@ class SuCardOrderQuery {
       ])
     }
     return true
-  }
-
-  /**
-   * Handles sql connectivity, executes query supplied as parameter
-   *
-   * @param query
-   * @return closure result
-   */
-  private withConnection(Closure query) {
-    def response = null
-    Sql sql = null
-    try {
-      sql = new Sql(suCardDataSource as BasicDataSource)
-      response = query(sql)
-    } catch (ex) {
-      log.error "Connection to SuCardDB failed", ex
-      throw ex
-    } finally {
-      try {
-        sql.close()
-      } catch (ex) {
-        /* This exception we eat, since there is no point in propagating this error. */
-        log.error "Failed to close connection", ex
-      }
-    }
-    return response
-  }
-
-  /**
-   * Perform a query expecting a list as return value.
-   *
-   * @param query
-   * @param args
-   * @return list of row entries.
-   */
-  private List doListQuery(String query, Map args) {
-    Closure queryClosure = { Sql sql ->
-      if (!sql) { return null }
-      return sql?.rows(query, args)
-    }
-
-    return withConnection(queryClosure)
   }
 
   /**
