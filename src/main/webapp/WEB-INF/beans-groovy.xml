@@ -68,11 +68,15 @@
     <property name="username" value="${sucard.database.user}"/>
     <property name="password" value="${sucard.database.password}"/>
     <property name="validationQuery" value="select 1"/>
+    <property name="initialSize" value="2"/>
     <property name="minIdle" value="2"/>
     <property name="maxIdle" value="20"/>
     <property name="maxActive" value="20"/>
     <property name="removeAbandoned" value="true"/>
     <property name="removeAbandonedTimeout" value="300"/>
+    <property name="testWhileIdle" value="true"/>
+    <property name="timeBetweenEvictionRunsMillis" value="5000"/>
+    <property name="minEvictableIdleTimeMillis" value="600000"/>
   </bean>
 
   <bean id="suCardSql" class="groovy.sql.Sql" destroy-method="close" lazy-init="false">
