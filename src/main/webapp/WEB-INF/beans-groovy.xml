@@ -62,7 +62,7 @@
     <property name="ignoreUnresolvablePlaceholders" value="true"/>
   </bean>
 
-  <bean id="suCardDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+  <bean id="suCardDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close" lazy-init="false">
     <property name="driverClassName" value="${sucard.database.driver}"/>
     <property name="url" value="${sucard.database.url}"/>
     <property name="username" value="${sucard.database.user}"/>
@@ -75,7 +75,7 @@
     <property name="removeAbandonedTimeout" value="300"/>
   </bean>
 
-  <bean id="suCardSql" class="groovy.sql.Sql" destroy-method="close">
+  <bean id="suCardSql" class="groovy.sql.Sql" destroy-method="close" lazy-init="false">
     <constructor-arg ref="suCardDataSource" />
   </bean>
 
