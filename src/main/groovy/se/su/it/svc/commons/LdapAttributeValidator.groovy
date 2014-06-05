@@ -76,8 +76,8 @@ public class LdapAttributeValidator {
     if (! (uid ==~ /^[a-z0-9]*$/))
       throwMe(validateAttributesString,"Attribute validation failed for uid <${uid}>. Only alphanumeric characters are allowed.")
 
-    if (! (uid ==~ /^.{2,8}$/))
-      throwMe(validateAttributesString,"Attribute validation failed for uid <${uid}>. uid:s are between 2 and 8 chars in length.")
+    if (! (uid ==~ /^.{2,10}$/))
+      throwMe(validateAttributesString,"Attribute validation failed for uid <${uid}>. uid:s are between 2 and 10 chars in length.")
   }
 
   private static void validateAffiliations(Object affiliations) {
