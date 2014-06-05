@@ -72,8 +72,7 @@ public class LdapAttributeValidator {
   private static void validateUid(Object uid) {
     if (uid == null)
       throwMe(validateAttributesString,"Attribute validation failed for uid <${uid}>. uid can not be null.")
-    if (!uid instanceof String)
-      throwMe(validateAttributesString,"Attribute validation failed for uid <${uid}>. uid need to be a String object.")
+
     String tmpUid = (String)uid
     if (uid == null || tmpUid.length() < 2 || tmpUid.length() > 8)
       throwMe(validateAttributesString,"Attribute validation failed for uid <${tmpUid}>. uid need to be at least min 2 and max 8 chars in length.")
