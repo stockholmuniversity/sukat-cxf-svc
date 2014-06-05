@@ -42,6 +42,8 @@ class LdapAttributeValidatorSpec extends Specification
         null         | _
         "a"          | _
         "0123456789" | _
+        "a-b"        | _
+        [1: "foo"]   | _
     }
 
     def "checkValidMailAddress: email patterns"()
