@@ -21,6 +21,7 @@ class LdapAttributeValidatorSpec extends Specification
         where:
         email       | res
         "a@b.se"    | true
+        "a@b-c.se"  | true
         "a@b@su.se" | false
     }
 }
