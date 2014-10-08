@@ -68,6 +68,46 @@ class AccountServiceImplSpec extends Specification {
     GldapoSchemaRegistry.metaClass = null
   }
 
+  def "exec: happy path"()
+  {
+    when:
+    def ret = service.exec("ls /dev/null")
+
+    then:
+    ret =~ "/dev/null"
+  }
+
+  def "exec: execution fails"()
+  {
+    when:
+    def ret = service.exec("ls file-that-does-not-exist")
+
+    then:
+    thrown(RuntimeException)
+  }
+
+  def "getSubAccount: happy path"()
+  {
+    service.metaClass.exec = { String a -> return new StringBuffer("uid:gsaTest") }
+
+    when:
+    def ret = service.getSubAccount("gsauid", "gsaType")
+
+    then:
+    ret.uid == "gsaTest"
+  }
+
+  def "getSubAccount: script returns something else"()
+  {
+    service.metaClass.exec = { String a -> return new StringBuffer("notuid:gsaTest") }
+
+    when:
+    def ret = service.getSubAccount("gsauid", "gsaType")
+
+    then:
+    ret.uid == null
+  }
+
   def "Test updatePrimaryAffiliation with null uid argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()

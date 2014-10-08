@@ -32,6 +32,7 @@
 package se.su.it.svc
 
 import se.su.it.svc.commons.SvcSuPersonVO
+import se.su.it.svc.commons.SvcSubAccountVO
 import se.su.it.svc.commons.SvcUidPwd
 
 public interface AccountService {
@@ -47,4 +48,5 @@ public interface AccountService {
   String[] addMailLocalAddresses(String uid, String[] mailLocalAddresses)
   SvcSuPersonVO[] findAllSuPersonsBySocialSecurityNumber(String socialSecurityNumber)
   SvcSuPersonVO findSuPersonByUid(String uid)
+  SvcSubAccountVO getSubAccount(String uid, String type)
 }

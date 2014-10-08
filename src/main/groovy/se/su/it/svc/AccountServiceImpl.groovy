@@ -31,6 +31,8 @@
 
 package se.su.it.svc
 
+import java.util.regex.Matcher
+
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang.NotImplementedException
 import org.gcontracts.annotations.Ensures
@@ -39,6 +41,7 @@ import se.su.it.commons.Kadmin
 import se.su.it.commons.PasswordUtils
 import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcSuPersonVO
+import se.su.it.svc.commons.SvcSubAccountVO
 import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuPersonStub
@@ -66,6 +69,73 @@ public class AccountServiceImpl implements AccountService {
   public WebServiceContext context;
 
   def configManager
+
+  static final String GET_SUB_ACCOUNT_SCRIPT = "/local/sukat/libexec/getSubAccount.pl"
+
+  /**
+   * Execute an external command and handle errors.
+   *
+   * @param cmd Command to execute.
+   *
+   * @return Stringbuffer with command output.
+   */
+  private StringBuffer exec(String cmd)
+  {
+        def out = new StringBuffer()
+
+        def proc = cmd.execute()
+
+        proc.consumeProcessOutput(out, out)
+
+        proc.waitFor()
+
+        if (proc.exitValue() != 0)
+        {
+            out.eachLine { line ->
+                log.info("getSubAccount: ${line}")
+            }
+
+            throw new RuntimeException("Execution of getSubAccount.pl failed.")
+        }
+
+        return out
+  }
+
+  /**
+   * Retrieve sub account for the given uid and type.
+   *
+   * @param uid uid of the user.
+   * @param type Sub account type.
+   *
+   * @return A SvcSubAccountVO.
+   */
+  @Requires({
+    type &&
+    ! LdapAttributeValidator.validateAttributes([
+        uid: uid
+    ])
+  })
+  @Ensures({ result instanceof SvcSubAccountVO })
+  public SvcSubAccountVO getSubAccount(
+        @WebParam(name = 'uid') String uid,
+        @WebParam(name = 'type') String type
+    )
+  {
+        def cmd = GET_SUB_ACCOUNT_SCRIPT + " ${uid}/${type}"
+
+        def sav = new SvcSubAccountVO()
+
+        exec(cmd).eachLine { line ->
+            switch (line)
+            {
+                case ~/^uid:(.*)$/:
+                    sav.uid=Matcher.lastMatcher[0][1]
+                    break
+            }
+        }
+
+        return sav
+  }
 
   /**
    * This method sets the primary affiliation for the specified uid.
