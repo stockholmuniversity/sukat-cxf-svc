@@ -75,10 +75,7 @@ public class SuPersonQuery {
 
     try {
       suPerson = SuPerson.find(directory: directory, base: "") {
-        and {
-          eq("uid", uid)
-          eq("objectclass", "suPerson")
-        }
+        eq("uid", uid)
       }
     } catch (ex) {
       log.error "Failed finding SuPerson for uid: $uid", ex
@@ -100,10 +97,7 @@ public class SuPersonQuery {
    */
   static List<SuPerson> getSuPersonFromSsn(String directory, String ssn) {
     return SuPerson.findAll(directory: directory, base: "") {
-      and {
-        eq("socialSecurityNumber", ssn)
-        eq("objectclass", "person")
-      }
+      eq("socialSecurityNumber", ssn)
     }
   }
 
