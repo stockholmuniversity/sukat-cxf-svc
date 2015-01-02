@@ -275,6 +275,10 @@ public class AccountServiceImpl implements AccountService {
       throw new IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
     }
 
+    if (SuPersonQuery.getSuPersonFromSsn(ConfigManager.LDAP_RW, ssn)) {
+      throw new IllegalArgumentException("createSuPerson - A user with socialSecurityNumber <"+ssn+"> already exists")
+    }
+
     String parent = configManager.config.ldap.accounts.parent
     log.info "createSuPerson: parent is configured to be $parent"
 
