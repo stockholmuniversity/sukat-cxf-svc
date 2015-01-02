@@ -354,6 +354,19 @@ class AccountServiceImplSpec extends Specification {
     thrown(PreconditionViolation)
   }
 
+  def "createSuPerson: socialSecurityNumber already exists"() {
+    setup:
+    SuPersonQuery.metaClass.static.findSuPersonByUID = {String directory,String uid -> null }
+    SuPersonQuery.metaClass.static.getSuPersonFromSsn = {String directory,String uid -> new SuPerson() }
+    def accountServiceImpl = new AccountServiceImpl()
+
+    when:
+    accountServiceImpl.createSuPerson("testtest","6601010357","Test","Testsson")
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
   def "Test createSuPerson with null givenName argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
@@ -399,6 +412,7 @@ class AccountServiceImplSpec extends Specification {
     def sn = 'Testsson'
 
     SuPersonQuery.metaClass.static.findSuPersonByUID = { String a, String b -> null }
+    SuPersonQuery.metaClass.static.getSuPersonFromSsn = { String a, String b -> null }
 
     def spy = GroovySpy(SuPersonStub)
 
