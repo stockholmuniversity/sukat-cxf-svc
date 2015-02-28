@@ -168,6 +168,26 @@ public class AccountServiceImpl implements AccountService {
   }
 
   /**
+   * Get password for the specified uid.
+   * @param uid uid of the user.
+   *
+   * @return String Password.
+   */
+  @Requires({
+    uid
+  })
+  @Ensures({ result && result instanceof String })
+  @AuditHideReturnValue
+  public String getPassword(
+          @WebParam(name = 'uid') String uid
+  )
+  {
+        def res = exec("getPassword ${uid}")
+
+        return res.password
+  }
+
+  /**
    * This method resets the password for the specified uid and returns the clear text password.
    *
    * @param uid  uid of the user.
