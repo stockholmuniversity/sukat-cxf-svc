@@ -159,6 +159,18 @@ class AccountServiceImplSpec extends Specification {
     myaffiliation == "employee"
   }
 
+  def "getPassword: happy path"()
+  {
+    setup:
+    service.metaClass.exec = { String a -> [password: "gppasswd"] }
+
+    when:
+    def ret = service.getPassword("gptest/ppp")
+
+    then:
+    ret == "gppasswd"
+  }
+
   def "Test resetPassword with null uid argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
