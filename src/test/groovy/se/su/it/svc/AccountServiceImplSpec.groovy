@@ -93,6 +93,18 @@ class AccountServiceImplSpec extends Specification {
     thrown(RuntimeException)
   }
 
+  def "createSubAccount: happy path"()
+  {
+    setup:
+    service.metaClass.exec = { String a -> }
+
+    when:
+    service.createSubAccount("csauid", "csaType")
+
+    then:
+    notThrown(Exception)
+  }
+
   def "getSubAccount: happy path"()
   {
     service.metaClass.exec = { String a -> [uid: "gsaTest"] }
