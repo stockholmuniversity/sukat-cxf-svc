@@ -104,17 +104,6 @@ class AccountServiceImplSpec extends Specification {
     ret.uid == "gsaTest"
   }
 
-  def "getSubAccount: script returns something else"()
-  {
-    service.metaClass.exec = { String a -> [notuid: "gsaTest"] }
-
-    when:
-    def ret = service.getSubAccount("gsauid", "gsaType")
-
-    then:
-    ret.uid == null
-  }
-
   def "Test updatePrimaryAffiliation with null uid argument"() {
     setup:
     def accountServiceImpl = new AccountServiceImpl()
