@@ -33,6 +33,8 @@ package se.su.it.svc
 
 import java.util.regex.Matcher
 
+import groovy.json.JsonSlurper
+
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang.NotImplementedException
 import org.gcontracts.annotations.Ensures
@@ -70,18 +72,20 @@ public class AccountServiceImpl implements AccountService {
 
   def configManager
 
-  static final String GET_SUB_ACCOUNT_SCRIPT = "/local/sukat/libexec/getSubAccount.pl"
-
   /**
    * Execute an external command and handle errors.
    *
    * @param cmd Command to execute.
    *
-   * @return Stringbuffer with command output.
+   * @return Map with command output.
    */
-  private StringBuffer exec(String cmd)
+  private Map exec(String cmd)
   {
         def out = new StringBuffer()
+
+        def prefix = cmd.tokenize().first()
+
+        cmd = "/local/sukat/libexec/" + cmd
 
         def proc = cmd.execute()
 
@@ -91,14 +95,17 @@ public class AccountServiceImpl implements AccountService {
 
         if (proc.exitValue() != 0)
         {
+            log.error("${prefix}: ${cmd}")
+
             out.eachLine { line ->
-                log.info("getSubAccount: ${line}")
+                log.error("${prefix}: ${line}")
             }
 
-            throw new RuntimeException("Execution of getSubAccount.pl failed.")
+            throw new RuntimeException("Execution of ${prefix} failed.")
         }
 
-        return out
+        def json = new JsonSlurper();
+        return json.parseText(out.toString());
   }
 
   /**
@@ -121,18 +128,11 @@ public class AccountServiceImpl implements AccountService {
         @WebParam(name = 'type') String type
     )
   {
-        def cmd = GET_SUB_ACCOUNT_SCRIPT + " ${uid}/${type}"
-
         def sav = new SvcSubAccountVO()
 
-        exec(cmd).eachLine { line ->
-            switch (line)
-            {
-                case ~/^uid:(.*)$/:
-                    sav.uid=Matcher.lastMatcher[0][1]
-                    break
-            }
-        }
+        def res = exec("getSubAccount ${uid}/${type}")
+
+        sav.uid = res.uid
 
         return sav
   }
