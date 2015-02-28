@@ -49,5 +49,6 @@ public interface AccountService {
   String[] addMailLocalAddresses(String uid, String[] mailLocalAddresses)
   SvcSuPersonVO[] findAllSuPersonsBySocialSecurityNumber(String socialSecurityNumber)
   SvcSuPersonVO findSuPersonByUid(String uid)
+  void createSubAccount(String uid, String type)
   SvcSubAccountVO getSubAccount(String uid, String type)
 }

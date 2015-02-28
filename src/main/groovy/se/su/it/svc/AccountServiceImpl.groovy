@@ -109,6 +109,26 @@ public class AccountServiceImpl implements AccountService {
   }
 
   /**
+   * Create sub account for the given uid and type.
+   *
+   * @param uid uid of the user.
+   * @param type Sub account type.
+   */
+  @Requires({
+    type &&
+    ! LdapAttributeValidator.validateAttributes([
+        uid: uid
+    ])
+  })
+  public void createSubAccount(
+        @WebParam(name = 'uid') String uid,
+        @WebParam(name = 'type') String type
+    )
+  {
+        exec("createSubAccount ${uid}/${type}")
+  }
+
+  /**
    * Retrieve sub account for the given uid and type.
    *
    * @param uid uid of the user.
