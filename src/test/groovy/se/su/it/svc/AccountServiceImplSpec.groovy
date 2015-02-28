@@ -66,19 +66,26 @@ class AccountServiceImplSpec extends Specification {
     SuPersonStub.metaClass = null
     SuPersonQuery.metaClass = null
     GldapoSchemaRegistry.metaClass = null
+    String.metaClass = null
   }
 
   def "exec: happy path"()
   {
+    setup:
+    String.metaClass.execute = { Runtime.getRuntime().exec(['echo { "happy": "path" }']) }
+
     when:
-    def ret = service.exec("ls /dev/null")
+    def ret = service.exec("happy path")
 
     then:
-    ret =~ "/dev/null"
+    ret.happy == "path"
   }
 
   def "exec: execution fails"()
   {
+    setup:
+    String.metaClass.execute = { Runtime.getRuntime().exec(['ls file-does-not-exist']) }
+
     when:
     def ret = service.exec("ls file-that-does-not-exist")
 
@@ -88,7 +95,7 @@ class AccountServiceImplSpec extends Specification {
 
   def "getSubAccount: happy path"()
   {
-    service.metaClass.exec = { String a -> return new StringBuffer("uid:gsaTest") }
+    service.metaClass.exec = { String a -> [uid: "gsaTest"] }
 
     when:
     def ret = service.getSubAccount("gsauid", "gsaType")
@@ -99,7 +106,7 @@ class AccountServiceImplSpec extends Specification {
 
   def "getSubAccount: script returns something else"()
   {
-    service.metaClass.exec = { String a -> return new StringBuffer("notuid:gsaTest") }
+    service.metaClass.exec = { String a -> [notuid: "gsaTest"] }
 
     when:
     def ret = service.getSubAccount("gsauid", "gsaType")
