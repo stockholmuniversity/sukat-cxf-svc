@@ -56,7 +56,7 @@ class SuPerson implements Serializable {
   static final long serialVersionUID = -687991492884005033L
 
   /** Path to create home directories in. */
-  public static final String AFS_HOME_DIR_BASE = "/afs/su.se/home/"
+  public static final String HOME_DIR_BASE = "/home"
 
   /** Path to set as user shell */
   public static final String SHELL_PATH = "/usr/local/bin/bash"
@@ -289,8 +289,8 @@ class SuPerson implements Serializable {
         "--user", SCRIPT_USER,
         ENABLE_SCRIPT,
         "--uid", uid,
-        "--password", password,
-        "--gidnumber", DEFAULT_USER_GID ]
+        "--password", password
+    ]
 
     try {
       log.debug("enableUser - Running perlscript to create user in KDC and AFS for uid<${uid}>")
@@ -317,7 +317,7 @@ class SuPerson implements Serializable {
   private String fetchHomeDirectoryPath() {
     if (!uid) { return null }
     def invalid = LdapAttributeValidator.validateAttributes(uid: uid)
-    invalid ? null : AFS_HOME_DIR_BASE + uid.charAt(0) + "/" + uid.charAt(1) + "/" + uid
+    invalid ? null : HOME_DIR_BASE + "/" + uid
   }
 
   /**
