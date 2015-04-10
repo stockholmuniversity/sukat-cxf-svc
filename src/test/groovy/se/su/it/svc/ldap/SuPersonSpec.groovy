@@ -243,9 +243,9 @@ class SuPersonSpec extends Specification {
     null  | null
     ''    | null
     'a'   | null // To short
-    'aa'  | SuPerson.AFS_HOME_DIR_BASE + 'a/a/aa'
-    'aaa' | SuPerson.AFS_HOME_DIR_BASE + 'a/a/aaa'
-    'abc' | SuPerson.AFS_HOME_DIR_BASE + 'a/b/abc'
+    'aa'  | SuPerson.HOME_DIR_BASE + '/aa'
+    'aaa' | SuPerson.HOME_DIR_BASE + '/aaa'
+    'abc' | SuPerson.HOME_DIR_BASE + '/abc'
   }
 
   def "runEnableScript should return false on exception"() {
