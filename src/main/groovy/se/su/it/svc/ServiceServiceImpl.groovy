@@ -139,7 +139,10 @@ public class ServiceServiceImpl implements ServiceService {
         SuSubAccount subAcc = new SuSubAccount()
         subAcc.parent = person.getDn().toString()
         subAcc.uid = subUid
-        subAcc.description = description
+
+        if (description != '')
+            subAcc.description = description
+
         subAcc.objectClass = ["top", "account"]
         if (serviceType.equalsIgnoreCase("urn:x-su:service:type:jabber")) {
           subAcc.objectClass.add("jabberUser")
