@@ -2,6 +2,7 @@ package se.su.it.svc
 
 import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PreconditionViolation
+import org.springframework.ldap.core.DistinguishedName
 import se.su.it.commons.Kadmin
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuService
@@ -167,6 +168,44 @@ class ServiceServiceImplSpec extends Specification {
 
     then:
     thrown(PreconditionViolation)
+  }
+
+  def "enableServiceFully: description is set"()
+  {
+    setup:
+    def serviceServiceImpl = new ServiceServiceImpl()
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> new SuPerson(uid: "testuid") }
+    SuPerson.metaClass.getDn = {return new DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
+    SuSubAccountQuery.metaClass.static.getSuSubAccounts = {String directory, DistinguishedName dn -> return}
+    SuSubAccount.metaClass.setParent = {String dn -> return void}
+    SuSubAccountQuery.metaClass.static.createSubAccount = {String a, SuSubAccount b -> return void}
+    Kadmin.metaClass.resetOrCreatePrincipal = {String subUid -> return void}
+    SuServiceQuery.metaClass.static.getSuServiceByType = { String a, DistinguishedName b, String c -> return new SuService(suServiceStatus: 'esfTest') }
+
+    when:
+    def ret = serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", 'A description')
+
+    then:
+    ret.suServiceStatus == 'enabled'
+  }
+
+  def "enableServiceFully: subAccount does not exist"()
+  {
+    setup:
+    def serviceServiceImpl = new ServiceServiceImpl()
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> new SuPerson(uid: "testuid") }
+    SuPerson.metaClass.getDn = {return new DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
+    SuSubAccountQuery.metaClass.static.getSuSubAccounts = {String directory, DistinguishedName dn -> return}
+    SuSubAccount.metaClass.setParent = {String dn -> return void}
+    SuSubAccountQuery.metaClass.static.createSubAccount = {String a, SuSubAccount b -> return void}
+    Kadmin.metaClass.resetOrCreatePrincipal = {String subUid -> return void}
+    SuServiceQuery.metaClass.static.getSuServiceByType = { String a, DistinguishedName b, String c -> return new SuService(suServiceStatus: 'esfTest') }
+
+    when:
+    def ret = serviceServiceImpl.enableServiceFully("testuid", "urn:x-su:service:type:jabber", "jabber", '')
+
+    then:
+    ret.suServiceStatus == 'enabled'
   }
 
   def "Test enableServiceFully returns exception when person dont exists"() {
