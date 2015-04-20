@@ -135,7 +135,7 @@ public class ServiceServiceImpl implements ServiceService {
       subUid = uid + "." + qualifier;
       def subAccounts = SuSubAccountQuery.getSuSubAccounts(ConfigManager.LDAP_RO, person.getDn())
       if (!subAccounts.find { subAcc -> subAcc.uid == subUid }) {
-        log.debug("enableServiceFully - Trying to create sub account uid=<${subUid}> to be used by service=<${serviceType}> for uid=<${uid}>")
+        log.info("enableServiceFully - Trying to create sub account uid=<${subUid}> to be used by service=<${serviceType}> for uid=<${uid}>")
         SuSubAccount subAcc = new SuSubAccount()
         subAcc.parent = person.getDn().toString()
         subAcc.uid = subUid
@@ -158,7 +158,7 @@ public class ServiceServiceImpl implements ServiceService {
         ConfigManager.LDAP_RW, person.getDn() as DistinguishedName, serviceType)
 
     if (suService == null) {
-      log.debug("enableServiceFully - Trying to create service=<${serviceType}> for uid=<${uid}>")
+      log.info("enableServiceFully - Trying to create service=<${serviceType}> for uid=<${uid}>")
       //create service
       suService = new SuService()
       suService.objectClass = ["top", "suServiceObject", "suService", "organizationalRole"]
@@ -169,7 +169,7 @@ public class ServiceServiceImpl implements ServiceService {
       suService.suServiceStatus = "enabled"
       if (subUid.length() > 0) {
         suService.roleOccupant = "uid=${subUid},${person.getDn().toString()}"
-        log.debug("enableServiceFully - Setting roleOccupant of service=<${serviceType}> to <${suService.roleOccupant}>")
+        log.info("enableServiceFully - Setting roleOccupant of service=<${serviceType}> to <${suService.roleOccupant}>")
       }
       suService.parent = person.getDn().toString()
       suService.directory = ConfigManager.LDAP_RW
@@ -177,7 +177,7 @@ public class ServiceServiceImpl implements ServiceService {
       log.info("enableServiceFully - Created service=<${serviceType}> for uid=<${uid}>")
     } else {
       //enable service
-      log.debug("enableServiceFully - Service=<${serviceType}> for uid=<${uid}> already exist. Trying to enable it.")
+      log.info("enableServiceFully - Service=<${serviceType}> for uid=<${uid}> already exist. Trying to enable it.")
       if (suService.suServiceStatus.equalsIgnoreCase("blocked") || suService.suServiceStatus.equalsIgnoreCase("locked"))
         throw new IllegalArgumentException("enableServiceFully Service " + suService.getDn().toString() + " is blocked/locked")
       suService.suServiceStatus = "enabled"
