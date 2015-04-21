@@ -33,8 +33,6 @@ package se.su.it.svc
 
 import java.util.regex.Matcher
 
-import groovy.json.JsonSlurper
-
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang.NotImplementedException
 import org.gcontracts.annotations.Ensures
@@ -73,42 +71,6 @@ public class AccountServiceImpl implements AccountService {
   def configManager
 
   /**
-   * Execute an external command and handle errors.
-   *
-   * @param cmd Command to execute.
-   *
-   * @return Map with command output.
-   */
-  private Map exec(String cmd)
-  {
-        def out = new StringBuffer()
-
-        def prefix = cmd.tokenize().first()
-
-        cmd = "/local/sukat/libexec/" + cmd
-
-        def proc = cmd.execute()
-
-        proc.consumeProcessOutput(out, out)
-
-        proc.waitFor()
-
-        if (proc.exitValue() != 0)
-        {
-            log.error("${prefix}: ${cmd}")
-
-            out.eachLine { line ->
-                log.error("${prefix}: ${line}")
-            }
-
-            throw new RuntimeException("Execution of ${prefix} failed.")
-        }
-
-        def json = new JsonSlurper();
-        return json.parseText(out.toString());
-  }
-
-  /**
    * Create sub account for the given uid and type.
    *
    * @param uid uid of the user.
@@ -125,7 +87,7 @@ public class AccountServiceImpl implements AccountService {
         @WebParam(name = 'type') String type
     )
   {
-        exec("createSubAccount ${uid}/${type}")
+        GeneralUtils.execHelper("createSubAccount", "${uid}/${type}")
   }
 
   /**
@@ -150,7 +112,7 @@ public class AccountServiceImpl implements AccountService {
   {
         def sav = new SvcSubAccountVO()
 
-        def res = exec("getSubAccount ${uid}/${type}")
+        def res = GeneralUtils.execHelper("getSubAccount", "${uid}/${type}")
 
         sav.uid = res.uid
 
@@ -202,7 +164,7 @@ public class AccountServiceImpl implements AccountService {
           @WebParam(name = 'uid') String uid
   )
   {
-        def res = exec("getPassword ${uid}")
+        def res = GeneralUtils.execHelper("getPassword", uid)
 
         return res.password
   }

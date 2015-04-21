@@ -31,8 +31,13 @@
 
 package se.su.it.svc.util
 
+import groovy.json.JsonSlurper
+
+import groovy.util.logging.Slf4j
+
 import java.lang.reflect.Modifier
 
+@Slf4j
 class GeneralUtils {
 
   public static final String SU_SE_SCOPE = "@su.se"
@@ -80,5 +85,40 @@ class GeneralUtils {
         target.setProperty(prop.name, source.getProperty(prop.name))
       }
     }
+  }
+
+  /**
+   * Execute an external helper and handle errors.
+   *
+   * @param helper Helper to execute.
+   * @param args Arguments.
+   *
+   * @return Map with command output.
+   */
+  static Map execHelper(String helper, String args)
+  {
+        def out = new StringBuffer()
+
+        def cmd = "/local/sukat/libexec/" + helper + " " + args
+
+        def proc = cmd.execute()
+
+        proc.consumeProcessOutput(out, out)
+
+        proc.waitFor()
+
+        if (proc.exitValue() != 0)
+        {
+            log.error("${helper}: ${cmd}")
+
+            out.eachLine { line ->
+                log.error("${helper}: ${line}")
+            }
+
+            throw new RuntimeException("Execution of ${helper} failed.")
+        }
+
+        def json = new JsonSlurper();
+        return json.parseText(out.toString());
   }
 }

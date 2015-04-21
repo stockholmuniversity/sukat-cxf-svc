@@ -42,6 +42,7 @@ import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuPersonStub
 import se.su.it.svc.query.SuPersonQuery
+import se.su.it.svc.util.GeneralUtils
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -66,37 +67,12 @@ class AccountServiceImplSpec extends Specification {
     SuPersonStub.metaClass = null
     SuPersonQuery.metaClass = null
     GldapoSchemaRegistry.metaClass = null
-    String.metaClass = null
-  }
-
-  def "exec: happy path"()
-  {
-    setup:
-    String.metaClass.execute = { Runtime.getRuntime().exec(['echo { "happy": "path" }']) }
-
-    when:
-    def ret = service.exec("happy path")
-
-    then:
-    ret.happy == "path"
-  }
-
-  def "exec: execution fails"()
-  {
-    setup:
-    String.metaClass.execute = { Runtime.getRuntime().exec(['ls file-does-not-exist']) }
-
-    when:
-    def ret = service.exec("ls file-that-does-not-exist")
-
-    then:
-    thrown(RuntimeException)
   }
 
   def "createSubAccount: happy path"()
   {
     setup:
-    service.metaClass.exec = { String a -> }
+    GeneralUtils.metaClass.static.execHelper = { String a, String b -> }
 
     when:
     service.createSubAccount("csauid", "csaType")
@@ -107,7 +83,7 @@ class AccountServiceImplSpec extends Specification {
 
   def "getSubAccount: happy path"()
   {
-    service.metaClass.exec = { String a -> [uid: "gsaTest"] }
+    GeneralUtils.metaClass.static.execHelper = { String a, String b -> [uid: 'gsaTest'] }
 
     when:
     def ret = service.getSubAccount("gsauid", "gsaType")
@@ -163,7 +139,7 @@ class AccountServiceImplSpec extends Specification {
   def "getPassword: happy path"()
   {
     setup:
-    service.metaClass.exec = { String a -> [password: "gppasswd"] }
+    GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: 'gppasswd'] }
 
     when:
     def ret = service.getPassword("gptest/ppp")

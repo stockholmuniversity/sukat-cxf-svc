@@ -118,4 +118,28 @@ class GeneralUtilsSpec extends Specification {
     target.metaClass != source.metaClass
     target.serialVersionUID != source.serialVersionUID
   }
+
+  def 'execHelper: happy path'()
+  {
+    setup:
+    String.metaClass.execute = { Runtime.getRuntime().exec(['echo { "happy": "path" }']) }
+
+    when:
+    def ret = GeneralUtils.execHelper('happy', 'path')
+
+    then:
+    ret.happy == 'path'
+  }
+
+  def 'execHelper: execution fails'()
+  {
+    setup:
+    String.metaClass.execute = { Runtime.getRuntime().exec(['ls file-does-not-exist']) }
+
+    when:
+    def ret = GeneralUtils.execHelper('ls', 'file-that-does-not-exist')
+
+    then:
+    thrown(RuntimeException)
+  }
 }
