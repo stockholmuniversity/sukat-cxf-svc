@@ -3,7 +3,6 @@ package se.su.it.svc
 import gldapo.GldapoSchemaRegistry
 import org.gcontracts.PreconditionViolation
 import org.springframework.ldap.core.DistinguishedName
-import se.su.it.commons.Kadmin
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuService
 import se.su.it.svc.ldap.SuServiceDescription
@@ -44,6 +43,7 @@ import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.SuServiceDescriptionQuery
 import se.su.it.svc.query.SuServiceQuery
 import se.su.it.svc.query.SuSubAccountQuery
+import se.su.it.svc.util.AccountServiceUtils
 import spock.lang.Specification
 
 class ServiceServiceImplSpec extends Specification {
@@ -56,13 +56,13 @@ class ServiceServiceImplSpec extends Specification {
   }
 
   def cleanup() {
+    AccountServiceUtils.metaClass = null
     SuPerson.metaClass = null
     SuService.metaClass = null
     SuPersonQuery.metaClass = null
     SuServiceQuery.metaClass = null
     SuServiceDescriptionQuery.metaClass = null
     SuSubAccountQuery.metaClass = null
-    Kadmin.metaClass = null
     GldapoSchemaRegistry.metaClass = null
   }
 
@@ -179,7 +179,7 @@ class ServiceServiceImplSpec extends Specification {
     SuSubAccountQuery.metaClass.static.getSuSubAccounts = {String directory, DistinguishedName dn -> return}
     SuSubAccount.metaClass.setParent = {String dn -> return void}
     SuSubAccountQuery.metaClass.static.createSubAccount = {String a, SuSubAccount b -> return void}
-    Kadmin.metaClass.resetOrCreatePrincipal = {String subUid -> return void}
+    AccountServiceUtils.metaClass.static.getSubAccount = { String a, String b -> [uid: 'esfTest'] }
     SuServiceQuery.metaClass.static.getSuServiceByType = { String a, DistinguishedName b, String c -> return new SuService(suServiceStatus: 'esfTest') }
 
     when:
@@ -198,7 +198,8 @@ class ServiceServiceImplSpec extends Specification {
     SuSubAccountQuery.metaClass.static.getSuSubAccounts = {String directory, DistinguishedName dn -> return}
     SuSubAccount.metaClass.setParent = {String dn -> return void}
     SuSubAccountQuery.metaClass.static.createSubAccount = {String a, SuSubAccount b -> return void}
-    Kadmin.metaClass.resetOrCreatePrincipal = {String subUid -> return void}
+    AccountServiceUtils.metaClass.static.getSubAccount = { String a, String b -> [:] }
+    AccountServiceUtils.metaClass.static.createSubAccount = { String a, String b -> }
     SuServiceQuery.metaClass.static.getSuServiceByType = { String a, DistinguishedName b, String c -> return new SuService(suServiceStatus: 'esfTest') }
 
     when:
@@ -226,7 +227,7 @@ class ServiceServiceImplSpec extends Specification {
     SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
     SuSubAccountQuery.metaClass.static.getSuSubAccounts = {String directory, org.springframework.ldap.core.DistinguishedName dn -> return [new SuSubAccount(uid: "test2uid.jabber"),new SuSubAccount(uid: "testuid.jabber")]}
     SuSubAccountQuery.metaClass.static.createSubAccount = {String directory, SuSubAccount -> return void}
-    Kadmin.metaClass.resetOrCreatePrincipal = {String subUid -> return void}
+    AccountServiceUtils.metaClass.static.getSubAccount = { String a, String b -> [uid: 'esfTest'] }
     SuServiceQuery.metaClass.static.getSuServiceByType = {String directory, org.springframework.ldap.core.DistinguishedName dn, String serviceType -> return null}
     SuService.metaClass.setParent = {String dn -> return void}
     SuServiceQuery.metaClass.static.createService = {String directory, SuService suService -> return void}
@@ -246,7 +247,7 @@ class ServiceServiceImplSpec extends Specification {
     SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
     SuSubAccountQuery.metaClass.static.getSuSubAccounts = {String directory, org.springframework.ldap.core.DistinguishedName dn -> return [new SuSubAccount(uid: "test2uid.jabber"),new SuSubAccount(uid: "testuid.jabber")]}
     SuSubAccountQuery.metaClass.static.createSubAccount = {String directory, SuSubAccount -> return void}
-    Kadmin.metaClass.resetOrCreatePrincipal = {String subUid -> return void}
+    AccountServiceUtils.metaClass.static.getSubAccount = { String a, String b -> [uid: 'esfTest'] }
     SuServiceQuery.metaClass.static.getSuServiceByType = {String directory, org.springframework.ldap.core.DistinguishedName dn, String serviceType -> return new SuService(suServiceStatus: "blocked")}
     SuService.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("cn=1234-abcd-567-efgh-890,uid=testuid,dc=it,dc=su,dc=se")}
     SuService.metaClass.setParent = {String dn -> return void}
@@ -265,7 +266,7 @@ class ServiceServiceImplSpec extends Specification {
     SuPerson.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("uid=testuid,dc=it,dc=su,dc=se")}
     SuSubAccountQuery.metaClass.static.getSuSubAccounts = {String directory, org.springframework.ldap.core.DistinguishedName dn -> return [new SuSubAccount(uid: "test2uid.jabber"),new SuSubAccount(uid: "testuid.jabber")]}
     SuSubAccountQuery.metaClass.static.createSubAccount = {String directory, SuSubAccount -> return void}
-    Kadmin.metaClass.resetOrCreatePrincipal = {String subUid -> return void}
+    AccountServiceUtils.metaClass.static.getSubAccount = { String a, String b -> [uid: 'esfTest'] }
     SuServiceQuery.metaClass.static.getSuServiceByType = {String directory, org.springframework.ldap.core.DistinguishedName dn, String serviceType -> return new SuService(suServiceStatus: "locked")}
     SuService.metaClass.getDn = {return new org.springframework.ldap.core.DistinguishedName("cn=1234-abcd-567-efgh-890,uid=testuid,dc=it,dc=su,dc=se")}
     SuService.metaClass.setParent = {String dn -> return void}
