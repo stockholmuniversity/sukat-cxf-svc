@@ -11,6 +11,7 @@ class AccountServiceUtilsSpec extends Specification {
   }
 
   def cleanup() {
+    GeneralUtils.metaClass = null
     GldapoSchemaRegistry.metaClass = null
   }
 
