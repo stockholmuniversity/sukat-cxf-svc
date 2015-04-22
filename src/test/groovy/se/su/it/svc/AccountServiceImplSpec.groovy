@@ -64,6 +64,7 @@ class AccountServiceImplSpec extends Specification {
 
   def cleanup() {
     this.service = null
+    AccountServiceUtils.metaClass = null
     Kadmin.metaClass = null
     SuPersonStub.metaClass = null
     SuPersonQuery.metaClass = null
@@ -84,6 +85,7 @@ class AccountServiceImplSpec extends Specification {
 
   def "getSubAccount: happy path"()
   {
+    setup:
     AccountServiceUtils.metaClass.static.getSubAccount = { String a, String b -> [uid: 'gsaTest'] }
 
     when:
