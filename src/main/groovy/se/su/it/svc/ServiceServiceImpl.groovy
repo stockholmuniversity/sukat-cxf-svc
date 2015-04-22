@@ -34,7 +34,6 @@ package se.su.it.svc
 import groovy.util.logging.Slf4j
 import org.gcontracts.annotations.Requires
 import org.springframework.ldap.core.DistinguishedName
-import se.su.it.commons.Kadmin
 import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuService
@@ -46,6 +45,7 @@ import se.su.it.svc.query.SuServiceDescriptionQuery
 import se.su.it.svc.query.SuServiceQuery
 import se.su.it.svc.query.SuSubAccountQuery
 import se.su.it.svc.server.annotations.AuthzRole
+import se.su.it.svc.util.AccountServiceUtils
 import se.su.it.svc.util.GeneralUtils
 
 import javax.jws.WebParam
@@ -149,11 +149,21 @@ public class ServiceServiceImpl implements ServiceService {
           subAcc.jabberID = GeneralUtils.uidToPrincipal(uid)
         }
         SuSubAccountQuery.createSubAccount(ConfigManager.LDAP_RW, subAcc)
-        Kadmin.newInstance().resetOrCreatePrincipal(GeneralUtils.uidToKrb5Principal(subUid))
         log.info("enableServiceFully - Created sub account uid=<${subUid}> to be used by service=<${serviceType}> for uid=<${uid}>")
       } else {
         log.info("enableServiceFully - Sub account uid=<${subUid}> to be used by service=<${serviceType}> for uid=<${uid}> already exist. Using it.")
       }
+    }
+
+    def sav = AccountServiceUtils.getSubAccount(uid, qualifier)
+    if (sav.uid)
+    {
+        log.info("enableServiceFully - Kerberos principal for sub account ${sav.uid} already exists.")
+    }
+    else
+    {
+        log.info("enableServiceFully - Creating kerberos principal for sub account ${uid}/${qualifier}.")
+        AccountServiceUtils.createSubAccount(uid, qualifier)
     }
 
     // END Try to create sub account if it do not exist
