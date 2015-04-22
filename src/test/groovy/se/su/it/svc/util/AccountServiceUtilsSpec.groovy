@@ -30,4 +30,28 @@ class AccountServiceUtilsSpec extends Specification {
   def "domainToDN handles null"() {
     expect: AccountServiceUtils.domainToDN(null) == ''
   }
+
+  def 'createSubAccount: happy path'()
+  {
+        setup:
+        GeneralUtils.metaClass.static.execHelper = { String a, String b -> }
+
+        when:
+        AccountServiceUtils.createSubAccount('happy', 'path')
+
+        then:
+        notThrown(Exception)
+  }
+
+  def 'getSubAccount: happy path'()
+  {
+        setup:
+        GeneralUtils.metaClass.static.execHelper = { String a, String b -> [uid: 'gsaTest'] }
+
+        when:
+        def res = AccountServiceUtils.getSubAccount('happy', 'path')
+
+        then:
+        res.uid == 'gsaTest'
+  }
 }

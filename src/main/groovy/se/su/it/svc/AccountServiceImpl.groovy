@@ -49,6 +49,7 @@ import se.su.it.svc.manager.ConfigManager
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.server.annotations.AuditHideReturnValue
 import se.su.it.svc.server.annotations.AuthzRole
+import se.su.it.svc.util.AccountServiceUtils
 import se.su.it.svc.util.GeneralUtils
 
 import javax.annotation.Resource
@@ -87,7 +88,7 @@ public class AccountServiceImpl implements AccountService {
         @WebParam(name = 'type') String type
     )
   {
-        GeneralUtils.execHelper("createSubAccount", "${uid}/${type}")
+        AccountServiceUtils.createSubAccount(uid, type)
   }
 
   /**
@@ -110,13 +111,7 @@ public class AccountServiceImpl implements AccountService {
         @WebParam(name = 'type') String type
     )
   {
-        def sav = new SvcSubAccountVO()
-
-        def res = GeneralUtils.execHelper("getSubAccount", "${uid}/${type}")
-
-        sav.uid = res.uid
-
-        return sav
+        return AccountServiceUtils.getSubAccount(uid, type)
   }
 
   /**

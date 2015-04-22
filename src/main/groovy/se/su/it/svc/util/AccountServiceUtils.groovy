@@ -31,7 +31,20 @@
 
 package se.su.it.svc.util
 
+import se.su.it.svc.commons.SvcSubAccountVO
+
 class AccountServiceUtils {
+
+  /**
+   * Create sub account for the given uid and type.
+   *
+   * @param uid uid of the user.
+   * @param type Sub account type.
+   */
+  static void createSubAccount(String uid, String type)
+  {
+        GeneralUtils.execHelper("createSubAccount", "${uid}/${type}")
+  }
 
   /**
    * Convert a domain to a dn (ex. it.su.se -> dc=it,dc=su,dc=se)
@@ -51,5 +64,24 @@ class AccountServiceUtils {
     }
 
     return retString
+  }
+
+  /**
+   * Retrieve sub account for the given uid and type.
+   *
+   * @param uid uid of the user.
+   * @param type Sub account type.
+   *
+   * @return A SvcSubAccountVO.
+   */
+  static SvcSubAccountVO getSubAccount(String uid, String type)
+  {
+        def sav = new SvcSubAccountVO()
+
+        def res = GeneralUtils.execHelper("getSubAccount", "${uid}/${type}")
+
+        sav.uid = res.uid
+
+        return sav
   }
 }

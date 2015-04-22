@@ -42,6 +42,7 @@ import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuPersonStub
 import se.su.it.svc.query.SuPersonQuery
+import se.su.it.svc.util.AccountServiceUtils
 import se.su.it.svc.util.GeneralUtils
 import spock.lang.Shared
 import spock.lang.Specification
@@ -72,7 +73,7 @@ class AccountServiceImplSpec extends Specification {
   def "createSubAccount: happy path"()
   {
     setup:
-    GeneralUtils.metaClass.static.execHelper = { String a, String b -> }
+    AccountServiceUtils.metaClass.static.createSubAccount = { String a, String b -> }
 
     when:
     service.createSubAccount("csauid", "csaType")
@@ -83,7 +84,7 @@ class AccountServiceImplSpec extends Specification {
 
   def "getSubAccount: happy path"()
   {
-    GeneralUtils.metaClass.static.execHelper = { String a, String b -> [uid: 'gsaTest'] }
+    AccountServiceUtils.metaClass.static.getSubAccount = { String a, String b -> [uid: 'gsaTest'] }
 
     when:
     def ret = service.getSubAccount("gsauid", "gsaType")
