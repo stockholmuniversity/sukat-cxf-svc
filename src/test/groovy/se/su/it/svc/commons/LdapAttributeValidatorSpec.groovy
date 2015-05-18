@@ -24,10 +24,11 @@ class LdapAttributeValidatorSpec extends Specification
         noExceptionThrown()
 
         where:
-        uid          | _
-        "validuid"   | _
-        "042larkar"  | _
-        "0123456789" | _
+        uid           | _
+        "validuid"    | _
+        "042larkar"   | _
+        "0123456789"  | _
+        "01234567890" | _
     }
 
     @Unroll
@@ -40,12 +41,12 @@ class LdapAttributeValidatorSpec extends Specification
         thrown(IllegalArgumentException)
 
         where:
-        uid           | _
-        null          | _
-        "a"           | _
-        "01234567890" | _
-        "a-b"         | _
-        [1: "foo"]    | _
+        uid            | _
+        null           | _
+        "a"            | _
+        "012345678901" | _
+        "a-b"          | _
+        [1: "foo"]     | _
     }
 
     def "checkValidMailAddress: email patterns"()
