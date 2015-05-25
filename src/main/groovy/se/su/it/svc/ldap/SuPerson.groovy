@@ -34,7 +34,6 @@ package se.su.it.svc.ldap
 import gldapo.schema.annotation.GldapoNamingAttribute
 import gldapo.schema.annotation.GldapoSchemaFilter
 import groovy.util.logging.Slf4j
-import se.su.it.commons.ExecUtils
 import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
@@ -63,15 +62,6 @@ class SuPerson implements Serializable {
 
   /** Default GID for new users. */
   public static final String DEFAULT_USER_GID = "1200"
-
-  /** User to run enable-user script as. */
-  public static final String SCRIPT_USER = "uadminw"
-
-  /** Path to 'enable-user' script */
-  public static final String ENABLE_SCRIPT = "/local/sukat/libexec/enable-user.pl"
-
-  /** Path to 'run-token-script' */
-  public static final String TOKEN_SCRIPT = "/local/scriptbox/bin/run-token-script.sh"
 
   public static enum Affilation {
     EMPLOYEE('employee', 40),
@@ -283,29 +273,10 @@ class SuPerson implements Serializable {
    * @return the uid of the enabled user, null if the operation fails.
    */
   private boolean runEnableScript(String uid, String password) {
-    String uidNumber = null
+    def res = GeneralUtils.execHelper("enableUser", "--uid ${uid} --password ${password}")
 
-    def perlScript = [
-        "--user", SCRIPT_USER,
-        ENABLE_SCRIPT,
-        "--uid", uid,
-        "--password", password
-    ]
+    this.uidNumber = res.uidNumber
 
-    try {
-      log.debug("enableUser - Running perlscript to create user in KDC and AFS for uid<${uid}>")
-      def res = ExecUtils.exec(TOKEN_SCRIPT, perlScript.toArray(new String[perlScript.size()]))
-      Pattern p = Pattern.compile("OK \\(uidnumber:(\\d+)\\)")
-      Matcher m = p.matcher(res.trim())
-      if (m.matches()) {
-        uidNumber = m.group(1)
-      }
-      this.uidNumber = uidNumber
-    } catch (ex) {
-      log.error("enableUser - Error when enabling uid: <$uid> in KDC and/or AFS! " +
-          "PosixAccount attributes will not be written to SUKAT!", ex)
-      return false
-    }
     return true
   }
 

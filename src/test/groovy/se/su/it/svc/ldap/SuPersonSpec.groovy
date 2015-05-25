@@ -1,7 +1,6 @@
 package se.su.it.svc.ldap
 
 import gldapo.GldapoSchemaRegistry
-import se.su.it.commons.ExecUtils
 import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
@@ -20,6 +19,7 @@ class SuPersonSpec extends Specification {
   }
 
   def cleanup() {
+    GeneralUtils.metaClass = null
     SuPerson.metaClass = null
     SuPersonQuery.metaClass = null
     GldapoSchemaRegistry.metaClass = null
@@ -248,42 +248,17 @@ class SuPersonSpec extends Specification {
     'abc' | SuPerson.HOME_DIR_BASE + '/abc'
   }
 
-  def "runEnableScript should return false on exception"() {
-    given:
-    GroovyMock(ExecUtils, global: true)
-    ExecUtils.exec(*_) >> { throw new NullPointerException() }
+  def 'runEnableScript: happy path'()
+  {
+        setup:
+        SuPerson sp = new SuPerson()
+        GeneralUtils.metaClass.static.execHelper = { String a, String b -> [uidNumber: '1024'] }
 
-    when:
-    def ret = new SuPerson().runEnableScript("", "")
+        when:
+        sp.runEnableScript("", "")
 
-    then:
-    !ret
-  }
-
-  @Unroll
-  def "runEnableScript should return '#result' on script output '#execReturn'"() {
-    given:
-    GroovyMock(ExecUtils, global: true)
-    ExecUtils.exec(*_) >> { "OK (uidnumber:1234)" }
-
-    when:
-    SuPerson suPerson = new SuPerson()
-    def ret = suPerson.runEnableScript("", "")
-
-    then:
-    suPerson.uidNumber == "1234"
-    assert ret
-
-    where:
-    execReturn             | result
-    null                   | null
-    ""                     | null
-    "OK"                   | null
-    "OK (uidnumber: 1234)" | null
-    "OK (uidnumber:1)"     | "1"
-    "OK (uidnumber:12)"    | "12"
-    "OK (uidnumber:123)"   | "123"
-    "OK (uidnumber:1234)"  | "1234"
+        then:
+        sp.uidNumber == '1024'
   }
 
   def "enableUser should set uidNumber=-1 if skipCreate"() {
