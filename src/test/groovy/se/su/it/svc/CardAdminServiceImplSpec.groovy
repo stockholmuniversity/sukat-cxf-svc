@@ -129,45 +129,12 @@ class CardAdminServiceImplSpec extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  def "setCardPIN with null suCardUUID argument"() {
+  def "setCardPIN is unsupported"() {
     setup:
     def cardAdminServiceImpl = new CardAdminServiceImpl()
     when:
     cardAdminServiceImpl.setCardPIN(null, "1234")
     then:
-    thrown(IllegalArgumentException)
-  }
-
-  def "setCardPIN with null pin argument"() {
-    setup:
-    def cardAdminServiceImpl = new CardAdminServiceImpl()
-    when:
-    cardAdminServiceImpl.setCardPIN("testcarduuid", null)
-    then:
-    thrown(IllegalArgumentException)
-  }
-
-  def "setCardPIN sets pin"() {
-    setup:
-    def suCard = new SuCard()
-    suCard.metaClass.save = {}
-    SuCardQuery.metaClass.static.findCardBySuCardUUID = { String arg1, String arg2 -> return suCard }
-
-    def cardAdminServiceImpl = new CardAdminServiceImpl()
-    when:
-    cardAdminServiceImpl.setCardPIN("testcarduuid", "1234")
-    then:
-    suCard.suCardPIN == "1234"
-  }
-
-  def "setCardPIN returns false when no card was found"() {
-    setup:
-    SuCardQuery.metaClass.static.findCardBySuCardUUID = { String arg1, String arg2 -> return null }
-
-    def cardAdminServiceImpl = new CardAdminServiceImpl()
-    when:
-    cardAdminServiceImpl.setCardPIN("testcarduuid", "1234")
-    then:
-    thrown(IllegalArgumentException)
+    thrown(UnsupportedOperationException)
   }
 }

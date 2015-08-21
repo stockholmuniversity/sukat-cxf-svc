@@ -89,16 +89,10 @@ public class CardAdminServiceImpl implements CardAdminService {
    */
   public void setCardPIN(
           @WebParam(name = "suCardUUID") String suCardUUID,
-          @WebParam(name = "pin") String pin) {
-    if(suCardUUID == null || pin == null)
-      throw new java.lang.IllegalArgumentException("setCardPIN - Null argument values not allowed in this function")
-    SuCard card =SuCardQuery.findCardBySuCardUUID(ConfigManager.LDAP_RW,suCardUUID)
-    if(card != null) {
-      card.suCardPIN = pin
-      card.update()
-    } else {
-      log.info("setCardPIN: Could not find a card with uuid<${suCardUUID}>")
-      throw new IllegalArgumentException("revokeCard: Could not find a card with uuid<${suCardUUID}>")
-    }
+          @WebParam(name = "pin") String pin)
+  {
+
+        throw new UnsupportedOperationException("setCardPIN - PIN-code on university cards are currently not in use, see IDM-877")
+
   }
 }
