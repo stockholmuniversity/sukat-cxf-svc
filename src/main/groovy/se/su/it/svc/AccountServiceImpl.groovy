@@ -92,6 +92,26 @@ public class AccountServiceImpl implements AccountService {
   }
 
   /**
+   * Delete sub account for the given uid and type.
+   *
+   * @param uid uid of the user.
+   * @param type Sub account type.
+   */
+  @Requires({
+    type &&
+    ! LdapAttributeValidator.validateAttributes([
+        uid: uid
+    ])
+  })
+  public void deleteSubAccount(
+        @WebParam(name = 'uid') String uid,
+        @WebParam(name = 'type') String type
+    )
+  {
+        AccountServiceUtils.deleteSubAccount(uid, type)
+  }
+
+  /**
    * Retrieve sub account for the given uid and type.
    *
    * @param uid uid of the user.

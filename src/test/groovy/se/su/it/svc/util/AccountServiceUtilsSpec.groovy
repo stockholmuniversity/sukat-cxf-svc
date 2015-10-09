@@ -44,6 +44,18 @@ class AccountServiceUtilsSpec extends Specification {
         notThrown(Exception)
   }
 
+  def 'deleteSubAccount: happy path'()
+  {
+        setup:
+        GeneralUtils.metaClass.static.execHelper = { String a, String b -> }
+
+        when:
+        AccountServiceUtils.deleteSubAccount('happy', 'path')
+
+        then:
+        notThrown(Exception)
+  }
+
   def 'getSubAccount: happy path'()
   {
         setup:
