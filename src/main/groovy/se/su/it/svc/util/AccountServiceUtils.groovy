@@ -47,6 +47,17 @@ class AccountServiceUtils {
   }
 
   /**
+   * Delete sub account for the given uid and type.
+   *
+   * @param uid uid of the user.
+   * @param type Sub account type.
+   */
+  static void deleteSubAccount(String uid, String type)
+  {
+        GeneralUtils.execHelper("deleteSubAccount", "${uid}/${type}")
+  }
+
+  /**
    * Convert a domain to a dn (ex. it.su.se -> dc=it,dc=su,dc=se)
    *
    * @param domain the domain to be converted

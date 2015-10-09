@@ -83,6 +83,18 @@ class AccountServiceImplSpec extends Specification {
     notThrown(Exception)
   }
 
+  def "deleteSubAccount: happy path"()
+  {
+    setup:
+    AccountServiceUtils.metaClass.static.deleteSubAccount = { String a, String b -> }
+
+    when:
+    service.deleteSubAccount("csauid", "csaType")
+
+    then:
+    notThrown(Exception)
+  }
+
   def "getSubAccount: happy path"()
   {
     setup:
