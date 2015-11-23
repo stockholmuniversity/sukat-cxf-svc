@@ -132,6 +132,14 @@
           address="/AccountService"
           publishedEndpointUrl="${soap.publishedEndpointUrl}/AccountService"/>
 
+  <bean id="onetimecodeserviceEndpoint" class="se.su.it.svc.OneTimeCodeServiceImpl"/>
+  <jaxws:endpoint
+          id="onetimecodeservice"
+          implementorClass="se.su.it.svc.OneTimeCodeServiceImpl"
+          implementor="#onetimecodeserviceEndpoint"
+          address="/OneTimeCodeService"
+          publishedEndpointUrl="${soap.publishedEndpointUrl}/OneTimeCodeService"/>
+
   <bean id="roleserviceEndpoint" class="se.su.it.svc.RoleServiceImpl"/>
   <jaxws:endpoint
           id="roleservice"
