@@ -64,12 +64,13 @@ import javax.xml.ws.WebServiceContext
 
 @WebService @Slf4j
 @AuthzRole(role = "sukat-account-admin")
-public class AccountServiceImpl implements AccountService {
+public class AccountServiceImpl implements AccountService
+{
 
-  @Resource
-  public WebServiceContext context;
+    @Resource
+    public WebServiceContext context;
 
-  def configManager
+    def configManager
 
   /**
    * Create sub account for the given uid and type.
