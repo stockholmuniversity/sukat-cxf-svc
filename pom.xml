@@ -276,6 +276,7 @@
             <include>**/*Spec.java</include>
             <include>**/*Test.java</include>
           </includes>
+          <trimStackTrace>false</trimStackTrace>
         </configuration>
       </plugin>
 
