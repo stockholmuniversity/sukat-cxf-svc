@@ -108,7 +108,7 @@ class AccountServiceImplSpec extends Specification {
         service.setHomePostalAddress("shpauid", new SvcPostalAddressVO(country: '11'))
 
         then:
-        Thrown(IllegalArgumentException)
+        thrown(IllegalArgumentException)
     }
 
   def "createSubAccount: happy path"()
