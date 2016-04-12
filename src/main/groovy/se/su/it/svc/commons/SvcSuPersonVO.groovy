@@ -87,8 +87,8 @@ public class SvcSuPersonVO implements Serializable{
   String homeMobilePhone
   @XmlAttribute
   String homePhone
-  @XmlElement(name="homePostalAddress")
-  Set<String> homePostalAddress
+  @XmlAttribute
+  String homePostalAddress
   @XmlAttribute
   String homeLocalityName
   @XmlAttribute
