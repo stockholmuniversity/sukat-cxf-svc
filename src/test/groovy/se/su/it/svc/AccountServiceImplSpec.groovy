@@ -37,6 +37,7 @@ import org.gcontracts.PostconditionViolation
 import org.gcontracts.PreconditionViolation
 import se.su.it.commons.Kadmin
 import se.su.it.commons.PasswordUtils
+import se.su.it.svc.commons.SvcPostalAddressVO
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuPerson
@@ -70,6 +71,45 @@ class AccountServiceImplSpec extends Specification {
     SuPersonQuery.metaClass = null
     GldapoSchemaRegistry.metaClass = null
   }
+
+    def "setHomePostalAddress: happy path"()
+    {
+        setup:
+        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> new SuPerson(uid: "foo") }
+        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> return true }
+
+        when:
+        service.setHomePostalAddress("shpauid", new SvcPostalAddressVO(country: 'SE'))
+
+        then:
+        notThrown(Exception)
+    }
+
+    def "setHomePostalAddress: street2 is set"()
+    {
+        setup:
+        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> new SuPerson(uid: "foo") }
+        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> return true }
+
+        when:
+        service.setHomePostalAddress("shpauid", new SvcPostalAddressVO(street2: 'a', country: 'SE'))
+
+        then:
+        notThrown(Exception)
+    }
+
+    def "setHomePostalAddress: invalid country code"()
+    {
+        setup:
+        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> new SuPerson(uid: "foo") }
+        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> return true }
+
+        when:
+        service.setHomePostalAddress("shpauid", new SvcPostalAddressVO(country: '11'))
+
+        then:
+        Thrown(IllegalArgumentException)
+    }
 
   def "createSubAccount: happy path"()
   {

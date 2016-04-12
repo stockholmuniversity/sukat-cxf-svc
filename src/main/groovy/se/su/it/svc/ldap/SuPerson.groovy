@@ -113,9 +113,10 @@ class SuPerson implements Serializable {
   String departmentNumber
   String homeMobilePhone
   String homePhone
-  Set<String> homePostalAddress
+  String homePostalAddress
   String homeLocalityName
   String homePostalCode
+  String homeCountry
   String description
   String sukatComment
   String loginShell

@@ -40,6 +40,7 @@ import org.gcontracts.annotations.Requires
 import se.su.it.commons.Kadmin
 import se.su.it.commons.PasswordUtils
 import se.su.it.svc.commons.LdapAttributeValidator
+import se.su.it.svc.commons.SvcPostalAddressVO
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcSubAccountVO
 import se.su.it.svc.commons.SvcUidPwd
@@ -64,12 +65,57 @@ import javax.xml.ws.WebServiceContext
 
 @WebService @Slf4j
 @AuthzRole(role = "sukat-account-admin")
-public class AccountServiceImpl implements AccountService {
+public class AccountServiceImpl implements AccountService
+{
 
-  @Resource
-  public WebServiceContext context;
+    @Resource
+    public WebServiceContext context;
 
-  def configManager
+    def configManager
+
+    /**
+     * Set homePostalAddress and related attributes.
+     *
+     * @param uid uid of the user.
+     * @param address Address to be set.
+     */
+    @Requires({
+        address &&
+        ! LdapAttributeValidator.validateAttributes([
+            uid: uid
+        ])
+    })
+    public void setHomePostalAddress(
+            @WebParam(name = 'uid') String uid,
+            @WebParam(name = 'address') SvcPostalAddressVO address
+        )
+    {
+        SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
+
+        if (address.street2)
+        {
+            person.homePostalAddress = address.street1 + '$' + address.street2
+        }
+        else
+        {
+            person.homePostalAddress = address.street1
+        }
+
+        person.homePostalCode = address.code
+        person.homeLocalityName = address.locality
+
+        // Should be a valid ISO 3166-1 alpha-2 code
+        if (address.country =~ /^[A-Z][A-Z]$/)
+        {
+            person.homeCountry = address.country
+        }
+        else
+        {
+            throw new IllegalArgumentException("Invalid country code")
+        }
+
+        SuPersonQuery.updateSuPerson(person)
+    }
 
   /**
    * Create sub account for the given uid and type.

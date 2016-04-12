@@ -31,6 +31,7 @@
 
 package se.su.it.svc
 
+import se.su.it.svc.commons.SvcPostalAddressVO
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcSubAccountVO
 import se.su.it.svc.commons.SvcUidPwd
@@ -52,4 +53,5 @@ public interface AccountService {
   void createSubAccount(String uid, String type)
   void deleteSubAccount(String uid, String type)
   SvcSubAccountVO getSubAccount(String uid, String type)
+  void setHomePostalAddress(String uid, SvcPostalAddressVO homePostalAddress)
 }
