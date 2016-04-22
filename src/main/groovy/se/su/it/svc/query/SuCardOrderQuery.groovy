@@ -59,7 +59,7 @@ class SuCardOrderQuery {
   public static final findAllCardsQuery = "SELECT r.id, r.serial, r.owner, r.printer, " +
       "r.createTime, r.firstname, r.lastname, a.streetaddress1, " +
       "a.streetaddress2, a.locality, a.zipcode, s.value, s.description " +
-      "FROM request r JOIN address a ON r.address = a.id" +
+      "FROM request r LEFT JOIN address a ON r.address = a.id" +
       " JOIN status s ON r.status = s.id WHERE r.owner = :uid"
 
   /**
@@ -67,7 +67,7 @@ class SuCardOrderQuery {
    */
   public static final findActiveCardOrdersQuery = "SELECT r.id, serial, owner, printer, createTime, firstname, " +
       "lastname, streetaddress1, streetaddress2, locality, zipcode, value, description " +
-      "FROM request r JOIN address a ON r.address = a.id " +
+      "FROM request r LEFT JOIN address a ON r.address = a.id " +
       "JOIN status s ON r.status = s.id WHERE r.owner = :owner AND status in (1,2,3)"
 
   /**
