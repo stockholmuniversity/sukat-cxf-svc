@@ -52,6 +52,8 @@ class SuCard implements Serializable {
   @XmlAttribute
   String cn
   @XmlAttribute
+  String owner
+  @XmlAttribute
   String suCardUUID
   @XmlAttribute
   String suCardTypeURN
