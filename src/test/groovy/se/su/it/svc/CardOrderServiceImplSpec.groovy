@@ -71,6 +71,18 @@ class CardOrderServiceImplSpec extends Specification {
         zipcode: '12345')
   }
 
+    def "findCardOrderByUuid: happy path"()
+    {
+        setup:
+        service.suCardOrderQuery.findCardOrderByUuid(*_) >> [id: "1"]
+
+        when:
+        def resp = service.findCardOrderByUuid("1")
+
+        then:
+        resp.id == "1"
+    }
+
   @Unroll
   void "findAllCardOrdersForUid: given uid: \'#uid\'"(){
     when:

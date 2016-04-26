@@ -45,6 +45,23 @@ class CardOrderServiceImpl implements CardOrderService {
 
   def suCardOrderQuery
 
+    /**
+     * Find card order that matches uuid.
+     *
+     * @param uuid Universal identifier
+     *
+     * @return Single card orderp
+     */
+    @Requires({ uuid })
+    @Ensures({ result instanceof SvcCardOrderVO })
+    SvcCardOrderVO findCardOrderByUuid(
+            @WebParam(name = 'uuid') String uuid
+        )
+    {
+        return suCardOrderQuery.findCardOrderByUuid(uuid)
+    }
+
+
   /**
    * Find all card orders for the supplied uid.
    *
