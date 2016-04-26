@@ -49,6 +49,7 @@ class CardOrderServiceImplSpec extends Specification {
   def setup() {
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
     service = new CardOrderServiceImpl()
+    service.suCardOrderQuery = Mock(SuCardOrderQuery)
   }
 
   void cleanup() {
@@ -84,9 +85,7 @@ class CardOrderServiceImplSpec extends Specification {
 
   void "findAllCardOrdersForUid: with no card orders."() {
     given:
-    service.suCardOrderQuery = Mock(SuCardOrderQuery) {
-      1 * findAllCardOrdersForUid(*_) >> []
-    }
+    1 * service.suCardOrderQuery.findAllCardOrdersForUid(*_) >> []
 
     expect:
     [] == service.findAllCardOrdersForUid('uid')
@@ -94,9 +93,9 @@ class CardOrderServiceImplSpec extends Specification {
 
   void "findAllCardOrdersForUid: with card orders."() {
     given:
-    service.suCardOrderQuery = Mock(SuCardOrderQuery) {
-      1 * findAllCardOrdersForUid(*_) >> [new SvcCardOrderVO(id:1), new SvcCardOrderVO(id:2)]
-    }
+    1 * service.suCardOrderQuery.findAllCardOrdersForUid(*_) >> [
+            new SvcCardOrderVO(id:1), new SvcCardOrderVO(id:2)
+        ]
 
     when:
     def resp = service.findAllCardOrdersForUid('uid')
@@ -130,9 +129,7 @@ class CardOrderServiceImplSpec extends Specification {
     cardOrder.id = null
     cardOrder.serial = null
 
-    service.suCardOrderQuery = Mock(SuCardOrderQuery) {
-      1 * orderCard(*_) >> UUID.randomUUID()
-    }
+    1 * service.suCardOrderQuery.orderCard(*_) >> UUID.randomUUID()
 
     when:
     def resp = service.orderCard(cardOrder)
@@ -147,9 +144,7 @@ class CardOrderServiceImplSpec extends Specification {
     GroovyMock(CardOrderServiceUtils, global: true)
     CardOrderServiceUtils.validateCardOrderVO(cardOrder) >> [ hasErrors: false, errors: [] ]
 
-    service.suCardOrderQuery = Mock(SuCardOrderQuery) {
-      1 * orderCard(*_) >> uuid
-    }
+    service.suCardOrderQuery.orderCard(*_) >> uuid
 
     when:
     service.orderCard(cardOrder)
