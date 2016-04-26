@@ -68,6 +68,18 @@ public class SuCardOrderQuerySpec extends Specification {
         zipcode: '12345')
   }
 
+    def "findCardOrderByUuid: happy path"()
+    {
+        setup:
+        service.suCardSql.firstRow(*_) >> [id: 1]
+
+        when:
+        def resp = service.findCardOrderByUuid("1")
+
+        then:
+        resp.id == "1"
+    }
+
   void "getFindAllCardsQuery"() {
     expect: 'should return'
     service.findAllCardsQuery == "SELECT r.id, r.serial, r.owner, r.printer, r.createTime, r.firstname, r.lastname, a.streetaddress1," +

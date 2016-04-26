@@ -53,6 +53,14 @@ class SuCardOrderQuery {
    */
   public static final String STATUS_DISCARDED = 'DISCARDED'
 
+    /**
+     * Find card order by <b>uuid</b>
+     */
+    public static final findCardOrderByUuidQuery = "SELECT r.id, serial, owner, createTime, " +
+        "firstname, lastname, streetaddress1, streetaddress2, locality, zipcode, value, description " +
+        "FROM request r LEFT JOIN address a ON r.address = a.id " +
+        "JOIN status s ON r.status = s.id WHERE r.id = :uuid"
+
   /**
    * Find all card orders for <b>uid</b>
    */
@@ -101,6 +109,18 @@ class SuCardOrderQuery {
    * Find <i>id</i> from <i>request</i> for <b>uuid</b>
    */
   public static final findFreeUUIDQuery = "SELECT id FROM request WHERE id = :uuid"
+
+    /**
+     * Find card order for supplied uuid
+     *
+     * @param uuid the uuid to find card orders for
+     *
+     * @return A single card order
+     */
+    SvcCardOrderVO findCardOrderByUuid(String uuid)
+    {
+        return suCardSql.firstRow(findCardOrderByUuidQuery, [uuid: uuid])
+    }
 
   /**
    * Find all card orders for supplied uid
