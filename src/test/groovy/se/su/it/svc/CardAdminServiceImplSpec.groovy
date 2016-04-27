@@ -86,16 +86,18 @@ class CardAdminServiceImplSpec extends Specification
         suCard.suCardState == "urn:x-su:su-card:state:revoked"
     }
 
-    def "revokeCard throws IllegalArgumentException when no card was found"()
+    def "revokeCard: when no card was found in SUKAT"()
     {
         setup:
+        def orderStatus = true
         SuCardQuery.metaClass.static.findCardBySuCardUUID = { String arg1, String arg2 -> return null }
+        service.suCardOrderQuery.markCardAsDiscarded(*_) >> { orderStatus = false }
 
         when:
         service.revokeCard("testcarduuid", 'uid')
 
         then:
-        thrown(IllegalArgumentException)
+        orderStatus == false
     }
 
     def "setCardPIN is unsupported"()

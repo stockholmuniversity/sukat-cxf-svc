@@ -51,32 +51,29 @@ public class CardAdminServiceImpl implements CardAdminService {
 
   def suCardOrderQuery
 
-  /**
-   * This method puts a university card in revoked state in both sukat and sucard db.
-   *
-   *
-   * @param suCardUUID  the card uuid for the card.
-   * @return void.
-   * @see se.su.it.svc.ldap.SuCard
-   */
-  @Requires({ suCardUUID && revokerUid })
-  public void revokeCard(
-      @WebParam(name = "suCardUUID") String suCardUUID,
-      @WebParam(name = "revokerUid") String revokerUid)
-  {
+    /**
+     * This method puts a university card in revoked state in both SUKAT and SUCardDB.
+     *
+     * @param suCardUUID  the card uuid for the card.
+     * @return void.
+     * @see se.su.it.svc.ldap.SuCard
+     */
+    @Requires({ suCardUUID && revokerUid })
+    public void revokeCard(
+            @WebParam(name = "suCardUUID") String suCardUUID,
+            @WebParam(name = "revokerUid") String revokerUid
+        )
+    {
+        SuCard card = SuCardQuery.findCardBySuCardUUID(ConfigManager.LDAP_RW, suCardUUID)
 
-    SuCard card = SuCardQuery.findCardBySuCardUUID(ConfigManager.LDAP_RW, suCardUUID)
+        if (card)
+        {
+            card.suCardState = "urn:x-su:su-card:state:revoked"
+            card.update()
+        }
 
-    if (!card) {
-      log.info("revokeCard: Could not find a card with uuid<${suCardUUID}>")
-      throw new IllegalArgumentException("revokeCard: Could not find a card with uuid<${suCardUUID}>")
+        suCardOrderQuery.markCardAsDiscarded(suCardUUID, revokerUid)
     }
-
-    card.suCardState = "urn:x-su:su-card:state:revoked"
-    card.update()
-
-    suCardOrderQuery.markCardAsDiscarded(suCardUUID, revokerUid)
-  }
 
   /**
    * This method sets a PIN for the specified University Card
