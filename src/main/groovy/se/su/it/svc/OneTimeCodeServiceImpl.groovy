@@ -40,5 +40,29 @@ public class OneTimeCodeServiceImpl implements OneTimeCodeService
 
         return otcvo
     }
+
+    /**
+     * Creates an unconfirmed One Time Code.
+     *
+     * @param days how many days should the code be valid
+     *
+     * @return Object with uid, password and expire
+     */
+    @Requires({
+        days && days <= 28
+    })
+    SvcOneTimeCodeVO getUnconfirmed(
+            @WebParam(name = 'days') Integer days
+        )
+    {
+        def res = GeneralUtils.execHelper("getUnconfirmedOTC", "${days}")
+
+        SvcOneTimeCodeVO otcvo  = new SvcOneTimeCodeVO()
+        otcvo.uid = res.uid
+        otcvo.password = res.password
+        otcvo.expire = res.expire
+
+        return otcvo
+    }
 }
 

@@ -30,6 +30,18 @@ class OneTimeCodeServiceImplSpec extends Specification
 
         then:
         notThrown(Exception)
-  }
+    }
+
+    def "getUnconfirmed: happy path"()
+    {
+        setup:
+        GeneralUtils.metaClass.static.execHelper = { String a, String b -> [] }
+
+        when:
+        service.getUnconfirmed(1)
+
+        then:
+        notThrown(Exception)
+    }
 }
 
