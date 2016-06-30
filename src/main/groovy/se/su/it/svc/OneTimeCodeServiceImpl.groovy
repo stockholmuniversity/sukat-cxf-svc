@@ -21,17 +21,19 @@ public class OneTimeCodeServiceImpl implements OneTimeCodeService
      * Creates a confirmed One Time Code.
      *
      * @param nin 12 character national identification number
+     * @param days how many days should the code be valid
      *
      * @return Object with uid, password and expire
      */
     @Requires({
-        nin && nin.length() == 12
+        nin && nin.length() == 12 && days
     })
     SvcOneTimeCodeVO getConfirmed(
-            @WebParam(name = 'nin') String nin
+            @WebParam(name = 'nin') String nin,
+            @WebParam(name = 'days') Integer days
         )
     {
-        def res = GeneralUtils.execHelper("getConfirmedOTC", nin)
+        def res = GeneralUtils.execHelper("getConfirmedOTC", "${nin} ${days}")
 
         SvcOneTimeCodeVO otcvo  = new SvcOneTimeCodeVO()
         otcvo.uid = res.uid
