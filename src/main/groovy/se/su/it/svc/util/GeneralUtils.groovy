@@ -87,38 +87,42 @@ class GeneralUtils {
     }
   }
 
-  /**
-   * Execute an external helper and handle errors.
-   *
-   * @param helper Helper to execute.
-   * @param args Arguments.
-   *
-   * @return Map with command output.
-   */
-  static Map execHelper(String helper, String args)
-  {
+    /**
+     * Execute an external helper and handle errors.
+     *
+     * @param helper Helper to execute.
+     * @param args Arguments.
+     *
+     * @return Map with command output.
+     */
+    static Map execHelper(String helper, String args)
+    {
         def out = new StringBuffer()
 
         def cmd = "/local/sukat/libexec/" + helper + " " + args
 
         def proc = cmd.execute()
 
-        proc.consumeProcessOutput(out, out)
+        proc.waitForProcessOutput(out, out)
 
-        proc.waitFor()
-
-        if (proc.exitValue() != 0)
+        def json = new JsonSlurper();
+        try
         {
+            return json.parseText(out.toString());
+        }
+        catch(ex)
+        {
+            log.error("${helper}: Execution of external helper failed.")
             log.error("${helper}: ${cmd}")
 
+            log.error("${helper}: --- Begin helper output ---")
             out.eachLine { line ->
                 log.error("${helper}: ${line}")
             }
+            log.error("${helper}: --- End helper output ---")
 
-            throw new RuntimeException("Execution of ${helper} failed.")
+            throw ex
         }
-
-        def json = new JsonSlurper();
-        return json.parseText(out.toString());
-  }
+    }
 }
+
