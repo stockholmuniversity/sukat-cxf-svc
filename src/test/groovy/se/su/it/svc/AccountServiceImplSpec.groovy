@@ -40,9 +40,14 @@ import se.su.it.commons.PasswordUtils
 import se.su.it.svc.commons.SvcPostalAddressVO
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
+
+import se.su.it.svc.ldap.Account
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuPersonStub
+
+import se.su.it.svc.query.AccountQuery
 import se.su.it.svc.query.SuPersonQuery
+
 import se.su.it.svc.util.AccountServiceUtils
 import se.su.it.svc.util.GeneralUtils
 import spock.lang.Shared
@@ -371,8 +376,22 @@ class AccountServiceImplSpec extends Specification {
     thrown(PreconditionViolation)
   }
 
+    def "createSuPerson: account already exist"()
+    {
+        setup:
+        AccountQuery.metaClass.static.findAccountByUid = { String directory, String uid -> new Account() }
+        def accountServiceImpl = new AccountServiceImpl()
+
+        when:
+        accountServiceImpl.createSuPerson("testtest", "6601010357", "Test", "Testsson")
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
   def "Test createSuPerson with already exist uid argument"() {
     setup:
+    AccountQuery.metaClass.static.findAccountByUid = { String directory, String uid -> null }
     SuPersonQuery.metaClass.static.findSuPersonByUID = {String directory,String uid -> new SuPerson() }
     def accountServiceImpl = new AccountServiceImpl()
 
@@ -407,6 +426,7 @@ class AccountServiceImplSpec extends Specification {
 
   def "createSuPerson: socialSecurityNumber already exists"() {
     setup:
+    AccountQuery.metaClass.static.findAccountByUid = { String directory, String uid -> null }
     SuPersonQuery.metaClass.static.findSuPersonByUID = {String directory,String uid -> null }
     SuPersonQuery.metaClass.static.getSuPersonFromSsn = {String directory,String uid -> new SuPerson() }
     def accountServiceImpl = new AccountServiceImpl()

@@ -47,7 +47,10 @@ import se.su.it.svc.commons.SvcUidPwd
 import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuPersonStub
 import se.su.it.svc.manager.ConfigManager
+
+import se.su.it.svc.query.AccountQuery
 import se.su.it.svc.query.SuPersonQuery
+
 import se.su.it.svc.server.annotations.AuditHideReturnValue
 import se.su.it.svc.server.annotations.AuthzRole
 import se.su.it.svc.util.AccountServiceUtils
@@ -333,6 +336,11 @@ public class AccountServiceImpl implements AccountService
           @WebParam(name = 'givenName') String givenName,
           @WebParam(name = 'sn') String sn
   ) {
+
+        if (AccountQuery.findAccountByUid(ConfigManager.LDAP_RW, uid))
+        {
+            throw new IllegalArgumentException("createSuPerson - An account with uid <" + uid + "> already exists")
+        }
 
     if (SuPersonQuery.findSuPersonByUID(ConfigManager.LDAP_RW, uid)) {
       throw new IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
