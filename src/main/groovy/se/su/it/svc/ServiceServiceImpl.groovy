@@ -59,6 +59,50 @@ import javax.jws.WebService
 @AuthzRole(role = "sukat-service-admin")
 public class ServiceServiceImpl implements ServiceService {
 
+    /**
+     * Deletes the specified service from user.
+     *
+     * @param uid uid of the user
+     * @param type service type in short form i.e. 'jabber'
+     */
+    @Requires({
+        uid && !LdapAttributeValidator.validateAttributes([uid:uid ])
+    })
+    public void deleteService(
+        @WebParam(name = "uid") String uid,
+        @WebParam(name = "type") String type
+    )
+    {
+        String urn
+        switch (type)
+        {
+            case 'jabber':
+                urn = 'urn:x-su:service:type:jabber'
+                break
+
+            default:
+                throw new IllegalArgumentException("Unsupported service type")
+        }
+
+        AccountServiceUtils.deleteSubAccount(uid, type)
+
+        SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RO, uid)
+
+        def service = SuServiceQuery.getSuServiceByType(ConfigManager.LDAP_RW, person.dn, urn)
+        if (service)
+        {
+            service.delete()
+        }
+
+        for (account in SuSubAccountQuery.getSuSubAccounts(ConfigManager.LDAP_RW, person.dn))
+        {
+            if (account.uid == "${uid}.${type}")
+            {
+                account.delete()
+            }
+        }
+    }
+
   /**
    * This method returns services for the specified uid.
    *

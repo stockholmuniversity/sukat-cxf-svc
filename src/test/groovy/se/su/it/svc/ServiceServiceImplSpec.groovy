@@ -44,11 +44,18 @@ import se.su.it.svc.query.SuServiceDescriptionQuery
 import se.su.it.svc.query.SuServiceQuery
 import se.su.it.svc.query.SuSubAccountQuery
 import se.su.it.svc.util.AccountServiceUtils
+
+import spock.lang.Shared
 import spock.lang.Specification
 
 class ServiceServiceImplSpec extends Specification {
 
+    @Shared
+    ServiceServiceImpl service
+
   def setup() {
+    service = new ServiceServiceImpl()
+
     GldapoSchemaRegistry.metaClass.add = { Object registration -> }
     SuService.metaClass.directory = "directory"
     SuService.metaClass.static.update = {->}
@@ -65,6 +72,95 @@ class ServiceServiceImplSpec extends Specification {
     SuSubAccountQuery.metaClass = null
     GldapoSchemaRegistry.metaClass = null
   }
+
+    def "deleteService: happy path"()
+    {
+        setup:
+        GroovyMock(AccountServiceUtils, global: true)
+        GroovyMock(SuPersonQuery, global: true)
+        GroovyMock(SuServiceQuery, global: true)
+        GroovyMock(SuSubAccountQuery, global: true)
+
+        def p = new SuPerson()
+        p.metaClass.getDn = { "" }
+
+        def s = GroovyMock(SuService) {
+            asBoolean() >> true // https://github.com/spockframework/spock/issues/438
+        }
+        def sa = GroovyMock(SuSubAccount) {
+            asBoolean() >> true // https://github.com/spockframework/spock/issues/438
+            getUid() >> 'dsuser.jabber'
+        }
+
+        when:
+        service.deleteService('dsuser', 'jabber')
+
+        then:
+        1 * AccountServiceUtils.deleteSubAccount(*_)
+        1 * SuPersonQuery.getSuPersonFromUID(*_) >> p
+        1 * SuServiceQuery.getSuServiceByType(*_) >> s
+        1 * SuSubAccountQuery.getSuSubAccounts(*_) >> [sa]
+        1 * s.delete()
+        1 * sa.delete()
+    }
+
+    def "deleteService: unknown service type"()
+    {
+        when:
+        service.deleteService('dsuser', 'pabber')
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
+    def "deleteService: SUKAT information has already been removed"()
+    {
+        setup:
+        GroovyMock(AccountServiceUtils, global: true)
+        GroovyMock(SuPersonQuery, global: true)
+        GroovyMock(SuServiceQuery, global: true)
+        GroovyMock(SuSubAccountQuery, global: true)
+
+        def p = new SuPerson()
+        p.metaClass.getDn = { "" }
+
+        when:
+        service.deleteService('dsuser', 'jabber')
+
+        then:
+        1 * AccountServiceUtils.deleteSubAccount(*_)
+        1 * SuPersonQuery.getSuPersonFromUID(*_) >> p
+        1 * SuServiceQuery.getSuServiceByType(*_)
+        1 * SuSubAccountQuery.getSuSubAccounts(*_)
+        0 * _.delete()
+    }
+
+    def "deleteService: other SUKAT subaccount"()
+    {
+        setup:
+        GroovyMock(AccountServiceUtils, global: true)
+        GroovyMock(SuPersonQuery, global: true)
+        GroovyMock(SuServiceQuery, global: true)
+        GroovyMock(SuSubAccountQuery, global: true)
+
+        def p = new SuPerson()
+        p.metaClass.getDn = { "" }
+
+        def sa = GroovyMock(SuSubAccount) {
+            asBoolean() >> true // https://github.com/spockframework/spock/issues/438
+            getUid() >> 'dsuser.other'
+        }
+
+        when:
+        service.deleteService('dsuser', 'jabber')
+
+        then:
+        1 * AccountServiceUtils.deleteSubAccount(*_)
+        1 * SuPersonQuery.getSuPersonFromUID(*_) >> p
+        1 * SuServiceQuery.getSuServiceByType(*_)
+        1 * SuSubAccountQuery.getSuSubAccounts(*_) >> [sa]
+        0 * _.delete()
+    }
 
   def "Test getServices with null uid argument"() {
     setup:

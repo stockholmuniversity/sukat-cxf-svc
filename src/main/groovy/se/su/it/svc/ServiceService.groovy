@@ -35,6 +35,7 @@ import se.su.it.svc.ldap.SuService
 import se.su.it.svc.ldap.SuServiceDescription
 
 public interface ServiceService {
+    void deleteService(String uid, String type)
   SuService[] getServices(String uid)
   SuServiceDescription getServiceTemplate(String serviceType)
   SuServiceDescription[] getServiceTemplates()
