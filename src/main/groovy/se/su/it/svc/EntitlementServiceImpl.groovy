@@ -50,38 +50,40 @@ import javax.jws.WebService
 @AuthzRole(role = "sukat-entitlement-admin")
 public class EntitlementServiceImpl implements EntitlementService {
 
-  /**
-   * This method adds entitlement to the specified uid.
-   *
-   *
-   * @param uid  uid of the user.
-   * @param entitlement entitlement to add
-   * @return void.
-   * @see se.su.it.svc.ldap.SuPerson
-   */
-  @Requires({ uid && entitlement  &&
-      !LdapAttributeValidator.validateAttributes([uid:uid, entitlement:entitlement ])})
-  public void addEntitlement(
-      @WebParam(name = "uid") String uid,
-      @WebParam(name = "entitlement") String entitlement)
-  {
+    /**
+     * This method adds entitlement to the specified uid.
+     *
+     *
+     * @param uid  uid of the user.
+     * @param entitlement entitlement to add
+     * @return void.
+     * @see se.su.it.svc.ldap.SuPerson
+     */
+    @Requires({ uid && entitlement  &&
+        !LdapAttributeValidator.validateAttributes([uid:uid, entitlement:entitlement ])})
+    public void addEntitlement(
+        @WebParam(name = "uid") String uid,
+        @WebParam(name = "entitlement") String entitlement
+    )
+    {
+        SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
 
-    SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
+        // According to the LDAP schema eduPersonEntitlement is case-insesitive but it is not
+        // certain that all systems that receive this through SAML feel the same. So to keep SUKAT
+        // clean we compare case-sensetive and if there is a case-insesitive match LDAP will throw
+        // and exception separating the different cases.
+        if (person.eduPersonEntitlement.find { it.equals(entitlement) })
+        {
+           throw new IllegalArgumentException("Entitlement ${entitlement} already exist")
+        }
 
-    if (person.eduPersonEntitlement != null) {
-      if (person.eduPersonEntitlement.find { it.equalsIgnoreCase(entitlement) }) {
-        throw new IllegalArgumentException("Entitlement ${entitlement} already exist")
-      }
+        // Entitlements are used to flag manual students. Sometimes this is done before the account
+        // is activated and therefor it might lack the eduPerson class.
+        person.objectClass.add('eduPerson');
 
-      person.eduPersonEntitlement.add(entitlement)
-      SuPersonQuery.updateSuPerson(person)
-    } else {
-      def tmpSet = new LinkedHashSet<String>()
-      tmpSet.add(entitlement)
-      person.eduPersonEntitlement = tmpSet
-      SuPersonQuery.updateSuPerson(person)
+        person.eduPersonEntitlement.add(entitlement)
+        SuPersonQuery.updateSuPerson(person)
     }
-  }
 
   /**
    * This method removes entitlement from the specified uid.

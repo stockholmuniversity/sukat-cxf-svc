@@ -86,32 +86,34 @@ class EntitlementServiceImplSpec extends Specification {
     thrown(IllegalArgumentException)
   }
 
-  def "Test addEntitlement whith duplicate entitlement"() {
-    setup:
-    SuPerson person = new SuPerson()
-    def tmpSet = new java.util.LinkedHashSet<String>()
-    tmpSet.add("urn:mace:swami.se:gmai:test:test")
-    person.eduPersonEntitlement = tmpSet
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return person }
-    SuPersonQuery.metaClass.static.saveSuPerson = {SuPerson arg1 -> return void}
-    def entitlementServiceImpl = new EntitlementServiceImpl()
-    when:
-    entitlementServiceImpl.addEntitlement("testuid","urn:mace:swami.se:gmai:test:test")
-    then:
-    thrown(IllegalArgumentException)
-  }
+    def "addEntitlement: user already has entitlement"()
+    {
+        setup:
+        SuPerson person = new SuPerson(eduPersonEntitlement: ['urn:mace:swami.se:gmai:test:test'])
+        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> return person }
+        def entitlementServiceImpl = new EntitlementServiceImpl()
 
-  def "Test addEntitlement"() {
-    setup:
-    SuPerson person = new SuPerson()
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> return person }
-    SuPersonQuery.metaClass.static.updateSuPerson = {SuPerson arg1 -> return void}
-    def entitlementServiceImpl = new EntitlementServiceImpl()
-    when:
-    entitlementServiceImpl.addEntitlement("testuid","urn:mace:swami.se:gmai:test:test")
-    then:
-    person.eduPersonEntitlement.contains("urn:mace:swami.se:gmai:test:test") == true
-  }
+        when:
+        entitlementServiceImpl.addEntitlement("testuid","urn:mace:swami.se:gmai:test:test")
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
+    def "addEntitlement: happy path"()
+    {
+        setup:
+        SuPerson person = new SuPerson(eduPersonEntitlement: [], objectClass: [])
+        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> return person }
+        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson arg1 -> }
+        def entitlementServiceImpl = new EntitlementServiceImpl()
+
+        when:
+        entitlementServiceImpl.addEntitlement("testuid", "urn:mace:swami.se:gmai:test:test")
+
+        then:
+        person.eduPersonEntitlement.contains("urn:mace:swami.se:gmai:test:test") == true
+    }
 
   def "Test removeEntitlement with null uid argument"() {
     setup:
