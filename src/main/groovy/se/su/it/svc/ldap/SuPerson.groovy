@@ -322,25 +322,30 @@ class SuPerson implements Serializable {
     log.info("enrollUser - User with uid <$uid> now enabled.")
   }
 
-  /**
-   * Sets mailLocalAddress if not already set, adds new mailLocalAddress if
-   * @param mailLocalAddresses
-   */
-  public String[] addMailLocalAddress(Set<String> mailLocalAddresses) {
+    /**
+     * Sets mailLocalAddress if not already set, adds new mailLocalAddress if
+     * @param mailLocalAddresses
+     */
+    public String[] addMailLocalAddress(Set<String> mailLocalAddresses)
+    {
 
-    mailLocalAddresses = mailLocalAddresses*.toLowerCase()
+        mailLocalAddresses = mailLocalAddresses*.toLowerCase()
 
-    if (mailLocalAddress == null) {
-      setMailLocalAddress(mailLocalAddresses)
-    } else {
-      def newEntries = mailLocalAddresses - mailLocalAddress*.toLowerCase()
-      if (newEntries) {
-        mailLocalAddress += newEntries
-      }
+        if (mailLocalAddress == null)
+        {
+            setMailLocalAddress(mailLocalAddresses)
+        }
+        else
+        {
+            def newEntries = mailLocalAddresses - mailLocalAddress*.toLowerCase()
+            if (newEntries)
+            {
+                mailLocalAddress += newEntries
+            }
+        }
+
+        return mailLocalAddress as String[]
     }
-
-    return mailLocalAddress as String[]
-  }
 
   private boolean isSkipCreateEnabled() {
     return configManager.config.enrollment.create.skip == "true"
