@@ -331,17 +331,17 @@ class SuPerson implements Serializable {
 
         mailLocalAddresses = mailLocalAddresses*.toLowerCase()
 
-        if (mailLocalAddress == null)
-        {
-            setMailLocalAddress(mailLocalAddresses)
-        }
-        else
+        if (mailLocalAddress)
         {
             def newEntries = mailLocalAddresses - mailLocalAddress*.toLowerCase()
             if (newEntries)
             {
                 mailLocalAddress += newEntries
             }
+        }
+        else
+        {
+            setMailLocalAddress(mailLocalAddresses)
         }
 
         return mailLocalAddress as String[]

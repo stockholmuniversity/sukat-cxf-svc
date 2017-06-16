@@ -400,7 +400,7 @@ class SuPersonSpec extends Specification {
   def "addMailLocalAddresses: When SuPerson doesn't have any mailLocalAddress entries"() {
     given:
     def mailLocalAddresses = ['kaka@su.se', "bar@su.se"] as Set
-    SuPerson suPerson = new SuPerson(objectClass:[])
+    SuPerson suPerson = new SuPerson(objectClass: [], mailLocalAddress: [])
 
     when:
     def resp = suPerson.addMailLocalAddress(mailLocalAddresses)
