@@ -53,8 +53,10 @@ public class SvcSuPersonVO implements Serializable{
   String sn
   @XmlAttribute
   String displayName
-  @XmlElement(name="title")
-  Set<String> title
+  @XmlAttribute
+  String title
+  @XmlAttribute
+  String title_en
   @XmlElement(name="roomNumber")
   Set<String> roomNumber
   @XmlElement(name="telephoneNumber")

@@ -33,6 +33,8 @@ package se.su.it.svc.ldap
 
 import gldapo.schema.annotation.GldapoNamingAttribute
 import gldapo.schema.annotation.GldapoSchemaFilter
+import gldapo.schema.annotation.GldapoSynonymFor
+
 import groovy.util.logging.Slf4j
 import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcSuPersonVO
@@ -96,7 +98,9 @@ class SuPerson implements Serializable {
   String sn
   String cn
   String displayName
-  Set<String> title
+  String title
+  @GldapoSynonymFor('title;lang-en')
+  String title_en
   Set<String> roomNumber
   Set<String> telephoneNumber
   String mobile
