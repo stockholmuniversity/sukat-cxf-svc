@@ -352,9 +352,9 @@ class AccountServiceImplSpec extends Specification {
   def "Test updateSuPerson when person exist"() {
     setup:
     SvcSuPersonVO suPerson = new SvcSuPersonVO()
-    suPerson.title = ["knallhatt"]
+    suPerson.title = "knallhatt"
     suPerson.eduPersonAffiliation = ["other"]
-    def title = []
+    def title
     String listEntry0 = null
     SuPersonQuery.metaClass.static.getSuPersonFromUID = {String directory,String uid -> new SuPerson(title: ["systemdeveloper"], eduPersonAffiliation: ["employee"]) }
     SuPersonQuery.metaClass.static.updateSuPerson = {SuPerson person -> title = person.title;listEntry0=person.eduPersonAffiliation.iterator().next()}
@@ -362,7 +362,7 @@ class AccountServiceImplSpec extends Specification {
     when:
     accountServiceImpl.updateSuPerson("testuid",suPerson)
     then:
-    title.iterator().next() == "knallhatt"
+    title == "knallhatt"
     listEntry0 == "other"
   }
 
