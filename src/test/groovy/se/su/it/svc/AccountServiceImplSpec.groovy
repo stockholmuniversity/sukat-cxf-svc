@@ -71,6 +71,7 @@ class AccountServiceImplSpec extends Specification {
   def cleanup() {
     this.service = null
     AccountServiceUtils.metaClass = null
+    GeneralUtils.metaClass = null
     Kadmin.metaClass = null
     SuPersonStub.metaClass = null
     SuPersonQuery.metaClass = null
