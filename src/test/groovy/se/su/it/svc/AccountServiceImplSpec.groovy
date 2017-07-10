@@ -117,6 +117,36 @@ class AccountServiceImplSpec extends Specification {
         thrown(IllegalArgumentException)
     }
 
+    def "setTitle: happy path"()
+    {
+        setup:
+        def person = new SuPerson(uid: "stuid", title: "gammal titel", title_en: "old title")
+        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> return person }
+        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson a -> return true }
+
+        when:
+        service.setTitle("stuid", "ny titel", "new title")
+
+        then:
+        person.title == "ny titel"
+        person.title_en == "new title"
+    }
+
+    def "setTitle: english title is empty"()
+    {
+        setup:
+        def person = new SuPerson(uid: "stuid", title: "gammal titel", title_en: "old title")
+        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> return person }
+        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson a -> return true }
+
+        when:
+        service.setTitle("stuid", "ny titel", "")
+
+        then:
+        person.title == "ny titel"
+        person.title_en == null
+    }
+
   def "createSubAccount: happy path"()
   {
     setup:

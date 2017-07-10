@@ -120,6 +120,41 @@ public class AccountServiceImpl implements AccountService
         SuPersonQuery.updateSuPerson(person)
     }
 
+    /**
+     * Set titles, swedish is required, english is optional.
+     *
+     * @param sv Swedish title
+     * @param en English title
+     */
+    @Requires({
+        sv &&
+        en != null &&
+        ! LdapAttributeValidator.validateAttributes([
+            uid: uid
+        ])
+    })
+    public void setTitle(
+            @WebParam(name = 'uid') String uid,
+            @WebParam(name = 'sv') String sv,
+            @WebParam(name = 'en') String en
+        )
+    {
+        SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
+
+        person.title = sv
+
+        if (en.length() > 0)
+        {
+            person.title_en = en
+        }
+        else
+        {
+            person.title_en = null
+        }
+
+        SuPersonQuery.updateSuPerson(person)
+    }
+
   /**
    * Create sub account for the given uid and type.
    *
