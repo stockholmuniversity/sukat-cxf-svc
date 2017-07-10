@@ -54,4 +54,5 @@ public interface AccountService {
   void deleteSubAccount(String uid, String type)
   SvcSubAccountVO getSubAccount(String uid, String type)
   void setHomePostalAddress(String uid, SvcPostalAddressVO homePostalAddress)
+  void setTitle(String uid, String sv, String en)
 }
