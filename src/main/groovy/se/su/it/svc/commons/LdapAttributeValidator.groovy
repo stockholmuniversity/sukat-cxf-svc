@@ -141,8 +141,8 @@ public class LdapAttributeValidator {
       throwMe(validateAttributesString,"Attribute validation failed for nin <${ssn}>. ssn can not be null.")
     if (!ssn instanceof String)
       throwMe(validateAttributesString,"Attribute validation failed for nin <${ssn}>. ssn need to be a String object.")
-    if(! (ssn ==~ /[0-9]{6}([a-zA-Z0-9\*][0-9]{3}){0,1}/) ) {
-      throwMe(validateAttributesString,"Attribute validation failed for nin <${ssn}>. ssn need to be a 6 or 10 chars in length.")
+    if(! (ssn ==~ /^[0-9]{6}[a-zA-Z0-9\*][0-9]{3}$/) ) {
+      throwMe(validateAttributesString,"Attribute validation failed for nin <${ssn}>. ssn need to be a 10 chars in length.")
     }
   }
 
