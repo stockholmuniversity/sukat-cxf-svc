@@ -114,5 +114,31 @@ class GeneralUtils {
             throw ex
         }
     }
+
+    /**
+     * Attempt to qualify a 10 digit ssn with 19 or 20 for century
+     *
+     * @param ssn The ssn to qualify
+     *
+     * @return A 12 digit nin
+     */
+    static String ssnToNin(String ssn)
+    {
+        // Test- and Archiveaccounts are always in the "year" 2000.
+        if (ssn ==~ /^00[0-9].00A\d\d\d$/)
+        {
+            return "20${ssn}"
+        }
+
+        def now = Calendar.getInstance()
+        if (ssn.substring(0, 2) > now.format("yy"))
+        {
+            return "19${ssn}";
+        }
+        else
+        {
+            throw new RuntimeException("Could not guess century for ${ssn}")
+        }
+    }
 }
 
