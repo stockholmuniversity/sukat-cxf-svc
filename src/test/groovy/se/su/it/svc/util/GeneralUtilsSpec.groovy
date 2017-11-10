@@ -130,4 +130,28 @@ class GeneralUtilsSpec extends Specification {
     then:
     thrown(RuntimeException)
   }
+
+    def "ssnToNin: qualification is successful for #ssn"()
+    {
+        expect:
+        nin == GeneralUtils.ssnToNin(ssn)
+
+        where:
+        ssn          | nin
+        "9010101013" | "199010101013"
+        "009000A000" | "20009000A000"
+    }
+
+    def "ssnToNin: qualification fails for #ssn"()
+    {
+        when:
+        GeneralUtils.ssnToNin(ssn)
+
+        then:
+        thrown(RuntimeException)
+
+        where:
+        ssn          | _
+        "0001010000" | _
+    }
 }
