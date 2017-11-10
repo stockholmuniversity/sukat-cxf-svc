@@ -48,18 +48,6 @@ class GeneralUtilsSpec extends Specification {
   }
 
   @Unroll
-  void "pnrToSsn: When given pnr: '#pnr' we expect '#expected'"() {
-    expect:
-    GeneralUtils.pnrToSsn(pnr) == expected
-
-    where:
-    pnr           | expected
-    '_'*11        | '_'*11        // 11 chars, nothing happens.
-    '++' + '_'*10 | '_'*10        // 12 chars, first 2 chars should be cut.
-    '++' + '_'*11 | '++' + '_'*11 // 13 chars, nothing happens.
-  }
-
-  @Unroll
   void "uidToKrb5Principal: When given uid: \'#uid\' we expect '\'#expected\'"() {
     expect:
     GeneralUtils.uidToKrb5Principal(uid) == expected
