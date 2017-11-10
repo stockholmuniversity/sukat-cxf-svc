@@ -43,6 +43,7 @@ class LdapAttributeValidatorSpec extends Specification
         ssn      | _
         "860101" | _
     }
+
     @Unroll
     def "validateUid: uid is ok"()
     {
