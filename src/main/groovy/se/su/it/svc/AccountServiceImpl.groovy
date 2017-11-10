@@ -350,7 +350,7 @@ public class AccountServiceImpl implements AccountService
    * This method creates a SuPerson in sukat.
    *
    * @param uid of the SuPerson to be created.
-   * @param ssn 6-10 digit social security number for the SuPerson.
+   * @param ssn 10 digit social security number for the SuPerson.
    * @param givenName given name for the SuPerson.
    * @param sn surname of the SuPerson.
    * @throws IllegalArgumentException if a user with the supplied uid already exists

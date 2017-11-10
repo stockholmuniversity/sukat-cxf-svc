@@ -15,6 +15,35 @@ class LdapAttributeValidatorSpec extends Specification
     }
 
     @Unroll
+    def "validateSsn: ssn #ssn is ok"()
+    {
+        when:
+        lav.validateSsn(ssn)
+
+        then:
+        noExceptionThrown()
+
+        where:
+        ssn          | _
+        "8710101234" | _
+        "871010A234" | _
+        "871010P234" | _
+    }
+
+    @Unroll
+    def "validateSsn: ssn #ssn is bad"()
+    {
+        when:
+        lav.validateSsn(ssn)
+
+        then:
+        thrown(IllegalArgumentException)
+
+        where:
+        ssn      | _
+        "860101" | _
+    }
+    @Unroll
     def "validateUid: uid is ok"()
     {
         when:
