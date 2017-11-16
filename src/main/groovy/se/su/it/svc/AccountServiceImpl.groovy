@@ -426,6 +426,12 @@ public class AccountServiceImpl implements AccountService
 
     suPerson.activate(svcUidPwd, affiliations, domain)
 
+    // Notify Ladok-import of the activation to setup postaladdress and more
+    def msg = [:]
+    msg.socialsecuritynumber = GeneralUtils.ssnToNin(suPerson.socialSecurityNumber)
+
+    GeneralUtils.publishMessage(msg)
+
     return svcUidPwd
   }
 

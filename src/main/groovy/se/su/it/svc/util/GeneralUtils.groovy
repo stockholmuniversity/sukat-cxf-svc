@@ -31,6 +31,7 @@
 
 package se.su.it.svc.util
 
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
 import groovy.util.logging.Slf4j
@@ -113,6 +114,29 @@ class GeneralUtils {
 
             throw ex
         }
+    }
+
+    /**
+     * Publish a message by writing a file that the daemon will pickup
+     *
+     * @param message A map with the message
+     */
+    static void publishMessage(Map message)
+    {
+        def now = new Date()
+        def messageId = now.time
+
+        log.info("Publishing message with id ${messageId}")
+
+        def file = "/local/sukat/work/messages/${messageId}.json"
+
+        def fh = new File("${file}.tmp")
+
+        fh.write(JsonOutput.toJson(message))
+
+        // This should be an atomic rename so that the message is ready when the
+        // producer sees it.
+        fh.renameTo(file)
     }
 
     /**

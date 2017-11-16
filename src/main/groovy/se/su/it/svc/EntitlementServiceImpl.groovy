@@ -38,6 +38,7 @@ import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.manager.ConfigManager
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.server.annotations.AuthzRole
+import se.su.it.svc.util.GeneralUtils
 
 import javax.jws.WebParam
 import javax.jws.WebService
@@ -83,6 +84,15 @@ public class EntitlementServiceImpl implements EntitlementService {
 
         person.eduPersonEntitlement.add(entitlement)
         SuPersonQuery.updateSuPerson(person)
+
+        // Ladok-import should check affiliation if this was a manual student entitlement
+        if (entitlement ==~ /^urn:mace:swami.se:gmai:su-student:manual:semester=.*$/)
+        {
+            def msg = [:]
+            msg.socialsecuritynumber = GeneralUtils.ssnToNin(person.socialSecurityNumber)
+
+            GeneralUtils.publishMessage(msg)
+        }
     }
 
   /**
@@ -113,5 +123,14 @@ public class EntitlementServiceImpl implements EntitlementService {
     } else {
       throw new IllegalArgumentException("entitlement $entitlement was not found for person with uid: $uid")
     }
+
+        // Ladok-import should check affiliation if this was a manual student entitlement
+        if (entitlement ==~ /^urn:mace:swami.se:gmai:su-student:manual:semester=.*$/)
+        {
+            def msg = [:]
+            msg.socialsecuritynumber = GeneralUtils.ssnToNin(person.socialSecurityNumber)
+
+            GeneralUtils.publishMessage(msg)
+        }
   }
 }

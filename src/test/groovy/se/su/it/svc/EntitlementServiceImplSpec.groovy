@@ -6,6 +6,8 @@ import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.query.SuPersonQuery
 import spock.lang.Specification
 
+import se.su.it.svc.util.GeneralUtils
+
 /*
  * Copyright (c) 2013, IT Services, Stockholm University
  * All rights reserved.
@@ -115,6 +117,22 @@ class EntitlementServiceImplSpec extends Specification {
         person.eduPersonEntitlement.contains("urn:mace:swami.se:gmai:test:test") == true
     }
 
+    def "addEntitlement: manual student"()
+    {
+        setup:
+        SuPerson person = new SuPerson(eduPersonEntitlement: [], objectClass: [], socialSecurityNumber: '9910101234')
+        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> return person }
+        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson arg1 -> }
+        def entitlementServiceImpl = new EntitlementServiceImpl()
+        GroovyMock(GeneralUtils, global: true)
+
+        when:
+        entitlementServiceImpl.addEntitlement("testuid", "urn:mace:swami.se:gmai:su-student:manual:semester=19911")
+
+        then:
+        1 * GeneralUtils.publishMessage(*_)
+    }
+
   def "Test removeEntitlement with null uid argument"() {
     setup:
     def entitlementServiceImpl = new EntitlementServiceImpl()
@@ -195,4 +213,20 @@ class EntitlementServiceImplSpec extends Specification {
     then:
     person.eduPersonEntitlement.contains("urn:mace:swami.se:gmai:test:test") == false
   }
+
+    def "removeEntitlement: manual student"()
+    {
+        setup:
+        SuPerson person = new SuPerson(eduPersonEntitlement: ['urn:mace:swami.se:gmai:su-student:manual:semester=1991'])
+        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> return person }
+        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson arg1 -> return void}
+        def entitlementServiceImpl = new EntitlementServiceImpl()
+        GroovyMock(GeneralUtils, global: true)
+
+        when:
+        entitlementServiceImpl.removeEntitlement("testuid", 'urn:mace:swami.se:gmai:su-student:manual:semester=1991')
+
+        then:
+        1 * GeneralUtils.publishMessage(*_)
+    }
 }

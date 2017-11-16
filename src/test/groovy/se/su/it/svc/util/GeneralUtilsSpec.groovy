@@ -131,6 +131,22 @@ class GeneralUtilsSpec extends Specification {
     thrown(RuntimeException)
   }
 
+    def "publishMessage: happy path"()
+    {
+        setup:
+        def mockFile = GroovyMock(File) {
+            1 * write(*_)
+            1 * renameTo(*_)
+        }
+        GroovySpy(File, global: true, constructorArgs: ['a-pretty-file-name'])
+
+        when:
+        GeneralUtils.publishMessage([key: 'test message value'])
+
+        then:
+        1 * new File(*_) >> mockFile
+    }
+
     def "ssnToNin: qualification is successful for #ssn"()
     {
         expect:

@@ -758,7 +758,11 @@ class AccountServiceImplSpec extends Specification {
 
   def "activateSuPerson: test when user exists in LDAP, should handle user and return new password"() {
     given:
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> return GroovyMock(SuPerson) }
+    def suPerson = GroovyMock(SuPerson) {
+        getSocialSecurityNumber(*_) >> '9901011234'
+    }
+    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> suPerson }
+    GroovyMock(GeneralUtils, global: true)
 
     when:
     def svcUidPwd = service.activateSuPerson(
@@ -769,6 +773,7 @@ class AccountServiceImplSpec extends Specification {
     then:
     svcUidPwd.uid == 'uid'
     svcUidPwd.password.size() == 10
+    1 * GeneralUtils.publishMessage(*_)
   }
 
   def "activateSuPerson: test when user doesn't exist in LDAP, should throw exception"() {
@@ -803,9 +808,12 @@ class AccountServiceImplSpec extends Specification {
     def uid = "testuid"
     def password = "*" * 10
 
-    SuPerson suPerson = Mock(SuPerson)
+    SuPerson suPerson = Mock(SuPerson) {
+        getSocialSecurityNumber(*_) >> '9901011235'
+    }
     SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> suPerson }
 
+    GroovyMock(GeneralUtils, global: true)
     GroovyMock(PasswordUtils, global: true)
 
     when:
@@ -815,6 +823,7 @@ class AccountServiceImplSpec extends Specification {
     ret.uid == uid
     ret.password == password
     1 * PasswordUtils.genRandomPassword(10, 10) >> password
+    1 * GeneralUtils.publishMessage(*_)
   }
 
   def "addMailLocalAddresses: given no valid uid"() {
