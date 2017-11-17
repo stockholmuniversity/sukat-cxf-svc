@@ -287,6 +287,15 @@
           <tagNameFormat>@{project.version}</tagNameFormat>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+            <skip>true</skip>
+        </configuration>
+      </plugin>
+
     </plugins>
   </build>
 
@@ -325,13 +334,6 @@
       <url>http://maven.it.su.se/it.su.se/maven2</url>
     </repository>
   </repositories>
-
-  <distributionManagement>
-    <repository>
-      <id>ssh-repository</id>
-      <url>scpexe://git.it.su.se/afs/su.se/services/maven/it.su.se/maven2</url>
-    </repository>
-  </distributionManagement>
 
   <prerequisites>
     <maven>3.0.0</maven>
