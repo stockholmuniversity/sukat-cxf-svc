@@ -773,7 +773,7 @@ class AccountServiceImplSpec extends Specification {
     then:
     svcUidPwd.uid == 'uid'
     svcUidPwd.password.size() == 10
-    1 * GeneralUtils.publishMessage(*_)
+    2 * GeneralUtils.publishMessage(*_)
   }
 
   def "activateSuPerson: test when user doesn't exist in LDAP, should throw exception"() {
@@ -823,7 +823,7 @@ class AccountServiceImplSpec extends Specification {
     ret.uid == uid
     ret.password == password
     1 * PasswordUtils.genRandomPassword(10, 10) >> password
-    1 * GeneralUtils.publishMessage(*_)
+    2 * GeneralUtils.publishMessage(*_)
   }
 
   def "addMailLocalAddresses: given no valid uid"() {
