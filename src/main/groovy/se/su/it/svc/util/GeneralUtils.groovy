@@ -34,6 +34,8 @@ package se.su.it.svc.util
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
+import groovy.transform.Synchronized
+
 import groovy.util.logging.Slf4j
 
 import java.lang.reflect.Modifier
@@ -121,6 +123,7 @@ class GeneralUtils {
      *
      * @param message A map with the message
      */
+    @Synchronized
     static void publishMessage(Map message)
     {
         def now = new Date()
@@ -137,6 +140,10 @@ class GeneralUtils {
         // This should be an atomic rename so that the message is ready when the
         // producer sees it.
         fh.renameTo(file)
+
+        // Sleep a millisecond to make sure that the next messageId will be different, requires
+        // syncronization.
+        Thread.sleep(1)
     }
 
     /**
