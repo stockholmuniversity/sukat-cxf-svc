@@ -7,6 +7,7 @@ import javax.jws.WebService
 
 import org.gcontracts.annotations.Requires
 
+import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcOneTimeCodeVO
 
 import se.su.it.svc.server.annotations.AuthzRole
@@ -26,7 +27,10 @@ public class OneTimeCodeServiceImpl implements OneTimeCodeService
      * @return Object with uid, password and expire
      */
     @Requires({
-        nin && nin.length() == 12 && days
+        days &&
+        ! LdapAttributeValidator.validateAttributes([
+            nin: nin]
+          )
     })
     SvcOneTimeCodeVO getConfirmed(
             @WebParam(name = 'nin') String nin,
