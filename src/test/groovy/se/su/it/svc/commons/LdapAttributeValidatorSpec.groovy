@@ -15,6 +15,35 @@ class LdapAttributeValidatorSpec extends Specification
     }
 
     @Unroll
+    def "validateNin: nin #nin is ok"()
+    {
+        when:
+        lav.validateNin(nin)
+
+        then:
+        noExceptionThrown()
+
+        where:
+        nin            | _
+        "199010101013" | _  // Personnummer
+    }
+
+    @Unroll
+    def "validateNin: nin #nin is bad"()
+    {
+        when:
+        lav.validateNin(nin)
+
+        then:
+        thrown(IllegalArgumentException)
+
+        where:
+        nin            | _
+        "8601011234"   | _   // Too short
+        "218601011234" | _   // Invalid century
+    }
+
+    @Unroll
     def "validateSsn: ssn #ssn is ok"()
     {
         when:
