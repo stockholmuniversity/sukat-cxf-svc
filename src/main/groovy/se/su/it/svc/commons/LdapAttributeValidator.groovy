@@ -131,20 +131,71 @@ public class LdapAttributeValidator {
     }
   }
 
-  /**
-   * Validate ssn according to https://confluence.it.su.se/confluence/x/EhIfAw
-   *
-   * @param ssn the socailSecurityNumber to validate.
-   */
-  private static void validateSsn(Object ssn) {
-    if (ssn == null)
-      throwMe(validateAttributesString,"Attribute validation failed for nin <${ssn}>. ssn can not be null.")
-    if (!ssn instanceof String)
-      throwMe(validateAttributesString,"Attribute validation failed for nin <${ssn}>. ssn need to be a String object.")
-    if(! (ssn ==~ /^[0-9]{6}[a-zA-Z0-9\*][0-9]{3}$/) ) {
-      throwMe(validateAttributesString,"Attribute validation failed for nin <${ssn}>. ssn need to be a 10 chars in length.")
+    /**
+     * Validate ssn according to https://confluence.it.su.se/confluence/x/EhIfAw
+     *
+     * @param ssn the socailSecurityNumber to validate.
+     */
+    private static void validateSsn(Object ssn)
+    {
+        if (ssn.length() != 10)
+        {
+            throwMe("Given ssn (${ssn}) is not 10 characters long.")
+        }
+
+        // Special accounts such as testaccount
+        if (ssn ==~ /^00[2-9]\d00A\d\d\d$/)
+        {
+            throwMe("Given ssn (${ssn}) is for a specialaccount")
+        }
+        else
+        {
+            def year = ssn.substring(0, 2)
+            if ((year ==~ /^\d\d$/) == false)
+            {
+                throwMe("Given ssn (${ssn}) contains an invalid year (${year}).")
+            }
+
+            def monthString = ssn.substring(2, 4)
+            def month = monthString as int
+            if (month < 01 || month > 12)
+            {
+                throwMe("Given ssn (${ssn}) contans an invalid month (${monthString}).")
+            }
+
+            def dayString = ssn.substring(4, 6)
+            def day = dayString as int
+            if ((day < 01 || day > 31) && (day < 61 || day > 91)) // 61 to 91 for samordningsnummer
+            {
+                throwMe("Given ssn (${ssn}) contains an invalid day (${dayString}).")
+            }
+
+            def letter = ssn.substring(6, 7)
+            if (letter ==~ /^\d$/)
+            {
+                def birthno = ssn.substring(6, 9)
+                if ((birthno ==~ /^\d\d\d$/) == false)
+                {
+                    throwMe("Given ssn (${ssn}) contains an invalid birthnumber (${birthno}).")
+                }
+            }
+            else
+            {
+                if ((letter ==~ /^[APRSTUV]$/) == false)
+                {
+                    throwMe("The letter (${letter}) is not valid for interimspersonnummer or SUKAT-personnummer.")
+                }
+
+            }
+
+            def checksum = ssn.substring(9) as int
+            if (checksum != calculateSsnChecksum(ssn))
+            {
+                throwMe("Given ssn (${ssn}) contains an invalid checksum (${checksum}).")
+            }
+        }
+
     }
-  }
 
   /**
    * Validate according to socialSecurityNumber or norEduPersonNIN
@@ -227,6 +278,11 @@ public class LdapAttributeValidator {
     }
   }
 
+    private static void throwMe(String message)
+    {
+        throw new IllegalArgumentException(message)
+    }
+
   private static void throwMe(String function, String message) {
     throw new IllegalArgumentException("${function} - ${message}!")
   }
@@ -238,4 +294,61 @@ public class LdapAttributeValidator {
     }
     return true
   }
+
+    /**
+     * Calculate a nin or ssn checksum.
+     *
+     * @param ssn 10 or 12 character string
+     */
+    private static int calculateSsnChecksum(String ssn)
+    {
+        def letter = ssn.substring(6, 7)
+        if (letter ==~ /^[A-Z]$/)
+        {
+            // Letters in interimspersonnummer and SUKAT-personnummer gets replaced by 1
+            ssn = ssn.substring(0, 6) + "1" + ssn.substring(7)
+        }
+
+        int sum = 0;
+
+        for (i in 0..8)
+        {
+            def digit = ssn.substring(i, i + 1) as int
+
+            if (i % 2)
+            {
+                sum += digit * 1
+            }
+            else
+            {
+                def part = digit * 2
+
+                if (part > 9)
+                {
+                    // Split 10, 11, ..., 18 into 1+0 1+1, ..., 1+8
+                    // 2 * 9 makes maximum value 18
+                    sum += 1
+                    sum += part - 10
+                }
+                else
+                {
+                    sum += part
+                }
+            }
+        }
+
+        // In a sum such as 23 use only the last digit (3).
+        while (sum > 9)
+        {
+            sum = sum - 10
+        }
+
+        def checksum = 0
+        if (sum != 0)
+        {
+            checksum = 10 - sum
+        }
+
+        return checksum
+    }
 }

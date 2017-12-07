@@ -401,7 +401,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson(null,"196601010357","Test","Testsson")
+    accountServiceImpl.createSuPerson(null,"196601010355","Test","Testsson")
 
     then:
     thrown(PreconditionViolation)
@@ -414,7 +414,7 @@ class AccountServiceImplSpec extends Specification {
         def accountServiceImpl = new AccountServiceImpl()
 
         when:
-        accountServiceImpl.createSuPerson("testtest", "6601010357", "Test", "Testsson")
+        accountServiceImpl.createSuPerson("testtest", "6601010355", "Test", "Testsson")
 
         then:
         thrown(IllegalArgumentException)
@@ -427,7 +427,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","6601010357","Test","Testsson")
+    accountServiceImpl.createSuPerson("testtest","6601010355","Test","Testsson")
 
     then:
     thrown(IllegalArgumentException)
@@ -463,7 +463,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","6601010357","Test","Testsson")
+    accountServiceImpl.createSuPerson("testtest","6601010355","Test","Testsson")
 
     then:
     thrown(IllegalArgumentException)
@@ -474,7 +474,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","196601010357",null,"Testsson")
+    accountServiceImpl.createSuPerson("testtest","196601010355",null,"Testsson")
 
     then:
     thrown(PreconditionViolation)
@@ -485,7 +485,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","196601010357","Test",null)
+    accountServiceImpl.createSuPerson("testtest","196601010355","Test",null)
 
     then:
     thrown(PreconditionViolation)
@@ -496,7 +496,7 @@ class AccountServiceImplSpec extends Specification {
     def accountServiceImpl = new AccountServiceImpl()
 
     when:
-    accountServiceImpl.createSuPerson("testtest","196601010357","Test","Testsson")
+    accountServiceImpl.createSuPerson("testtest","196601010355","Test","Testsson")
 
     then:
     thrown(PreconditionViolation)
@@ -509,7 +509,7 @@ class AccountServiceImplSpec extends Specification {
     service.configManager = [config:[ldap:[accounts:[default:properties]]]]
 
     def uid = 'uid'
-    def ssn = '0000000000'
+    def ssn = '0010100006'
     def givenName = 'Test'
     def sn = 'Testsson'
 
@@ -656,7 +656,7 @@ class AccountServiceImplSpec extends Specification {
     SuPersonQuery.metaClass.static.getSuPersonFromSsn = { String a, String b -> new SvcSuPersonVO[0] }
 
     when:
-    def ret = accountServiceImpl.findAllSuPersonsBySocialSecurityNumber('1001010000')
+    def ret = accountServiceImpl.findAllSuPersonsBySocialSecurityNumber('1001010006')
 
     then:
     notThrown(PostconditionViolation)
@@ -679,7 +679,7 @@ class AccountServiceImplSpec extends Specification {
     }
 
     when:
-    def resp = accountServiceImpl.findAllSuPersonsBySocialSecurityNumber('1001010000')
+    def resp = accountServiceImpl.findAllSuPersonsBySocialSecurityNumber('1001010006')
 
     then:
     resp instanceof SvcSuPersonVO[]
