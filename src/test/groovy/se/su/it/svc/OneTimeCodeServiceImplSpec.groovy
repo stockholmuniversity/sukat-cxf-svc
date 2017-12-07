@@ -26,7 +26,7 @@ class OneTimeCodeServiceImplSpec extends Specification
         GeneralUtils.metaClass.static.execHelper = { String a, String b -> [] }
 
         when:
-        service.getConfirmed("191123456789", 1)
+        service.getConfirmed("190012236782", 1)
 
         then:
         notThrown(Exception)
