@@ -25,9 +25,10 @@ class LdapAttributeValidatorSpec extends Specification
 
         where:
         ssn          | _
-        "8710101234" | _
-        "871010A234" | _
-        "871010P234" | _
+        "9010101013" | _  // Personnummer
+        "871010A232" | _  // SUKAT-personnummer
+        "871010P232" | _  // Interimspersonnummer
+        "8301822980" | _  // Samordningsnummer
     }
 
     @Unroll
@@ -40,8 +41,16 @@ class LdapAttributeValidatorSpec extends Specification
         thrown(IllegalArgumentException)
 
         where:
-        ssn      | _
-        "860101" | _
+        ssn            | _
+        "860101"       | _   // Too short
+        "198601011234" | _   // Too long
+        "AA01011013"   | _   // Invalid month
+        "8613011234"   | _   // Invalid month
+        "8601321234"   | _   // Invalid day
+        "8301822A80"   | _   // Birthnumber
+        "9010101016"   | _   // Invalid checksum
+        "009000A000"   | _   // Testaccount
+        "871010B232"   | _   // Invalid letter
     }
 
     @Unroll
