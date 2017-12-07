@@ -116,20 +116,27 @@ public class LdapAttributeValidator {
       throwMe(validateAttributesString,"Attribute validation failed for domain <${domain}>. domain need to be a valid FQDN.")
   }
 
-  /**
-   * Validate norEduPersonNIN according to https://confluence.it.su.se/confluence/x/IhIfAw
-   *
-   * @param nin the norEduPersonNIN to validate
-   */
-  private static void validateNin(Object nin) {
-    if (nin == null)
-      throwMe(validateAttributesString,"Attribute validation failed for nin <${nin}>. nin can not be null.")
-    if (!nin instanceof String)
-      throwMe(validateAttributesString,"Attribute validation failed for nin <${nin}>. nin need to be a String object.")
-    if(! (nin ==~ /[0-9]{8}[A-Z0-9][0-9]{3}/) ) {
-      throwMe(validateAttributesString,"Attribute validation failed for nin <${nin}>. nin need to be a 12 in length.")
+    /**
+     * Validate norEduPersonNIN according to https://confluence.it.su.se/confluence/x/IhIfAw
+     *
+     * @param nin the norEduPersonNIN to validate
+     */
+    private static void validateNin(Object nin)
+    {
+        if (nin.length() != 12)
+        {
+            throwMe("Given nin (${nin}) is not 12 characters long.")
+        }
+
+        def century = nin.substring(0, 2)
+        if (century != '19' && century != '20')
+        {
+            throwMe("Given nin (${nin}) contains an invalid century (${century}).")
+        }
+
+        def ssn = nin.substring(2)
+        validateSsn(ssn)
     }
-  }
 
     /**
      * Validate ssn according to https://confluence.it.su.se/confluence/x/EhIfAw
