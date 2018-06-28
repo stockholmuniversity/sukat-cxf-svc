@@ -329,9 +329,9 @@
 
   <repositories>
     <repository>
-      <id>su-mvn</id>
-      <name>SU Maven2</name>
-      <url>http://maven.it.su.se/it.su.se/maven2</url>
+      <id>SU-Maven</id>
+      <name>Stockholm university Maven repository</name>
+      <url>https://maven.it.su.se/repository/public/</url>
     </repository>
   </repositories>
 
