@@ -2,7 +2,7 @@ This project will produce a runnable war.
 It depends on cxf-svc-server-XXXX.jar.
 To generate the war, do as follow:
 
-mvn assembly:assembly
+./mvnw assembly:assembly
 
 The war file will appear in the root directory
 

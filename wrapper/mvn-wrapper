@@ -164,9 +164,13 @@ if $cygwin; then
     CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
 fi
 
+# IDM-2133: The floowing line has been altered form the original
+#  -classpath "${M2_HOME}"/boot/plexus-classworlds-*.jar \
+# to allow for modern cryptos when downloading artifacts.
+
 exec "$JAVACMD" \
   $MAVEN_OPTS \
-  -classpath "${M2_HOME}"/boot/plexus-classworlds-*.jar \
+  -classpath "${M2_HOME}"/boot/*:./wrapper/* \
   "-Dclassworlds.conf=${M2_HOME}/bin/m2.conf" \
   "-Dmaven.home=${M2_HOME}"  \
   ${CLASSWORLDS_LAUNCHER} "$@"
