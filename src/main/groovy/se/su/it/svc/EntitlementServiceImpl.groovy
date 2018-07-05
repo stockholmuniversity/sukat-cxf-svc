@@ -95,6 +95,29 @@ public class EntitlementServiceImpl implements EntitlementService {
         }
     }
 
+    /**
+     * Get all entitlements for a person.
+     *
+     * @param uid uid of the person
+     *
+     * @return Array of strings representing entitlements
+     */
+    @Requires({
+        uid &&
+        ! LdapAttributeValidator.validateAttributes([
+            uid: uid
+        ])
+    })
+    public String[] getEntitlements(
+        @WebParam(name = "uid") String uid
+    )
+    {
+        // RW is used to avoid race condition with LDAP replication
+        SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
+
+        return person.eduPersonEntitlement
+    }
+
   /**
    * This method removes entitlement from the specified uid.
    *
