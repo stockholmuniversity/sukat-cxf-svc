@@ -133,6 +133,21 @@ class EntitlementServiceImplSpec extends Specification {
         1 * GeneralUtils.publishMessage(*_)
     }
 
+    def "getEntitlements: happy path"()
+    {
+        setup:
+        //SuPerson person = new SuPerson(eduPersonEntitlement: [], objectClass: [], socialSecurityNumber: '9910101234')
+        SuPerson person = new SuPerson(eduPersonEntitlement: [])
+        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> return person }
+        def entitlementServiceImpl = new EntitlementServiceImpl()
+
+        when:
+        def ret = entitlementServiceImpl.getEntitlements("testuid")
+
+        then:
+        ret == []
+    }
+
   def "Test removeEntitlement with null uid argument"() {
     setup:
     def entitlementServiceImpl = new EntitlementServiceImpl()

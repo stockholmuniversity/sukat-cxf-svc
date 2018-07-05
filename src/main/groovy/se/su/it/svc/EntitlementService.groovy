@@ -40,5 +40,6 @@ package se.su.it.svc
  */
 public interface EntitlementService {
   void addEntitlement(String uid, String entitlement)
+  String[] getEntitlements(String uid)
   void removeEntitlement(String uid,String entitlement)
 }
