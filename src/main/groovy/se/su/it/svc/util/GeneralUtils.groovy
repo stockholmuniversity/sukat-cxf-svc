@@ -40,6 +40,10 @@ import groovy.util.logging.Slf4j
 
 import java.lang.reflect.Modifier
 
+import java.security.SecureRandom
+
+import org.apache.commons.lang.RandomStringUtils
+
 @Slf4j
 class GeneralUtils {
 
@@ -116,6 +120,57 @@ class GeneralUtils {
 
             throw ex
         }
+    }
+
+    /**
+     * Generate password according to current assurance level regulations
+     *
+     * @return Newly generated password
+     */
+    static String generatePassword()
+    {
+        def UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        def LOWER = "abcdefghijklmnopqrstuvwxyz"
+        def DIGIT = "0123456789"
+
+        // Remove some that are hard to distinguish when printed
+        UPPER = UPPER.replaceAll('I', '')
+        UPPER = UPPER.replaceAll('O', '')
+
+        LOWER = LOWER.replaceAll('l', '')
+
+        DIGIT = DIGIT.replaceAll('0', '')
+        DIGIT = DIGIT.replaceAll('1', '')
+
+        char[] chars = UPPER + LOWER + DIGIT
+
+        // Try a number of times to get all character classes
+        // In testing 1000000 passwords where generated, sometimes it took 11 rounds to give a good
+        // password, 25 should be on the safe side to never fail in production.
+        for (i in 1..25)
+        {
+            // Since some characters are removed, use a length of 11 to guarantee that we have 24-bits
+            String password = RandomStringUtils.random(11, 0, chars.length-1, false, false, chars, new SecureRandom() )
+
+            if ((password ==~ /^.*[A-Z]+.*$/) == false)
+            {
+                continue
+            }
+
+            if ((password ==~ /^.*[a-z]+.*$/) == false)
+            {
+                continue
+            }
+
+            if ((password ==~ /^.*[0-9]+.*$/) == false)
+            {
+                continue
+            }
+
+            return password
+        }
+
+        throw new RuntimeException("Failed to generate password")
     }
 
     /**
