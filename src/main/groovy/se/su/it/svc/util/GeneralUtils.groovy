@@ -40,10 +40,6 @@ import groovy.util.logging.Slf4j
 
 import java.lang.reflect.Modifier
 
-import java.security.SecureRandom
-
-import org.apache.commons.lang.RandomStringUtils
-
 @Slf4j
 class GeneralUtils {
 
