@@ -131,60 +131,6 @@ class GeneralUtilsSpec extends Specification {
     thrown(RuntimeException)
   }
 
-    def "generatePassword: properly generate a number of passwords"()
-    {
-        setup:
-        int count = 0
-        def iterations = 10000 // Try a number of times to see potential duplicates
-        def bucket = []
-
-        when:
-        for (i in 1..iterations)
-        {
-            def password = GeneralUtils.generatePassword()
-            if (password.length() != 11)
-            {
-                throw new RuntimeException("Password \'${password}\' is not 10 characters long")
-            }
-
-            if ((password ==~ /^.*[a-z]+.*$/) == false)
-            {
-                throw new RuntimeException("Password \'${password}\' does not contain a-z")
-            }
-
-            if ((password ==~ /^.*[A-Z]+.*$/) == false)
-            {
-                throw new RuntimeException("Password \'${password}\' does not contain A-Z")
-                ret = 1
-            }
-
-            if ((password ==~ /^.*[0-9]+.*$/) == false)
-            {
-                throw new RuntimeException("Password \'${password}\' does not contain 0-9")
-                ret = 1
-            }
-
-            // Test for chars that are hard to distinguish when printed
-            if (password ==~ /^.*[IOl01]+.*$/)
-            {
-                throw new RuntimeException("Password \'${password}\' contains hard to distinguish characters")
-                ret = 1
-            }
-
-            if (bucket.contains(password))
-            {
-                throw new RuntimeException("Password \'${password}\' has already been generated")
-            }
-
-            bucket.add(password)
-
-            count++
-        }
-
-        then:
-        count == iterations
-    }
-
     def "publishMessage: happy path"()
     {
         setup:
