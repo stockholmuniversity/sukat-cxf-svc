@@ -239,59 +239,18 @@ class AccountServiceImplSpec extends Specification {
     ret == "gppasswd"
   }
 
-  def "Test resetPassword with null uid argument"() {
-    setup:
-    def accountServiceImpl = new AccountServiceImpl()
+    def "resetPassword: happy path"()
+    {
+        setup:
+        def pass = 'rppasswd234'
+        GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: pass] }
 
-    when:
-    accountServiceImpl.resetPassword(null)
+        when:
+        def res = service.resetPassword("rpuid")
 
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "Test resetPassword uid dont exist"() {
-    setup:
-    Kadmin.metaClass.principalExists = {String uid -> return false}
-    def accountServiceImpl = new AccountServiceImpl()
-
-    when:
-    accountServiceImpl.resetPassword("testuid")
-
-    then:
-    thrown(IllegalArgumentException)
-  }
-
-  def "Test resetPassword password 10 chars"() {
-    setup:
-    GroovyMock(PasswordUtils, global: true)
-    def kadmin = Mock(Kadmin)
-    Kadmin.metaClass.static.newInstance = { kadmin }
-    kadmin.principalExists(_) >> true
-    def accountServiceImpl = new AccountServiceImpl()
-
-    when:
-    def ret = accountServiceImpl.resetPassword("testuid")
-
-    then:
-    1* PasswordUtils.genRandomPassword(10, 10) >> "*" *10
-    assert ret == "*" *10
-  }
-
-  def "Test resetPassword correct conversion of uid"() {
-    setup:
-    def kadmin = Mock(Kadmin)
-    Kadmin.metaClass.static.newInstance = { kadmin }
-
-    def accountServiceImpl = new AccountServiceImpl()
-
-    when:
-    accountServiceImpl.resetPassword("testuid.jabber")
-
-    then:
-    1 * kadmin.principalExists("testuid/jabber") >> true
-    1 * kadmin.setPassword("testuid/jabber", _)
-  }
+        then:
+        res == pass
+    }
 
   def "scramblePassword - is a void method"() {
     when:

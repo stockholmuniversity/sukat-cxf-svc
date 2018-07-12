@@ -268,36 +268,26 @@ public class AccountServiceImpl implements AccountService
         return res.password
   }
 
-  /**
-   * This method resets the password for the specified uid and returns the clear text password.
-   *
-   * @param uid  uid of the user.
-   * @return String new password.
-   * @throws IllegalArgumentException if the uid can't be found
-   */
-  @Requires({
-    uid
-  })
-  @Ensures({ result && result instanceof String && result.size() == 10 })
-  @AuditHideReturnValue
-  public String resetPassword(
-          @WebParam(name = 'uid') String uid
-  ) {
-    String trueUid = GeneralUtils.uidToKrb5Principal(uid)
+    /**
+     * This method resets the password for the specified uid and returns the clear text password.
+     *
+     * @param uid  uid of the user.
+     * @return String new password.
+     * @throws IllegalArgumentException if the uid can't be found
+     */
+    @Requires({
+        uid
+    })
+    @Ensures({ result && result instanceof String && result.size() == 11 })
+    @AuditHideReturnValue
+    public String resetPassword(
+        @WebParam(name = 'uid') String uid
+    )
+    {
+        def res = GeneralUtils.execHelper("resetPassword", uid)
 
-    def kadmin = Kadmin.newInstance()
-
-    if (kadmin.principalExists(trueUid)) {
-      log.debug("resetPassword - Trying to reset password for uid=<${uid}>")
-      String pwd = PasswordUtils.genRandomPassword(10, 10)
-      kadmin.setPassword(trueUid, pwd)
-      log.info("resetPassword - Password was reset for uid=<${uid}>")
-      return pwd
-    } else {
-      log.warn("resetPassword - No such uid found: "+uid)
-      throw new IllegalArgumentException("resetPassword - No such uid found: "+uid)
+        return res.password
     }
-  }
 
   /**
    * This method resets the password for the specified uid without returning the result.
