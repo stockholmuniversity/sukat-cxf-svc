@@ -147,7 +147,7 @@ class GeneralUtils {
     }
 
     /**
-     * Attempt to qualify a 10 digit ssn with 19 or 20 for century
+     * Qualify a 10 digit ssn with 19 or 20 for century
      *
      * @param ssn The ssn to qualify
      *
@@ -161,6 +161,7 @@ class GeneralUtils {
             return "20${ssn}"
         }
 
+        // Use a rolling window in the hope that 100-yearolds are scarce.
         def now = Calendar.getInstance()
         if (ssn.substring(0, 2) > now.format("yy"))
         {
@@ -168,7 +169,7 @@ class GeneralUtils {
         }
         else
         {
-            throw new RuntimeException("Could not guess century for ${ssn}")
+            return "20${ssn}";
         }
     }
 }
