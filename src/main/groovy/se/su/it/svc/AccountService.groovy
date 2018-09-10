@@ -51,6 +51,7 @@ public interface AccountService {
   SvcSuPersonVO[] findAllSuPersonsBySocialSecurityNumber(String socialSecurityNumber)
   SvcSuPersonVO findSuPersonByUid(String uid)
   void createSubAccount(String uid, String type)
+  SvcUidPwd createSubAccount2(String uid, String type)
   void deleteSubAccount(String uid, String type)
   SvcSubAccountVO getSubAccount(String uid, String type)
   void setHomePostalAddress(String uid, SvcPostalAddressVO homePostalAddress)

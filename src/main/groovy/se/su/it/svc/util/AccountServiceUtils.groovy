@@ -32,6 +32,7 @@
 package se.su.it.svc.util
 
 import se.su.it.svc.commons.SvcSubAccountVO
+import se.su.it.svc.commons.SvcUidPwd
 
 class AccountServiceUtils {
 
@@ -40,10 +41,14 @@ class AccountServiceUtils {
    *
    * @param uid uid of the user.
    * @param type Sub account type.
+   *
+   * @return A SvcUidPwd
    */
-  static void createSubAccount(String uid, String type)
+  static SvcUidPwd createSubAccount(String uid, String type)
   {
-        GeneralUtils.execHelper("createSubAccount", "${uid}/${type}")
+        def res = GeneralUtils.execHelper("createSubAccount", "${uid}/${type}")
+
+        return res
   }
 
   /**
