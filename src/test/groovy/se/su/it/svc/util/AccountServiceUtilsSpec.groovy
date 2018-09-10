@@ -35,13 +35,14 @@ class AccountServiceUtilsSpec extends Specification {
   def 'createSubAccount: happy path'()
   {
         setup:
-        GeneralUtils.metaClass.static.execHelper = { String a, String b -> }
+        GeneralUtils.metaClass.static.execHelper = { String a, String b -> [uid: "${b}", password: "csaP4ssw0rd"]}
 
         when:
-        AccountServiceUtils.createSubAccount('happy', 'path')
+        def ret = AccountServiceUtils.createSubAccount('happy', 'path')
 
         then:
-        notThrown(Exception)
+        ret.uid == "happy/path"
+        ret.password == "csaP4ssw0rd"
   }
 
   def 'deleteSubAccount: happy path'()
