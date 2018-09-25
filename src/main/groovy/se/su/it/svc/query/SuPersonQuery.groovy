@@ -40,6 +40,28 @@ import se.su.it.svc.ldap.SuPerson
 @Slf4j
 public class SuPersonQuery {
 
+    /**
+     * Find person in by NIN
+     *
+     * @param directory RW or RO LDAP-directory
+     * @param nin 12 digit National Identification Number
+     *
+     * @return SuPerson object.
+     */
+    static SuPerson findPersonByNin(String directory, String nin)
+    {
+        def ssn = nin[2..-1]
+
+        def person = SuPerson.find(directory: directory) {
+            or {
+                eq('norEduPersonNIN', nin)
+                eq('socialSecurityNumber', ssn)
+            }
+        }
+
+        return person
+    }
+
   /**
    * Returns a SuPerson object, specified by the parameter uid.
    *

@@ -41,6 +41,7 @@ public interface AccountService {
   String getPassword(String uid)
   String resetPassword(String uid)
   void scramblePassword(String uid)
+  String createPerson(String nin, String givenName, String sn)
   void createSuPerson(String uid, String ssn, String givenName, String sn)
   void updateSuPerson(String uid, SvcSuPersonVO person)
   SvcUidPwd activateSuPerson(String uid, String domain, String[] affiliations)

@@ -77,6 +77,53 @@ public class AccountServiceImpl implements AccountService
     def configManager
 
     /**
+     * Create a person (stub).
+     *
+     * @param nin Twelve digit personnummer
+     * @param givenName Given name
+     * @param sn Surname
+     *
+     * @return Username of created user
+     */
+    @Requires({
+        ! LdapAttributeValidator.validateAttributes([
+            nin: nin,
+            givenName: givenName,
+            sn: sn
+        ])
+    })
+    @Ensures({ result && result.length() == 8 })
+    public String createPerson(
+            @WebParam(name = 'nin') String nin,
+            @WebParam(name = 'givenName') String givenName,
+            @WebParam(name = 'sn') String sn
+        )
+    {
+        def p = SuPersonQuery.findPersonByNin(ConfigManager.LDAP_RW, nin)
+        if (p != null)
+        {
+            throw new IllegalArgumentException("A person with personnummer ${nin} already exists.")
+        }
+
+        def uid = AccountServiceUtils.generateUid(givenName, sn)
+
+        def ssn = nin[2..-1]
+
+        def parent = configManager.config.ldap.accounts.parent
+
+        def directory = ConfigManager.LDAP_RW
+
+        def suPersonStub = SuPersonStub.newInstance(uid, givenName, sn, ssn, parent, directory)
+
+        suPersonStub.save()
+
+        // Add paranoia by refreshing the information from the datastore.
+        SuPerson person = SuPersonQuery.getSuPersonFromUID(directory, uid)
+
+        return person.uid
+    }
+
+    /**
      * Set homePostalAddress and related attributes.
      *
      * @param uid uid of the user.
