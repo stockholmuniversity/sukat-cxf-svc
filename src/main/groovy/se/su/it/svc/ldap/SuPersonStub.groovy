@@ -44,6 +44,7 @@ class SuPersonStub implements Serializable {
 
   @GldapoNamingAttribute
   String uid
+  Set<String> eduPersonAffiliation
   Set<String> objectClass
   String socialSecurityNumber
   String cn
@@ -64,9 +65,10 @@ class SuPersonStub implements Serializable {
     this.givenName = givenName
     this.sn = sn
     this.socialSecurityNumber = ssn
-    this.objectClass = ['suPerson', 'sSNObject', 'inetOrgPerson']
+    this.objectClass = ['suPerson', 'eduPerson', 'sSNObject', 'inetOrgPerson']
     this.displayName = givenName + " " + sn
     this.cn = givenName + " " + sn
+    this.eduPersonAffiliation = ['other']
     this.parent = parent
     this.directory = directory
   }

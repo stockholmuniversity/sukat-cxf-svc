@@ -16,7 +16,7 @@ class SuPersonStubSpec extends Specification {
     given:
 
     String uid = "a"
-    Set objectClass = ['suPerson', 'sSNObject', 'inetOrgPerson']
+    Set objectClass = ['suPerson', 'eduPerson', 'sSNObject', 'inetOrgPerson']
     String socialSecurityNumber = "c"
     String sn = "d"
     String givenName = "e"
