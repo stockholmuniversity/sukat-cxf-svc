@@ -31,20 +31,40 @@
 
 package se.su.it.svc.query
 
-import gldapo.GldapoSchemaRegistry
 import se.su.it.svc.ldap.SuPerson
+
 import spock.lang.Specification
 
-class SuPersonQuerySpec extends Specification {
+class SuPersonQuerySpec extends Specification
+{
+    def cleanup()
+    {
+        SuPerson.metaClass = null
+    }
 
-  def setup() {
-    GldapoSchemaRegistry.metaClass.add = { Object registration -> }
-  }
+    def "findPersonByNin: person is found"()
+    {
+        setup:
+        SuPerson.metaClass.static.find = { Map arg1, Closure arg2 -> [:] }
 
-  def cleanup(){
-    SuPerson.metaClass = null
-    GldapoSchemaRegistry.metaClass = null
-  }
+        when:
+        def res = SuPersonQuery.findPersonByNin("Test directory", "199610101234")
+
+        then:
+        res != null
+    }
+
+    def "findPersonByNin: no person is found"()
+    {
+        setup:
+        SuPerson.metaClass.static.find = { Map arg1, Closure arg2 -> }
+
+        when:
+        def res = SuPersonQuery.findPersonByNin(null, "199610101234")
+
+        then:
+        res == null
+    }
 
   def "getSuPersonFromUID should handle exception"() {
     given:

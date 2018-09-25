@@ -78,6 +78,33 @@ class AccountServiceImplSpec extends Specification {
     GldapoSchemaRegistry.metaClass = null
   }
 
+    def "createPerson: happy path"()
+    {
+        setup:
+        SuPersonQuery.metaClass.static.findPersonByNin = { String directory, String nin -> }
+        AccountServiceUtils.metaClass.static.generateUid = { String givenName, String sn -> "whop1234" }
+        service.configManager = [config: [ldap: [accounts: [:]]]]
+        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> new SuPerson(uid: 'whopwhop') }
+
+        when:
+        def res = service.createPerson("19001213A124", "cpgn", "cpsn")
+
+        then:
+        res ==~ /^whopwhop/
+    }
+
+    def "createPerson: already exists"()
+    {
+        setup:
+        SuPersonQuery.metaClass.static.findPersonByNin = { String directory, String nin -> new SuPerson() }
+
+        when:
+        def res = service.createPerson("20001213A124", "cpgn", "cpsn")
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
     def "setHomePostalAddress: happy path"()
     {
         setup:
