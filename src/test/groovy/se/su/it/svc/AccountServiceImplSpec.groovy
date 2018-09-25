@@ -267,18 +267,6 @@ class AccountServiceImplSpec extends Specification {
     myaffiliation == "employee"
   }
 
-  def "getPassword: happy path"()
-  {
-    setup:
-    GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: 'gppasswd'] }
-
-    when:
-    def ret = service.getPassword("gptest/ppp")
-
-    then:
-    ret == "gppasswd"
-  }
-
     def "resetPassword: happy path"()
     {
         setup:
