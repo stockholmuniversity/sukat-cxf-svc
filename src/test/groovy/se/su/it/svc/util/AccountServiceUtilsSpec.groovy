@@ -17,6 +17,10 @@ class AccountServiceUtilsSpec extends Specification
 
     def "generateUID: correct generation of uid"()
     {
+        setup:
+        AccountQuery.metaClass.static.findAccountByUid = { String d, String uid -> }
+        SuPersonQuery.metaClass.static.findSuPersonByUID = { String d, String uid -> }
+
         when:
         def uid = AccountServiceUtils.generateUid('Magnus', 'Svensson')
 
@@ -31,6 +35,7 @@ class AccountServiceUtilsSpec extends Specification
     {
         setup:
         AccountQuery.metaClass.static.findAccountByUid = { String d, String uid -> }
+        SuPersonQuery.metaClass.static.findSuPersonByUID = { String d, String uid -> }
 
         expect:
         AccountServiceUtils.generateUid(givenName, sn).substring(0, 4) == pfx
@@ -48,6 +53,7 @@ class AccountServiceUtilsSpec extends Specification
         setup:
         int i = 0
         AccountQuery.metaClass.static.findAccountByUid = { String d, String uid -> i++; i == 1 ? [uid: 'masv0000'] : null }
+        SuPersonQuery.metaClass.static.findSuPersonByUID = { String d, String uid -> }
 
         when:
         def uid = AccountServiceUtils.generateUid('Magnus', 'Svensson')
