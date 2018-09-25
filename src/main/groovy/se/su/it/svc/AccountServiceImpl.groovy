@@ -318,26 +318,6 @@ public class AccountServiceImpl implements AccountService
     log.info("updatePrimaryAffiliation - Updated affiliation for uid=<${uid}> with affiliation=<${person.eduPersonPrimaryAffiliation}>")
   }
 
-  /**
-   * Get password for the specified uid.
-   * @param uid uid of the user.
-   *
-   * @return String Password.
-   */
-  @Requires({
-    uid
-  })
-  @Ensures({ result && result instanceof String })
-  @AuditHideReturnValue
-  public String getPassword(
-          @WebParam(name = 'uid') String uid
-  )
-  {
-        def res = GeneralUtils.execHelper("getPassword", uid)
-
-        return res.password
-  }
-
     /**
      * This method resets the password for the specified uid and returns the clear text password.
      *
