@@ -174,17 +174,18 @@ class AccountServiceImplSpec extends Specification {
         person.title_en == null
     }
 
-  def "createSubAccount: happy path"()
-  {
-    setup:
-    AccountServiceUtils.metaClass.static.createSubAccount = { String a, String b -> [uid: "${a}/${b}", password: "csaPassword"] }
+    def "createSubAccount: happy path"()
+    {
+        setup:
+        AccountServiceUtils.metaClass.static.createSubAccount = { String a, String b -> [uid: "${a}/${b}", password: "csaPassword"] }
 
-    when:
-    service.createSubAccount("csauid", "csaType")
+        when:
+        def ret = service.createSubAccount("csauid", "csaType")
 
-    then:
-    notThrown(Exception)
-  }
+        then:
+        ret.uid == "csauid/csaType"
+        ret.password == "csaPassword"
+    }
 
   def "createSubAccount2: happy path"()
   {
