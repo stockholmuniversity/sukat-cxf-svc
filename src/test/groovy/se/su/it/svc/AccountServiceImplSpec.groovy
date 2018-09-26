@@ -187,19 +187,6 @@ class AccountServiceImplSpec extends Specification {
         ret.password == "csaPassword"
     }
 
-  def "createSubAccount2: happy path"()
-  {
-    setup:
-    AccountServiceUtils.metaClass.static.createSubAccount = { String a, String b -> [uid: "${a}/${b}", password: "csaPassword"] }
-
-    when:
-    def ret = service.createSubAccount2("csauid", "csaType")
-
-    then:
-    ret.uid == "csauid/csaType"
-    ret.password == "csaPassword"
-  }
-
   def "deleteSubAccount: happy path"()
   {
     setup:
