@@ -50,6 +50,7 @@ import se.su.it.svc.manager.ConfigManager
 
 import se.su.it.svc.query.AccountQuery
 import se.su.it.svc.query.SuPersonQuery
+import se.su.it.svc.query.UidNumberQuery
 
 import se.su.it.svc.server.annotations.AuditHideReturnValue
 import se.su.it.svc.server.annotations.AuthzRole
@@ -75,6 +76,61 @@ public class AccountServiceImpl implements AccountService
     public WebServiceContext context;
 
     def configManager
+    def uidNumberQuery
+
+    /**
+     * Activate a person.
+     *
+     * @param uid Username
+     *
+     * @return Password for the activated user
+     */
+    @Requires({
+        ! LdapAttributeValidator.validateAttributes([
+            uid: uid
+        ])
+    })
+    @Ensures({ result && result.length() > 10 })
+    public String activatePerson(
+            @WebParam(name = 'uid') String uid
+        )
+    {
+        def person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
+
+        person.objectClass.add("posixAccount")
+
+        person.gidNumber = "1200"
+        person.homeDirectory = "/home/" + person.uid
+        person.loginShell = "/usr/local/bin/bash"
+
+        if (person.mail == null)
+        {
+            person.mail = person.uid + "@student.su.se"
+        }
+
+        // Fix uidNumber first as it can be restarted at an later attempt
+        person.uidNumber = uidNumberQuery.getUidNumber(person.uid)
+
+        // Failing after this point will leave the principal and prevent later attempts
+        def res = GeneralUtils.execHelper("createPrincipal", person.uid)
+
+        // Last step as this will make all systems consider this as an active account
+        SuPersonQuery.updateSuPerson(person)
+
+        // Notify Ladok-import of the activation to setup postaladdress and more
+        def ladokMsg = [:]
+        ladokMsg.socialsecuritynumber = GeneralUtils.ssnToNin(person.socialSecurityNumber)
+
+        GeneralUtils.publishMessage(ladokMsg)
+
+        // Notify SUKAT consumers of new account (mostly AD sync)
+        def sukatMsg = [:]
+        sukatMsg.update = person.uid
+
+        GeneralUtils.publishMessage(sukatMsg)
+
+        return res.password
+    }
 
     /**
      * Create a person (stub).

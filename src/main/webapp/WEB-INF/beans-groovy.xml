@@ -83,6 +83,23 @@
     <property name="suCardSql" ref="suCardSql"/>
   </bean>
 
+  <bean id="uidNumberQuery" class="se.su.it.svc.query.UidNumberQuery" />
+
+  <bean id="sukatSql" class="groovy.sql.Sql" destroy-method="close" lazy-init="false">
+    <constructor-arg ref="sukatDataSource" />
+  </bean>
+
+  <bean id="sukatDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close" lazy-init="false">
+    <property name="driverClassName" value="${sukat.database.driver}"/>
+    <property name="url" value="${sukat.database.url}"/>
+    <property name="username" value="${sukat.database.user}"/>
+    <property name="password" value="${sukat.database.password}"/>
+    <property name="validationQuery" value="SELECT 1"/>
+    <property name="minIdle" value="1"/>
+    <property name="testWhileIdle" value="true"/>
+    <property name="timeBetweenEvictionRunsMillis" value="1800000"/>
+  </bean>
+
   <bean id="cardinfoserviceEndpoint" class="se.su.it.svc.CardInfoServiceImpl"/>
 
   <jaxws:endpoint

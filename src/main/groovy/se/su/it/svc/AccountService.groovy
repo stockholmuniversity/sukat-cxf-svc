@@ -40,6 +40,7 @@ public interface AccountService {
   void updatePrimaryAffiliation(String uid, String affiliation)
   String resetPassword(String uid)
   void scramblePassword(String uid)
+  String activatePerson(String uid)
   String createPerson(String nin, String givenName, String sn)
   void createSuPerson(String uid, String ssn, String givenName, String sn)
   void updateSuPerson(String uid, SvcSuPersonVO person)

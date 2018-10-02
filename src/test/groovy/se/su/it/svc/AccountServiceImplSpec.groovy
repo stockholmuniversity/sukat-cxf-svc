@@ -47,6 +47,7 @@ import se.su.it.svc.ldap.SuPersonStub
 
 import se.su.it.svc.query.AccountQuery
 import se.su.it.svc.query.SuPersonQuery
+import se.su.it.svc.query.UidNumberQuery
 
 import se.su.it.svc.util.AccountServiceUtils
 import se.su.it.svc.util.GeneralUtils
@@ -66,6 +67,8 @@ class AccountServiceImplSpec extends Specification {
     SuPersonStub.metaClass.save = {->}
     SuPersonStub.metaClass.parent = "parent"
     SuPersonStub.metaClass.directory = "directory"
+
+    service.uidNumberQuery = Mock(UidNumberQuery)
   }
 
   def cleanup() {
@@ -77,6 +80,38 @@ class AccountServiceImplSpec extends Specification {
     SuPersonQuery.metaClass = null
     GldapoSchemaRegistry.metaClass = null
   }
+
+    def "activatePerson: happy path"()
+    {
+        setup:
+        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> new SuPerson(uid: 'apap1234', objectClass: [], socialSecurityNumber: "901010A123") }
+        service.uidNumberQuery.metaClass.uidNumber = "400000"
+        GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: "activatePass"] }
+        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> return true }
+        GeneralUtils.metaClass.static.publishMessage = { Map a -> }
+
+        when:
+        def res = service.activatePerson("apap1234")
+
+        then:
+        res == "activatePass"
+    }
+
+    def "activatePerson: person has mail"()
+    {
+        setup:
+        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> new SuPerson(uid: 'apap1234', objectClass: [], mail: "apap1234@su.se", socialSecurityNumber: "901010A123") }
+        service.uidNumberQuery.metaClass.uidNumber = "400000"
+        GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: "activatePass"] }
+        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> return true }
+        GeneralUtils.metaClass.static.publishMessage = { Map a -> }
+
+        when:
+        def res = service.activatePerson("apap1234")
+
+        then:
+        res == "activatePass"
+    }
 
     def "createPerson: happy path"()
     {
