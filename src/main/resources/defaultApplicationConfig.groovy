@@ -50,6 +50,15 @@ sucard {
   }
 }
 
+sukat {
+  database {
+    driver = "com.mysql.jdbc.Driver"
+    url = "jdbc:mysql://localhost:3306/sukat?autoReconnect=true"
+    user = "sukat"
+    password = "sukat"
+  }
+}
+
 directories {
   ldapreadonly {
     url = "ldap://ldap-test.su.se"

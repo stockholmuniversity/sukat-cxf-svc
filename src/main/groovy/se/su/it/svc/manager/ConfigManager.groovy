@@ -53,6 +53,10 @@ class ConfigManager {
       'sucard.database.driver',
       'sucard.database.user',
       'sucard.database.password',
+      'sukat.database.url',
+      'sukat.database.driver',
+      'sukat.database.user',
+      'sukat.database.password',
   ]
 
   /**
