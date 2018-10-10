@@ -7,18 +7,6 @@ spocp {
 }
 
 /**
-*  enrollment.create.skip does the following.
-*  true = Create user in SUKAT, DO NOT create in AFS and KDC.
-*  false = Create user in SUKAT, AFS and KDC.
-*/
-enrollment {
-  create {
-    skip = "true"
-  }
-}
-
-
-/**
  * Configure which authorization bean to use.
  */
 authorizor {

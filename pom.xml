@@ -95,12 +95,6 @@
     </dependency>
 
     <dependency>
-      <groupId>se.su.it.commons</groupId>
-      <artifactId>su-commons</artifactId>
-      <version>1.9.2</version>
-    </dependency>
-
-    <dependency>
       <groupId>org.gcontracts</groupId>
       <artifactId>gcontracts-core</artifactId>
       <version>1.2.12</version>

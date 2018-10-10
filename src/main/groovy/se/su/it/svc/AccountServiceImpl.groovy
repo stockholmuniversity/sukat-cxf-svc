@@ -31,14 +31,11 @@
 
 package se.su.it.svc
 
-import java.util.regex.Matcher
-
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang.NotImplementedException
 import org.gcontracts.annotations.Ensures
 import org.gcontracts.annotations.Requires
-import se.su.it.commons.Kadmin
-import se.su.it.commons.PasswordUtils
+
 import se.su.it.svc.commons.LdapAttributeValidator
 import se.su.it.svc.commons.SvcPostalAddressVO
 import se.su.it.svc.commons.SvcSuPersonVO
@@ -420,101 +417,6 @@ public class AccountServiceImpl implements AccountService
 
     SuPersonQuery.updateSuPerson(originalPerson)
     log.info("updateSuPerson - Updated SuPerson uid<${originalPerson.uid}>")
-  }
-
-  /**
-   * This method creates a SuPerson in sukat.
-   *
-   * @param uid of the SuPerson to be created.
-   * @param ssn 10 digit social security number for the SuPerson.
-   * @param givenName given name for the SuPerson.
-   * @param sn surname of the SuPerson.
-   * @throws IllegalArgumentException if a user with the supplied uid already exists
-   * @see se.su.it.svc.ldap.SuPerson
-   * @see se.su.it.svc.ldap.SuPersonStub
-   * @see se.su.it.svc.commons.SvcSuPersonVO
-   */
-  @Requires({
-    ! LdapAttributeValidator.validateAttributes([
-            uid: uid,
-            ssn: ssn,
-            givenName: givenName,
-            sn: sn ])
-  })
-  public void createSuPerson(
-          @WebParam(name = 'uid') String uid,
-          @WebParam(name = 'ssn') String ssn,
-          @WebParam(name = 'givenName') String givenName,
-          @WebParam(name = 'sn') String sn
-  ) {
-
-        if (AccountQuery.findAccountByUid(ConfigManager.LDAP_RW, uid))
-        {
-            throw new IllegalArgumentException("createSuPerson - An account with uid <" + uid + "> already exists")
-        }
-
-    if (SuPersonQuery.findSuPersonByUID(ConfigManager.LDAP_RW, uid)) {
-      throw new IllegalArgumentException("createSuPerson - A user with uid <"+uid+"> already exists")
-    }
-
-    if (SuPersonQuery.getSuPersonFromSsn(ConfigManager.LDAP_RW, ssn)) {
-      throw new IllegalArgumentException("createSuPerson - A user with socialSecurityNumber <"+ssn+"> already exists")
-    }
-
-    String parent = configManager.config.ldap.accounts.parent
-    log.info "createSuPerson: parent is configured to be $parent"
-
-    String directory = ConfigManager.LDAP_RW
-
-    SuPersonStub suPersonStub = SuPersonStub.newInstance(uid, givenName, sn, ssn, parent, directory)
-
-    log.debug("createSuPerson - Creating initial sukat record from function arguments for uid<${uid}>")
-    suPersonStub.save()
-  }
-
-  /**
-   * This method enrolls a user in sukat, kerberos and afs.
-   *
-   * @param uid                         uid of the user to activate
-   * @param domain                      domain of user in sukat. This is used to set the DN if user will be created.
-   * @param eduPersonPrimaryAffiliation the primary affiliation to set.
-   * @return SvcUidPwd                  object with the uid and password.
-   * @throws IllegalArgumentException if a user with the supplied uid can't be found
-   */
-  @Requires({
-    ! LdapAttributeValidator.validateAttributes([
-            uid: uid,
-            domain: domain,
-            affiliation: affiliations ])
-  })
-  @Ensures({ result && result.uid && result.password && result.password.size() == 10 })
-  @AuditHideReturnValue
-  public SvcUidPwd activateSuPerson(
-          @WebParam(name = 'uid') String uid,
-          @WebParam(name = 'domain') String domain,
-          @WebParam(name = 'affiliations') String[] affiliations
-  ) {
-
-    SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
-
-    SvcUidPwd svcUidPwd = new SvcUidPwd(uid: uid)
-    svcUidPwd.password = PasswordUtils.genRandomPassword(10, 10)
-
-    suPerson.activate(svcUidPwd, affiliations, domain)
-
-    // Notify Ladok-import of the activation to setup postaladdress and more
-    def ladokMsg = [:]
-    ladokMsg.socialsecuritynumber = GeneralUtils.ssnToNin(suPerson.socialSecurityNumber)
-
-    GeneralUtils.publishMessage(ladokMsg)
-
-    // Notify SUKAT consumers of new account (mostly AD sync)
-    def sukatMsg = [:]
-    sukatMsg.update = suPerson.uid
-
-    GeneralUtils.publishMessage(sukatMsg)
-
-    return svcUidPwd
   }
 
   /**

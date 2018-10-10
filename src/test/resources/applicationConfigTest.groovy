@@ -1,11 +1,5 @@
 package se.su.it.svc
 
-enrollment {
-  create {
-    skip = "true"
-  }
-}
-
 soap {
   publishedEndpointUrl = "localhost"
 }

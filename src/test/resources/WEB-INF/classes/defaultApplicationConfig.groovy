@@ -2,12 +2,6 @@ test = "test"
 
 customConfig = ""
 
-enrollment {
-  create {
-    skip = "true"
-  }
-}
-
 soap {
   publishedEndpointUrl = "http://localhost:8080"
 }

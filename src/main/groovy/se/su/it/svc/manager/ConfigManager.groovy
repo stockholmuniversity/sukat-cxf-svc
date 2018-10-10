@@ -44,7 +44,6 @@ class ConfigManager {
   public static final String DEFAULT_CONFIG_FILE_PATH = "WEB-INF/classes/defaultApplicationConfig.groovy"
 
   private static final List<String> MANDATORY_PROPERTIES = [
-      'enrollment.create.skip',
       'soap.publishedEndpointUrl',
       'ldap.accounts.parent',
       'ldap.ro.name',
