@@ -35,8 +35,7 @@ import gldapo.GldapoSchemaRegistry
 import org.apache.commons.lang.NotImplementedException
 import org.gcontracts.PostconditionViolation
 import org.gcontracts.PreconditionViolation
-import se.su.it.commons.Kadmin
-import se.su.it.commons.PasswordUtils
+
 import se.su.it.svc.commons.SvcPostalAddressVO
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
@@ -75,7 +74,6 @@ class AccountServiceImplSpec extends Specification {
     this.service = null
     AccountServiceUtils.metaClass = null
     GeneralUtils.metaClass = null
-    Kadmin.metaClass = null
     SuPersonStub.metaClass = null
     SuPersonQuery.metaClass = null
     GldapoSchemaRegistry.metaClass = null
@@ -406,145 +404,6 @@ class AccountServiceImplSpec extends Specification {
     listEntry0 == "other"
   }
 
-  def "Test createSuPerson with null uid argument"() {
-    setup:
-    def accountServiceImpl = new AccountServiceImpl()
-
-    when:
-    accountServiceImpl.createSuPerson(null,"196601010355","Test","Testsson")
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-    def "createSuPerson: account already exist"()
-    {
-        setup:
-        AccountQuery.metaClass.static.findAccountByUid = { String directory, String uid -> new Account() }
-        def accountServiceImpl = new AccountServiceImpl()
-
-        when:
-        accountServiceImpl.createSuPerson("testtest", "6601010355", "Test", "Testsson")
-
-        then:
-        thrown(IllegalArgumentException)
-    }
-
-  def "Test createSuPerson with already exist uid argument"() {
-    setup:
-    AccountQuery.metaClass.static.findAccountByUid = { String directory, String uid -> null }
-    SuPersonQuery.metaClass.static.findSuPersonByUID = {String directory,String uid -> new SuPerson() }
-    def accountServiceImpl = new AccountServiceImpl()
-
-    when:
-    accountServiceImpl.createSuPerson("testtest","6601010355","Test","Testsson")
-
-    then:
-    thrown(IllegalArgumentException)
-  }
-
-  def "Test createSuPerson with null ssn argument"() {
-    setup:
-    def accountServiceImpl = new AccountServiceImpl()
-
-    when:
-    accountServiceImpl.createSuPerson("testtest",null,"Test","Testsson")
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "Test createSuPerson with wrong ssn argument"() {
-    setup:
-    def accountServiceImpl = new AccountServiceImpl()
-
-    when:
-    accountServiceImpl.createSuPerson("testtest","20001128-5764","Test","Testsson")
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "createSuPerson: socialSecurityNumber already exists"() {
-    setup:
-    AccountQuery.metaClass.static.findAccountByUid = { String directory, String uid -> null }
-    SuPersonQuery.metaClass.static.findSuPersonByUID = {String directory,String uid -> null }
-    SuPersonQuery.metaClass.static.getSuPersonFromSsn = {String directory,String uid -> new SuPerson() }
-    def accountServiceImpl = new AccountServiceImpl()
-
-    when:
-    accountServiceImpl.createSuPerson("testtest","6601010355","Test","Testsson")
-
-    then:
-    thrown(IllegalArgumentException)
-  }
-
-  def "Test createSuPerson with null givenName argument"() {
-    setup:
-    def accountServiceImpl = new AccountServiceImpl()
-
-    when:
-    accountServiceImpl.createSuPerson("testtest","196601010355",null,"Testsson")
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "Test createSuPerson with null sn argument"() {
-    setup:
-    def accountServiceImpl = new AccountServiceImpl()
-
-    when:
-    accountServiceImpl.createSuPerson("testtest","196601010355","Test",null)
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "Test createSuPerson with null person argument"() {
-    setup:
-    def accountServiceImpl = new AccountServiceImpl()
-
-    when:
-    accountServiceImpl.createSuPerson("testtest","196601010355","Test","Testsson")
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "Test createSuPerson true flow"() {
-    setup:
-    Properties properties = new Properties()
-    properties.put("parent", "foo")
-    service.configManager = [config:[ldap:[accounts:[default:properties]]]]
-
-    def uid = 'uid'
-    def ssn = '0010100006'
-    def givenName = 'Test'
-    def sn = 'Testsson'
-
-    SuPersonQuery.metaClass.static.findSuPersonByUID = { String a, String b -> null }
-    SuPersonQuery.metaClass.static.getSuPersonFromSsn = { String a, String b -> null }
-
-    def spy = GroovySpy(SuPersonStub)
-
-    SuPersonStub.metaClass.static.newInstance = { String arg1, String arg2, String arg3, String arg4, String arg5, String arg6 ->
-      return spy
-    }
-
-    SuPersonStub.metaClass.save = {-> delegate.uid = uid.reverse() }
-
-    when:
-    service.createSuPerson(
-            uid,
-            ssn,
-            givenName,
-            sn)
-
-    then: 'we test that the object returned has been saved.'
-    spy.uid == uid.reverse()
-  }
-
   def "Test terminateSuPerson"() {
     when:
     new AccountServiceImpl().terminateSuPerson("testuid")
@@ -756,84 +615,6 @@ class AccountServiceImplSpec extends Specification {
     resp.registeredAddress == 'registeredAddress'
     resp.mail == 'email1@su.se'
     resp.accountIsActive
-  }
-
-  def "activateSuPersonWithMailRoutingAddress: test when attributes are invalid, should throw Exception"() {
-    when:
-    service.activateSuPerson("uid", "domain", ['affiliation'] as String[])
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "activateSuPerson: test when user exists in LDAP, should handle user and return new password"() {
-    given:
-    def suPerson = GroovyMock(SuPerson) {
-        getSocialSecurityNumber(*_) >> '9901011234'
-    }
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> suPerson }
-    GroovyMock(GeneralUtils, global: true)
-
-    when:
-    def svcUidPwd = service.activateSuPerson(
-            "uid",
-            "student.su.se",
-            ['other'] as String[])
-
-    then:
-    svcUidPwd.uid == 'uid'
-    svcUidPwd.password.size() == 10
-    2 * GeneralUtils.publishMessage(*_)
-  }
-
-  def "activateSuPerson: test when user doesn't exist in LDAP, should throw exception"() {
-    given:
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> throw new IllegalArgumentException("foo") }
-
-    when:
-    service.activateSuPerson('uid', "student.su.se", ["other"] as String[])
-
-    then:
-    thrown(IllegalArgumentException)
-  }
-
-  def "Test activateSuPerson without null domain argument"() {
-    when:
-    service.activateSuPerson('uid', null, ["other"] as String[])
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "Test activateSuPerson without null eduPersonAffiliation argument"() {
-    when:
-    service.activateSuPerson('uid', "student.su.se", null)
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "Test activateSuPerson Happy Path"() {
-    setup:
-    def uid = "testuid"
-    def password = "*" * 10
-
-    SuPerson suPerson = Mock(SuPerson) {
-        getSocialSecurityNumber(*_) >> '9901011235'
-    }
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> suPerson }
-
-    GroovyMock(GeneralUtils, global: true)
-    GroovyMock(PasswordUtils, global: true)
-
-    when:
-    SvcUidPwd ret = service.activateSuPerson(uid, "student.su.se", ["other"] as String[])
-
-    then:
-    ret.uid == uid
-    ret.password == password
-    1 * PasswordUtils.genRandomPassword(10, 10) >> password
-    2 * GeneralUtils.publishMessage(*_)
   }
 
   def "addMailLocalAddresses: given no valid uid"() {

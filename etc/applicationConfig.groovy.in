@@ -6,17 +6,6 @@ import se.su.it.svc.ldap.SuService
 import se.su.it.svc.ldap.SuServiceDescription
 import se.su.it.svc.ldap.SuSubAccount
 
-/**
-*  enrollment.create.skip does the following.
-*  true = Create user in SUKAT, DO NOT create in AFS and KDC.
-*  false = Create user in SUKAT, AFS and KDC.
-*/
-enrollment {
-  create {
-    skip = "%%SKIP_CREATE%%"
-  }
-}
-
 soap {
   publishedEndpointUrl = "%%PUBLISHED_ENDPOINT_URL%%"
 }

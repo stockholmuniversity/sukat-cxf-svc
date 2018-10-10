@@ -36,17 +36,11 @@ import gldapo.schema.annotation.GldapoSchemaFilter
 import gldapo.schema.annotation.GldapoSynonymFor
 
 import groovy.util.logging.Slf4j
-import se.su.it.svc.commons.LdapAttributeValidator
+
 import se.su.it.svc.commons.SvcSuPersonVO
 import se.su.it.svc.commons.SvcUidPwd
-import se.su.it.svc.manager.ApplicationContextProvider
-import se.su.it.svc.manager.ConfigManager
-import se.su.it.svc.query.SuPersonQuery
-import se.su.it.svc.util.AccountServiceUtils
-import se.su.it.svc.util.GeneralUtils
 
-import java.util.regex.Matcher
-import java.util.regex.Pattern
+import se.su.it.svc.util.GeneralUtils
 
 /** GLDAPO schema class for SU employees and students also used by web service. */
 
@@ -55,15 +49,6 @@ import java.util.regex.Pattern
 class SuPerson implements Serializable {
 
   static final long serialVersionUID = -687991492884005033L
-
-  /** Path to create home directories in. */
-  public static final String HOME_DIR_BASE = "/home"
-
-  /** Path to set as user shell */
-  public static final String SHELL_PATH = "/usr/local/bin/bash"
-
-  /** Default GID for new users. */
-  public static final String DEFAULT_USER_GID = "1200"
 
   public static enum Affilation {
     EMPLOYEE('employee', 40),
@@ -194,138 +179,6 @@ class SuPerson implements Serializable {
     }
   }
 
-  /**
-   * Sets affiliations & calculates primary affiliation
-   *
-   * @param affiliations the new affiliations
-   */
-  private void updateAffiliations(String[] affiliations) throws IllegalArgumentException {
-    log.debug "updateAffiliations: Received affiliations ${affiliations?.join(', ')}"
-
-    if (affiliations == null) {
-      // TODO: See if we should be able to reset
-      throw new IllegalArgumentException("Affiliations can't be null.")
-    }
-
-    /* If an invalid affiliation is supplied we throw an IllegalArgumentException */
-    if (!AFFILIATIONS.containsAll(affiliations)) {
-      affiliations.every { affiliation ->
-        if (!AFFILIATIONS.contains(affiliation)) {
-          throw new IllegalArgumentException("Supplied affiliation $affiliation is invalid.")
-        }
-      }
-    }
-
-    objectClass.add("eduPerson")
-    log.debug "updateAffiliations: affiliations set to ${affiliations?.join(', ')}"
-    eduPersonAffiliation = affiliations
-
-    String primary = null
-
-    for (targetAffiliation in Affilation.enumConstants) {
-      if (affiliations.contains(targetAffiliation.value)) {
-        primary = targetAffiliation.value
-        break
-      }
-    }
-
-    log.debug "updateAffiliations: Primary affiliation set to $primary"
-    eduPersonPrimaryAffiliation = primary
-  }
-
-  /**
-   * Enables the user through the 'enable-user.pl' script & saves the new data in SUKAT
-   *
-   * @param uid uid of the user to be enabled
-   * @param password the password
-   * @return true the operation succeeds, false if it fails.
-   */
-  private boolean enable(String uid, String password) {
-    boolean error = false
-
-    boolean skipCreate = skipCreateEnabled
-
-    if (skipCreate) {
-      log.warn "Skipping enable user since skipCreate is set to $skipCreate"
-      this.uidNumber = "-1"
-    } else {
-      boolean enabled = this.runEnableScript(uid, password)
-      if (!enabled) {
-        error = true
-      }
-    }
-
-    if (error) { return false }
-
-    /** End call Perlscript to init user in kdc, afs and unixshell */
-    log.debug("enableUser - Perlscript success for uid<${uid}>")
-    log.debug("enableUser - Writing posixAccount attributes to sukat for uid<${uid}>")
-
-    this.objectClass.add("posixAccount")
-    this.loginShell = SHELL_PATH
-    this.homeDirectory = fetchHomeDirectoryPath()
-    this.gidNumber = DEFAULT_USER_GID
-    SuPersonQuery.updateSuPerson(this)
-
-    return true
-  }
-
-  /**
-   * Run the script that enables the user in AFS & KDC
-   *
-   * @param uid the uid to enable
-   * @param password the password
-   * @return the uid of the enabled user, null if the operation fails.
-   */
-  private boolean runEnableScript(String uid, String password) {
-    def res = GeneralUtils.execHelper("enableUser", "--uid ${uid} --password ${password}")
-
-    this.uidNumber = res.uidNumber
-
-    return true
-  }
-
-  /**
-   * Generate a homeDirectory path string from uid
-   *
-   * @return homeDirectory absolute path or null if uid is null or empty
-   */
-  private String fetchHomeDirectoryPath() {
-    if (!uid) { return null }
-    def invalid = LdapAttributeValidator.validateAttributes(uid: uid)
-    invalid ? null : HOME_DIR_BASE + "/" + uid
-  }
-
-  /**
-   * Activate an existing user
-   *
-   * @param suEnrollPerson person to enroll
-   * @param svcUidPwd user & password
-   * @param eduPersonPrimaryAffiliation the primary affiliation to set
-   * @param domain the domain
-   */
-  public void activate(
-      SvcUidPwd svcUidPwd,
-      String[] affiliations,
-      String domain) {
-    log.debug("enrollUser - Now enabling uid <${uid}>.")
-
-    boolean enabledUser = enable(uid, svcUidPwd.password)
-
-    if (!enabledUser) {
-      log.error("enrollUser - enroll failed while excecuting perl scripts for uid <$uid>")
-      throw new IllegalStateException("enrollUser - enroll failed in scripts.")
-    }
-
-    updateAffiliations(affiliations)
-    mail = uid + "@" + domain
-    addMailLocalAddress([mail] as Set)
-
-    SuPersonQuery.moveSuPerson(this, AccountServiceUtils.domainToDN(domain))
-    SuPersonQuery.updateSuPerson(this)
-    log.info("enrollUser - User with uid <$uid> now enabled.")
-  }
-
     /**
      * Sets mailLocalAddress if not already set, adds new mailLocalAddress if
      * @param mailLocalAddresses
@@ -350,12 +203,4 @@ class SuPerson implements Serializable {
 
         return mailLocalAddress as String[]
     }
-
-  private boolean isSkipCreateEnabled() {
-    return configManager.config.enrollment.create.skip == "true"
-  }
-
-  private ConfigManager getConfigManager() {
-    return (ConfigManager) ApplicationContextProvider.applicationContext.getBean("configManager")
-  }
 }
