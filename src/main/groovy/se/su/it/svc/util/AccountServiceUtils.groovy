@@ -129,7 +129,7 @@ class AccountServiceUtils {
    */
   static SvcUidPwd createSubAccount(String uid, String type)
   {
-        def res = GeneralUtils.execHelper("createSubAccount", "${uid}/${type}")
+        def res = GeneralUtils.execHelper("createPrincipal", "${uid}/${type}")
 
         return res
   }
@@ -142,7 +142,7 @@ class AccountServiceUtils {
    */
   static void deleteSubAccount(String uid, String type)
   {
-        GeneralUtils.execHelper("deleteSubAccount", "${uid}/${type}")
+        GeneralUtils.execHelper("deletePrincipal", "${uid}/${type}")
   }
 
   /**
@@ -177,7 +177,7 @@ class AccountServiceUtils {
   {
         def sav = new SvcSubAccountVO()
 
-        def res = GeneralUtils.execHelper("getSubAccount", "${uid}/${type}")
+        def res = GeneralUtils.execHelper("getPrincipal", "${uid}/${type}")
 
         sav.uid = res.uid
 
