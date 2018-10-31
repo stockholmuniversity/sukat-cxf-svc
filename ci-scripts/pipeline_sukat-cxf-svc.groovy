@@ -26,17 +26,12 @@ node('agent')
         suGitHubBuildStatus
         {
 
-            stage('Junit Tests')
+            stage('Unit tests')
             {
                 sh './mvnw test'
             }
 
-            stage('Compile Code')
-            {
-                sh './mvnw package'
-            }
-
-            stage('Deploy to Nexus')
+            stage('Build and deploy')
             {
                 sh './mvnw deploy -DskipTests'
             }
