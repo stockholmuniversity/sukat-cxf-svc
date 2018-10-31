@@ -1,6 +1,7 @@
 #!/usr/bin/env groovy
 
 String projectName = env.JOB_NAME
+Boolean isReleaseBuild = false
 
 suSetProperties(["github": "true"])
 
