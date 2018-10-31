@@ -36,9 +36,9 @@ node('agent')
                 sh './mvnw package'
             }
 
-            stage('Deploy Nexus')
+            stage('Deploy to Nexus')
             {
-                sh './mvnw deploy'
+                sh './mvnw deploy -DskipTests'
             }
         }
     }

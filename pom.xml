@@ -6,6 +6,18 @@
   <packaging>war</packaging>
   <name>sukat-cxf-svc-war</name>
 
+  <distributionManagement>
+    <snapshotRepository>
+      <id>it.su.se-jenkins-snapshot</id>
+      <url>https://maven.it.su.se/repository/it.su.se-jenkins-snapshot</url>
+    </snapshotRepository>
+    <repository>
+      <id>it.su.se-jenkins-release</id>
+      <name>Jenkins release repo</name>
+      <url>https://maven.it.su.se/repository/it.su.se-jenkins-release</url>
+    </repository>
+  </distributionManagement>
+
   <dependencies>
     <dependency>
       <groupId>se.su.it.svc</groupId>
