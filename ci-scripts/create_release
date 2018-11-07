@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+function get_next_version {
+    current_version="${1}"
+    echo "${current_version}" | perl -pe 's/^((\d+\.)*)(\d+)(.*)$/$1.($3+1).$4/e'
+}
+
+if ! which xmlstarlet; then
+    echo "xmlstarlet is needed to run this script. Please install."
+    exit 1
+fi
+
+new_release_version="${1}"
+
+BASEDIR="$(dirname "${0}")/.."
+
+pomfile="${BASEDIR}/pom.xml"
+[ -f "${pomfile}" ] || exit 1
+
+current_version=$(xpath -q -e '/project/version/text()' "${pomfile}")
+if ! [[ "${current_version}" =~ -SNAPSHOT ]]; then
+    echo "Not a SNAPSHOT version in pom.xml. This is weird, won't do anything."
+    exit 1
+fi
+
+if [ -z "${new_release_version}" ]; then
+    new_release_version=$(echo "${current_version}" | cut -d- -f1)
+else
+    if [[ "${new_release_version}" =~ -SNAPSHOT ]]; then>/dev/null 2>&1
+        echo "Can't set new version to a SNAPSHOT, has to be a release version."
+        echo "version: ${new_release_version}"
+        exit 1
+    fi
+fi
+
+xmlstarlet edit -L -u "/_:project/_:version" -v "${new_release_version}" "${pomfile}"
+git add "${pomfile}"
+git commit -m "New release version ${new_release_version}."
+git tag "${new_release_version}"
+git push origin "${new_release_version}"
+
+# Update version with next SNAPSHOT version.
+new_development_version="$(get_next_version "${new_release_version}")-SNAPSHOT"
+xmlstarlet edit -L -u "/_:project/_:version" -v "${new_development_version}" "${pomfile}"
+git add "${pomfile}"
+git commit -m "New development version ${new_development_version}."
+git push origin master

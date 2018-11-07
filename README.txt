@@ -54,3 +54,14 @@ Gå in i beans-groovy.xml och ändra db connectivity settings
 GLDAPO:
 
 Se spnego.conf ovan.
+
+Create new release:
+
+Run the create_release script in ci-scripts dir:
+
+Automatically increment minor version (no argument to script needed):
+$ ci-scripts/create_release
+
+Manually specify a release version:
+$ ci-scripts/create_release 1.2.0
+
