@@ -17,7 +17,7 @@ BASEDIR="$(dirname "${0}")/.."
 pomfile="${BASEDIR}/pom.xml"
 [ -f "${pomfile}" ] || exit 1
 
-current_version=$(xpath -q -e '/project/version/text()' "${pomfile}")
+current_version=$(xmlstarlet sel -t -v "/_:project/_:version" "${pomfile}")
 if ! [[ "${current_version}" =~ -SNAPSHOT ]]; then
     echo "Not a SNAPSHOT version in pom.xml. This is weird, won't do anything."
     exit 1
@@ -37,7 +37,6 @@ xmlstarlet edit -L -u "/_:project/_:version" -v "${new_release_version}" "${pomf
 git add "${pomfile}"
 git commit -m "New release version ${new_release_version}."
 git tag "${new_release_version}"
-git push origin "${new_release_version}"
 
 # Update version with next SNAPSHOT version.
 new_development_version="$(get_next_version "${new_release_version}")-SNAPSHOT"
@@ -45,3 +44,5 @@ xmlstarlet edit -L -u "/_:project/_:version" -v "${new_development_version}" "${
 git add "${pomfile}"
 git commit -m "New development version ${new_development_version}."
 git push origin master
+# Lastly push the tag.
+git push origin "${new_release_version}"
