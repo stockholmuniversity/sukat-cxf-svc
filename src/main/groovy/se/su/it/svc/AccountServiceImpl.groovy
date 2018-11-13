@@ -94,6 +94,12 @@ public class AccountServiceImpl implements AccountService
     {
         def person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
 
+        // Trying to activate an already activated person is probably a misconfigured client.
+        if (person.objectClass.contains("posixAccount"))
+        {
+            throw new IllegalArgumentException("The person with uid ${uid} has already been activated.")
+        }
+
         person.objectClass.add("posixAccount")
 
         person.gidNumber = "1200"
