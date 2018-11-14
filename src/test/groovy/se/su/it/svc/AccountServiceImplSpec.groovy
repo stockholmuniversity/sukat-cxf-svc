@@ -82,7 +82,7 @@ class AccountServiceImplSpec extends Specification {
     def "activatePerson: happy path"()
     {
         setup:
-        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> new SuPerson(uid: 'apap1234', objectClass: ['suPerson'], socialSecurityNumber: "901010A123") }
+        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> new SuPerson(uid: 'apap1234', objectClass: ['suPerson'], socialSecurityNumber: "901010A120") }
         service.uidNumberQuery.metaClass.uidNumber = "400000"
         GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: "activatePass"] }
         SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> return true }
@@ -98,7 +98,19 @@ class AccountServiceImplSpec extends Specification {
     def "activatePerson: person is already active"()
     {
         setup:
-        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> new SuPerson(uid: 'apap1235', objectClass: ['posixAccount', 'suPerson'], socialSecurityNumber: "901010A123") }
+        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> new SuPerson(uid: 'apap1235', objectClass: ['posixAccount', 'suPerson']) }
+
+        when:
+        def res = service.activatePerson("apap1234")
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
+    def "activatePerson: person has an invalid ssn"()
+    {
+        setup:
+        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> new SuPerson(uid: 'apap1235', objectClass: ['suPerson'], socialSecurityNumber: "901010") }
 
         when:
         def res = service.activatePerson("apap1234")
@@ -110,7 +122,7 @@ class AccountServiceImplSpec extends Specification {
     def "activatePerson: person has mail"()
     {
         setup:
-        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> new SuPerson(uid: 'apap1234', objectClass: [], mail: "apap1234@su.se", socialSecurityNumber: "901010A123") }
+        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> new SuPerson(uid: 'apap1234', objectClass: [], mail: "apap1234@su.se", socialSecurityNumber: "901010A120") }
         service.uidNumberQuery.metaClass.uidNumber = "400000"
         GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: "activatePass"] }
         SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> return true }

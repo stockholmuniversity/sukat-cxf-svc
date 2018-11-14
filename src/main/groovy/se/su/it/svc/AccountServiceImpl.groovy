@@ -100,6 +100,14 @@ public class AccountServiceImpl implements AccountService
             throw new IllegalArgumentException("The person with uid ${uid} has already been activated.")
         }
 
+        // Old stubs may have invalid ssn, such accounts causes many problems, one example is all
+        // contact with Ladok.
+        def message = LdapAttributeValidator.validateAttributes([ssn: person.socialSecurityNumber])
+        if (message)
+        {
+            throw new IllegalArgumentException(message)
+        }
+
         person.objectClass.add("posixAccount")
 
         person.gidNumber = "1200"
