@@ -66,11 +66,13 @@ class AccountServiceUtils {
         g = g.replaceAll("\\p{M}", "")
         g = g.toLowerCase()
         g = g.replaceAll("-", "")
+        s = s.replaceAll("'", "")
 
         def s = Normalizer.normalize(sn, Normalizer.Form.NFD)
         s = s.replaceAll("\\p{M}", "")
         s = s.toLowerCase()
         s = s.replaceAll("-", "")
+        s = s.replaceAll("'", "")
 
         for (pos in [[2, 2], [1, 3], [3, 1], [0, 4], [4, 0]])
         {

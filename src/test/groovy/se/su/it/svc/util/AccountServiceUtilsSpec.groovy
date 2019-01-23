@@ -46,6 +46,7 @@ class AccountServiceUtilsSpec extends Specification
         'Anna'    | 'Aldin'    | 'aald' // Avoid bad words such as 'anal'
         'Åke'     | 'Åkesson'  | 'akak' // Diacritics should be stripped
         'Dash'    | 'A-Dash'   | 'daad' // '-' should be stripped
+        'Nils'    | "O'Neil"   | 'nion' // "'" should be stripped
     }
 
     def "generateUID: an account is found"()
