@@ -153,7 +153,14 @@ public class LdapAttributeValidator {
         // Special accounts such as testaccount
         if (ssn ==~ /^00[2-9]\d00A\d\d\d$/)
         {
-            throwMe("Given ssn (${ssn}) is for a specialaccount")
+            if (ssn ==~ /^009\d00A\d\d\d$/)
+            {
+                // Testaccounts are ok
+            }
+            else
+            {
+                throwMe("Given ssn (${ssn}) is for a specialaccount")
+            }
         }
         else
         {
