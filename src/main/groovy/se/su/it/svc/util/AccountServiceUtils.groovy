@@ -66,7 +66,7 @@ class AccountServiceUtils {
         g = g.replaceAll("\\p{M}", "")
         g = g.toLowerCase()
         g = g.replaceAll("-", "")
-        s = s.replaceAll("'", "")
+        g = g.replaceAll("'", "")
 
         def s = Normalizer.normalize(sn, Normalizer.Form.NFD)
         s = s.replaceAll("\\p{M}", "")
