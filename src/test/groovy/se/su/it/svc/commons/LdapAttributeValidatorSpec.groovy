@@ -58,6 +58,7 @@ class LdapAttributeValidatorSpec extends Specification
         "871010A232" | _  // SUKAT-personnummer
         "871010P232" | _  // Interimspersonnummer
         "8301822980" | _  // Samordningsnummer
+        "009000A000" | _  // Testaccount
     }
 
     @Unroll
@@ -78,7 +79,7 @@ class LdapAttributeValidatorSpec extends Specification
         "8601321234"   | _   // Invalid day
         "8301822A80"   | _   // Birthnumber
         "9010101016"   | _   // Invalid checksum
-        "009000A000"   | _   // Testaccount
+        "008000A000"   | _   // Archiveaccount
         "871010B232"   | _   // Invalid letter
     }
 
