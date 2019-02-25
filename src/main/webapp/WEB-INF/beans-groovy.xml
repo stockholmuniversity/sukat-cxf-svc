@@ -133,14 +133,6 @@
           address="/EntitlementService"
           publishedEndpointUrl="${soap.publishedEndpointUrl}/EntitlementService"/>
 
-  <bean id="serviceserviceEndpoint" class="se.su.it.svc.ServiceServiceImpl"/>
-  <jaxws:endpoint
-          id="serviceservice"
-          implementorClass="se.su.it.svc.ServiceServiceImpl"
-          implementor="#serviceserviceEndpoint"
-          address="/ServiceService"
-          publishedEndpointUrl="${soap.publishedEndpointUrl}/ServiceService"/>
-
   <bean id="accountserviceEndpoint" class="se.su.it.svc.AccountServiceImpl"/>
   <jaxws:endpoint
           id="accountservice"
