@@ -72,7 +72,4 @@ schemas = [
     SuRole,
     SuCard,
     SuPerson,
-    SuServiceDescription,
-    SuService,
-    SuSubAccount,
 ]
