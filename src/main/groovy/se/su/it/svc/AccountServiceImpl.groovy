@@ -46,6 +46,8 @@ import se.su.it.svc.ldap.SuPersonStub
 import se.su.it.svc.manager.ConfigManager
 
 import se.su.it.svc.query.AccountQuery
+import se.su.it.svc.query.GroupOfUniqueNamesQuery
+import se.su.it.svc.query.NamedObjectQuery
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.UidNumberQuery
 
@@ -141,6 +143,72 @@ public class AccountServiceImpl implements AccountService
         GeneralUtils.publishMessage(sukatMsg)
 
         return res.password
+    }
+
+    /**
+     * Accepts an array of mailLocalAddresses, the new entries gets compared with the SuPersons
+     * current mailLocalAddress entries and new entries gets added to the suPerson entry.
+     *
+     * @param uid uid for the user
+     * @param mailLocalAddresses E-mail addresses to add
+     *
+     * @return new list of mailLocalAddresses bound to the suPerson after the update.
+     */
+    @Requires({
+        ! LdapAttributeValidator.validateAttributes([
+            uid: uid,
+            mailLocalAddresses: mailLocalAddresses
+        ]) &&
+        mailLocalAddresses.size() > 0
+    })
+    public String[] addMailLocalAddresses(
+        @WebParam(name = "uid") String uid,
+        @WebParam(name = "mailLocalAddresses") String[] mailLocalAddresses)
+    {
+        def directory = ConfigManager.LDAP_RW
+        def person = SuPersonQuery.getSuPersonFromUID(directory, uid)
+
+        for (mla in mailLocalAddresses)
+        {
+            mla = mla.toLowerCase()
+
+            def p = SuPersonQuery.findByMailLocalAddress(directory, mla)
+
+            if (p)
+            {
+                if (p.uid == person.uid)
+                {
+                    log.info("${uid} already have ${mla} as mailLocalAddress")
+                    continue
+                }
+                else
+                {
+                    throw new IllegalArgumentException("${mla} is already in use on ${p.dn}")
+                }
+            }
+
+            def gou = GroupOfUniqueNamesQuery.findByMailLocalAddress(directory, mla)
+            if (gou)
+            {
+                throw new IllegalArgumentException("${mla} is already in use on ${gou.dn}")
+            }
+
+            def no = NamedObjectQuery.findByMailLocalAddress(directory, mla)
+            if (no)
+            {
+                throw new IllegalArgumentException("${mla} is already in use on ${no.dn}")
+            }
+
+            log.info("Adding ${mla} as new mailLocalAddress for ${uid}")
+            person.mailLocalAddress.add(mla)
+        }
+
+        SuPersonQuery.updateSuPerson(person)
+
+        // Add paranoia by refreshing the information from the datastore.
+        SuPerson rp = SuPersonQuery.getSuPersonFromUID(directory, uid)
+
+        return rp.mailLocalAddress
     }
 
     /**
@@ -529,33 +597,5 @@ public class AccountServiceImpl implements AccountService
     SuPerson suPerson = SuPersonQuery.findSuPersonByUID(ConfigManager.LDAP_RW, uid)
 
     return suPerson ? suPerson?.createSvcSuPersonVO() : null
-  }
-
-  /**
-   * Accepts an array of mailLocalAddresses, the new entries gets compared with the SuPersons current
-   * mailLocalAddress entries and new entries gets added to the suPerson entry.
-   *
-   * @param uid
-   * @param mailLocalAddresses
-   * @return new list of mailLocalAddresses bound to the suPerson after the update.
-   */
-  @Requires({
-    ! LdapAttributeValidator.validateAttributes([
-        uid: uid,
-        mailLocalAddresses: mailLocalAddresses ]) &&
-    mailLocalAddresses?.size() > 0
-  })
-  public String[] addMailLocalAddresses(@WebParam(name = "uid") String uid,
-                                        @WebParam(name = "mailLocalAddresses") String[] mailLocalAddresses)
-  {
-
-    SuPerson suPerson = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
-    // Can't depend on the mailLocalAddress Set doing it's thing without removing case.
-
-    String[] mailLocalAddress = suPerson.addMailLocalAddress(mailLocalAddresses as Set<String>)
-
-    suPerson.update()
-
-    return mailLocalAddress
   }
 }

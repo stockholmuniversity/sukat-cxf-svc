@@ -83,6 +83,8 @@ directories {
 }
 schemas = [
     se.su.it.svc.ldap.Account,
+    se.su.it.svc.ldap.GroupOfUniqueNames,
+    se.su.it.svc.ldap.NamedObject,
     se.su.it.svc.ldap.SuPersonStub,
     se.su.it.svc.ldap.SuRole,
     se.su.it.svc.ldap.SuCard,

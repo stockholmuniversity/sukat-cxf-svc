@@ -45,6 +45,8 @@ import se.su.it.svc.ldap.SuPerson
 import se.su.it.svc.ldap.SuPersonStub
 
 import se.su.it.svc.query.AccountQuery
+import se.su.it.svc.query.GroupOfUniqueNamesQuery
+import se.su.it.svc.query.NamedObjectQuery
 import se.su.it.svc.query.SuPersonQuery
 import se.su.it.svc.query.UidNumberQuery
 
@@ -135,6 +137,82 @@ class AccountServiceImplSpec extends Specification {
         res == "activatePass"
     }
 
+    def "addMailLocalAddresses: happy path"()
+    {
+        setup:
+        String[] mlas = ['amal1234@student.su.se']
+        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> new SuPerson(mailLocalAddress: []) }
+        SuPersonQuery.metaClass.static.findByMailLocalAddress = { String directory, String mail -> }
+        GroupOfUniqueNamesQuery.metaClass.static.findByMailLocalAddress = { String directory, String mail -> }
+        NamedObjectQuery.metaClass.static.findByMailLocalAddress = { String directory, String mail -> }
+        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> return true }
+
+        when:
+        def res = service.addMailLocalAddresses("amal1234", mlas)
+
+        then:
+        res == []
+    }
+
+    def "addMailLocalAddresses: address is in use on other person"()
+    {
+        setup:
+        String[] mlas = ['amal1234@student.su.se']
+        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> new SuPerson(uid: uid) }
+        SuPersonQuery.metaClass.static.findByMailLocalAddress = { String directory, String mail -> [dn: "uid=notamal1234", uid: "notamal1234"] }
+
+        when:
+        def res = service.addMailLocalAddresses("amal1234", mlas)
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
+    def "addMailLocalAddresses: address is in use on group"()
+    {
+        setup:
+        String[] mlas = ['amal1234@student.su.se']
+        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> new SuPerson(uid: uid) }
+        SuPersonQuery.metaClass.static.findByMailLocalAddress = { String directory, String mail -> }
+        GroupOfUniqueNamesQuery.metaClass.static.findByMailLocalAddress = { String directory, String mail -> [dn: "cn=notamal1234"] }
+
+        when:
+        def res = service.addMailLocalAddresses("amal1234", mlas)
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
+    def "addMailLocalAddresses: address is in use on named object"()
+    {
+        setup:
+        String[] mlas = ['amal1234@student.su.se']
+        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> new SuPerson(uid: uid) }
+        SuPersonQuery.metaClass.static.findByMailLocalAddress = { String directory, String mail -> }
+        GroupOfUniqueNamesQuery.metaClass.static.findByMailLocalAddress = { String directory, String mail -> }
+        NamedObjectQuery.metaClass.static.findByMailLocalAddress = { String directory, String mail -> [dn: "cn=notamal1234"] }
+
+        when:
+        def res = service.addMailLocalAddresses("amal1234", mlas)
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
+    def "addMailLocalAddresses: user already has address"()
+    {
+        setup:
+        String[] mlas = ['amal1234@student.su.se']
+        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> new SuPerson(uid: uid, mailLocalAddress: mlas) }
+        SuPersonQuery.metaClass.static.findByMailLocalAddress = { String directory, String mail -> new SuPerson(uid: "amal1234") }
+        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> return true }
+
+        when:
+        def res = service.addMailLocalAddresses("amal1234", mlas)
+
+        then:
+        res == mlas
+    }
     def "createPerson: happy path"()
     {
         setup:
@@ -648,67 +726,4 @@ class AccountServiceImplSpec extends Specification {
     then:
     thrown(PreconditionViolation)
   }
-
-  def "addMailLocalAddresses: given no mailLocalAddresses"() {
-    when:
-    service.addMailLocalAddresses('foo', [] as String[])
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "addMailLocalAddresses: given an invalid email in mailLocalAddresses"() {
-    when:
-    service.addMailLocalAddresses('foo', ['foo', 'kaka@su.se'] as String[])
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "addMailLocalAddresses: When SuPerson can't be found by uid"() {
-    given:
-    SuPerson.metaClass.static.find = { Map arg1, Closure arg2 ->}
-
-    when:
-    service.addMailLocalAddresses('foo', ['kaka@su.se'] as String[])
-
-    then:
-    thrown(IllegalArgumentException)
-  }
-
-  def "addMailLocalAddresses: When SuPerson doesn't already have the attribute mailLocalAddress"() {
-    given:
-    SuPerson.metaClass.update = {-> }
-    def mailLocalAddresses = ['kaka@su.se', "bar@su.se"]
-    String uid = 'foo'
-    SuPerson suPerson = GroovyMock(SuPerson)
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> suPerson }
-
-    when:
-    def resp = service.addMailLocalAddresses(uid, mailLocalAddresses as String[])
-
-    then:
-    resp == mailLocalAddresses
-
-    and:
-    1 * suPerson.addMailLocalAddress(_) >> mailLocalAddresses
-  }
-
-  def "addMailLocalAddresses: When SuPerson"() {
-    given:
-    SuPerson.metaClass.update = {-> }
-    def mailLocalAddresses = ['kaka@su.se', "bar@su.se"]
-    String uid = 'foo'
-    SuPerson suPerson = GroovyMock(SuPerson) {
-      1 * addMailLocalAddress(*_) >> mailLocalAddresses
-    }
-    SuPersonQuery.metaClass.static.getSuPersonFromUID = { String a, String b -> suPerson }
-
-    when:
-    def resp = service.addMailLocalAddresses(uid, mailLocalAddresses as String[])
-
-    then:
-    resp instanceof String[]
-  }
-
 }
