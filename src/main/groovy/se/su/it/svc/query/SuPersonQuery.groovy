@@ -62,6 +62,23 @@ public class SuPersonQuery {
         return person
     }
 
+    /**
+     * Find person by mailLocalAddress
+     *
+     * @param directory RW or RO LDAP-directory
+     * @param email email address
+     *
+     * @return SuPerson object.
+     */
+    static SuPerson findByMailLocalAddress(String directory, String email)
+    {
+        def person = SuPerson.find(directory: directory) {
+            eq('mailLocalAddress', email)
+        }
+
+        return person
+    }
+
   /**
    * Returns a SuPerson object, specified by the parameter uid.
    *
