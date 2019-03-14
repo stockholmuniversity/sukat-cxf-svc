@@ -58,29 +58,6 @@ class SuPersonSpec extends Specification {
     'a@b.c' | 'b@b.c' | ['b@b.c'] | ['b@b.c', 'a@b.c']
   }
 
-  @Unroll
-  def "setMailLocalAddress - when MLA=#expectedMLA should set OC=#expectedOC if OC=#preOC"() {
-    given:
-    SuPerson suPerson = new SuPerson(
-            objectClass: preOC)
-
-    when:
-    suPerson.mailLocalAddress = expectedMLA
-
-    then:
-    suPerson.objectClass == expectedOC as Set<String>
-    suPerson.mailLocalAddress == expectedMLA as Set<String>
-
-    where:
-    expectedMLA | preOC                      | expectedOC
-    null        | null                       | null
-    null        | ['foo']                    | ['foo']
-    null        | ['inetLocalMailRecipient'] | ['inetLocalMailRecipient']
-    ['a@b.c']   | null                       | null
-    ['a@b.c']   | ['foo']                    | ['foo','inetLocalMailRecipient']
-    ['a@b.c']   | ['inetLocalMailRecipient'] | ['inetLocalMailRecipient']
-  }
-
   def "updateFromSvcSuPersonVO - should copy properties"() {
     given:
     def suPerson = new SuPerson()
@@ -159,52 +136,5 @@ class SuPersonSpec extends Specification {
     mailRoutingAddress << ["", "mail@su.se"]
     expected << [false, true]
 
-  }
-
-  def "addMailLocalAddresses: When SuPerson doesn't have any mailLocalAddress entries"() {
-    given:
-    def mailLocalAddresses = ['kaka@su.se', "bar@su.se"] as Set
-    SuPerson suPerson = new SuPerson(objectClass: [], mailLocalAddress: [])
-
-    when:
-    def resp = suPerson.addMailLocalAddress(mailLocalAddresses)
-
-    then:
-    resp == mailLocalAddresses as String[]
-
-    and:
-    suPerson.objectClass.contains('inetLocalMailRecipient')
-  }
-
-  def "addMailLocalAddresses: When SuPerson already has mailLocalAddress entries."() {
-    given:
-    def mailLocalAddresses = ['kaka@su.se', "bar@su.se", "foo@bar.se"] as LinkedHashSet
-    SuPerson suPerson = new SuPerson(objectClass:['inetLocalMailRecipient'])
-    suPerson.@mailLocalAddress = ["barbar@su.se", "kaka@su.se"] as LinkedHashSet
-
-    when:
-    def resp = suPerson.addMailLocalAddress(mailLocalAddresses)
-
-    then:
-    resp == ["barbar@su.se", "kaka@su.se", "foo@bar.se", "bar@su.se"]
-
-    and:
-    suPerson.objectClass.contains('inetLocalMailRecipient')
-  }
-
-  def "addMailLocalAddresses: When no new entries are added objectClass is not set either."() {
-    given:
-    def mailLocalAddresses = ["kaka@su.se"] as Set
-    SuPerson suPerson = new SuPerson()
-    suPerson.@mailLocalAddress = ["kaka@su.se"]
-
-    when:
-    def resp = suPerson.addMailLocalAddress(mailLocalAddresses)
-
-    then:
-    resp == ["kaka@su.se"]
-
-    and:
-    suPerson.objectClass == null
   }
 }

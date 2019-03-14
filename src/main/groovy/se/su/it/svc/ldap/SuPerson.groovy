@@ -154,19 +154,6 @@ class SuPerson implements Serializable {
   }
 
   /**
-   * Set the mailLocalAddress & add 'inetLocalMailRecipient' objectClass
-   *
-   * @param mailLocalAddress the new mailLocalAddress
-   */
-  public void setMailLocalAddress(Set<String> mailLocalAddress) {
-    this.mailLocalAddress = mailLocalAddress
-
-    if (this.mailLocalAddress) {
-      this.objectClass?.add("inetLocalMailRecipient")
-    }
-  }
-
-  /**
    * Set the mailRoutingAddress & add 'inetLocalMailRecipient' objectClass
    *
    * @param mailRoutingAddress the new mailRoutingAddress
@@ -178,29 +165,4 @@ class SuPerson implements Serializable {
       this.objectClass?.add("inetLocalMailRecipient")
     }
   }
-
-    /**
-     * Sets mailLocalAddress if not already set, adds new mailLocalAddress if
-     * @param mailLocalAddresses
-     */
-    public String[] addMailLocalAddress(Set<String> mailLocalAddresses)
-    {
-
-        mailLocalAddresses = mailLocalAddresses*.toLowerCase()
-
-        if (mailLocalAddress)
-        {
-            def newEntries = mailLocalAddresses - mailLocalAddress*.toLowerCase()
-            if (newEntries)
-            {
-                mailLocalAddress += newEntries
-            }
-        }
-        else
-        {
-            setMailLocalAddress(mailLocalAddresses)
-        }
-
-        return mailLocalAddress as String[]
-    }
 }
