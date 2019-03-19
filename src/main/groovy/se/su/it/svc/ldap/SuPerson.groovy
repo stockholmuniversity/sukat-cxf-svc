@@ -77,6 +77,7 @@ class SuPerson implements Serializable {
   Set<String> objectClass
   String eduPersonPrimaryAffiliation
   Set<String> eduPersonAffiliation
+  Set<String> eduPersonAssurance
   Set<String> eduPersonEntitlement
   String socialSecurityNumber
   String givenName
