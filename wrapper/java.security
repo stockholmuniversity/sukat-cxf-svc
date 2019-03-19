@@ -1,5 +1,0 @@
-
-# Modern maven.it.su.se uses Diffie-Hellman keys larger than 1024 so we need
-# more modern crypto than JDK 1.6 provides.
-security.provider.9=org.bouncycastle.jce.provider.BouncyCastleProvider
-

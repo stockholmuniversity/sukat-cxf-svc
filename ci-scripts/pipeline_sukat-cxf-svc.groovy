@@ -28,12 +28,12 @@ node('agent')
 
             stage('Unit tests')
             {
-                sh './mvnw test'
+                sh 'mvn test'
             }
 
             stage('Build and deploy')
             {
-                sh './mvnw deploy -DskipTests'
+                sh 'mvn deploy -DskipTests'
             }
         }
     }
