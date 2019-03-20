@@ -80,6 +80,18 @@ public class SuCardOrderQuerySpec extends Specification {
         resp.id == "1"
     }
 
+    def "getCardOrderHistory: happy path"()
+    {
+        setup:
+        service.suCardSql.rows(*_) >> [[comment: "Ordered by foo"]]
+
+        when:
+        def resp = service.getCardOrderHistory("1")
+
+        then:
+        resp[0].comment == "Ordered by foo"
+    }
+
   void "getFindAllCardsQuery"() {
     expect: 'should return'
     service.findAllCardsQuery == "SELECT r.id, r.serial, r.owner, r.printer, r.createTime, r.firstname, r.lastname, a.streetaddress1," +

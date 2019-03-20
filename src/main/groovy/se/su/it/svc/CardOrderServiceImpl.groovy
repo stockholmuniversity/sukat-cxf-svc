@@ -34,7 +34,10 @@ package se.su.it.svc
 import groovy.util.logging.Slf4j
 import org.gcontracts.annotations.Ensures
 import org.gcontracts.annotations.Requires
+
 import se.su.it.svc.commons.SvcCardOrderVO
+import se.su.it.svc.commons.SvcCardOrderHistoryVO
+
 import se.su.it.svc.util.CardOrderServiceUtils
 
 import javax.jws.WebParam
@@ -78,6 +81,23 @@ class CardOrderServiceImpl implements CardOrderService {
 
     return (SvcCardOrderVO[]) cardOrders.toArray()
   }
+
+    /**
+     * Get status history for a card order
+     *
+     * @param uuid UUID of the card
+     *
+     * @return Array of history entries
+     */
+    @Requires({ uuid  })
+    @Ensures({ result instanceof SvcCardOrderHistoryVO[] })
+    public SvcCardOrderHistoryVO[] getCardOrderHistory(
+            @WebParam(name = 'uuid') String uuid
+    )
+    {
+        return suCardOrderQuery.getCardOrderHistory(uuid)
+    }
+
   /**
    * Create a card order
    *
