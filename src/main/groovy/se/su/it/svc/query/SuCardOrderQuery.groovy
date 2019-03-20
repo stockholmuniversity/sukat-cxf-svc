@@ -34,7 +34,9 @@ package se.su.it.svc.query
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
 import groovy.util.logging.Slf4j
+
 import se.su.it.svc.commons.SvcCardOrderVO
+import se.su.it.svc.commons.SvcCardOrderHistoryVO
 
 import java.sql.Timestamp
 
@@ -78,6 +80,11 @@ class SuCardOrderQuery {
       "FROM request r LEFT JOIN address a ON r.address = a.id " +
       "JOIN status s ON r.status = s.id WHERE r.owner = :owner AND status in (1,2,3)"
 
+    /**
+     * Get status history for a card order.
+     */
+    public static final getStatusHistoryQuery = "SELECT timestamp, status, comment FROM status_history WHERE request = :uuid"
+
   /**
    * Insert into <i>address</i> values <b>streetaddress1</b>, <b>streetaddress2</b>,
    *  <b>locality</b> & <b>zipcode</b>
@@ -120,6 +127,18 @@ class SuCardOrderQuery {
     SvcCardOrderVO findCardOrderByUuid(String uuid)
     {
         return suCardSql.firstRow(findCardOrderByUuidQuery, [uuid: uuid])
+    }
+
+    /**
+     * Get card order history for supplied uuid
+     *
+     * @param uuid the uuid to find card order history for
+     *
+     * @return An array of card order history entries
+     */
+    SvcCardOrderHistoryVO[] getCardOrderHistory(String uuid)
+    {
+        return suCardSql.rows(getStatusHistoryQuery, [uuid: uuid])
     }
 
   /**

@@ -117,6 +117,18 @@ class CardOrderServiceImplSpec extends Specification {
     resp.every { it instanceof SvcCardOrderVO }
   }
 
+    def "findCardOrderByUuid: happy path"()
+    {
+        setup:
+        service.suCardOrderQuery.getCardOrderHistory(*_) >> [[comment: "1"]]
+
+        when:
+        def resp = service.getCardOrderHistory("1")
+
+        then:
+        resp[0].comment == "1"
+    }
+
   void "orderCard: when given no cardOrder"() {
     when:
     service.orderCard(null)

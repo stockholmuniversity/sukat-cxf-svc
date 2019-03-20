@@ -32,9 +32,11 @@
 package se.su.it.svc
 
 import se.su.it.svc.commons.SvcCardOrderVO
+import se.su.it.svc.commons.SvcCardOrderHistoryVO
 
 public interface CardOrderService {
     SvcCardOrderVO findCardOrderByUuid(String uuid)
   SvcCardOrderVO[] findAllCardOrdersForUid(String uid)
+    SvcCardOrderHistoryVO[] getCardOrderHistory(String uuid)
   String orderCard(SvcCardOrderVO svcCardOrderVO)
 }
