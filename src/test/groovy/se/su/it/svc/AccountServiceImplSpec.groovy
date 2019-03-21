@@ -393,7 +393,7 @@ class AccountServiceImplSpec extends Specification {
     def "resetPassword: happy path"()
     {
         setup:
-        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> [eduPersonAssurance: ["reset-assurance"]] }
+        SuPersonQuery.metaClass.static.findSuPersonByUID = { String directory, String uid -> [eduPersonAssurance: ["reset-assurance"]] }
         SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> }
         def pass = 'rppasswd234'
         GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: pass] }
@@ -408,7 +408,7 @@ class AccountServiceImplSpec extends Specification {
     def "resetPassword: no person is found"()
     {
         setup:
-        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> }
+        SuPersonQuery.metaClass.static.findSuPersonByUID = { String directory, String uid -> }
         def pass = 'rppasswd234'
         GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: pass] }
 
@@ -422,7 +422,7 @@ class AccountServiceImplSpec extends Specification {
     def "resetPassword: person do not have any assurance"()
     {
         setup:
-        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> [:] }
+        SuPersonQuery.metaClass.static.findSuPersonByUID = { String directory, String uid -> [:] }
         def pass = 'rppasswd234'
         GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: pass] }
 

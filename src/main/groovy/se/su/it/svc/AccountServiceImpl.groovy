@@ -449,7 +449,7 @@ public class AccountServiceImpl implements AccountService
         @WebParam(name = 'uid') String uid
     )
     {
-        SuPerson person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
+        SuPerson person = SuPersonQuery.findSuPersonByUID(ConfigManager.LDAP_RW, uid)
 
         if (person)
         {
