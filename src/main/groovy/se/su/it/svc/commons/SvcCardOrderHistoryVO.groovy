@@ -12,7 +12,7 @@ class SvcCardOrderHistoryVO implements Serializable
     @XmlAttribute
     Date timestamp
     @XmlAttribute
-    String status
+    String value
     @XmlAttribute
     String comment
 }

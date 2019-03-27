@@ -83,7 +83,9 @@ class SuCardOrderQuery {
     /**
      * Get status history for a card order.
      */
-    public static final getStatusHistoryQuery = "SELECT timestamp, status, comment FROM status_history WHERE request = :uuid"
+    public static final getStatusHistoryQuery = "SELECT timestamp, s.value, comment " +
+    "FROM status_history h " +
+    "JOIN status s ON h.status = s.id WHERE request = :uuid"
 
   /**
    * Insert into <i>address</i> values <b>streetaddress1</b>, <b>streetaddress2</b>,
