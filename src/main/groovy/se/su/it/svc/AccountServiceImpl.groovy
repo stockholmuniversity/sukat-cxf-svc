@@ -457,6 +457,7 @@ public class AccountServiceImpl implements AccountService
             {
                 person.eduPersonAssurance = null
                 SuPersonQuery.updateSuPerson(person)
+                log.info("ASSURANCE Removed assurance from ${uid}")
             }
         }
 
