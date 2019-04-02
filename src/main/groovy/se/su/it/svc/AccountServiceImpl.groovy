@@ -449,21 +449,7 @@ public class AccountServiceImpl implements AccountService
         @WebParam(name = 'uid') String uid
     )
     {
-        SuPerson person = SuPersonQuery.findSuPersonByUID(ConfigManager.LDAP_RW, uid)
-
-        if (person)
-        {
-            if (person.eduPersonAssurance)
-            {
-                person.eduPersonAssurance = null
-                SuPersonQuery.updateSuPerson(person)
-                log.info("ASSURANCE Removed assurance from ${uid}")
-            }
-        }
-
-        def res = GeneralUtils.execHelper("resetPassword", uid)
-
-        return res.password
+        return resetPasswordWithAssurance(uid, [] as String[])
     }
 
     /**

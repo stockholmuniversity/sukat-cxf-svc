@@ -393,8 +393,9 @@ class AccountServiceImplSpec extends Specification {
     def "resetPassword: happy path"()
     {
         setup:
-        SuPersonQuery.metaClass.static.findSuPersonByUID = { String directory, String uid -> [eduPersonAssurance: ["reset-assurance"]] }
-        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> }
+        def p = [eduPersonAssurance: ["reset-assurance"]]
+        SuPersonQuery.metaClass.static.findSuPersonByUID = { String directory, String uid -> p }
+        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> p = person }
         def pass = 'rppasswd234'
         GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: pass] }
 
@@ -403,34 +404,7 @@ class AccountServiceImplSpec extends Specification {
 
         then:
         res == pass
-    }
-
-    def "resetPassword: no person is found"()
-    {
-        setup:
-        SuPersonQuery.metaClass.static.findSuPersonByUID = { String directory, String uid -> }
-        def pass = 'rppasswd234'
-        GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: pass] }
-
-        when:
-        def res = service.resetPassword("rpuid")
-
-        then:
-        res == pass
-    }
-
-    def "resetPassword: person do not have any assurance"()
-    {
-        setup:
-        SuPersonQuery.metaClass.static.findSuPersonByUID = { String directory, String uid -> [:] }
-        def pass = 'rppasswd234'
-        GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: pass] }
-
-        when:
-        def res = service.resetPassword("rpuid")
-
-        then:
-        res == pass
+        p.eduPersonAssurance.size() == 0 // Paranoia, MUST always be reset
     }
 
     def "resetPasswordWithAssurance: happy path"()
