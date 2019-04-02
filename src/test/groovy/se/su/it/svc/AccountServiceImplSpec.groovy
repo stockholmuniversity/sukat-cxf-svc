@@ -433,6 +433,90 @@ class AccountServiceImplSpec extends Specification {
         res == pass
     }
 
+    def "resetPasswordWithAssurance: happy path"()
+    {
+        setup:
+        SuPersonQuery.metaClass.static.findSuPersonByUID = { String directory, String uid -> }
+        def pass = 'rppasswd345'
+        GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: pass] }
+
+        when:
+        def res = service.resetPasswordWithAssurance("rpuid", [] as String[])
+
+        then:
+        res == pass
+    }
+
+    def "resetPasswordWithAssurance: old assurance is removed"()
+    {
+        setup:
+        def p = [eduPersonAssurance: ["remove-me"]]
+        SuPersonQuery.metaClass.static.findSuPersonByUID = { String directory, String uid -> p }
+        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> p = person }
+        def pass = 'rppasswd345'
+        GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: pass] }
+
+        when:
+        def res = service.resetPasswordWithAssurance("rpuid", [] as String[])
+
+        then:
+        res == pass
+        p.eduPersonAssurance.size() == 0
+    }
+
+    def "resetPasswordWithAssurance: AL1 is set"()
+    {
+        setup:
+        String[] ass = ["http://www.swamid.se/policy/assurance/al1"]
+        def p = [eduPersonAssurance: []]
+        SuPersonQuery.metaClass.static.findSuPersonByUID = { String directory, String uid -> p }
+        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> p = person }
+        def pass = 'rppasswd345'
+        GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: pass] }
+
+        when:
+        def res = service.resetPasswordWithAssurance("rpuid", ass)
+
+        then:
+        res == pass
+        p.eduPersonAssurance == ["http://www.swamid.se/policy/assurance/al1"] as HashSet
+    }
+
+    def "resetPasswordWithAssurance: AL2 is set"()
+    {
+        setup:
+        String[] ass = ["http://www.swamid.se/policy/assurance/al2"]
+        def p = [eduPersonAssurance: []]
+        SuPersonQuery.metaClass.static.findSuPersonByUID = { String directory, String uid -> p }
+        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> p = person }
+        def pass = 'rppasswd345'
+        GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: pass] }
+
+        when:
+        def res = service.resetPasswordWithAssurance("rpuid", ass)
+
+        then:
+        res == pass
+        p.eduPersonAssurance == ["http://www.swamid.se/policy/assurance/al2"] as HashSet
+    }
+
+    def "resetPasswordWithAssurance: AL3 is unknown"()
+    {
+        setup:
+        String[] ass = ["http://www.swamid.se/policy/assurance/al3"]
+        def p = [eduPersonAssurance: []]
+        SuPersonQuery.metaClass.static.findSuPersonByUID = { String directory, String uid -> p }
+        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> p = person }
+        def pass = 'rppasswd345'
+        GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: pass] }
+
+        when:
+        def res = service.resetPasswordWithAssurance("rpuid", ass)
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
   def "scramblePassword - is a void method"() {
     when:
     Method m = AccountServiceImpl.getMethod('scramblePassword', String)

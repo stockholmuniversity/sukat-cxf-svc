@@ -39,6 +39,7 @@ import se.su.it.svc.commons.SvcUidPwd
 public interface AccountService {
   void updatePrimaryAffiliation(String uid, String affiliation)
   String resetPassword(String uid)
+  String resetPasswordWithAssurance(String uid, String[] assurance)
   void scramblePassword(String uid)
   String activatePerson(String uid)
   String createPerson(String nin, String givenName, String sn)
