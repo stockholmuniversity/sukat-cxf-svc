@@ -248,7 +248,7 @@ public class AccountServiceImpl implements AccountService
 
         def directory = ConfigManager.LDAP_RW
 
-        def suPersonStub = SuPersonStub.newInstance(uid, givenName, sn, ssn, parent, directory)
+        SuPersonStub suPersonStub = SuPersonStub.newInstance(uid, givenName, sn, ssn, parent, directory)
 
         suPersonStub.save()
 
