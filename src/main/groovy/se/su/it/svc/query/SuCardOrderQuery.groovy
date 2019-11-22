@@ -211,7 +211,8 @@ class SuCardOrderQuery {
       throw ex
     }
 
-    log.info "Returning $uuid"
+    log.info("Created card order ${uuid}, owner ${cardOrderVO.owner}")
+
     return uuid
   }
 
