@@ -357,7 +357,7 @@ public class AccountServiceImpl implements AccountService
         @WebParam(name = 'type') String type
     )
     {
-        return AccountServiceUtils.createSubAccount(uid, type)
+        throw new RuntimeException("This method is deprecated")
     }
 
   /**
@@ -377,7 +377,7 @@ public class AccountServiceImpl implements AccountService
         @WebParam(name = 'type') String type
     )
   {
-        AccountServiceUtils.deleteSubAccount(uid, type)
+        throw new RuntimeException("This method is deprecated")
   }
 
   /**
@@ -400,7 +400,7 @@ public class AccountServiceImpl implements AccountService
         @WebParam(name = 'type') String type
     )
   {
-        return AccountServiceUtils.getSubAccount(uid, type)
+        throw new RuntimeException("This method is deprecated")
   }
 
   /**
