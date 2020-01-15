@@ -311,39 +311,29 @@ class AccountServiceImplSpec extends Specification {
 
     def "createSubAccount: happy path"()
     {
-        setup:
-        AccountServiceUtils.metaClass.static.createSubAccount = { String a, String b -> [uid: "${a}/${b}", password: "csaPassword"] }
-
         when:
         def ret = service.createSubAccount("csauid", "csaType")
 
         then:
-        ret.uid == "csauid/csaType"
-        ret.password == "csaPassword"
+        thrown(RuntimeException)
     }
 
   def "deleteSubAccount: happy path"()
   {
-    setup:
-    AccountServiceUtils.metaClass.static.deleteSubAccount = { String a, String b -> }
-
     when:
     service.deleteSubAccount("csauid", "csaType")
 
     then:
-    notThrown(Exception)
+    thrown(RuntimeException)
   }
 
   def "getSubAccount: happy path"()
   {
-    setup:
-    AccountServiceUtils.metaClass.static.getSubAccount = { String a, String b -> [uid: 'gsaTest'] }
-
     when:
     def ret = service.getSubAccount("gsauid", "gsaType")
 
     then:
-    ret.uid == "gsaTest"
+    thrown(RuntimeException)
   }
 
   def "Test updatePrimaryAffiliation with null uid argument"() {
