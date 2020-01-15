@@ -449,7 +449,7 @@ public class AccountServiceImpl implements AccountService
         @WebParam(name = 'uid') String uid
     )
     {
-        return resetPasswordWithAssurance(uid, [] as String[])
+        throw new RuntimeException("This method is deprecated")
     }
 
     /**
@@ -471,45 +471,7 @@ public class AccountServiceImpl implements AccountService
         @WebParam(name = 'assurance') String[] assurance
     )
     {
-        SuPerson person = SuPersonQuery.findSuPersonByUID(ConfigManager.LDAP_RW, uid)
-
-        if (person)
-        {
-            if (person.eduPersonAssurance)
-            {
-                person.eduPersonAssurance = []
-                SuPersonQuery.updateSuPerson(person)
-                log.info("ASSURANCE Removed assurance from ${uid}")
-            }
-        }
-
-        def res = GeneralUtils.execHelper("resetPassword", uid)
-
-        if (person)
-        {
-            for (a in assurance)
-            {
-                if (a == 'http://www.swamid.se/policy/assurance/al1')
-                {
-                    log.info("ASSURANCE Adding assurance SWAMID AL1 to ${uid}")
-                    person.eduPersonAssurance.add('http://www.swamid.se/policy/assurance/al1')
-                    continue
-                }
-
-                if (a == 'http://www.swamid.se/policy/assurance/al2')
-                {
-                    log.info("ASSURANCE Adding assurance SWAMID AL2 to ${uid}")
-                    person.eduPersonAssurance.add('http://www.swamid.se/policy/assurance/al2')
-                    continue
-                }
-
-                throw new IllegalArgumentException("Unknown assurance ${a}");
-            }
-
-            SuPersonQuery.updateSuPerson(person)
-        }
-
-        return res.password
+        throw new RuntimeException("This method is deprecated")
     }
 
   /**
@@ -524,12 +486,7 @@ public class AccountServiceImpl implements AccountService
   public void scramblePassword(
           @WebParam(name = 'uid') String uid
   ) {
-    try {
-      resetPassword(uid)
-    } catch (ex) {
-      log.warn "scramblePassword - Exception while scrambling password for uid '${uid}': " + ex.message
-      throw ex
-    }
+        throw new RuntimeException("This method is deprecated")
   }
 
   /**

@@ -392,155 +392,28 @@ class AccountServiceImplSpec extends Specification {
 
     def "resetPassword: happy path"()
     {
-        setup:
-        def p = [eduPersonAssurance: ["reset-assurance"]]
-        SuPersonQuery.metaClass.static.findSuPersonByUID = { String directory, String uid -> p }
-        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> p = person }
-        def pass = 'rppasswd234'
-        GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: pass] }
-
         when:
         def res = service.resetPassword("rpuid")
 
         then:
-        res == pass
-        p.eduPersonAssurance.size() == 0 // Paranoia, MUST always be reset
+        thrown(RuntimeException)
     }
 
     def "resetPasswordWithAssurance: happy path"()
     {
-        setup:
-        SuPersonQuery.metaClass.static.findSuPersonByUID = { String directory, String uid -> }
-        def pass = 'rppasswd345'
-        GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: pass] }
-
         when:
         def res = service.resetPasswordWithAssurance("rpuid", [] as String[])
 
         then:
-        res == pass
+        thrown(RuntimeException)
     }
-
-    def "resetPasswordWithAssurance: old assurance is removed"()
-    {
-        setup:
-        def p = [eduPersonAssurance: ["remove-me"]]
-        SuPersonQuery.metaClass.static.findSuPersonByUID = { String directory, String uid -> p }
-        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> p = person }
-        def pass = 'rppasswd345'
-        GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: pass] }
-
-        when:
-        def res = service.resetPasswordWithAssurance("rpuid", [] as String[])
-
-        then:
-        res == pass
-        p.eduPersonAssurance.size() == 0
-    }
-
-    def "resetPasswordWithAssurance: AL1 is set"()
-    {
-        setup:
-        String[] ass = ["http://www.swamid.se/policy/assurance/al1"]
-        def p = [eduPersonAssurance: []]
-        SuPersonQuery.metaClass.static.findSuPersonByUID = { String directory, String uid -> p }
-        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> p = person }
-        def pass = 'rppasswd345'
-        GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: pass] }
-
-        when:
-        def res = service.resetPasswordWithAssurance("rpuid", ass)
-
-        then:
-        res == pass
-        p.eduPersonAssurance == ["http://www.swamid.se/policy/assurance/al1"] as HashSet
-    }
-
-    def "resetPasswordWithAssurance: AL2 is set"()
-    {
-        setup:
-        String[] ass = ["http://www.swamid.se/policy/assurance/al2"]
-        def p = [eduPersonAssurance: []]
-        SuPersonQuery.metaClass.static.findSuPersonByUID = { String directory, String uid -> p }
-        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> p = person }
-        def pass = 'rppasswd345'
-        GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: pass] }
-
-        when:
-        def res = service.resetPasswordWithAssurance("rpuid", ass)
-
-        then:
-        res == pass
-        p.eduPersonAssurance == ["http://www.swamid.se/policy/assurance/al2"] as HashSet
-    }
-
-    def "resetPasswordWithAssurance: AL3 is unknown"()
-    {
-        setup:
-        String[] ass = ["http://www.swamid.se/policy/assurance/al3"]
-        def p = [eduPersonAssurance: []]
-        SuPersonQuery.metaClass.static.findSuPersonByUID = { String directory, String uid -> p }
-        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> p = person }
-        def pass = 'rppasswd345'
-        GeneralUtils.metaClass.static.execHelper = { String a, String b -> [password: pass] }
-
-        when:
-        def res = service.resetPasswordWithAssurance("rpuid", ass)
-
-        then:
-        thrown(IllegalArgumentException)
-    }
-
-  def "scramblePassword - is a void method"() {
-    when:
-    Method m = AccountServiceImpl.getMethod('scramblePassword', String)
-
-    then:
-    m.returnType == void
-  }
 
   def "scramblePassword - happy path"() {
-    setup:
-    String uid = "foo"
-    def spy = Spy(AccountServiceImpl) {
-      1 * resetPassword(uid) >> 'foobar'
-    }
-
     when:
-    spy.scramblePassword(uid)
+    service.scramblePassword("spuid")
 
     then:
-    notThrown(IllegalStateException)
-  }
-
-  def "scramblePassword - passes exception forward"() {
-    setup:
-    String uid = "foo"
-    def spy = Spy(AccountServiceImpl) {
-      1 * resetPassword(uid) >> { throw new IllegalStateException("foo") }
-    }
-
-    when:
-    spy.scramblePassword(uid)
-
-    then:
-    thrown(IllegalStateException)
-  }
-
-  def "scramblePassword - fails precondition on null uid"() {
-    when:
-    new AccountServiceImpl().scramblePassword(null)
-
-    then:
-    thrown(PreconditionViolation)
-  }
-
-  def "scramblePassword - fails precondition on empty uid"() {
-    when:
-    new AccountServiceImpl().scramblePassword('')
-
-    then:
-    thrown(PreconditionViolation)
+    thrown(RuntimeException)
   }
 
   def "Test updateSuPerson with null uid argument"() {
