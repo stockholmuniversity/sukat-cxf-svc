@@ -177,41 +177,11 @@ class AccountServiceImplSpec extends Specification {
 
     def "setHomePostalAddress: happy path"()
     {
-        setup:
-        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> new SuPerson(uid: "foo") }
-        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> return true }
-
         when:
         service.setHomePostalAddress("shpauid", new SvcPostalAddressVO(country: 'SE'))
 
         then:
-        notThrown(Exception)
-    }
-
-    def "setHomePostalAddress: street2 is set"()
-    {
-        setup:
-        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> new SuPerson(uid: "foo") }
-        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> return true }
-
-        when:
-        service.setHomePostalAddress("shpauid", new SvcPostalAddressVO(street2: 'a', country: 'SE'))
-
-        then:
-        notThrown(Exception)
-    }
-
-    def "setHomePostalAddress: invalid country code"()
-    {
-        setup:
-        SuPersonQuery.metaClass.static.getSuPersonFromUID = { String directory, String uid -> new SuPerson(uid: "foo") }
-        SuPersonQuery.metaClass.static.updateSuPerson = { SuPerson person -> return true }
-
-        when:
-        service.setHomePostalAddress("shpauid", new SvcPostalAddressVO(country: '11'))
-
-        then:
-        thrown(IllegalArgumentException)
+        thrown(RuntimeException)
     }
 
     def "setTitle: happy path"()
