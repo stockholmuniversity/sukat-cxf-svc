@@ -94,55 +94,7 @@ public class AccountServiceImpl implements AccountService
             @WebParam(name = 'uid') String uid
         )
     {
-        def person = SuPersonQuery.getSuPersonFromUID(ConfigManager.LDAP_RW, uid)
-
-        // Trying to activate an already activated person is probably a misconfigured client.
-        if (person.objectClass.contains("posixAccount"))
-        {
-            throw new IllegalArgumentException("The person with uid ${uid} has already been activated.")
-        }
-
-        // Old stubs may have invalid ssn, such accounts causes many problems, one example is all
-        // contact with Ladok.
-        def message = LdapAttributeValidator.validateAttributes([ssn: person.socialSecurityNumber])
-        if (message)
-        {
-            throw new IllegalArgumentException(message)
-        }
-
-        person.objectClass.add("posixAccount")
-
-        person.gidNumber = "1200"
-        person.homeDirectory = "/home/" + person.uid
-        person.loginShell = "/usr/local/bin/bash"
-
-        if (person.mail == null)
-        {
-            person.mail = person.uid + "@student.su.se"
-        }
-
-        // Fix uidNumber first as it can be restarted at an later attempt
-        person.uidNumber = uidNumberQuery.getUidNumber(person.uid)
-
-        // Failing after this point will leave the principal and prevent later attempts
-        def res = GeneralUtils.execHelper("createPrincipal", person.uid)
-
-        // Last step as this will make all systems consider this as an active account
-        SuPersonQuery.updateSuPerson(person)
-
-        // Notify Ladok-import of the activation to setup postaladdress and more
-        def ladokMsg = [:]
-        ladokMsg.socialsecuritynumber = GeneralUtils.ssnToNin(person.socialSecurityNumber)
-
-        GeneralUtils.publishMessage(ladokMsg)
-
-        // Notify SUKAT consumers of new account (mostly AD sync)
-        def sukatMsg = [:]
-        sukatMsg.update = person.uid
-
-        GeneralUtils.publishMessage(sukatMsg)
-
-        return res.password
+        throw new RuntimeException("This method is deprecated")
     }
 
     /**
@@ -234,28 +186,7 @@ public class AccountServiceImpl implements AccountService
             @WebParam(name = 'sn') String sn
         )
     {
-        def p = SuPersonQuery.findPersonByNin(ConfigManager.LDAP_RW, nin)
-        if (p != null)
-        {
-            throw new IllegalArgumentException("A person with personnummer ${nin} already exists.")
-        }
-
-        def uid = AccountServiceUtils.generateUid(givenName, sn)
-
-        def ssn = nin[2..-1]
-
-        def parent = configManager.config.ldap.accounts.parent
-
-        def directory = ConfigManager.LDAP_RW
-
-        SuPersonStub suPersonStub = SuPersonStub.newInstance(uid, givenName, sn, ssn, parent, directory)
-
-        suPersonStub.save()
-
-        // Add paranoia by refreshing the information from the datastore.
-        SuPerson person = SuPersonQuery.getSuPersonFromUID(directory, uid)
-
-        return person.uid
+        throw new RuntimeException("This method is deprecated")
     }
 
     /**
