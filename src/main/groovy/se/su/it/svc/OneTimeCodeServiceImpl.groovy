@@ -37,14 +37,7 @@ public class OneTimeCodeServiceImpl implements OneTimeCodeService
             @WebParam(name = 'days') Integer days
         )
     {
-        def res = GeneralUtils.execHelper("getConfirmedOTC", "${nin} ${days}")
-
-        SvcOneTimeCodeVO otcvo  = new SvcOneTimeCodeVO()
-        otcvo.uid = res.uid
-        otcvo.password = res.password
-        otcvo.expire = res.expire
-
-        return otcvo
+        throw new RuntimeException("This method is deprecated")
     }
 
     /**
@@ -61,14 +54,7 @@ public class OneTimeCodeServiceImpl implements OneTimeCodeService
             @WebParam(name = 'days') Integer days
         )
     {
-        def res = GeneralUtils.execHelper("getUnconfirmedOTC", "${days}")
-
-        SvcOneTimeCodeVO otcvo  = new SvcOneTimeCodeVO()
-        otcvo.uid = res.uid
-        otcvo.password = res.password
-        otcvo.expire = res.expire
-
-        return otcvo
+        throw new RuntimeException("This method is deprecated")
     }
 }
 
