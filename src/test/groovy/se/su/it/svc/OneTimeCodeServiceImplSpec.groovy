@@ -22,26 +22,20 @@ class OneTimeCodeServiceImplSpec extends Specification
 
     def "getConfirmed: happy path"()
     {
-        setup:
-        GeneralUtils.metaClass.static.execHelper = { String a, String b -> [] }
-
         when:
         service.getConfirmed("190012236782", 1)
 
         then:
-        notThrown(Exception)
+        thrown(RuntimeException)
     }
 
     def "getUnconfirmed: happy path"()
     {
-        setup:
-        GeneralUtils.metaClass.static.execHelper = { String a, String b -> [] }
-
         when:
         service.getUnconfirmed(1)
 
         then:
-        notThrown(Exception)
+        thrown(RuntimeException)
     }
 }
 
